@@ -1,15 +1,64 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local"
 import "./globals.css";
+import GsapInitializer from "@/components/GsapInitializer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+// 1. Montserrat (Primary Variable Font - Split into Roman and Italic files)
+const montserrat = localFont({
+  src: [
+    {
+      path: "./fonts/Montserrat-VariableFont_wght.ttf",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Montserrat-Italic-VariableFont_wght.ttf",
+      style: "italic",
+    },
+  ],
+  variable: "--font-montserrat",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+// 2. Crimson Text (Secondary Font - Array of all static weight and style files)
+const crimsonText = localFont({
+  src: [
+    {
+      path: "./fonts/CrimsonText-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/CrimsonText-Italic.ttf",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "./fonts/CrimsonText-SemiBold.ttf",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "./fonts/CrimsonText-SemiBoldItalic.ttf",
+      weight: "600",
+      style: "italic",
+    },
+    {
+      path: "./fonts/CrimsonText-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "./fonts/CrimsonText-BoldItalic.ttf",
+      weight: "700",
+      style: "italic",
+    },
+  ],
+  variable: "--font-crimson",
+});
+
+// 3. Brusher (Accent Script Font)
+const brusher = localFont({
+  src: "./fonts/Brusher.ttf",
+  variable: "--font-brusher",
 });
 
 export const metadata: Metadata = {
@@ -25,9 +74,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${crimsonText.variable} ${brusher.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <GsapInitializer />
+        {children}
+      </body>
     </html>
   );
 }

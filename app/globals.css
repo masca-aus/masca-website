@@ -1,26 +1,43 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* primary colours 60% */
+  --color-blue-900: #00004D; /* Darkest: Used for hover/press states */
+  --color-blue-600: #010066; /* Base: Your main primary brand blue */
+  --color-blue-500: #1B1E80; 
+  --color-blue-400: #34389A; 
+  --color-blue-100: #E5E5F0; /* Tint: Light surfaces, alerts, and borders */
+  --color-blue-50:  #F2F2F8; /* Lightest: Selected states or subtle backgrounds */
+
+  /* secondary colours 30% */
+  --color-red-900: #990001; /* Darkest shade */
+  --color-red-800: #B30001; /* Hover state for filled red */
+  --color-red-600: #CC0001; /* Base primary red */
+  --color-red-100: #FBE5E5; /* Tint for inline alert backgrounds */
+  --color-red-50:  #FDF2F2; /* Lightest tint for subtle alert states */
+
+  /* accent colours 10% */
+  --color-yellow-800: #B38F00; /* Dark mustard shade for hover/borders */
+  --color-yellow-500: #FFCC00; /* Base vibrant accent yellow */
+  --color-yellow-100: #FFF6CC; /* Light tint for background blocks */
+  --color-yellow-50:  #FFFBE5; /* Softest tint for subtle surfaces */
+
+  /* neutral colours */
+  --color-black:        #000000; /* Main Body Text */
+  --color-gray-700:     #4A4A4A; /* Secondary Text / Icons */
+  --color-gray-300:     #CFCFCF; /* Borders / Dividers */
+  --color-gray-100:     #F2F2F2; /* Card and UI Surfaces */
+  --color-white:        #FFFFFF; /* Main Canvas Background */
+
+  /* Font Families (Mapping to Next.js font variables) */
+  --font-primary: var(--font-montserrat), sans-serif;
+  --font-secondary: var(--font-crimson), serif;
+  --font-accent: var(--font-brusher), cursive;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Base resets or fallback styling if needed */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-white);
+  color: var(--color-black);
+  font-family: var(--font-secondary);
 }
