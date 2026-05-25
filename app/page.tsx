@@ -8,32 +8,49 @@ import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
 import { MotionPathPlugin } from "gsap/MotionPathPlugin";
 import { GSDevTools } from "gsap/GSDevTools";
 
-import TraceText from "@/components/TraceText";
+import { InAustralia, JoinUs }  from "@/components/TextSVG";
 import Button from "@/components/Button";
 
 gsap.registerPlugin(DrawSVGPlugin, MotionPathPlugin, GSDevTools);
 
 export default function Home() {
+  useGSAP(() => {
+   gsap.fromTo(
+      ".joinus",
+      { drawSVG: 0 },
+      { drawSVG: "100%", duration: 0.3, stagger: 0.25, ease: "none" }
+   )
+  })
+
   return (
-    <section
+   <>
+      <section
       className="
-        grid gap-16 px-8 md:px-16 lg:px-24 xl:px-32 2xl:px-40 min-h-screen bg-blue-600
-        grid-cols-1 grid-rows-[1fr_auto_2fr] [grid-template-areas:'.'_'main'_'stats']
-        md:grid-cols-2 md:grid-rows-[1fr_auto_2fr] md:[grid-template-areas:'._.'_'main_event'_'stats_.']
+         grid gap-16 px-8 md:px-16 lg:px-24 xl:px-32 2xl:px-40 min-h-screen bg-blue-600
+         grid-cols-1 grid-rows-[1fr_auto_2fr] [grid-template-areas:'.'_'main'_'stats']
+         md:grid-cols-2 md:grid-rows-[1fr_auto_2fr] md:[grid-template-areas:'._.'_'main_event'_'stats_.']
       "
-    >
+      >
       <div className="[grid-area:main]">
-        <MainContent />
+         <MainContent />
       </div>
 
       <div className="[grid-area:stats]">
-        <Statistic />
+         <Statistic />
       </div>
 
-      <div className="hidden md:inline-flex md:[grid-area:event] md:justify-self-start md:self-center">
-        <UpcomingEvent />
+      <div className="hidden md:inline-flex md:[grid-area:event] md:justify-self-center md:self-center">
+         <UpcomingEvent />
       </div>
-    </section>
+      </section>
+
+      <section className="flex flex-col gap-4 py-32 px-8 md:px-16 lg:px-24 xl:px-32 bg-yellow-500">
+         <span className="eyebrow text-red-600">Membership is free</span>
+         <span className="text-blue-600 text-h2 font-bold inline-flex gap-4">
+            Jom <JoinUs /> ⸺ the community is waiting. 
+         </span>
+      </section>
+    </>
   );
 }
 
@@ -46,7 +63,7 @@ function MainContent() {
     );
 
     // testing
-    GSDevTools.create({ animation });
+   //  GSDevTools.create({ animation });
   });
 
   return (
@@ -55,7 +72,7 @@ function MainContent() {
         founded 2001 &middot; 6 states &middot; 1 territory
       </span>
       <h1 className="text-white">
-        A home for <br /> Malaysians <br /> studying <TraceText />
+        A home for <br /> Malaysians <br /> studying <InAustralia />
       </h1>
       <p className="text-gray-300">
         MASCA is the peak student representative body for Malaysians across

@@ -1,4 +1,4 @@
-const TraceText = () => (
+const InAustralia = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlSpace="preserve"
@@ -159,4 +159,53 @@ const TraceText = () => (
   </svg>
 );
 
-export default TraceText;
+const JoinUs = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    version="1.1"
+    viewBox="262 182 182 64"
+    style={{ height: "1.5em", width: "auto", overflow: "visible", verticalAlign: "baseline" }}
+  >
+    <g
+      className="stroke-red-600"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <ellipse className="joinus" cx="285.313" cy="188.322" strokeWidth="5" rx="1.3" ry="1.3" />
+      <path
+        className="joinus"
+        strokeWidth="6"
+        d="M284.655 199.798s17.674 56.53-4.136 42.867c-21.81-13.662-.125-25.194 11.782-33.467s13.341-11.461 13.341-11.461"
+      />
+      <path
+        className="joinus"
+        strokeWidth="6"
+        d="M304.47 199.117s-10.922 23.974 3.196 18.647 4.396-23.974-1.198-20.644-4.574 11.532 9.456 7.591l11.854-3.33"
+      />
+      <ellipse className="joinus" cx="328.471" cy="188.376" strokeWidth="5" rx="1.3" ry="1.3" />
+      <path
+        className="joinus"
+        strokeWidth="6"
+        d="M328.444 200.05s-7.192 26.504 1.998 19.978 11.72-17.58 11.72-17.58"
+      />
+      <path
+        className="joinus"
+        strokeWidth="6"
+        d="M343.095 195.92s-4.534 34.11 1.598 18.647c6.127-15.45 10.655-20.111 12.786-13.452 2.158 6.743-1.865 18.647 2.664 11.854 4.528-6.793 6.126-11.188 6.126-11.188"
+      />
+      <path
+        className="joinus"
+        strokeWidth="6"
+        d="M383.713 196.81s-7.206 26.347 7.206 16.664c14.671-9.857 13.06-14.862 13.06-14.862s-9.682 28.598-1.35 22.293c8.331-6.305 13.285-20.266 13.285-20.266"
+      />
+      <path
+        className="joinus"
+        strokeWidth="6"
+        d="M416.59 195.009s24.545 30.4 9.007 31.075c-16.162.703-4.465-21.403 3.378-23.644 7.881-2.252 9.908 2.477 9.908 2.477"
+      />
+    </g>
+  </svg>
+);
+
+export { InAustralia, JoinUs };
