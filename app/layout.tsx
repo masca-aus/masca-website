@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local"
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next"
+
 import GsapInitializer from "@/components/GsapInitializer";
 
 // 1. Montserrat (Primary Variable Font - Split into Roman and Italic files)
@@ -79,6 +81,7 @@ export default function RootLayout({
       <body>
         <GsapInitializer />
         {children}
+        <Analytics/>
       </body>
     </html>
   );
