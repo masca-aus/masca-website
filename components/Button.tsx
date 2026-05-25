@@ -22,8 +22,8 @@ export default function Button({
 
   const variantClasses: Record<ButtonVariant, string> = {
     primary: "bg-blue-600 hover:bg-blue-900 text-white",
-    secondary: "bg-red-600 hover:bg-red-800 text-white",
-    accent: "bg-yellow-500 hover:bg-yellow-800 text-blue-900 shadow-md shadow-yellow-500/10",
+    secondary: "bg-red-600 hover:bg-red-800 text-white shadow-md",
+    accent: "bg-yellow-500 hover:bg-yellow-800 text-blue-900 shadow-accent",
     outline: "bg-transparent border border-blue-600 text-blue-600",
     ghost: "bg-transparent text-blue-600"
   };

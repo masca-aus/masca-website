@@ -49,6 +49,12 @@
   --radius-lg: 12px;  /* Overrides Tailwind's default 8px */
   --radius-xl: 20px;  /* Adds your custom 20px structural token */
   --radius-pill: 999px; /* Replaces 'full' with your 'pill' token */
+
+  --shadow-sm: 0 1px 3px 0 rgba(1, 0, 102, 0.06), 0 1px 2px -1px rgba(1, 0, 102, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(1, 0, 102, 0.08), 0 2px 4px -2px rgba(1, 0, 102, 0.08);
+  --shadow-lg: 0 10px 15px -3px rgba(1, 0, 102, 0.12), 0 4px 6px -4px rgba(1, 0, 102, 0.12);
+  --shadow-brand: 0 15px 25px -5px rgba(1, 0, 102, 0.25), 0 8px 10px -6px rgba(1, 0, 102, 0.2);
+  --shadow-accent: 0 0 20px 2px rgba(255, 204, 0, 0.35), 0 10px 15px -3px rgba(255, 204, 0, 0.15);
 }
 
 
@@ -91,3 +97,5 @@ p {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+
+
