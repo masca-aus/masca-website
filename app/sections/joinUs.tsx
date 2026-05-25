@@ -37,7 +37,7 @@ export default function JoinUsSection() {
         <div className="flex flex-col gap-4">
           <span className="eyebrow text-red-600">Membership is free</span>
           <span className="title text-blue-600">
-            Jom <JoinUs /> ⸺ the community is waiting.
+            Jom <span className="inline-block translate-y-[0.67em] scale-110 origin-center"><JoinUs /></span> ⸺ the community is waiting.
           </span>
         </div>
 

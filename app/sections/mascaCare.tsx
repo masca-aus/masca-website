@@ -32,7 +32,7 @@ export default function MascaCareSection() {
 
   return (
     <section ref={sectionRef}>
-      <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-10 lg:gap-16 py-32">
+      <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-24 lg:gap-16 py-32">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-4">
             <span className="eyebrow text-red-600">student welfare</span>
@@ -44,7 +44,7 @@ export default function MascaCareSection() {
         </div>
 
         <div className="flex justify-center lg:justify-end">
-          <article className="relative isolate overflow-hidden flex flex-col justify-center w-full max-w-sm min-h-[26rem] md:min-h-[32rem] rounded-xl bg-blue-600 shadow-brand p-6 md:p-8">
+          <article className="relative isolate overflow-hidden flex flex-col justify-center w-full max-w-xl min-h-105 md:min-h-130 rounded-xl bg-blue-600 shadow-brand p-6 md:p-8">
             <span className="eyebrow text-yellow-500">masca care</span>
             <h1 className="text-yellow-500 leading-none mt-2 text-6xl md:text-7xl font-bold">1800 <br/> MASCA</h1>
             <span className="text-caption text-white mt-3">Confidential. Free. Staffed by trained MASCA student leaders.</span>
