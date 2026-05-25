@@ -209,4 +209,56 @@ const JoinUs = () => (
   </svg>
 );
 
-export { InAustralia, JoinUs };
+
+const Marking = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    version="1.1"
+    viewBox="-15 -15 195 225"
+    className="w-full h-auto overflow-visible"
+  >
+    <g
+      className="stroke-red-600"
+      fill="none"
+      strokeDasharray="none"
+      strokeLinecap="round"
+      strokeOpacity="1"
+      strokeWidth="6"
+    >
+      <path
+        className="marking"
+        strokeLinejoin="round"
+        d="M73.284 39.346S51.631 21.302 46.991 50.688s25.52 8.507 27.582-6.96S62.2 82.138 62.2 82.138"
+      ></path>
+      <path
+        className="marking"
+        strokeLinejoin="round"
+        d="M106.022 39.862s-25.52-18.818-26.294 13.92c-.85 36.029 42.158-23.083 27.84-8.765-14.95 14.951-18.044 39.44-18.044 39.44"
+      ></path>
+      <path className="marking" strokeLinejoin="miter" d="m33.844 98.12 99.76-7.992"></path>
+      <path
+        className="marking"
+        strokeLinejoin="round"
+        d="m55.24 128.022 13.404-12.116.773 47.431"
+      ></path>
+      <path
+        className="marking"
+        strokeLinejoin="round"
+        d="M87.72 115.39s-22.17 48.978.773 46.658c22.942-2.32 15.209-50.782-.773-46.657"
+      ></path>
+      <path
+        className="marking"
+        strokeLinejoin="round"
+        d="M118.395 113.586s-21.653 46.142 1.031 47.431c22.685 1.29 14.694-52.844-1.03-47.43"
+      ></path>
+      <path
+        className="marking"
+        strokeLinejoin="round"
+        d="M4.457 101.213c-13.96 62.965 148.241 191.544 158.534-10.827C170.514-57.537-19.76 6.27 11.933 111.782c8.453 28.142-1.805 41.502-1.805 41.502"
+      ></path>
+    </g>
+  </svg>
+);
+
+
+export { InAustralia, JoinUs, Marking };

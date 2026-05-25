@@ -18,7 +18,7 @@ export default function Button({
   ...props 
 }: ButtonProps) {
   
-  const baseClasses = "font-primary font-semibold text-sm rounded-lg p-3 md:px-5 transition-all inline-flex items-center justify-center gap-2 cursor-pointer select-none";
+  const baseClasses = "font-primary font-semibold text-sm rounded-lg p-3 px-5 transition-all inline-flex items-center justify-center gap-2 cursor-pointer select-none";
 
   const variantClasses: Record<ButtonVariant, string> = {
     primary: "bg-blue-600 hover:bg-blue-900 text-white",
