@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from "react";
+import { useRef, type CSSProperties } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
@@ -39,18 +39,25 @@ export default function BukuLatihanSection() {
   });
 
   return (
-    <section ref={sectionRef} className="relative bg-[#FFFEF8] font-accent">
+    <section
+      ref={sectionRef}
+      className="relative bg-[#FFFEF8] font-accent"
+      style={{ "--rule": "clamp(2rem, 8vw, 6rem)" } as CSSProperties}
+    >
 
       {/* Header */}
       <div
         className="relative w-full h-24 border-b-2 border-[#A8C8E8]"
         style={{
           backgroundImage:
-            "linear-gradient(to right, transparent clamp(2rem, 8vw, 6rem), #E89090 clamp(2rem, 8vw, 6rem), #E89090 calc(clamp(2rem, 8vw, 6rem) + 0.125rem), transparent calc(clamp(2rem, 8vw, 6rem) + 0.125rem))",
+            "linear-gradient(to right, transparent var(--rule), #E89090 var(--rule), #E89090 calc(var(--rule) + 0.125rem), transparent calc(var(--rule) + 0.125rem))",
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div className="flex h-full items-center justify-between px-30 pr-5 text-sm text-gray-600">
+        <div
+          className="flex h-full items-center justify-between pr-5 text-sm text-gray-600"
+          style={{ paddingLeft: "calc(var(--rule) + 0.75rem)" }}
+        >
           <h1 className="text-gray-700">
             Our Sponsors
           </h1>
@@ -65,12 +72,12 @@ export default function BukuLatihanSection() {
         className="relative w-full h-75 overflow-hidden"
         style={{
           backgroundImage:
-            "linear-gradient(to right, transparent clamp(2rem, 8vw, 6rem), #E89090 clamp(2rem, 8vw, 6rem), #E89090 calc(clamp(2rem, 8vw, 6rem) + 0.125rem), transparent calc(clamp(2rem, 8vw, 6rem) + 0.125rem)), repeating-linear-gradient(transparent, transparent 1.9375rem, #A8C8E8 1.9375rem, #A8C8E8 2rem)",
+            "linear-gradient(to right, transparent var(--rule), #E89090 var(--rule), #E89090 calc(var(--rule) + 0.125rem), transparent calc(var(--rule) + 0.125rem)), repeating-linear-gradient(transparent, transparent 1.9375rem, #A8C8E8 1.9375rem, #A8C8E8 2rem)",
           backgroundSize: "100% 100%, 100% 2rem",
           backgroundRepeat: "no-repeat, repeat",
         }}
       >
-        <div className="pl-30 pr-5 text-base leading-8 text-gray-700" style={{ paddingTop: "2rem" }}>
+        <div className="pr-5 text-base leading-8 text-gray-700" style={{ paddingTop: "2rem", paddingLeft: "calc(var(--rule) + 0.75rem)" }}>
           1 + 1 = 2
         </div>
       </div>
