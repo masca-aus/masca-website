@@ -41,7 +41,7 @@ export default function NavBar() {
       {/* Logo mobile + desktop */}
       <Link href="/" className="col-1 justify-self-start">
         <div className="flex items-center gap-4">
-          <Image src="/logo.svg" alt="Masca logo" width={40} height={40} priority />
+          <Image src="/logo/logo.svg" alt="Masca logo" width={40} height={40} priority />
           <div className="flex flex-col leading-none">
             <span className="text-xl font-bold text-blue-600">MASCA</span>
             <span className="text-xs text-gray-700/80 uppercase">malaysian students&apos; council</span>

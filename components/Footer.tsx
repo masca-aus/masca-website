@@ -46,7 +46,7 @@ export default function Footer() {
 
           <div className="col-span-2 flex flex-col gap-4 md:col-span-1">
             <div className="flex gap-4 items-center">
-              <Image src="/logo_bg.svg" alt="Masca logo" width={40} height={40} />
+              <Image src="/logo/logo_dark.svg" alt="Masca logo" width={40} height={40} />
               <span className="text-xl font-bold">MASCA</span>
             </div>
             <p className="text-body-sm text-gray-300">

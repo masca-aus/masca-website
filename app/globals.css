@@ -112,7 +112,7 @@ p {
 
 .container {
   width: 100%;
-  max-width: 80rem;       /* max-w-300 */
+  max-width: 88rem;       /* max-w-300 */
   margin-inline: auto;    /* mx-auto */
   padding-inline: 2rem;   /* px-8 */
 }

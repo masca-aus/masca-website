@@ -51,7 +51,7 @@ type Layer = {
 };
 
 const LAYERS: Layer[] = [
-  { y: -40,  z: 5,  target: 5, spawn: 800, dur: [24, 40], gap: 0.5 },
+  { y: -20,  z: 5,  target: 5, spawn: 800, dur: [24, 40], gap: 0.5 },
   { y: 0,  z: 10, target: 5, spawn: 600, dur: [16, 32], gap: 0.8 },
   { y: 80,  z: 20, target: 8, spawn: 400, dur: [16, 24], gap: 0.4 },
   { y: 130, z: 30, target: 20, spawn: 600, dur: [8, 32], gap: 0.8 },
