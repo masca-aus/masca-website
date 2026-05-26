@@ -1,29 +1,18 @@
 'use client'
 
-import { useRef, type CSSProperties } from "react";
-import { gsap } from "gsap";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 
-import { Marking } from "@/components/TextSVG"; 
+import { Marking } from "@/components/TextSVG";
+import { writeInOnScroll } from "@/utils/animation";
+import Button from "@/components/Button";
+import SponsorsMarquee from "@/components/SponsorsMarquee";
 
 export default function BukuLatihanSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
-   gsap.fromTo(
-      ".marking",
-      { drawSVG: 0 },
-      {
-        drawSVG: "100%",
-        duration: 0.3,
-        stagger: 0.25,
-        ease: "entranceEase",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-        },
-      }
-   )
+   writeInOnScroll(".marking", sectionRef.current)
   }, { scope: sectionRef })
 
   const today = new Date().toLocaleDateString("en-GB", {
@@ -35,22 +24,15 @@ export default function BukuLatihanSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#FFFEF8] font-accent"
-      style={{ "--rule": "clamp(2rem, 8vw, 6rem)" } as CSSProperties}
+      className="relative bg-[#FFFEF8] font-accent [--rule:clamp(2rem,8vw,6rem)]"
     >
 
       {/* Header */}
       <header
-        className="relative w-full h-24 border-b-2 border-[#A8C8E8]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, transparent var(--rule), #E89090 var(--rule), #E89090 calc(var(--rule) + 0.125rem), transparent calc(var(--rule) + 0.125rem))",
-          backgroundRepeat: "no-repeat",
-        }}
+        className="relative w-full h-24 border-b-2 border-[#A8C8E8] bg-no-repeat bg-[linear-gradient(to_right,transparent_var(--rule),#E89090_var(--rule),#E89090_calc(var(--rule)+0.125rem),transparent_calc(var(--rule)+0.125rem))]"
       >
         <div
-          className="flex h-full items-center justify-between pr-5 text-sm text-gray-600"
-          style={{ paddingLeft: "calc(var(--rule) + 0.75rem)" }}
+          className="flex h-full items-center justify-between pr-5 pl-[calc(var(--rule)+0.75rem)] text-sm text-gray-600"
         >
           <h1 className="text-gray-700">
             Our Sponsors
@@ -63,23 +45,19 @@ export default function BukuLatihanSection() {
 
       {/* Lined area */}
       <div
-        className="relative w-full h-75 overflow-hidden"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, transparent var(--rule), #E89090 var(--rule), #E89090 calc(var(--rule) + 0.125rem), transparent calc(var(--rule) + 0.125rem)), repeating-linear-gradient(transparent, transparent 1.9375rem, #A8C8E8 1.9375rem, #A8C8E8 2rem)",
-          backgroundSize: "100% 100%, 100% 2rem",
-          backgroundRepeat: "no-repeat, repeat",
-        }}
+        className="relative w-full h-75 overflow-hidden bg-[linear-gradient(to_right,transparent_var(--rule),#E89090_var(--rule),#E89090_calc(var(--rule)+0.125rem),transparent_calc(var(--rule)+0.125rem)),repeating-linear-gradient(transparent,transparent_1.9375rem,#A8C8E8_1.9375rem,#A8C8E8_2rem)] bg-size-[100%_100%,100%_2rem] [background-repeat:no-repeat,repeat]"
       >
-        <div className="pr-5 text-base leading-8 text-gray-700" style={{ paddingTop: "2rem", paddingLeft: "calc(var(--rule) + 0.75rem)" }}>
-          1 + 1 = 2
+        {/* Sponsor logos — full-bleed marquee, vertically centered over the ruled lines */}
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2">
+          <SponsorsMarquee />
         </div>
+
       </div>
 
       {/* Teacher's mark */}
-      <div className="absolute bottom-8 right-10 w-28 -rotate-6">
+      {/* <div className="absolute bottom-8 right-10 w-28 -rotate-6">
         <Marking />
-      </div>
+      </div> */}
     </section>
   )
 }

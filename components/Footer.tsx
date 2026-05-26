@@ -32,7 +32,7 @@ const footerSections: { heading: string; links: FooterLink[] }[] = [
       { label: "Facebook", href: "https://www.facebook.com/nationalmasca", external: true },
       { label: "X", href: "https://x.com/masca_national/", external: true },
       { label: "Linkedin", href: "https://au.linkedin.com/company/masca", external: true },
-      { label: "Contact us", href: "/" },
+      { label: "Contact us", href: "/contact" },
     ],
   },
 ];
@@ -47,7 +47,7 @@ export default function Footer() {
           <div className="col-span-2 flex flex-col gap-4 md:col-span-1">
             <div className="flex gap-4 items-center">
               <Image src="/logo/logo_dark.svg" alt="Masca logo" width={40} height={40} />
-              <span className="text-xl font-bold">MASCA</span>
+              <span className="text-xl font-bold tracking-wider">MASCA</span>
             </div>
             <p className="text-body-sm text-gray-300">
               The peak student representative body for Malaysians in Australia. Founded 2001 · run by students, for students.

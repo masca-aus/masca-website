@@ -1,30 +1,17 @@
 'use client'
 
 import { useRef } from "react";
-import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
 import { JoinUs }  from "@/components/TextSVG";
 import Button from "@/components/Button";
+import { writeInOnScroll } from "@/utils/animation";
 
 export default function JoinUsSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
-   gsap.fromTo(
-      ".joinus",
-      { drawSVG: 0 },
-      {
-        drawSVG: "100%",
-        duration: 0.3,
-        stagger: 0.25,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-        },
-      }
-   )
+   writeInOnScroll(".joinus", sectionRef.current)
   }, { scope: sectionRef })
 
   return (

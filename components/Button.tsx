@@ -18,14 +18,14 @@ export default function Button({
   ...props 
 }: ButtonProps) {
   
-  const baseClasses = "font-primary font-semibold text-sm rounded-lg transition-all inline-flex items-center justify-center gap-2 cursor-pointer select-none";
+  const baseClasses = "font-primary text-sm rounded-lg transition-all inline-flex items-center justify-center gap-2 cursor-pointer select-none";
 
   const variantClasses: Record<ButtonVariant, string> = {
-    primary: "bg-blue-600 hover:bg-blue-900 text-white py-3 px-5",
-    secondary: "bg-red-600 hover:bg-red-800 text-white shadow-md py-3 px-5",
-    accent: "bg-yellow-500 hover:bg-yellow-800 text-blue-900 shadow-accent py-3 px-5",
-    outline: "bg-transparent border border-blue-600 text-blue-600 py-3 px-5",
-    ghost: "bg-transparent text-blue-600 rounded-none px-0"
+    primary: "bg-blue-600 hover:bg-blue-900 text-white py-3 px-5 font-bold ",
+    secondary: "bg-red-600 hover:bg-red-800 text-white shadow-md py-3 px-5 font-bold ",
+    accent: "bg-yellow-500 hover:bg-yellow-800 text-blue-900 shadow-accent py-3 px-5 font-bold ",
+    outline: "bg-transparent border border-blue-600 text-blue-600 py-3 px-5 font-bold ",
+    ghost: "bg-transparent text-blue-600 rounded-none px-0 font-inherit font-bold tracking-wider"
   };
 
   const combinedClasses = `${baseClasses} ${variantClasses[variant]} ${className}`;

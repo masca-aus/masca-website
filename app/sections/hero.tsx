@@ -7,11 +7,18 @@ import { useGSAP } from "@gsap/react";
 
 import { InAustralia }  from "@/components/TextSVG";
 import Button from "@/components/Button";
+import { writeInOnScroll } from "@/utils/animation"
 
 
 export default function HeroSection() {
+  const sectionRef = useRef<HTMLElement>(null)
+
+  useGSAP(() => {
+    writeInOnScroll(".stroke", sectionRef.current)
+  }, { scope: sectionRef })
+
   return (
-    <section className="bg-blue-600">
+    <section ref={sectionRef} className="bg-blue-600">
       <div
       className="
           container grid gap-16 min-h-screen
@@ -36,14 +43,6 @@ export default function HeroSection() {
 }
 
 function MainContent() {
-  useGSAP(() => {
-    gsap.fromTo(
-      ".stroke",
-      { drawSVG: 0 },
-      { drawSVG: "100%", duration: 0.3, stagger: 0.25, ease: "none" }
-    )
-  })
-
   return (
     <header className="flex flex-col gap-6 justify-center">
       <span className="eyebrow text-yellow-500">
