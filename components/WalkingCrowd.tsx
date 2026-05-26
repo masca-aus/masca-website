@@ -51,11 +51,11 @@ type Layer = {
 };
 
 const LAYERS: Layer[] = [
-  { y: -10,  z: 5,  target: 3, spawn: 500, dur: [26, 36], gap: 0.5 },
-  { y: 30,  z: 10, target: 8, spawn: 600, dur: [22, 32], gap: 0.8 },
-  { y: 70,  z: 20, target: 15, spawn: 400, dur: [16, 24], gap: 0.4 },
-  { y: 100, z: 30, target: 8, spawn: 600, dur: [22, 32], gap: 0.8 },
-  { y: 150, z: 40, target: 30, spawn: 300, dur: [8, 14],  gap: 0.3 },
+  { y: -30,  z: 5,  target: 5, spawn: 500, dur: [8, 36], gap: 0.5 },
+  { y: 0,  z: 10, target: 8, spawn: 600, dur: [8, 32], gap: 0.8 },
+  { y: 50,  z: 20, target: 20, spawn: 400, dur: [8, 24], gap: 0.4 },
+  { y: 80, z: 30, target: 8, spawn: 600, dur: [8, 32], gap: 0.8 },
+  { y: 130, z: 40, target: 30, spawn: 300, dur: [8, 14],  gap: 0.3 },
 ];
 
 export default function WalkingCrowd({ peeps }: { peeps: Peep[] }) {
