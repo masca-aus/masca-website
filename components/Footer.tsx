@@ -75,10 +75,19 @@ export default function Footer() {
               </ul>
             </div>
           ))}
+
+          <span className="inline-flex lg:hidden text-h2 font-accent text-yellow-500 self-center justify-self-start">
+            Termima <br/> Kashi
+          </span>
         </div>
 
-        <div className="mt-12 border-t border-blue-100/20 pt-6 text-caption text-gray-300">
-          © {new Date().getFullYear()} MASCA · Malaysian Students&apos; Council of Australia
+        <div className="mt-12 border-t border-blue-100/20 pt-6 flex flex-row justify-between">
+          <span className="text-caption text-gray-300">
+            © {new Date().getFullYear()} &thinsp; MASCA &thinsp; &middot; &thinsp; Malaysian Students&apos; Council of Australia
+          </span>
+          <span className="lg:inline-flex hidden text-h3 font-accent text-yellow-500">
+            Termima Kashi
+          </span>
         </div>
       </div>
     </footer>

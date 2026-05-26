@@ -68,6 +68,12 @@ html, body {
   line-height: 1.5;                   /* Balanced vertical alignment spacing */
 }
 
+/* Text-selection highlight */
+::selection {
+  background-color: var(--color-red-600);
+  color: var(--color-white);
+}
+
 h1, h2, h3 {
   /* color: var(--color-blue-600);        */
   line-height: 1.2;                   
