@@ -1,9 +1,11 @@
 'use client'
 
+import Image from "next/image";
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-
-import Image from "next/image";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
+import { useRef } from "react";
 import Button from "./Button";
 
 const navLinks = [
@@ -14,13 +16,28 @@ const navLinks = [
 ]
 
 export default function NavBar() {
+  const headerRef = useRef(null)
   const pathname = usePathname()
-
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href)
 
+  useGSAP(() => {
+    gsap.to(headerRef.current, {
+      backgroundColor: 'rgba(255,255,255,0.8)',
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)',
+      ease: 'entranceEase',
+      scrollTrigger: {
+        start: 80,
+        end: 80,
+        toggleActions: 'play none none reverse',
+      },
+    })
+  }, { scope: headerRef })
+  
+
   return (
-    <header className="fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] py-4 px-4 md:px-16 bg-white">
+    <header ref={headerRef} className="fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] py-4 px-4 md:px-16 bg-white">
       {/* Logo mobile + desktop */}
       <Link href="/" className="col-1 justify-self-start">
         <div className="flex items-center gap-4">
