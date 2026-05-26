@@ -80,6 +80,7 @@ function StateCard({ state }: { state: State }) {
         y: -8,
         duration: 0.3,
         ease: "entranceEase",
+        boxShadow: "var(--shadow-lg)"
       })
       .to(cardRef.current!.querySelectorAll(".card-text"), {
         color: state.fg,
@@ -98,7 +99,7 @@ function StateCard({ state }: { state: State }) {
       ref={cardRef}
       onMouseEnter={() => tl.current?.play()}
       onMouseLeave={() => tl.current?.reverse()}
-      className="state-card relative overflow-hidden flex flex-col bg-white border border-gray-300 rounded-lg p-4 cursor-pointer"
+      className="state-card relative overflow-hidden flex flex-col bg-white border border-gray-300 rounded-lg p-4 cursor-pointer shadow-sm"
     >
       <NorthStar color={state.bg} className="absolute bottom-1 -right-2 h-12 w-12 opacity-50" />
       <span className="card-text text-h2 font-extrabold text-blue-600">{state.code}</span>

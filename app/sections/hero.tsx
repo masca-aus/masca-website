@@ -49,7 +49,7 @@ function MainContent() {
       <span className="eyebrow text-yellow-500">
         founded 2001 &middot; 6 states &middot; 1 territory
       </span>
-      <h1 className="text-white">
+      <h1 className="text-white text-5xl md:text-6xl">
         A home for <br /> Malaysians <br /> studying <InAustralia />
       </h1>
       <p className="text-gray-300">
