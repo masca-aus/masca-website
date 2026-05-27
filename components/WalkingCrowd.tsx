@@ -53,9 +53,9 @@ type Layer = {
 const LAYERS: Layer[] = [
   { y: -20,  z: 5,  target: 5, spawn: 800, dur: [8, 40], gap: 0.5 },
   { y: 0,  z: 10, target: 8, spawn: 600, dur: [16, 32], gap: 0.8 },
-  { y: 400,  z: 20, target: 10, spawn: 400, dur: [16, 24], gap: 0.4 },
-  { y: 90, z: 30, target: 20, spawn: 600, dur: [8, 32], gap: 0.8 },
-  { y: 120, z: 20, target: 30, spawn: 50, dur: [5, 32],  gap: 0.3 },
+  { y: 30,  z: 20, target: 10, spawn: 400, dur: [16, 24], gap: 0.4 },
+  { y: 80, z: 30, target: 20, spawn: 600, dur: [8, 32], gap: 0.8 },
+  { y: 120, z: 40, target: 50, spawn: 50, dur: [5, 32],  gap: 0.3 },
 ];
 
 export default function WalkingCrowd({ peeps }: { peeps: Peep[] }) {
