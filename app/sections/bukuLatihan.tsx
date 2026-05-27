@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 
-import { Marking } from "@/components/TextSVG";
 import { writeInOnScroll } from "@/utils/animation";
 import Button from "@/components/Button";
 import SponsorsMarquee from "@/components/SponsorsMarquee";

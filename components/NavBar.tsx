@@ -65,7 +65,7 @@ function flamePath(cx: number, baseY: number, h: number, w: number) {
 // drive GSAP animations against the inner #skewers / .flame / .smoke groups.
 function SatayIcon({ ref }: { ref?: Ref<SVGSVGElement> }) {
   return (
-    <svg ref={ref} viewBox="0 0 40 40" className="w-9 h-9 overflow-visible" aria-hidden="true">
+    <svg ref={ref} viewBox="0 0 40 40" className="w-11 h-11 overflow-visible" aria-hidden="true">
       {/* flames (painted behind the skewer) */}
       <g id="flames">
         {OUTER_FLAMES.map((f, i) => (
@@ -81,19 +81,26 @@ function SatayIcon({ ref }: { ref?: Ref<SVGSVGElement> }) {
         {SKEWERS.map(({ id, cy }) => (
           <g id={id} key={id}>
             <rect x="5" y={cy - 0.8} width="31" height="1.6" rx="0.8" />
-            <path d={`M 36 ${cy - 1.2} l 3.2 1.2 -3.2 1.2 z`} />
-            <rect x="6" y={cy - 2.6} width="6" height="5.2" rx="1.8" />
-            <rect x="13.5" y={cy - 2.6} width="6" height="5.2" rx="1.8" />
-            <rect x="21" y={cy - 2.6} width="6" height="5.2" rx="1.8" />
+            <rect x="5.5" y={cy - 2.5} width="4.6" height="5" rx="0.7" />
+            <rect x="10.6" y={cy - 2.5} width="4.6" height="5" rx="0.7" />
+            <rect x="15.7" y={cy - 2.5} width="4.6" height="5" rx="0.7" />
+            <rect x="20.8" y={cy - 2.5} width="4.6" height="5" rx="0.7" />
           </g>
         ))}
       </g>
 
       {/* smoke puff (close hint) */}
       <g id="smoke">
-        <ellipse className="smoke" cx="12" cy="14" rx="3" ry="2.2" fill="#4A4A4A" style={{ opacity: 0 }} />
-        <ellipse className="smoke" cx="18" cy="12" rx="2.6" ry="1.9" fill="#4A4A4A" style={{ opacity: 0 }} />
-        <ellipse className="smoke" cx="24" cy="13" rx="2.2" ry="1.6" fill="#4A4A4A" style={{ opacity: 0 }} />
+        <ellipse className="smoke" cx="12" cy="14" rx="3" ry="2.2" fill="#4A4A4A" stroke="#4A4A4A" style={{ opacity: 0 }} />
+        <ellipse className="smoke" cx="18" cy="12" rx="2.6" ry="1.9" fill="#4A4A4A" stroke="#4A4A4A" style={{ opacity: 0 }} />
+        <ellipse className="smoke" cx="24" cy="13" rx="2.2" ry="1.6" fill="#4A4A4A" stroke="#4A4A4A" style={{ opacity: 0 }} />
+      </g>
+
+      {/* thin wisps that rise continuously while the satay cooks */}
+      <g id="cook-smoke">
+        <circle className="cook-smoke" cx="13" cy="13" r="2.2" fill="#4A4A4A" style={{ opacity: 0 }} />
+        <circle className="cook-smoke" cx="19" cy="12.5" r="1.9" fill="#4A4A4A" style={{ opacity: 0 }} />
+        <circle className="cook-smoke" cx="24" cy="13" r="1.6" fill="#4A4A4A" style={{ opacity: 0 }} />
       </g>
     </svg>
   )
@@ -104,13 +111,16 @@ function SatayIcon({ ref }: { ref?: Ref<SVGSVGElement> }) {
 function SatayToggle({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   const svgRef = useRef<SVGSVGElement>(null)
   const flickerRef = useRef<gsap.core.Timeline | null>(null)
+  const smokeRef = useRef<gsap.core.Tween | null>(null)
 
-  // Build the looping flame-flicker timeline once; it stays paused until the
-  // menu opens, then plays continuously for that "live grill" feel.
+  // Build the looping flame-flicker + cooking-smoke timelines once; they stay
+  // paused until the menu opens, then play continuously for that "live grill"
+  // feel (flames flickering, a thin wisp of smoke rising off the satay).
   useGSAP(() => {
     const flames = gsap.utils.toArray<SVGElement>(".flame", svgRef.current)
     gsap.set(flames, { transformOrigin: "center bottom", scaleY: 0, opacity: 0 })
     gsap.set(".smoke", { transformOrigin: "center center", opacity: 0, y: 0, scale: 0.6 })
+    gsap.set(".cook-smoke", { transformOrigin: "center center", opacity: 0, y: 0, scale: 0.6 })
 
     flickerRef.current = gsap
       .timeline({ repeat: -1, yoyo: true, paused: true, repeatRefresh: true, defaults: { ease: "sine.inOut" } })
@@ -122,6 +132,22 @@ function SatayToggle({ open, onToggle }: { open: boolean; onToggle: () => void }
         duration: () => gsap.utils.random(0.16, 0.3),
         stagger: { each: 0.05, from: "random" },
       })
+
+    // Wisps rise off the skewer, fading in then out, staggered into a steady
+    // stream that loops for as long as the satay is cooking.
+    smokeRef.current = gsap.to(".cook-smoke", {
+      keyframes: {
+        "0%": { y: 0, opacity: 0, scale: 0.6 },
+        "20%": { opacity: 0.7 },
+        "70%": { opacity: 0.5 },
+        "100%": { y: -18, opacity: 0, scale: 1.6 },
+      },
+      duration: 1.8,
+      ease: "sine.out",
+      repeat: -1,
+      stagger: { each: 0.45 },
+      paused: true,
+    })
   }, { scope: svgRef })
 
   // Morph the icon when the menu toggles: the three cold skewers converge into
@@ -137,16 +163,19 @@ function SatayToggle({ open, onToggle }: { open: boolean; onToggle: () => void }
       tl.to("#skewer-top", { y: 9, opacity: 0, duration: 0.4 }, 0)
         .to("#skewer-bot", { y: -9, opacity: 0, duration: 0.4 }, 0)
         .to("#skewer-mid", { y: 0, scale: 1.08, rotation: 30, transformOrigin: "center center", duration: 0.4 }, 0)
-        .to("#skewers", { fill: "#CC0001", duration: 0.4 }, 0)
+        .to("#skewers", { fill: "#990001", duration: 0.2 }, 0)
+        .to("#skewers", { fill: "#B30001", duration: 0.4 }, 0.28)
         .to(flames, { opacity: 1, scaleY: 1, scaleX: 1, duration: 0.35, stagger: { each: 0.05, from: "center" } }, 0.18)
-      if (!reduced) tl.call(() => flickerRef.current?.play(0), undefined, 0.55)
+      if (!reduced) tl.call(() => { flickerRef.current?.play(0); smokeRef.current?.play(0) }, undefined, 0.55)
     } else {
       // Only run the close sequence if we were actually cooking — keeps the
       // initial mount (and StrictMode double-invoke) from flashing smoke.
       const lit = flames.length > 0 && (gsap.getProperty(flames[0], "scaleY") as number) > 0.05
       if (!lit) return
       flickerRef.current?.pause()
-      tl.to(flames, { scaleY: 0, opacity: 0, duration: 0.28, stagger: { each: 0.03, from: "edges" } }, 0)
+      smokeRef.current?.pause()
+      tl.set(".cook-smoke", { opacity: 0, y: 0, scale: 0.6 }, 0)
+        .to(flames, { scaleY: 0, opacity: 0, duration: 0.28, stagger: { each: 0.03, from: "edges" } }, 0)
         .fromTo(".smoke",
           { opacity: 0, y: 0, scale: 0.5 },
           { opacity: 0.9, y: -15, scale: 1.8, duration: 0.75, stagger: 0.12, ease: "power1.out" }, 0.05)
@@ -305,7 +334,7 @@ export default function NavBar() {
   }, { scope: headerRef })
 
   return (
-    <header ref={headerRef} className="fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] py-4 px-6 md:px-16 bg-white">
+    <header ref={headerRef} className="fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] items-center py-4 px-6 md:px-16 bg-white">
       <Logo />
       <SatayToggle open={open} onToggle={() => setOpen((v) => !v)} />
       <DesktopNav isActive={isActive} />
