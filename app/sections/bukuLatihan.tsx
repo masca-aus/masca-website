@@ -8,7 +8,7 @@ import { writeInOnScroll } from "@/utils/animation";
 import Button from "@/components/Button";
 import SponsorsMarquee from "@/components/SponsorsMarquee";
 
-export default function BukuLatihanSection() {
+export default function BukuLatihanSection({ sponsors }: { sponsors: string[] }) {
   const sectionRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
@@ -47,10 +47,19 @@ export default function BukuLatihanSection() {
       <div
         className="relative w-full h-75 overflow-hidden bg-[linear-gradient(to_right,transparent_var(--rule),#E89090_var(--rule),#E89090_calc(var(--rule)+0.125rem),transparent_calc(var(--rule)+0.125rem)),repeating-linear-gradient(transparent,transparent_1.9375rem,#A8C8E8_1.9375rem,#A8C8E8_2rem)] bg-size-[100%_100%,100%_2rem] [background-repeat:no-repeat,repeat]"
       >
+
         {/* Sponsor logos — full-bleed marquee, vertically centered over the ruled lines */}
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2">
-          <SponsorsMarquee />
+        <div className="absolute inset-x-0 top-2/5 -translate-y-1/2">
+          <SponsorsMarquee logos={sponsors} />
         </div>
+
+        {/* Sponsorship CTA — written on the bottom rule, after the margin */}
+        <p className="absolute bottom-0 left-0 pb-3 pl-[calc(var(--rule)+0.75rem)] pr-5 font-primary text-base font-semibold leading-8 text-gray-700">
+          Interested in sponsoring us?{" "}
+          <Button variant="ghost" href="/contact" className="font-extrabold">
+            Contact Us &rarr;
+          </Button>
+        </p>
 
       </div>
 

@@ -10,24 +10,18 @@ import horizontalLoop from "@/utils/horizontalLoop"
 
 gsap.registerPlugin(Observer);
 
-// Sponsor logos served from /public/sponsors — add new filenames here as they land.
-const LOGOS = [
-  "/sponsors/logo.svg", 
-  "/sponsors/Group 1.svg",
-  "/sponsors/red-bull-logo.svg",
-  "/sponsors/thenorthface-logo.svg"
-];
-// Repeat until the row is wider than the container — otherwise the loop cycles
-// inside a narrow zone and leaves the rest of the width empty.
-const LOOP_ITEMS = Array.from({ length: 10 }).flatMap(() => LOGOS);
-
-export default function SponsorsMarquee() {
+export default function SponsorsMarquee({ logos }: { logos: string[] }) {
   const container = useRef<HTMLDivElement>(null);
 
-  useGSAP(() => {
-    const logos = gsap.utils.toArray<HTMLElement>('.rail img');
+  // Repeat the set until the row overflows the container — otherwise the loop
+  // cycles inside a narrow zone and leaves the rest of the width empty.
+  const repeats = Math.max(2, Math.ceil(20 / Math.max(logos.length, 1)));
+  const loopItems = Array.from({ length: repeats }).flatMap(() => logos);
 
-    const tl = horizontalLoop(logos, {
+  useGSAP(() => {
+    const items = gsap.utils.toArray<HTMLElement>('.rail img');
+
+    const tl = horizontalLoop(items, {
       repeat: -1,
       paddingRight: 64,
       speed: 0.4, // idle drift (~40px/s). Lower = slower.
@@ -51,7 +45,7 @@ export default function SponsorsMarquee() {
       className="scrolling-text overflow-hidden w-full flex"
     >
       <div className="rail flex gap-16">
-        {LOOP_ITEMS.map((src, i) => (
+        {loopItems.map((src, i) => (
           <Image
             key={i}
             src={src}

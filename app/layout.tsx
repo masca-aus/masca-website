@@ -3,26 +3,11 @@ import localFont from "next/font/local"
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
 
-import { readdirSync } from "node:fs";
-import { join } from "node:path";
-
 import GsapInitializer from "@/components/GsapInitializer";
 import NavBar from "@/components/NavBar";
-import WalkingCrowd, { type Peep } from "@/components/WalkingCrowd";
+import WalkingCrowd from "@/components/WalkingCrowd";
 import Footer from "@/components/Footer";
-
-// Auto-discover the crowd from public/casts/ (runs on the server). Drop a new
-// SVG into that folder and it joins the walking crowd — no code changes needed.
-function getCastPeeps(): Peep[] {
-  const dir = join(process.cwd(), "public", "casts");
-  return readdirSync(dir)
-    .filter((file) => file.toLowerCase().endsWith(".svg"))
-    .sort()
-    .map((file) => ({
-      name: file.replace(/\.svg$/i, ""),
-      src: encodeURI(`/casts/${file}`), // encode spaces, e.g. "Jin Hong.svg"
-    }));
-}
+import { getCastPeeps } from "@/utils/casts";
 
 // 1. Montserrat (Primary Variable Font - Split into Roman and Italic files)
 const montserrat = localFont({
