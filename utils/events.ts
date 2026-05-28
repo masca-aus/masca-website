@@ -26,6 +26,8 @@ export type Event = {
   organizer?: { id: string; name: string } | null;
   ticket_availability?: {
     is_free?: boolean;
+    is_sold_out?: boolean;
+    has_available_tickets?: boolean;
     minimum_ticket_price?: { major_value: string; currency: string; display: string };
   } | null;
 }

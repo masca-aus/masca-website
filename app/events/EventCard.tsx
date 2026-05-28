@@ -57,6 +57,11 @@ export default function EventCard({ event, chapter }: { event: Event; chapter?: 
   const location = event.venue?.name ?? "Online"
   const price = priceLabel(event)
 
+  // has_available_tickets is the robust signal — false covers sold out, sales
+  // ended, and sales not yet started; fall back to is_sold_out.
+  const ta = event.ticket_availability
+  const soldOut = ta ? ta.has_available_tickets === false || ta.is_sold_out === true : false
+
   return (
     <article
       ref={cardRef}
@@ -99,7 +104,11 @@ export default function EventCard({ event, chapter }: { event: Event; chapter?: 
 
         <div className="flex items-center justify-between">
           <span className="text-md font-bold text-red-700">{price}</span>
-          <CheckoutButton eventId={event.id} />
+          {soldOut ? (
+            <span className="text-sm font-bold tracking-wider text-red-600">Full</span>
+          ) : (
+            <CheckoutButton eventId={event.id} />
+          )}
         </div>
       </div>
     </article>

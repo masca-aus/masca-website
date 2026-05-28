@@ -37,6 +37,9 @@ export default async function CheckoutPage({
             {event.venue ? ` · ${event.venue.name}` : ""}
           </p>
         )}
+        {event?.summary && (
+          <p className="mt-2 max-w-2xl text-body text-gray-700">{event.summary}</p>
+        )}
       </header>
 
       <InlineCheckout eventId={eventId} />
