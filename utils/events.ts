@@ -55,3 +55,13 @@ export async function getUpcomingEvents(): Promise<Event[]> {
   const data = await res.json()
   return data.events ?? []
 }
+
+/**
+ * Looks up a single upcoming event by id. Reuses the cached organization
+ * fetch, so it costs no extra API call. Returns undefined for ids that aren't
+ * in the current/future live set (e.g. past or unpublished events).
+ */
+export async function getEventById(id: string): Promise<Event | undefined> {
+  const events = await getUpcomingEvents()
+  return events.find((e) => e.id === id)
+}
