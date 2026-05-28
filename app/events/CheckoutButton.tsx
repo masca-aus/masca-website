@@ -14,8 +14,14 @@ declare global {
         eventId: string
         modalTriggerElementId?: string
         iframeContainerId?: string
+        iframeContainerHeight?: number
         onOrderComplete?: () => void
         promoCode?: string
+        themeSettings?: {
+          brandColor?: string
+          fontColor?: string
+          background?: string
+        }
       }) => void
     }
   }
@@ -65,6 +71,12 @@ export default function CheckoutButton({
           widgetType: "checkout",
           eventId,
           modalTriggerElementId: triggerId,
+          // Brand the checkout to match the site (modal mode, not inline).
+          themeSettings: {
+            brandColor: "#010066", // --color-blue-600
+            fontColor: "#000000", // --color-black
+            background: "#ffffff", // --color-white
+          },
         })
       })
       .catch(() => {
