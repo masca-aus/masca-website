@@ -264,14 +264,8 @@ function MobileMenu({ open, isActive, pathname }: { open: boolean; isActive: IsA
             </Button>
           )
         })}
-        <Button
-          href="/sign-in" variant="ghost"
-          className={`text-3xl! ${isActive("/sign-in") ? "text-red-600" : "text-blue-600"}`}
-        >
-          Sign In
-        </Button>
-        <Button href="/sign-up" variant="accent" className="text-xl! px-8 py-4 mt-2">
-          Become a Member
+        <Button href="/contact" variant="accent" className="text-xl! px-8 py-4 mt-2">
+          Contact us
         </Button>
       </nav>
     </div>

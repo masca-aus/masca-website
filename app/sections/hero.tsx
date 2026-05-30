@@ -14,6 +14,7 @@ export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNod
   const sectionRef = useRef<HTMLElement>(null)
 
   useGSAP(() => {
+    gsap.set(".inAustralia", { autoAlpha: 1 })
     writeInOnScroll(".stroke", sectionRef.current)
   }, { scope: sectionRef })
 
@@ -49,7 +50,7 @@ function MainContent() {
         founded 2001 &middot; 6 states &middot; 1 territory
       </span>
       <h1 className="text-white text-5xl md:text-6xl lg:text-7xl">
-        A home for <br /> Malaysians <br /> studying <InAustralia />
+        A home for <br /> Malaysians <br /> studying <span className="inAustralia invisible opacity-0"><InAustralia /></span>
       </h1>
       <p className="text-gray-300">
         MASCA is the peak student representative body for Malaysians across
@@ -69,63 +70,41 @@ function MainContent() {
 }
 
 function Statistic() {
+  const stats = [
+    { value: 20, suffix: "k+", label: "students reached" },
+    { value: 7,  suffix: "",   label: "state chapters" },
+    { value: 2001, suffix: "", label: "founded" },
+  ]
   const rootRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
-      const counters = gsap.utils.toArray<HTMLElement>(".stat-value");
-
-      counters.forEach((el) => {
-        const target = Number(el.dataset.value);
-        const suffix = el.dataset.suffix ?? "";
-        const proxy = { val: 0 };
-
-        // Reset to the start value before the first tick to avoid a flash of the final number.
-        el.textContent = `0${suffix}`;
-
-        gsap.to(proxy, {
-          val: target,
-          duration: 2,
-          ease: "entranceEase",
-          onUpdate: () => {
-            el.textContent = `${Math.round(proxy.val)}${suffix}`;
-          },
-        });
+  useGSAP(() => {
+    gsap.utils.toArray<HTMLElement>(".stat-value").forEach((e) => {
+      const target = Number(e.dataset.value);
+      const suffix = e.dataset.suffix ?? "";
+      const proxy = { val: 0 };
+      gsap.to(proxy, {
+        val: target,
+        duration: 5,
+        ease: "power4.out",
+        onUpdate: () => { e.textContent = `${Math.round(proxy.val)}${suffix}`; },
       });
-    },
-    { scope: rootRef }
-  );
+    });
+  }, { scope: rootRef });
 
   return (
     <div ref={rootRef} className="flex gap-4 border-t pt-8 border-blue-100/20">
-      <div className="flex flex-col">
-        <span
-          className="stat-value text-h2 font-bold text-yellow-500"
-          data-value="20"
-          data-suffix="k+"
-        >
-          20k+
-        </span>
-        <span className="eyebrow text-gray-300">students reached</span>
-      </div>
-      <div className="flex flex-col">
-        <span
-          className="stat-value text-h2 font-bold text-yellow-500"
-          data-value="7"
-        >
-          7
-        </span>
-        <span className="eyebrow text-gray-300">state chapters</span>
-      </div>
-      <div className="flex flex-col">
-        <span
-          className="stat-value text-h2 font-bold text-yellow-500"
-          data-value="2001"
-        >
-          2001
-        </span>
-        <span className="eyebrow text-gray-300">founded</span>
-      </div>
+        {stats.map(({ value, suffix, label }) => (
+          <div key={label} className="flex flex-col">
+            <span
+              className="stat-value text-h2 font-bold text-yellow-500"
+              data-value={value}
+              data-suffix={suffix}
+            >
+              0{suffix}
+            </span>
+            <span className="eyebrow text-gray-300">{label}</span>
+          </div>
+        ))}
     </div>
   );
 }

@@ -12,8 +12,8 @@ const footerSections: { heading: string; links: FooterLink[] }[] = [
     links: [
       { label: "Events", href: "/events" },
       { label: "Welfare", href: "/care" },
-      { label: "MASCAzine", href: "/" },
-      { label: "Muafakat", href: "/" },
+      { label: "MASCAvoice", href: "https://www.instagram.com/mascavoice/", external: true },
+      { label: "Muafakat", href: "https://www.muafakatgames2024.com/index.html", external: true },
     ],
   },
   {
