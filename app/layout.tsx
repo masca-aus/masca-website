@@ -3,7 +3,7 @@ import localFont from "next/font/local"
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
 
-import GsapInitializer from "@/components/GsapInitializer";
+import GsapInitializer from "@/utils/GsapInitializer";
 import NavBar from "@/components/NavBar";
 import WalkingCrowd from "@/components/WalkingCrowd";
 import Footer from "@/components/Footer";

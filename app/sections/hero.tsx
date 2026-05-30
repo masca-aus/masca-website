@@ -2,12 +2,11 @@
 
 import { useRef, type ReactNode } from "react";
 
-import { gsap } from "gsap";
+import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
 import { InAustralia }  from "@/components/TextSVG";
 import Button from "@/components/Button";
-import { writeInOnScroll } from "@/utils/animation"
 
 
 export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNode }) {
@@ -15,7 +14,7 @@ export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNod
 
   useGSAP(() => {
     gsap.set(".inAustralia", { autoAlpha: 1 })
-    writeInOnScroll(".stroke", sectionRef.current)
+    gsap.effects.writeInOnScroll(".stroke", { trigger: sectionRef.current });
   }, { scope: sectionRef })
 
   return (
@@ -71,17 +70,18 @@ function MainContent() {
 
 function Statistic() {
   const stats = [
-    { value: 20, suffix: "k+", label: "students reached" },
-    { value: 7,  suffix: "",   label: "state chapters" },
-    { value: 2001, suffix: "", label: "founded" },
+    { from: 0, value: 33, suffix: "k+", label: "students reached" },
+    { from: 0, value: 7, suffix: "", label: "state chapters" },
+    { from: new Date().getFullYear(), value: 2001, suffix: "", label: "founded" },
   ]
   const rootRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     gsap.utils.toArray<HTMLElement>(".stat-value").forEach((e) => {
       const target = Number(e.dataset.value);
+      const from = Number(e.dataset.from);
       const suffix = e.dataset.suffix ?? "";
-      const proxy = { val: 0 };
+      const proxy = { val: from };
       gsap.to(proxy, {
         val: target,
         duration: 5,
@@ -93,14 +93,15 @@ function Statistic() {
 
   return (
     <div ref={rootRef} className="flex gap-4 border-t pt-8 border-blue-100/20">
-        {stats.map(({ value, suffix, label }) => (
+        {stats.map(({ from, value, suffix, label }) => (
           <div key={label} className="flex flex-col">
             <span
               className="stat-value text-h2 font-bold text-yellow-500"
               data-value={value}
+              data-from={from}
               data-suffix={suffix}
             >
-              0{suffix}
+              {from}{suffix}
             </span>
             <span className="eyebrow text-gray-300">{label}</span>
           </div>

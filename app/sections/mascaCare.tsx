@@ -7,17 +7,10 @@ import Link from "next/link"
 
 import { Kita }  from "@/components/TextSVG";
 import Button from "@/components/Button";
-import { writeInOnScroll } from "@/utils/animation"
 
 export default function MascaCareSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(() => {
-   writeInOnScroll(".kita", sectionRef.current)
-  }, { scope: sectionRef })
-
   return (
-    <section ref={sectionRef}>
+    <section >
       <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-24 lg:gap-16 py-32">
         <div className="flex flex-col gap-6">
 
@@ -53,6 +46,7 @@ function MascaCareCard() {
   const tweenRef = useRef<gsap.core.Tween | null>(null)
 
   useGSAP(() => {
+    gsap.effects.writeInOnScroll(".kita", { trigger: cardRef.current });
     tweenRef.current = gsap.to(cardRef.current, {
       y: -16,
       ease: "none",

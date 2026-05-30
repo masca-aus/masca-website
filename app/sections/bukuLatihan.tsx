@@ -3,7 +3,7 @@
 import { useRef } from "react";
 
 import Button from "@/components/Button";
-import SponsorsMarquee from "@/components/SponsorsMarquee";
+import SponsorsMarquee from "@/app/sections/SponsorsMarquee";
 
 export default function BukuLatihanSection({ sponsors }: { sponsors: string[] }) {
   const sectionRef = useRef<HTMLElement>(null);

@@ -19,3 +19,24 @@ export default function GsapInitializer() {
 
   return null; // This component doesn't render anything visually
 }
+
+gsap.registerEffect({
+  name: "writeInOnScroll",
+  effect: (target: gsap.TweenTarget, config: gsap.TweenVars) => {
+    const { trigger, ...options } = config
+
+    return gsap.fromTo(target, {
+      drawSVG: "0%",
+    }, {
+      drawSVG: "100%",
+      duration: 0.3,
+      stagger: 0.25,
+      ease: "none",
+      scrollTrigger: {
+        trigger,
+        start: "top 80%",
+      },
+      ...options,
+    })
+  }
+})
