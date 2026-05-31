@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
+
 import { CHAPTERS, getUpcomingEvents } from "@/utils/events";
 import EventSection from "./EventSection";
+
+export const metadata: Metadata = {
+  title: "Events | MASCA",
+  description: "Every chapter, every month, all in one place. Filter by state to find what's happening near you."
+};
 
 export default async function EventPage() {
   const events = await getUpcomingEvents();

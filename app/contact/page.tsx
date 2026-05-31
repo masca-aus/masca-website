@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { ContactSection } from "./contactForm";
 
 export const metadata: Metadata = {
-  title: "Contact MASCA",
-  description: "Get in touch with MASCA — a real student officer reads every message.",
+  title: "Contact | MASCA",
+  description: "Get in touch with MASCA — we'd love to hear from you! A real student officer reads every single message.",
 };
 
 export default function ContactPage() {
