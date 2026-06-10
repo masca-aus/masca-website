@@ -156,7 +156,7 @@ function MemberModal({
     >
       <div
         ref={boxRef}
-        className="relative flex max-h-[90vh] w-full max-w-md flex-col overflow-y-auto rounded-2xl bg-white shadow-brand"
+        className="relative flex max-h-[90vh] w-full max-w-md flex-col overflow-y-auto rounded-2xl bg-white shadow-brand md:max-h-[80vh] md:max-w-6xl md:flex-row md:overflow-hidden"
       >
         {/* Minimal close control, top-right */}
         <button
@@ -168,15 +168,15 @@ function MemberModal({
           Close <X className="h-3.5 w-3.5" aria-hidden />
         </button>
 
-        {/* Portrait — sharp top corners, scales to the box width */}
+        {/* Portrait — sharp top corners on mobile, left edge on desktop */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={member.img}
           alt={member.name}
-          className="aspect-[4/5] w-full rounded-t-2xl object-cover"
+          className="aspect-[4/5] w-full rounded-t-2xl object-cover md:h-full md:w-2/5 md:shrink-0 md:rounded-l-2xl md:rounded-tr-none"
         />
 
-        <div className="flex flex-col gap-6 p-6 md:p-8">
+        <div className="flex flex-col gap-6 p-6 md:flex-1 md:overflow-y-auto md:p-8">
           {/* Name + role, stacked */}
           <div className="flex flex-col gap-1">
             <h2 className="text-h4 font-bold text-blue-600 leading-tight">
