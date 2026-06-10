@@ -12,13 +12,13 @@ export default function StatesSection() {
   useGSAP(() => {
     gsap.from(".state-card", {
       opacity: 0,
-      y: 24,
-      duration: 0.5,
-      stagger: 0.08,
+      y: 32,
+      duration: 0.55,
+      stagger: 0.06,
       ease: "entranceEase",
       scrollTrigger: {
         trigger: containerRef.current,
-        start: "top 80%",
+        start: "top 85%",
       },
     })
   }, { scope: containerRef })

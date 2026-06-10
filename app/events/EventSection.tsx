@@ -1,6 +1,8 @@
 'use client'
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useRef } from "react"
+import { gsap } from "gsap"
+import { useGSAP } from "@gsap/react"
 
 import type { Chapter, Event } from "@/utils/events"
 import EventCard from "./EventCard"
@@ -21,6 +23,23 @@ export default function EventList({ events, chapters }: { events: Event[]; chapt
 
   // Synthetic "All" pill prepended to the real chapters
   const pills: Chapter[] = [{ id: "all", name: "All" }, ...chapters]
+
+  const gridRef = useRef<HTMLDivElement>(null)
+
+  useGSAP(() => {
+    gsap.from(".event-card", {
+      opacity: 0,
+      y: 32,
+      scale: 0.96,
+      duration: 0.55,
+      stagger: 0.06,
+      ease: "entranceEase",
+      scrollTrigger: {
+        trigger: gridRef.current,
+        start: "top 85%",
+      },
+    })
+  }, { scope: gridRef })
 
   return (
     <div className="flex flex-col gap-8 container py-16">
@@ -52,7 +71,10 @@ export default function EventList({ events, chapters }: { events: Event[]; chapt
       {filtered.length === 0 ? (
         <p className="text-center text-gray-500">No upcoming events for this chapter.</p>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 justify-items-center items-center">
+        <div 
+          ref={gridRef}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6 justify-items-center items-center"
+        >
           {filtered.map((event) => (
             <EventCard
               key={event.id}
