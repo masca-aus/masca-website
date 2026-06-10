@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { useGSAP } from "@gsap/react"
 import { X } from "lucide-react"
@@ -27,14 +27,20 @@ export default function CommitteeSection({
     [members, activeYear],
   )
 
-  // Re-run the staggered entrance whenever the active year changes.
+  // Staggered reveal as the grid scrolls into view; re-runs on year change so
+  // a freshly-filtered set animates in too.
   useGSAP(() => {
     gsap.from(".member-card", {
       opacity: 0,
-      y: 24,
-      duration: 0.5,
+      y: 32,
+      scale: 0.96,
+      duration: 0.55,
       stagger: 0.06,
       ease: "entranceEase",
+      scrollTrigger: {
+        trigger: gridRef.current,
+        start: "top 85%",
+      },
     })
   }, { scope: gridRef, dependencies: [activeYear] })
 
@@ -99,11 +105,33 @@ function MemberModal({
 }) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const boxRef = useRef<HTMLDivElement>(null)
+  const tl = useRef<gsap.core.Timeline | null>(null)
+
+  // Build the open timeline and play it in on mount.
+  useGSAP(() => {
+    tl.current = gsap.timeline()
+      .from(overlayRef.current, { autoAlpha: 0, duration: 0.25, ease: "none" })
+      .from(boxRef.current, {
+        autoAlpha: 0,
+        y: 24,
+        scale: 0.96,
+        duration: 0.4,
+        ease: "entranceEase",
+      }, 0.05)
+  }, { scope: overlayRef })
+
+  // Play the open timeline in reverse, then unmount once it finishes.
+  const requestClose = useCallback(() => {
+    const t = tl.current
+    if (!t) return onClose()
+    t.eventCallback("onReverseComplete", onClose)
+    t.timeScale(1.5).reverse()
+  }, [onClose])
 
   // Close on Escape and lock background scroll while open.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose()
+      if (e.key === "Escape") requestClose()
     }
     document.addEventListener("keydown", onKey)
     const prev = document.body.style.overflow
@@ -112,18 +140,7 @@ function MemberModal({
       document.removeEventListener("keydown", onKey)
       document.body.style.overflow = prev
     }
-  }, [onClose])
-
-  useGSAP(() => {
-    gsap.from(overlayRef.current, { opacity: 0, duration: 0.2, ease: "none" })
-    gsap.from(boxRef.current, {
-      opacity: 0,
-      y: 24,
-      scale: 0.97,
-      duration: 0.35,
-      ease: "entranceEase",
-    })
-  })
+  }, [requestClose])
 
   return (
     <div
@@ -133,7 +150,7 @@ function MemberModal({
       aria-label={`${member.name}, ${member.role}`}
       onClick={(e) => {
         // Backdrop click closes; clicks inside the box are ignored.
-        if (e.target === e.currentTarget) onClose()
+        if (e.target === e.currentTarget) requestClose()
       }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-blue-950/60 backdrop-blur-sm p-4 sm:p-6"
     >
@@ -144,7 +161,7 @@ function MemberModal({
         {/* Minimal close control, top-right */}
         <button
           type="button"
-          onClick={onClose}
+          onClick={requestClose}
           aria-label="Close"
           className="absolute right-4 top-4 z-10 inline-flex items-center gap-1 rounded-pill bg-white/80 px-3 py-1.5 text-caption font-bold text-gray-700 backdrop-blur-sm transition-colors hover:text-blue-600"
         >
