@@ -14,7 +14,11 @@ export default function AboutUsPage() {
             The Story
           </span>
           <p className="text-base leading-relaxed text-blue-100/80 md:text-lg max-w-xl">
-            details on about us here
+            What really is MASCA? this section will explain what MASCA really is, 
+            for both committee members for reminders and any stakeholders.
+            Include sections like the pillars and what each of them does (amplifies, care, ambition etc.),
+            our challenges (e.g. one-year leadership terms solution: a alumni network)
+            and more...
           </p>
         </div>
       </section>
