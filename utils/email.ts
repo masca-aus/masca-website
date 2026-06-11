@@ -7,11 +7,23 @@ const resend = new Resend(process.env.RESEND_KEY)
 const OWNER_EMAIL = "hello@masca.org.au"
 
 // Each contact topic pill routes a copy to the inbox that owns it.
-const TOPIC_CC: Record<string, string> = {
+const TOPIC_CC: Record<string, string | null> = {
   General: "exco@masca.org.au",
-  Membership: "admin@masca.org.au",
-  Events: "admin@masca.org.au",
+  Events: "exco@masca.org.au",
   Welfare: "cares@masca.org.au",
+}
+
+// Each state chapter can also CC its own inbox. `null` means that chapter has
+// no dedicated inbox, so no chapter copy is sent.
+const STATE_CC: Record<string, string | null> = {
+  NSW: "chairperson@nsw.masca.org.au",
+  VIC: "chairperson@vic.masca.org.au",
+  QLD: null,
+  WA: null,
+  SA: null,
+  TAS: null,
+  ACT: null,
+  Others: null,
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -44,7 +56,11 @@ export async function sendEmail(
   const escape = (s: string) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 
-  const cc = TOPIC_CC[topic]
+  // Topic owns the primary CC; the chosen state chapter adds its own inbox
+  // when it has one (deduped so a shared address isn't CC'd twice).
+  const cc = [TOPIC_CC[topic], STATE_CC[state]].filter(
+    (addr, i, all): addr is string => Boolean(addr) && all.indexOf(addr) === i,
+  )
   const topicLabel = topic || "General"
 
   const row = (label: string, value: string) =>
@@ -104,7 +120,7 @@ export async function sendEmail(
   const { error } = await resend.emails.send({
     from: `${name} via Website <hello@masca.org.au>`,
     to: OWNER_EMAIL,
-    cc: cc ? [cc] : undefined,
+    cc: cc.length ? cc : undefined,
     replyTo: email || undefined,
     subject: `New ${topicLabel} enquiry from ${name || "website visitor"}`,
     html,
