@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "About | MASCA",
-  description: ""
-};
+import { pageMetadata } from "@/utils/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "About",
+  description:
+    "Learn about the Malaysian Students' Council of Australia (MASCA) — a non-profit student body established in April 2001 that advocates for student welfare, promotes academic excellence, and celebrates Malaysian culture across six states and one territory.",
+  path: "/about",
+});
 
 export default function AboutUsPage() {
   return (

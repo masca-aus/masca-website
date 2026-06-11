@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 
+import { pageMetadata } from "@/utils/seo";
 import { CHAPTERS, getUpcomingEvents } from "@/utils/events";
 import EventSection from "./EventSection";
 
-export const metadata: Metadata = {
-  title: "Events | MASCA",
-  description: "Every chapter, every month, all in one place. Filter by state to find what's happening near you."
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Events",
+  description:
+    "Malaysian student events across Australia — every chapter, every month, all in one place. Filter by state to find what's happening near you.",
+  path: "/events",
+});
 
 export default async function EventPage() {
   const events = await getUpcomingEvents();

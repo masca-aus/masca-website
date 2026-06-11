@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 
+import { pageMetadata } from "@/utils/seo";
 import { ContactSection } from "./contactForm";
 
-export const metadata: Metadata = {
-  title: "Contact | MASCA",
-  description: "Get in touch with MASCA — we'd love to hear from you! A real student officer reads every single message.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Contact",
+  description:
+    "Get in touch with MASCA — we'd love to hear from you! A real student officer reads every single message.",
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { pageMetadata } from "@/utils/seo";
 import { getCommittee, getCommitteeYears } from "@/utils/committee";
 import CommitteeSection from "./CommitteeSection";
 
@@ -8,11 +9,12 @@ import CommitteeSection from "./CommitteeSection";
 // background when the cache goes stale.
 export const revalidate = 1800;
 
-export const metadata: Metadata = {
-  title: "Committee | MASCA",
+export const metadata: Metadata = pageMetadata({
+  title: "Committee",
   description:
     "Meet the student leaders behind the Malaysian Students' Council of Australia — the national committee representing Malaysian students across every chapter.",
-};
+  path: "/committee",
+});
 
 export default async function CommitteePage() {
   // Sorted by `order` here on the server; the client section only ever filters.

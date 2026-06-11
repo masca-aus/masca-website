@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { SITE_NAME, SITE_DESCRIPTION } from "@/utils/seo";
 import HeroSection from "./sections/hero";
 import UpcomingEvent from "./sections/upcomingEvent";
 import StatesSection from "./sections/states";
@@ -13,8 +14,23 @@ import JoinUsSection from "./sections/joinUs";
 import { getSponsors } from "@/utils/sponsors";
 
 export const metadata: Metadata = {
-  title: "Home | MASCA",
-  description: "The Malaysian Students' Council of Australia (MASCA) is the official, peak student representative body for Malaysian students in Australia. Established in April 2001, it operates as a non-profit organization across six states and one territory to advocate for students' welfare, promote academic excellence, and celebrate Malaysian culture.",
+  // Homepage uses an absolute, keyword-rich title instead of "Home | MASCA".
+  title: { absolute: SITE_NAME },
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    locale: "en_AU",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default async function Home() {

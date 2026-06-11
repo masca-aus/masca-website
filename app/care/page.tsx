@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Care | MASCA",
-  description: ""
-};
+import { pageMetadata } from "@/utils/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "MASCA Care",
+  description:
+    "MASCA Care is confidential, free student support staffed by trained MASCA student leaders. Whether it's visa worries, mental health, or accommodation, we're here to listen and connect you to help — no judgement, no paperwork, no problem too small.",
+  path: "/care",
+});
 
 export default function MascaCarePage() {
   return (
