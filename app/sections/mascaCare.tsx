@@ -64,7 +64,7 @@ function MascaCareCard() {
       className="relative isolate overflow-hidden flex flex-col justify-center w-full max-w-xl min-h-105 md:min-h-130 rounded-xl bg-blue-600 shadow-brand p-6 md:p-8"
     >
       <span className="eyebrow text-yellow-500">masca care</span>
-      <h1 className="text-yellow-500 leading-none mt-2 text-7xl md:text-8xl font-black">1800 <br/> MASCA</h1>
+      <h2 className="text-yellow-500 leading-none mt-2 text-7xl md:text-8xl font-black">1800 <br/> MASCA</h2>
       <span className="text-caption text-white mt-3">Confidential. Free. Staffed by trained MASCA student leaders.</span>
 
       <div className="border-t border-blue-100/20 my-6"></div>

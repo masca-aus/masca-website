@@ -5,7 +5,7 @@ import { pageMetadata } from "@/utils/seo";
 export const metadata: Metadata = pageMetadata({
   title: "About",
   description:
-    "Learn about the Malaysian Students' Council of Australia (MASCA) — a non-profit student body established in April 2001 that advocates for student welfare, promotes academic excellence, and celebrates Malaysian culture across six states and one territory.",
+    "Learn about MASCA — a non-profit Malaysian student body founded April 2001, advocating for student welfare, academic excellence and Malaysian culture.",
   path: "/about",
 });
 

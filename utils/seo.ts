@@ -12,7 +12,7 @@ export const SITE_URL = "https://www.masca.org.au";
 export const SITE_NAME = "Malaysian Students' Council of Australia";
 export const SITE_SHORT_NAME = "MASCA";
 export const SITE_DESCRIPTION =
-  "The Malaysian Students' Council of Australia (MASCA) is the official, peak student representative body for Malaysian students in Australia. Established in April 2001, it operates as a non-profit organization across six states and one territory to advocate for students' welfare, promote academic excellence, and celebrate Malaysian culture.";
+  "The Malaysian Students' Council of Australia (MASCA) is the official, peak representative body for Malaysian students across Australia since April 2001.";
 
 export const SITE_SOCIALS = [
   "https://www.instagram.com/masca_national/",

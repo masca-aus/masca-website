@@ -5,7 +5,7 @@ import { pageMetadata } from "@/utils/seo";
 export const metadata: Metadata = pageMetadata({
   title: "Care",
   description:
-    "MASCA Care is confidential, free student support staffed by trained MASCA student leaders. Whether it's visa worries, mental health, or accommodation, we're here to listen and connect you to help — no judgement, no paperwork, no problem too small.",
+    "MASCA Care offers free, confidential support from trained MASCA student leaders — visa worries, mental health, accommodation and more. No judgement.",
   path: "/care",
 });
 
