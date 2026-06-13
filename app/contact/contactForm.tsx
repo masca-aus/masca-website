@@ -5,7 +5,7 @@ import FormField from "@/components/FormField";
 import Button from "@/components/Button";
 import { sendEmail, type SendState } from "@/utils/email";
 
-const TOPICS = ["General", "Events", "Welfare"] as const;
+const TOPICS = ["General", "Events", "Welfare", "Career", "Academic", "Sponsors"] as const;
 const STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "Others"];
 
 const initialState: SendState = { status: "idle" };

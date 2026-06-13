@@ -21,7 +21,7 @@ export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNod
     <section ref={sectionRef} className="bg-blue-600">
       <div
       className="
-          container grid gap-16 min-h-screen
+          container grid gap-16 min-h-screen md:min-h-[110vh]
           grid-cols-1 grid-rows-[1fr_auto_2fr] [grid-template-areas:'.'_'main'_'stats']
           lg:grid-cols-2 md:grid-rows-[1fr_auto_2fr] md:[grid-template-areas:'._.'_'main_event'_'stats_.']
       "

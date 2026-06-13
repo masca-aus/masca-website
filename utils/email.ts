@@ -9,8 +9,11 @@ const OWNER_EMAIL = "hello@masca.org.au"
 // Each contact topic pill routes a copy to the inbox that owns it.
 const TOPIC_CC: Record<string, string | null> = {
   General: "admin@masca.org.au",
-  Events: "exco@masca.org.au",
+  Events: "amplifies@masca.org.au",
   Welfare: "cares@masca.org.au",
+  Careers: "ambitions@masca.org.au",
+  Academic: "ambitions@masca.org.au",
+  Sponsors: "deputy.chairperson@masca.org.au"
 }
 
 // Each state chapter can also CC its own inbox. `null` means that chapter has
