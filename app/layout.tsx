@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local"
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 import GsapInitializer from "@/utils/GsapInitializer";
 import NavBar from "@/components/NavBar";
@@ -158,6 +159,7 @@ export default function RootLayout({
         <NavBar />
         {children}
         <Analytics/>
+        <SpeedInsights />
         <WalkingCrowd peeps={peeps} />
         <Footer />
       </body>
