@@ -24,7 +24,7 @@ function Logo() {
   return (
     <Link href="/" className="col-1 justify-self-start relative z-20">
       <div className="flex items-center gap-4">
-        <Image src="/logo/logo.png" alt="Masca logo" width={40} height={40} priority unoptimized className="h-10 w-auto" />
+        <Image src="/logo/logo.png" alt="Masca logo" width={36} height={40} priority sizes="40px" className="h-10 w-auto" />
         <div className="flex flex-col leading-none">
           <span className="text-xl font-bold tracking-wider text-blue-600">MASCA</span>
           <span className="text-xs font-semibold text-gray-700/80 uppercase">malaysian students&apos; council</span>
