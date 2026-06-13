@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useEffect, useRef, useState, type Ref } from "react";
 
@@ -318,8 +319,42 @@ export default function NavBar() {
     })
   }, { scope: headerRef })
 
+  // Hide on scroll-down, reveal on scroll-up — mobile only (below the lg
+  // breakpoint, where the satay menu replaces the desktop nav). A paused tween
+  // parked at its end (yPercent: 0, fully shown) is driven by a full-page
+  // ScrollTrigger that reads scroll direction: down (1) reverses it up out of
+  // view, up (-1) plays it back. Near the top it's always shown so the page
+  // never opens hidden. matchMedia tears it all down (and resets the header)
+  // when the viewport crosses into desktop, so the bar stays put there.
+  useGSAP(() => {
+    const mm = gsap.matchMedia()
+    mm.add("(max-width: 1023px) and (prefers-reduced-motion: no-preference)", () => {
+      const showAnim = gsap.from(headerRef.current, {
+        yPercent: -100,
+        paused: true,
+        duration: 0.3,
+        ease: "entranceEase",
+      }).progress(1)
+
+      const st = ScrollTrigger.create({
+        start: "top top",
+        end: "max",
+        onUpdate: (self) => {
+          if (self.scroll() < 80 || self.direction === -1) showAnim.play()
+          else showAnim.reverse()
+        },
+      })
+
+      return () => {
+        st.kill()
+        showAnim.kill()
+        gsap.set(headerRef.current, { clearProps: "transform" })
+      }
+    })
+  }, { scope: headerRef })
+
   return (
-    <header ref={headerRef} className="fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] items-center py-2 md:py-4 px-6 md:px-16 bg-white">
+    <header ref={headerRef} className="fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] items-center py-2 md:py-4 px-6 md:px-16 bg-white backface-hidden will-change-[transform,backdrop-filter]">
       <Logo />
       <SatayToggle open={open} onToggle={() => setOpen((v) => !v)} />
       <DesktopNav isActive={isActive} />
