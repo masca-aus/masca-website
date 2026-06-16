@@ -37,7 +37,8 @@ The "if you only read one section" section.
 - **Hosting / deploy:** Vercel (auto-deploys from the `main` branch)
 - **Contact form / email:** Resend
 - **Images:** Cloudinary
-- **Committee page content:** Notion
+- **Committee & sponsors content:** Notion
+- **Events / ticketing:** Eventbrite (auto-syncs to the site)
 
 There's no database or custom backend — content comes from the codebase, with
 images served from Cloudinary and the committee page sourced from Notion.
@@ -52,8 +53,9 @@ Everything below is **owned by MASCA, not by any individual.** The keystone is t
 ### `admin@masca.org.au` (keystone account)
 - A **real mailbox** the committee controls, hosted on **Google Workspace**.
 - **Every service is signed into with "Continue with Google" using this account** —
-  GitHub, Vercel, GoDaddy, Cloudflare, Resend, Cloudinary, and Notion all use Google
-  SSO rather than separate passwords. So this one account is the master key to everything.
+  GitHub, Vercel, GoDaddy, Cloudflare, Resend, Cloudinary, Notion, and Eventbrite all
+  use Google SSO rather than separate passwords. So this one account is the master key
+  to everything.
 - **If a service prompts for a 2FA / authentication code, open the Google
   Authenticator app on the admin account's device** and read the current code from
   there. That app is the live second factor for the Google login.
@@ -73,6 +75,16 @@ Everything below is **owned by MASCA, not by any individual.** The keystone is t
 - Project lives under the `admin@masca.org.au` Google Workspace login on Vercel.
 - It deploys automatically when something is merged to `main` on GitHub.
 - The custom domain is attached here under Project → Settings → Domains.
+
+### Eventbrite
+- Used for **event registration / ticketing**. Login via "Continue with Google"
+  using `admin@masca.org.au`.
+- Organiser page: https://www.eventbrite.com.au/o/121402646145
+- **Events sync to the site automatically.** Any event you publish in Eventbrite
+  appears on the website on its own, pulled in via the Eventbrite API — no code
+  change, no embed, no redeploy needed.
+- Powered by two env vars in Vercel: `EVENT_TOKEN` (API token) and `EVENT_ORG_ID`
+  (which organiser's events to pull). See the env var table in §4.
 
 ### Domain & DNS
 
@@ -125,8 +137,25 @@ The site should now be running at `http://localhost:3000` (or whatever the
 terminal prints).
 
 > **Env vars:** real secrets are **never** committed. They live in Notion and in
-> Vercel (Project → Settings → Environment Variables). `.env.local` is gitignored —
-> keep it that way. Expect keys for Resend, Cloudinary, and Notion.
+> Vercel (Project → Settings → Environment Variables, all marked Sensitive,
+> Production + Preview). `.env.local` is gitignored — keep it that way.
+
+### Environment variables
+
+Every one of these is required for the site to work. Real values are in Notion and
+in Vercel — copy them into `.env.local` for local dev.
+
+| Variable | Used for |
+|---|---|
+| `EVENT_TOKEN` | Eventbrite API token — pulls events onto the site |
+| `EVENT_ORG_ID` | Eventbrite organiser ID — which org's events to pull |
+| `RESEND_KEY` | Resend API key — sends the contact-form email |
+| `NOTION_TOKEN` | Notion integration token — reads committee + sponsors content |
+| `NOTION_COMMITTEE_DB_ID` | Notion database ID for the committee page |
+| `NOTION_SPONSORS_DB_ID` | Notion database ID for the sponsors page |
+
+If you add a new variable, set it in **both** `.env.local` and Vercel, then redeploy.
+(Check Vercel for any additional variables not listed here.)
 
 ---
 
@@ -152,8 +181,12 @@ automatically — check that link before merging.
   URL in the page. Don't commit large image files into the repo.
 - **Add a new page:** create a new folder under `app/` with a `page.tsx` inside
   (App Router convention) — copy an existing page as a template.
-- **Update the committee page:** edit the source in **Notion**; the site pulls from
-  there. No code change needed for committee content.
+- **Update the committee or sponsors page:** edit the source in **Notion** (separate
+  databases — see `NOTION_COMMITTEE_DB_ID` and `NOTION_SPONSORS_DB_ID`). The site
+  pulls from there; no code change needed.
+- **Create or manage an event:** publish it in **Eventbrite** (logged in via Google as
+  `admin@masca.org.au`). It appears on the website automatically via the API — nothing
+  to add or deploy on the site side.
 - **Change the contact-form recipient / email:** managed through **Resend** — check
   the API route under `app/api/` and the `RESEND_*` environment variables in Vercel.
 - **Add an environment variable:** add it to both your local `.env.local` **and**
@@ -196,6 +229,7 @@ Track anything that costs money or expires, so nothing lapses silently.
 | Resend | — | [FILL: free?] | n/a | Contact-form email |
 | Cloudinary | — | [FILL: free?] | n/a | Image hosting |
 | Notion | — | [FILL: free?] | n/a | Credentials + committee page |
+| Eventbrite | — | Free to set up | n/a | Service fees apply to paid tickets |
 
 ---
 
@@ -206,9 +240,11 @@ Track anything that costs money or expires, so nothing lapses silently.
 - **A deploy didn't go live:** check Vercel → Deployments for the latest build
   status and error log.
 - **Images not loading:** check Cloudinary (account status, correct URLs).
-- **Committee page empty/broken:** check the Notion source and the Notion API key
-  in Vercel env vars.
 - **Contact form not sending:** check Resend (account status, `RESEND_*` env vars).
+- **Events not showing on the site:** confirm the event is **published** in Eventbrite
+  (not draft), and that `EVENT_TOKEN` / `EVENT_ORG_ID` in Vercel are still valid.
+- **Committee/sponsors page empty or broken:** check the Notion source and that
+  `NOTION_TOKEN` plus the relevant DB ID are correct in Vercel env vars.
 - **Can't log into a service:** every service uses "Continue with Google" via
   `admin@masca.org.au`. If it asks for an auth code, read it from the **Google
   Authenticator app** on the admin account's device. If that device is unavailable,
