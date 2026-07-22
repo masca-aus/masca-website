@@ -1,13 +1,16 @@
-// Sponsor logos for the homepage marquee.
+// Sponsor logos for the marquee.
 //
-// Source of truth is a Notion database. When NOTION_TOKEN and
-// NOTION_SPONSORS_DB_ID are set, `getSponsors()` queries Notion; otherwise it
-// returns an empty list (the marquee simply renders nothing).
-//
-// Notion database property names (must match exactly, case-sensitive):
-//   name  Title  — sponsor name (used as the logo's alt text)
-//   date  Date   — when they came on board; sorts newest first
-//   img   URL    — logo image URL (Cloudinary, etc.)
+// Source of truth is the Payload `sponsors` collection (edited at /admin),
+// read here through Payload's Local API — a direct DB query on the server,
+// no HTTP hop. Pages that call this stay statically rendered: the query runs
+// at build/revalidate time, never per request. afterChange/afterDelete hooks
+// on the collection call revalidatePath, so an edit in /admin shows on the
+// live site in seconds without a redeploy.
+
+import { getPayload } from "payload"
+
+import config from "@payload-config"
+import type { Sponsor as SponsorDoc } from "@/payload-types"
 
 export type Sponsor = {
   id: string
@@ -17,82 +20,31 @@ export type Sponsor = {
 }
 
 /**
- * Returns sponsors sorted by `date` (newest first). Reads from Notion when
- * configured, otherwise an empty list.
+ * Returns sponsors sorted by `date` (newest first).
  */
 export async function getSponsors(): Promise<Sponsor[]> {
-  const sponsors = await loadSponsors()
-  return sponsors.sort((a, b) => b.date.localeCompare(a.date))
+  const payload = await getPayload({ config })
+  const { docs } = await payload.find({
+    collection: "sponsors",
+    sort: "-date",
+    // A handful of sponsors at most — fetch them all.
+    pagination: false,
+    // Populate the logo relation so its Supabase Storage URL comes along.
+    depth: 1,
+  })
+  return docs.map(toSponsor)
 }
 
-// ---------------------------------------------------------------------------
-// Notion integration
-// ---------------------------------------------------------------------------
-
-async function loadSponsors(): Promise<Sponsor[]> {
-  const token = process.env.NOTION_TOKEN
-  const databaseId = process.env.NOTION_SPONSORS_DB_ID
-  if (!token || !databaseId) return []
-
-  const sponsors: Sponsor[] = []
-  let cursor: string | undefined
-
-  do {
-    const res = await fetch(
-      `https://api.notion.com/v1/databases/${databaseId}/query`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Notion-Version": "2022-06-28",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(cursor ? { start_cursor: cursor } : {}),
-        // In production, cache the response and refresh every 30 min so edits
-        // appear without a redeploy and Notion isn't hit per request. In dev,
-        // skip the cache entirely so Notion changes show on the next reload.
-        ...(process.env.NODE_ENV === "development"
-          ? { cache: "no-store" as const }
-          : { next: { revalidate: 1800 } }),
-      },
-    )
-
-    if (!res.ok) {
-      // Don't take the whole page down if Notion hiccups — log and fall back.
-      console.error(`Notion sponsors query failed: ${res.status} ${await res.text()}`)
-      return sponsors
-    }
-
-    const data = (await res.json()) as { results: NotionPage[]; has_more: boolean; next_cursor: string | null }
-    for (const page of data.results) sponsors.push(mapPage(page))
-    cursor = data.has_more ? data.next_cursor ?? undefined : undefined
-  } while (cursor)
-
-  return sponsors
-}
-
-// Minimal shapes for just the Notion property types this database uses.
-type NotionText = { plain_text: string }
-type NotionPage = {
-  id: string
-  properties: Record<string, {
-    title?: NotionText[]
-    rich_text?: NotionText[]
-    date?: { start: string } | null
-    url?: string | null
-  }>
-}
-
-function mapPage(page: NotionPage): Sponsor {
-  const p = page.properties
-  const text = (v?: NotionText[]) => (v ?? []).map((t) => t.plain_text).join("")
+/** Maps a Payload doc to the shape the marquee renders. */
+export function toSponsor(doc: SponsorDoc): Sponsor {
+  // At depth 1 the logo arrives populated; anything else (depth 0, a deleted
+  // relation) degrades to an empty img rather than a crash.
+  const logo = typeof doc.logo === "object" ? doc.logo : null
 
   return {
-    id: page.id,
-    name: text(p.name?.title),
-    // Date property, with a rich_text fallback in case it's stored as text.
-    date: p.date?.date?.start ?? text(p.date?.rich_text),
-    // URL property, with a rich_text fallback in case it's stored as text.
-    img: p.img?.url ?? text(p.img?.rich_text),
+    id: String(doc.id),
+    name: doc.name,
+    date: doc.date,
+    img: logo?.url ?? "",
   }
 }
