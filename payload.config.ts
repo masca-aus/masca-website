@@ -94,8 +94,8 @@ export default buildConfig({
         read: () => true,
       },
       defaultSort: "order",
-      // Fields mirror the shape the committee page has always rendered, but
-      // validated here so the schema cannot drift the way it could in Notion.
+      // Fields mirror the shape the committee page has always rendered, and
+      // are validated here so bad entries are rejected at save time.
       fields: [
         {
           name: "name",
@@ -177,7 +177,7 @@ export default buildConfig({
       access: {
         read: () => true,
       },
-      // Newest partners lead the marquee, same order the Notion source used.
+      // Newest partners lead the marquee.
       defaultSort: "-date",
       // Fields mirror the shape the marquee has always rendered, but the logo
       // is now an upload into Media instead of a hand-pasted URL.

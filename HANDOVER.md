@@ -7,7 +7,7 @@ website. If you are a new committee member taking over the site, **read this fir
 > (a new host, a renewed domain, a new service). A handover doc that's out of date
 > is worse than none.
 
-**Last updated:** 16/6/2026 by Jin Hong Pang
+**Last updated:** 22/7/2026 by Jin Hong Pang
 
 ---
 
@@ -20,10 +20,12 @@ The "if you only read one section" section.
 | Live site | https://masca.org.au |
 | GitHub repo | `masca-aus/masca` (owner: `jin-ramen`) |
 | Hosting | Vercel, under the `admin@masca.org.au` Google Workspace account |
+| CMS admin panel | https://masca.org.au/admin — log in with the org inbox |
+| Database & media storage | Supabase (org owned by `admin@masca.org.au`) |
 | Domain registrar | GoDaddy (renewals only) |
 | DNS | Cloudflare (records → Vercel) |
 | Domain renews | **13/10/2029** — do not let this lapse |
-| Shared credentials | Notion (in the `admin@masca.org.au` Google Workspace) — see §3 |
+| Shared credentials | Password manager vault registered to `admin@masca.org.au` — see §4 |
 | Logging in | Every service uses "Continue with Google" via `admin@masca.org.au` |
 | Current tech lead | Jin — jinhong36@icloud.com |
 
@@ -35,16 +37,68 @@ The "if you only read one section" section.
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
 - **Hosting / deploy:** Vercel (auto-deploys from the `main` branch)
-- **Contact form / email:** Resend
-- **CMS:** Payload (admin panel at `/admin`), backed by Supabase Postgres
-- **Images:** uploaded via the CMS into Supabase Storage (older pages still use Cloudinary URLs)
-- **Committee content:** Payload CMS (`/admin` → Committee)
-- **Sponsors content:** Payload CMS (`/admin` → Sponsors)
+- **CMS:** Payload — admin panel at `/admin`; committee, sponsors, and media all
+  live here
+- **Database:** Supabase Postgres (connected via the transaction-mode pooler) —
+  stores all CMS content
+- **Images:** uploaded via the CMS into Supabase Storage (older pages still use
+  Cloudinary URLs)
+- **Contact form / email:** Resend (also sends the `/admin` password-reset email)
 - **Events / ticketing:** Eventbrite (auto-syncs to the site)
+
+How content flows: committee members and sponsors are edited in the CMS at
+`/admin`, stored in Supabase Postgres, and rendered as static pages. Saving a
+change in `/admin` automatically regenerates the affected pages within seconds —
+no redeploy, no code change. Events come straight from Eventbrite's API.
 
 ---
 
-## 3. Accounts & access (the important part)
+## 3. The CMS (Payload + Supabase)
+
+### What lives where
+
+- **Payload** is the CMS — the admin panel at `/admin` with three collections:
+  **Committee**, **Sponsors**, and **Media** (image uploads).
+- **Supabase** is the infrastructure underneath: a Postgres database (all CMS
+  content) and a Storage bucket (uploaded images, served publicly).
+
+### The `/admin` account and how to recover it
+
+- There is a **single shared admin user** whose email is the org inbox,
+  `admin@masca.org.au`. Do not create admin users under personal emails.
+- **If nobody knows the password** (e.g. after a handover): go to `/admin`, click
+  **Forgot password**, and a reset email is sent — via Resend — to the
+  **`admin@masca.org.au` mailbox**. Anyone who controls the org inbox can always
+  regain access to the CMS. This is the designed recovery path, and it's why the
+  admin user's email must **always** stay the shared inbox.
+
+### Supabase free-tier pausing
+
+- On the free tier, **Supabase pauses a project after roughly a week without
+  activity**. A paused project takes the whole CMS-backed site with it: `/admin`
+  errors out, the committee page and sponsors marquee can't build, deploys fail.
+- **To unpause:** log into [supabase.com](https://supabase.com) with
+  `admin@masca.org.au` ("Continue with Google"), open the MASCA project, and click
+  **Restore** / **Resume**. It's back within a couple of minutes. Nothing is lost —
+  pausing is hibernation, not deletion.
+- Normal site traffic keeps the project awake; pausing mostly happens over long
+  quiet stretches (e.g. summer break). If the site ever looks completely broken
+  after weeks of inactivity, check this first.
+
+### The dashboard is infrastructure-only — never content
+
+> **Rule: content is only ever edited through `/admin`. The Supabase dashboard is
+> for infrastructure.** Never add, edit, or delete rows in the database tables or
+> files in the Storage bucket via the Supabase dashboard. Payload owns the
+> database schema and refreshes the site's static pages when content changes —
+> edits made behind its back can corrupt data and won't show up on the site.
+> Legitimate Supabase dashboard tasks: unpausing the project, copying the
+> connection string, managing S3 access keys, checking the Storage bucket exists
+> and is public.
+
+---
+
+## 4. Accounts & access (the important part)
 
 Everything below is **owned by MASCA, not by any individual.** The keystone is the
 `admin@masca.org.au` account — most other services log in through it.
@@ -52,15 +106,17 @@ Everything below is **owned by MASCA, not by any individual.** The keystone is t
 ### `admin@masca.org.au` (keystone account)
 - A **real mailbox** the committee controls, hosted on **Google Workspace**.
 - **Every service is signed into with "Continue with Google" using this account** —
-  GitHub, Vercel, GoDaddy, Cloudflare, Resend, Cloudinary, Notion, and Eventbrite all
-  use Google SSO rather than separate passwords. So this one account is the master key
-  to everything.
+  GitHub, Vercel, Supabase, GoDaddy, Cloudflare, Resend, Cloudinary, and Eventbrite
+  all use Google SSO rather than separate passwords. So this one account is the
+  master key to everything.
+- It also receives the `/admin` password-reset email (see §3), so holding this
+  mailbox means you can always recover the CMS.
 - **If a service prompts for a 2FA / authentication code, open the Google
   Authenticator app on the admin account's device** and read the current code from
   there. That app is the live second factor for the Google login.
-- **Backup recovery codes live in Notion** (see below) — use these if the
-  Authenticator device is lost or unavailable. If you change the 2FA device, generate
-  fresh recovery codes and update Notion immediately.
+- **Backup recovery codes live in the shared password manager** (see below) — use
+  these if the Authenticator device is lost or unavailable. If you change the 2FA
+  device, generate fresh recovery codes and update the vault immediately.
 
 ### GitHub
 - Organisation: `masca-aus`
@@ -74,6 +130,16 @@ Everything below is **owned by MASCA, not by any individual.** The keystone is t
 - Project lives under the `admin@masca.org.au` Google Workspace login on Vercel.
 - It deploys automatically when something is merged to `main` on GitHub.
 - The custom domain is attached here under Project → Settings → Domains.
+- Environment variables live here (Project → Settings → Environment Variables) —
+  this is the canonical store for the live values in the table in §5.
+
+### Supabase
+- Organisation created with the org inbox (`admin@masca.org.au`, Google SSO);
+  the tech lead's personal account may be a member, but the org must never depend
+  on it.
+- One project (region `ap-southeast-2`) holding the CMS database and the public
+  `media` Storage bucket.
+- Remember §3: infrastructure-only. Content goes through `/admin`.
 
 ### Eventbrite
 - Used for **event registration / ticketing**. Login via "Continue with Google"
@@ -83,15 +149,15 @@ Everything below is **owned by MASCA, not by any individual.** The keystone is t
   appears on the website on its own, pulled in via the Eventbrite API — no code
   change, no embed, no redeploy needed.
 - Powered by two env vars in Vercel: `EVENT_TOKEN` (API token) and `EVENT_ORG_ID`
-  (which organiser's events to pull). See the env var table in §4.
+  (which organiser's events to pull). See the env var table in §5.
 
 ### Domain & DNS
 
 Three separate pieces — don't confuse them:
 
-- **Registrar (where the domain is owned/renewed): GoDaddy.** Login stored in Notion.
-  You only touch GoDaddy to renew the domain or change nameservers.
-  Renewal date: **13/10/2029** — set a calendar reminder a month ahead.
+- **Registrar (where the domain is owned/renewed): GoDaddy.** Login via Google SSO
+  with the org inbox. You only touch GoDaddy to renew the domain or change
+  nameservers. Renewal date: **13/10/2029** — set a calendar reminder a month ahead.
 - **DNS (where records are managed): Cloudflare.** GoDaddy's nameservers point to
   Cloudflare, and the actual DNS records live in Cloudflare. **To change any DNS
   record, go to Cloudflare — not GoDaddy.**
@@ -99,22 +165,21 @@ Three separate pieces — don't confuse them:
 
 So the chain is: **GoDaddy (registrar) → Cloudflare (DNS) → Vercel (site).**
 
-### Shared credentials (Notion)
-- All logins, recovery codes, and keys live in **Notion**, inside the
-  `admin@masca.org.au` Google Workspace.
-- **Never** store these in the repo, in a chat, or in personal accounts.
-- When someone leaves the committee, rotate anything they had access to and update Notion.
-
-> **Notion is not an encrypted password vault** — it's protected only by who can
-> access the workspace/page. So: keep the credentials page restricted to current
-> committee members, **never use Notion's "Share to web"** on it, and remember that
-> anyone with access to that workspace can read everything in it. If MASCA later
-> wants stronger separation, move the most sensitive logins (the Google Workspace
-> admin password especially) into a dedicated free password manager.
+### Shared credentials (password manager)
+- All shared secrets that aren't covered by Google SSO — the Google Workspace
+  password, 2FA backup recovery codes, API keys, and copies of the env var
+  values — live in a **dedicated password manager**, in a vault registered to
+  `admin@masca.org.au`. [FILL: which password manager — e.g. Bitwarden free tier]
+- **Never** store these in the repo, in a chat, in a shared doc, or in personal
+  accounts.
+- When someone leaves the committee, rotate anything they had access to and update
+  the vault.
+- Keep vault access restricted to current committee members, and hand the vault's
+  master credentials to each year's incoming tech lead as part of handover.
 
 ---
 
-## 4. Running it locally
+## 5. Running it locally
 
 ```bash
 # 1. Clone the repo
@@ -125,8 +190,8 @@ cd masca
 npm install
 
 # 3. Set up environment variables
-#    Copy the example file and fill in real values from Notion.
-cp .env.example .env.local
+#    Create .env.local in the repo root and add the variables from the table
+#    below, with real values copied from Vercel (or the password manager).
 
 # 4. Run the dev server
 npm run dev
@@ -135,26 +200,27 @@ npm run dev
 The site should now be running at `http://localhost:3000` (or whatever the
 terminal prints).
 
-> **Env vars:** real secrets are **never** committed. They live in Notion and in
-> Vercel (Project → Settings → Environment Variables, all marked Sensitive,
-> Production + Preview). `.env.local` is gitignored — keep it that way.
+> **Env vars:** real secrets are **never** committed. They live in Vercel
+> (Project → Settings → Environment Variables, all marked Sensitive,
+> Production + Preview), with backup copies in the password manager.
+> `.env.local` is gitignored — keep it that way.
 
 ### Environment variables
 
-Every one of these is required for the site to work. Real values are in Notion and
-in Vercel — copy them into `.env.local` for local dev.
+Every one of these is required for the site to work. Real values are in Vercel —
+copy them into `.env.local` for local dev.
 
 | Variable | Used for |
 |---|---|
 | `EVENT_TOKEN` | Eventbrite API token — pulls events onto the site |
 | `EVENT_ORG_ID` | Eventbrite organiser ID — which org's events to pull |
-| `RESEND_KEY` | Resend API key — sends the contact-form email |
+| `RESEND_KEY` | Resend API key — sends the contact-form email and `/admin` password resets |
 | `PAYLOAD_SECRET` | Payload CMS secret — signs admin login tokens. Any long random string; generate once, never rotate casually (rotating logs everyone out) |
 | `DATABASE_URI` | Supabase Postgres connection string — **must** be the transaction-mode pooler string (port 6543), not the direct connection |
 | `S3_ENDPOINT` | Supabase Storage S3 endpoint — Supabase dashboard → Storage → Settings → S3 Connection (looks like `https://<project>.storage.supabase.co/storage/v1/s3`) |
 | `S3_REGION` | Supabase project region (shown next to the S3 endpoint, e.g. `ap-southeast-2`) |
 | `S3_ACCESS_KEY_ID` | Supabase Storage S3 access key — create under Storage → Settings → S3 Access Keys |
-| `S3_SECRET_ACCESS_KEY` | Secret half of the S3 access key (shown once at creation — store in Notion) |
+| `S3_SECRET_ACCESS_KEY` | Secret half of the S3 access key (shown once at creation — store in the password manager) |
 | `S3_BUCKET` | Supabase Storage bucket for CMS image uploads (default `media`). **Must be created as a _public_ bucket** in Supabase → Storage, or uploaded images won't render |
 
 If you add a new variable, set it in **both** `.env.local` and Vercel, then redeploy.
@@ -162,7 +228,7 @@ If you add a new variable, set it in **both** `.env.local` and Vercel, then rede
 
 ---
 
-## 5. How deploys work
+## 6. How deploys work
 
 1. You make changes on a branch and open a **pull request** into `main`.
 2. Someone reviews and merges it (while the committee is small, self-merge is fine).
@@ -172,8 +238,8 @@ If you add a new variable, set it in **both** `.env.local` and Vercel, then rede
 **Database migrations:** the Vercel build command must be `npm run ci` (set in the
 Vercel project settings). That runs `payload migrate` against Supabase before
 `next build`, so schema changes ship with the code that needs them. Local builds
-(`npm run build`) skip migrations, but since the committee page is prerendered
-from Payload they do need a reachable `DATABASE_URI`.
+(`npm run build`) skip migrations, but since the committee page and sponsors
+marquee are prerendered from Payload they do need a reachable `DATABASE_URI`.
 
 To preview before going live: every pull request gets its own **Vercel preview URL**
 automatically — check that link before merging.
@@ -182,7 +248,7 @@ automatically — check that link before merging.
 
 ---
 
-## 6. Common tasks
+## 7. Common tasks
 
 - **Edit text:** in the page files under `app/` — find the page you want and edit
   the copy directly.
@@ -202,35 +268,40 @@ automatically — check that link before merging.
   `admin@masca.org.au`). It appears on the website automatically via the API — nothing
   to add or deploy on the site side.
 - **Change the contact-form recipient / email:** managed through **Resend** — check
-  the API route under `app/api/` and the `RESEND_*` environment variables in Vercel.
+  `utils/email.ts` and the `RESEND_KEY` environment variable in Vercel.
 - **Add an environment variable:** add it to both your local `.env.local` **and**
   Vercel → Settings → Environment Variables, then redeploy.
 
 ---
 
-## 7. Committee handover
+## 8. Committee handover
 
 ### Onboarding a new committee member
 1. They create a personal GitHub account (or use their existing one).
 2. An org admin adds them to the `masca-aus` → `web-committee` team (Maintain role).
-3. Give them access to the Notion workspace.
+3. Give them access to the shared password manager vault.
 4. Point them at this document.
 
 ### When someone leaves
 1. Remove them from the `web-committee` team on GitHub **(DO NOT remove owner `jin-ramen`)**.
-2. Remove their Notion access.
+2. Remove their password manager vault access.
 3. **Rotate** any shared credentials they personally knew (the `admin@` Google
-   password especially), and update Notion.
+   password especially), and update the vault.
 4. Make sure no service still depends on their personal account.
 
 ### Each year's tech lead inherits
 - The `admin@masca.org.au` Google Workspace account and its recovery codes.
+- Access to the shared password manager vault.
 - Admin on the `masca-aus` GitHub org.
 - Ownership of this document — keep it current.
 
+Because `/admin`, Supabase, and every SSO login all hang off the org inbox, the
+handover itself is simple: hand over the Google Workspace account (and its 2FA),
+hand over the vault, done.
+
 ---
 
-## 8. Costs & renewals
+## 9. Costs & renewals
 
 Track anything that costs money or expires, so nothing lapses silently.
 
@@ -239,24 +310,31 @@ Track anything that costs money or expires, so nothing lapses silently.
 | Domain (GoDaddy) | MASCA | [FILL: $] | **13/10/2029** | Critical — site + email die if it lapses |
 | DNS (Cloudflare) | — | Free | n/a | Manages DNS records → Vercel |
 | Hosting (Vercel) | — | Free (Hobby) | n/a | Free tier unless upgraded |
-| Google Workspace | MASCA | [FILL: $/mo] | [FILL: date] | Hosts the `admin@` mailbox + Notion access |
-| Resend | — | [FILL: free?] | n/a | Contact-form email |
-| Cloudinary | — | [FILL: free?] | n/a | Image hosting |
-| Notion | — | [FILL: free?] | n/a | Shared credentials |
+| Database + storage (Supabase) | — | Free | n/a | Free tier; pauses when idle ~a week — see §3 |
+| Google Workspace | MASCA | [FILL: $/mo] | [FILL: date] | Hosts the `admin@` mailbox — the keystone |
+| Password manager | — | [FILL: free?] | n/a | Shared credentials vault |
+| Resend | — | [FILL: free?] | n/a | Contact-form + password-reset email |
+| Cloudinary | — | [FILL: free?] | n/a | Legacy image hosting |
 | Eventbrite | — | Free to set up | n/a | Service fees apply to paid tickets |
 
 ---
 
-## 9. If something breaks
+## 10. If something breaks
 
 - **Site is down:** check the Vercel dashboard (`admin@` account) for a failed
   build, and confirm the domain hasn't expired at GoDaddy.
 - **A deploy didn't go live:** check Vercel → Deployments for the latest build
   status and error log.
+- **Everything database-backed is erroring after a quiet period** (`/admin` down,
+  committee/sponsors broken, builds failing): the Supabase project has probably
+  **paused** on the free tier. Log into Supabase with the org inbox and restore
+  it — see §3.
+- **Can't log into `/admin`:** use **Forgot password** on the login screen; the
+  reset email arrives in the `admin@masca.org.au` inbox (via Resend) — see §3.
 - **Images not loading:** for CMS uploads, check Supabase → Storage (bucket exists,
   is **public**, and the `S3_*` env vars in Vercel are valid). For older pages,
   check Cloudinary (account status, correct URLs).
-- **Contact form not sending:** check Resend (account status, `RESEND_*` env vars).
+- **Contact form not sending:** check Resend (account status, `RESEND_KEY` env var).
 - **Events not showing on the site:** confirm the event is **published** in Eventbrite
   (not draft), and that `EVENT_TOKEN` / `EVENT_ORG_ID` in Vercel are still valid.
 - **Committee page or sponsors marquee empty or broken:** check the entries in the
@@ -265,20 +343,23 @@ Track anything that costs money or expires, so nothing lapses silently.
 - **Can't log into a service:** every service uses "Continue with Google" via
   `admin@masca.org.au`. If it asks for an auth code, read it from the **Google
   Authenticator app** on the admin account's device. If that device is unavailable,
-  use the backup recovery codes in Notion.
+  use the backup recovery codes in the password manager.
 - **Domain/email suddenly stopped:** first check **GoDaddy** for an expired or
   unpaid domain (most common cause). If the domain is fine but the site won't
   resolve, check the **DNS records in Cloudflare** — not GoDaddy.
 - **Locked out entirely:** whoever holds the `admin@` Google Workspace account and
-  the Notion workspace can recover everything. That's why those two must always be
-  committee-controlled.
+  the password manager vault can recover everything — Google SSO reopens every
+  service, and the org inbox receives the `/admin` reset email. That's why those
+  two must always be committee-controlled.
 
 ---
 
-## 10. Source of truth
+## 11. Source of truth
 
 - **Code:** `github.com/masca-aus/masca`
-- **Credentials:** Notion (never the repo)
+- **Content (committee, sponsors, images):** the CMS at `/admin` — never the
+  Supabase dashboard
+- **Credentials:** the shared password manager vault (never the repo)
 - **This document:** lives in the repo at `HANDOVER.md` — update it as things change
 
 If you change how the site is hosted, where the domain lives, or which services it

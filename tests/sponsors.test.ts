@@ -45,7 +45,7 @@ describe("sponsors collection (Payload-served marquee)", () => {
     expect("required" in logo && logo.required).toBe(true);
   });
 
-  it("is publicly readable and sorted newest first, like the old Notion source", async () => {
+  it("is publicly readable and sorted newest first", async () => {
     const sponsors = await getSponsorsCollection();
     const canRead = sponsors.access.read({ req: { user: null } } as never);
     expect(canRead).toBe(true);

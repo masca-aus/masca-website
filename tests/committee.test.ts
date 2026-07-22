@@ -48,7 +48,7 @@ describe("committee collection (Payload-served committee page)", () => {
     expect("required" in portrait && portrait.required).toBe(true);
   });
 
-  it("validates the year format so the schema cannot drift like Notion could", async () => {
+  it("validates the year format so bad terms are rejected at save time", async () => {
     const year = await getField("year");
     if (!("validate" in year) || typeof year.validate !== "function")
       throw new Error("year has no validate function");
