@@ -42,11 +42,34 @@ export function ContactSection() {
             <label htmlFor="state" className={labelClass}>
               State chapter
             </label>
-            <select id="state" name="state" defaultValue="VIC" className={fieldClass}>
-              {STATES.map((s) => (
-                <option key={s}>{s}</option>
-              ))}
-            </select>
+            {/* appearance-none lets the padding size the select like the text
+                inputs; the chevron is re-added manually since it's removed too */}
+            <div className="relative">
+              <select
+                id="state"
+                name="state"
+                defaultValue="VIC"
+                className={`${fieldClass} w-full appearance-none pr-10`}
+              >
+                {STATES.map((s) => (
+                  <option key={s}>{s}</option>
+                ))}
+              </select>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 20 20"
+                fill="none"
+                className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-700"
+              >
+                <path
+                  d="M5 8l5 5 5-5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
           </div>
         </div>
 
