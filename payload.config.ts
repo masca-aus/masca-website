@@ -19,12 +19,41 @@ const s3Bucket = process.env.S3_BUCKET || "media";
 const publicFileURL = (filename: string) =>
   `${s3Endpoint.replace(/\/s3\/?$/, "")}/object/public/${s3Bucket}/${filename}`;
 
+// Media uploads are handed straight to Supabase Storage; if the S3 env vars
+// are absent the upload path dies deep inside the AWS SDK ("Region is
+// missing") and the admin just sees a bare 500. Refuse to boot on Vercel
+// without them so the misconfiguration is caught at deploy time instead.
+if (process.env.VERCEL) {
+  const missing = [
+    "S3_ENDPOINT",
+    "S3_REGION",
+    "S3_ACCESS_KEY_ID",
+    "S3_SECRET_ACCESS_KEY",
+  ].filter((name) => !process.env[name]);
+  if (missing.length) {
+    throw new Error(
+      `Media uploads need Supabase Storage credentials, but the Vercel project is missing: ${missing.join(", ")}. Add them in Vercel → Settings → Environment Variables and redeploy.`,
+    );
+  }
+}
+
+// revalidatePath only works inside a Next request; from a script or migration
+// using the Local API there is no cache to invalidate, so skip rather than
+// fail the whole write.
+const safeRevalidatePath = (path: string) => {
+  try {
+    revalidatePath(path);
+  } catch {
+    // Outside Next (payload run scripts, migrations) — nothing to revalidate.
+  }
+};
+
 // The committee page (and the homepage yearbook teaser) are statically
 // rendered from this collection, so an edit in /admin must regenerate them
 // on the spot — no ISR timer.
 const revalidateCommitteePages = () => {
-  revalidatePath("/committee");
-  revalidatePath("/");
+  safeRevalidatePath("/committee");
+  safeRevalidatePath("/");
 };
 
 // Every page that renders the sponsors marquee is statically rendered from the
@@ -32,7 +61,7 @@ const revalidateCommitteePages = () => {
 // no ISR timer. Today the marquee only appears on the homepage; add any new
 // marquee-bearing page here.
 const revalidateSponsorPages = () => {
-  revalidatePath("/");
+  safeRevalidatePath("/");
 };
 
 // Ruthlessly minimal Payload setup (issue #3): one shared admin account in a
