@@ -1,6 +1,7 @@
 import * as migration_20260722_082958_initial from './20260722_082958_initial';
 import * as migration_20260722_093931_add_media from './20260722_093931_add_media';
 import * as migration_20260722_095429_add_committee from './20260722_095429_add_committee';
+import * as migration_20260722_100506_add_sponsors from './20260722_100506_add_sponsors';
 
 export const migrations = [
   {
@@ -16,6 +17,11 @@ export const migrations = [
   {
     up: migration_20260722_095429_add_committee.up,
     down: migration_20260722_095429_add_committee.down,
-    name: '20260722_095429_add_committee'
+    name: '20260722_095429_add_committee',
+  },
+  {
+    up: migration_20260722_100506_add_sponsors.up,
+    down: migration_20260722_100506_add_sponsors.down,
+    name: '20260722_100506_add_sponsors'
   },
 ];

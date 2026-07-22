@@ -17,12 +17,16 @@ export default function SponsorsSection({ sponsors }: { sponsors: Sponsor[] }) {
         </p>
       </div>
 
-      {/* Full-bleed logo marquee; edge fades melt the rail into the section */}
-      <div className="relative my-12">
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-gray-100 to-transparent md:w-32" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-gray-100 to-transparent md:w-32" />
-        <SponsorsMarquee sponsors={sponsors} />
-      </div>
+      {sponsors.length > 0 ? (
+        /* Full-bleed logo marquee; edge fades melt the rail into the section */
+        <div className="relative my-12">
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-gray-100 to-transparent md:w-32" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-gray-100 to-transparent md:w-32" />
+          <SponsorsMarquee sponsors={sponsors} />
+        </div>
+      ) : (
+        <EmptyMarquee />
+      )}
 
       <div className="container flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="font-secondary text-lg italic text-blue-600">
@@ -33,5 +37,21 @@ export default function SponsorsSection({ sponsors }: { sponsors: Sponsor[] }) {
         </Button>
       </div>
     </section>
+  );
+}
+
+// The collection starts empty — better an honest joke than fake logos.
+function EmptyMarquee() {
+  return (
+    <div className="container my-12 flex flex-col items-center gap-4 py-8 text-center">
+      <span className="font-accent text-3xl leading-tight text-red-600 -rotate-2 md:text-4xl">
+        sponsor slot open &mdash; inquire within!
+      </span>
+      <p className="max-w-md text-gray-700">
+        This marquee is warmed up and ready to scroll, but the logos haven&rsquo;t
+        arrived yet. Your brand could be doing laps across it right now &mdash;
+        picture it gliding past, freshly fed on nasi lemak.
+      </p>
+    </div>
   );
 }

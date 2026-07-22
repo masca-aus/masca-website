@@ -76,7 +76,7 @@ export default function SponsorsMarquee({ sponsors }: { sponsors: Sponsor[] }) {
     >
       <div className="rail flex gap-16">
         {loopItems.map((sponsor, i) => (
-          // Plain <img>: sponsor logos are remote (Notion/Cloudinary) URLs, so
+          // Plain <img>: sponsor logos are remote (Supabase Storage) URLs, so
           // this avoids configuring next.config images.remotePatterns.
           // eslint-disable-next-line @next/next/no-img-element
           <img

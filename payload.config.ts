@@ -27,13 +27,21 @@ const revalidateCommitteePages = () => {
   revalidatePath("/");
 };
 
+// Every page that renders the sponsors marquee is statically rendered from the
+// sponsors collection, so an edit in /admin must regenerate them on the spot —
+// no ISR timer. Today the marquee only appears on the homepage; add any new
+// marquee-bearing page here.
+const revalidateSponsorPages = () => {
+  revalidatePath("/");
+};
+
 // Ruthlessly minimal Payload setup (issue #3): one shared admin account in a
 // single auth collection. No roles, drafts/versions, or extra collections.
 // Supabase is a dumb Postgres host reached through the transaction-mode
 // pooler — no Supabase Auth/RLS/JS client anywhere. Media uploads (issue #4)
 // go to Supabase Storage via its S3-compatible API. The committee directory
-// (issue #5) lives in the `committee` collection and is read by the public
-// site through the Local API.
+// (issue #5) and the sponsors marquee (issue #6) live in the `committee` and
+// `sponsors` collections and are read by the public site through the Local API.
 export default buildConfig({
   admin: {
     user: "users",
@@ -156,6 +164,51 @@ export default buildConfig({
       hooks: {
         afterChange: [revalidateCommitteePages],
         afterDelete: [revalidateCommitteePages],
+      },
+    },
+    {
+      slug: "sponsors",
+      admin: {
+        useAsTitle: "name",
+        defaultColumns: ["name", "date"],
+      },
+      // Anyone may read (the public site renders the marquee from this
+      // collection); only the logged-in admin can create/update/delete.
+      access: {
+        read: () => true,
+      },
+      // Newest partners lead the marquee, same order the Notion source used.
+      defaultSort: "-date",
+      // Fields mirror the shape the marquee has always rendered, but the logo
+      // is now an upload into Media instead of a hand-pasted URL.
+      fields: [
+        {
+          name: "name",
+          type: "text",
+          required: true,
+          admin: {
+            description: "Sponsor name — doubles as the logo's alt text.",
+          },
+        },
+        {
+          name: "logo",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+        },
+        {
+          name: "date",
+          type: "date",
+          required: true,
+          admin: {
+            description:
+              "When they came on board — newest sponsors lead the marquee.",
+          },
+        },
+      ],
+      hooks: {
+        afterChange: [revalidateSponsorPages],
+        afterDelete: [revalidateSponsorPages],
       },
     },
   ],

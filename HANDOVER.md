@@ -39,7 +39,7 @@ The "if you only read one section" section.
 - **CMS:** Payload (admin panel at `/admin`), backed by Supabase Postgres
 - **Images:** uploaded via the CMS into Supabase Storage (older pages still use Cloudinary URLs)
 - **Committee content:** Payload CMS (`/admin` → Committee)
-- **Sponsors content:** Notion
+- **Sponsors content:** Payload CMS (`/admin` → Sponsors)
 - **Events / ticketing:** Eventbrite (auto-syncs to the site)
 
 ---
@@ -149,8 +149,6 @@ in Vercel — copy them into `.env.local` for local dev.
 | `EVENT_TOKEN` | Eventbrite API token — pulls events onto the site |
 | `EVENT_ORG_ID` | Eventbrite organiser ID — which org's events to pull |
 | `RESEND_KEY` | Resend API key — sends the contact-form email |
-| `NOTION_TOKEN` | Notion integration token — reads sponsors content |
-| `NOTION_SPONSORS_DB_ID` | Notion database ID for the sponsors page |
 | `PAYLOAD_SECRET` | Payload CMS secret — signs admin login tokens. Any long random string; generate once, never rotate casually (rotating logs everyone out) |
 | `DATABASE_URI` | Supabase Postgres connection string — **must** be the transaction-mode pooler string (port 6543), not the direct connection |
 | `S3_ENDPOINT` | Supabase Storage S3 endpoint — Supabase dashboard → Storage → Settings → S3 Connection (looks like `https://<project>.storage.supabase.co/storage/v1/s3`) |
@@ -197,8 +195,9 @@ automatically — check that link before merging.
 - **Update the committee page:** edit members in the CMS at **`/admin` → Committee**
   (portraits come from **`/admin` → Media**). Changes appear on the live site within
   seconds — no redeploy, no code change.
-- **Update the sponsors page:** edit the source in **Notion** (see
-  `NOTION_SPONSORS_DB_ID`). The site pulls from there; no code change needed.
+- **Update the sponsors marquee:** edit sponsors in the CMS at **`/admin` → Sponsors**
+  (logos come from **`/admin` → Media**). Changes appear on the live site within
+  seconds — no redeploy, no code change.
 - **Create or manage an event:** publish it in **Eventbrite** (logged in via Google as
   `admin@masca.org.au`). It appears on the website automatically via the API — nothing
   to add or deploy on the site side.
@@ -243,7 +242,7 @@ Track anything that costs money or expires, so nothing lapses silently.
 | Google Workspace | MASCA | [FILL: $/mo] | [FILL: date] | Hosts the `admin@` mailbox + Notion access |
 | Resend | — | [FILL: free?] | n/a | Contact-form email |
 | Cloudinary | — | [FILL: free?] | n/a | Image hosting |
-| Notion | — | [FILL: free?] | n/a | Credentials + committee page |
+| Notion | — | [FILL: free?] | n/a | Shared credentials |
 | Eventbrite | — | Free to set up | n/a | Service fees apply to paid tickets |
 
 ---
@@ -260,8 +259,9 @@ Track anything that costs money or expires, so nothing lapses silently.
 - **Contact form not sending:** check Resend (account status, `RESEND_*` env vars).
 - **Events not showing on the site:** confirm the event is **published** in Eventbrite
   (not draft), and that `EVENT_TOKEN` / `EVENT_ORG_ID` in Vercel are still valid.
-- **Committee/sponsors page empty or broken:** check the Notion source and that
-  `NOTION_TOKEN` plus the relevant DB ID are correct in Vercel env vars.
+- **Committee page or sponsors marquee empty or broken:** check the entries in the
+  CMS at `/admin`, and that `DATABASE_URI` in Vercel is valid (the site renders both
+  from Payload).
 - **Can't log into a service:** every service uses "Continue with Google" via
   `admin@masca.org.au`. If it asks for an auth code, read it from the **Google
   Authenticator app** on the admin account's device. If that device is unavailable,
