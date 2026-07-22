@@ -4,8 +4,9 @@ import { getCommittee, getCommitteeYears } from "@/utils/committee"
 import YearbookStack from "./yearbookStack"
 
 export default async function YearbookSection() {
-  // Reuses the same cached Notion response as /committee (revalidate: 30min in
-  // utils/committee.ts), so this teaser doesn't cost an extra API call.
+  // Same Payload Local API query as /committee, run at build/revalidate time.
+  // The committee collection's hooks revalidate this page too, so the teaser
+  // never goes stale.
   const members = await getCommittee()
   const years = getCommitteeYears(members) // newest-first
   const latestYear = years[0]

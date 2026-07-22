@@ -1,6 +1,8 @@
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { revalidatePath } from "next/cache";
+
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { resendAdapter } from "@payloadcms/email-resend";
 import { s3Storage } from "@payloadcms/storage-s3";
@@ -17,11 +19,21 @@ const s3Bucket = process.env.S3_BUCKET || "media";
 const publicFileURL = (filename: string) =>
   `${s3Endpoint.replace(/\/s3\/?$/, "")}/object/public/${s3Bucket}/${filename}`;
 
+// The committee page (and the homepage yearbook teaser) are statically
+// rendered from this collection, so an edit in /admin must regenerate them
+// on the spot — no ISR timer.
+const revalidateCommitteePages = () => {
+  revalidatePath("/committee");
+  revalidatePath("/");
+};
+
 // Ruthlessly minimal Payload setup (issue #3): one shared admin account in a
 // single auth collection. No roles, drafts/versions, or extra collections.
 // Supabase is a dumb Postgres host reached through the transaction-mode
 // pooler — no Supabase Auth/RLS/JS client anywhere. Media uploads (issue #4)
-// go to Supabase Storage via its S3-compatible API.
+// go to Supabase Storage via its S3-compatible API. The committee directory
+// (issue #5) lives in the `committee` collection and is read by the public
+// site through the Local API.
 export default buildConfig({
   admin: {
     user: "users",
@@ -60,6 +72,90 @@ export default buildConfig({
         // Crop/focal-point UIs need sharp, which we deliberately don't ship.
         crop: false,
         focalPoint: false,
+      },
+    },
+    {
+      slug: "committee",
+      admin: {
+        useAsTitle: "name",
+        defaultColumns: ["name", "role", "year", "order"],
+      },
+      // Anyone may read (the public site renders from this collection); only
+      // the logged-in admin can create/update/delete.
+      access: {
+        read: () => true,
+      },
+      defaultSort: "order",
+      // Fields mirror the shape the committee page has always rendered, but
+      // validated here so the schema cannot drift the way it could in Notion.
+      fields: [
+        {
+          name: "name",
+          type: "text",
+          required: true,
+        },
+        {
+          name: "role",
+          type: "text",
+          required: true,
+          admin: {
+            description: 'Committee position, e.g. "President".',
+          },
+        },
+        {
+          name: "portrait",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+        },
+        {
+          name: "year",
+          type: "text",
+          required: true,
+          validate: (value: string | null | undefined) =>
+            /^\d{4}\/\d{4}$/.test(value ?? "") ||
+            'Year must be a committee term like "2026/2027".',
+          admin: {
+            description:
+              'Committee term, e.g. "2026/2027" — drives the year tabs on the page.',
+          },
+        },
+        {
+          name: "order",
+          type: "number",
+          required: true,
+          admin: {
+            description:
+              "Sort position within the year's grid (1 = first). Lower numbers appear first.",
+          },
+        },
+        {
+          name: "linkedin_url",
+          type: "text",
+          validate: (value: string | null | undefined) => {
+            if (!value) return true;
+            try {
+              return (
+                new URL(value).protocol === "https:" ||
+                "LinkedIn URL must start with https://"
+              );
+            } catch {
+              return "Must be a full URL, e.g. https://www.linkedin.com/in/…";
+            }
+          },
+        },
+        {
+          name: "bio",
+          type: "textarea",
+          required: true,
+          admin: {
+            description: "Shown in the expanded modal on the committee page.",
+          },
+        },
+      ],
+      hooks: {
+        afterChange: [revalidateCommitteePages],
+        afterDelete: [revalidateCommitteePages],
       },
     },
   ],

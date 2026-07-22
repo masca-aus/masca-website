@@ -4,10 +4,10 @@ import { pageMetadata } from "@/utils/seo";
 import { getCommittee, getCommitteeYears } from "@/utils/committee";
 import CommitteeSection from "./CommitteeSection";
 
-// Statically render the page and regenerate it at most once every 30 minutes
-// (ISR). Visitors get instant cached HTML; Notion is only queried in the
-// background when the cache goes stale.
-export const revalidate = 1800;
+// Statically rendered: Payload is queried once at build time (no per-request
+// DB query). afterChange/afterDelete hooks on the committee collection call
+// revalidatePath, so an edit in /admin regenerates this page in seconds — no
+// ISR timer needed.
 
 export const metadata: Metadata = pageMetadata({
   title: "Committee",
@@ -35,7 +35,29 @@ export default async function CommitteePage() {
         </div>
       </section>
 
-      <CommitteeSection members={members} years={years} />
+      {members.length > 0 ? (
+        <CommitteeSection members={members} years={years} />
+      ) : (
+        <EmptyYearbook />
+      )}
     </main>
+  );
+}
+
+// The collection starts empty — better an honest joke than fabricated people.
+function EmptyYearbook() {
+  return (
+    <section>
+      <div className="container flex flex-col items-center gap-6 py-32 text-center">
+        <span className="font-accent text-3xl leading-tight text-red-600 -rotate-2 md:text-4xl">
+          nobody&rsquo;s signed the yearbook yet!
+        </span>
+        <p className="max-w-md text-gray-700">
+          The committee portraits are still at the printers. Once the new team
+          is sworn in, their faces appear here — ties straightened, smiles
+          rehearsed, ready to make a big country feel a little smaller.
+        </p>
+      </div>
+    </section>
   );
 }

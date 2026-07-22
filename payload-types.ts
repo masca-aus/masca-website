@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    committee: Committee;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +79,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    committee: CommitteeSelect<false> | CommitteeSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -161,6 +163,34 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "committee".
+ */
+export interface Committee {
+  id: number;
+  name: string;
+  /**
+   * Committee position, e.g. "President".
+   */
+  role: string;
+  portrait: number | Media;
+  /**
+   * Committee term, e.g. "2026/2027" — drives the year tabs on the page.
+   */
+  year: string;
+  /**
+   * Sort position within the year's grid (1 = first). Lower numbers appear first.
+   */
+  order: number;
+  linkedin_url?: string | null;
+  /**
+   * Shown in the expanded modal on the committee page.
+   */
+  bio: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -190,6 +220,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'committee';
+        value: number | Committee;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -270,6 +304,21 @@ export interface MediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "committee_select".
+ */
+export interface CommitteeSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  portrait?: T;
+  year?: T;
+  order?: T;
+  linkedin_url?: T;
+  bio?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -38,7 +38,8 @@ The "if you only read one section" section.
 - **Contact form / email:** Resend
 - **CMS:** Payload (admin panel at `/admin`), backed by Supabase Postgres
 - **Images:** uploaded via the CMS into Supabase Storage (older pages still use Cloudinary URLs)
-- **Committee & sponsors content:** Notion
+- **Committee content:** Payload CMS (`/admin` → Committee)
+- **Sponsors content:** Notion
 - **Events / ticketing:** Eventbrite (auto-syncs to the site)
 
 ---
@@ -148,8 +149,7 @@ in Vercel — copy them into `.env.local` for local dev.
 | `EVENT_TOKEN` | Eventbrite API token — pulls events onto the site |
 | `EVENT_ORG_ID` | Eventbrite organiser ID — which org's events to pull |
 | `RESEND_KEY` | Resend API key — sends the contact-form email |
-| `NOTION_TOKEN` | Notion integration token — reads committee + sponsors content |
-| `NOTION_COMMITTEE_DB_ID` | Notion database ID for the committee page |
+| `NOTION_TOKEN` | Notion integration token — reads sponsors content |
 | `NOTION_SPONSORS_DB_ID` | Notion database ID for the sponsors page |
 | `PAYLOAD_SECRET` | Payload CMS secret — signs admin login tokens. Any long random string; generate once, never rotate casually (rotating logs everyone out) |
 | `DATABASE_URI` | Supabase Postgres connection string — **must** be the transaction-mode pooler string (port 6543), not the direct connection |
@@ -173,8 +173,9 @@ If you add a new variable, set it in **both** `.env.local` and Vercel, then rede
 
 **Database migrations:** the Vercel build command must be `npm run ci` (set in the
 Vercel project settings). That runs `payload migrate` against Supabase before
-`next build`, so schema changes ship with the code that needs them. Plain local
-builds (`npm run build`) skip migrations and don't need a database.
+`next build`, so schema changes ship with the code that needs them. Local builds
+(`npm run build`) skip migrations, but since the committee page is prerendered
+from Payload they do need a reachable `DATABASE_URI`.
 
 To preview before going live: every pull request gets its own **Vercel preview URL**
 automatically — check that link before merging.
@@ -193,9 +194,11 @@ automatically — check that link before merging.
   Don't commit large image files into the repo.
 - **Add a new page:** create a new folder under `app/` with a `page.tsx` inside
   (App Router convention) — copy an existing page as a template.
-- **Update the committee or sponsors page:** edit the source in **Notion** (separate
-  databases — see `NOTION_COMMITTEE_DB_ID` and `NOTION_SPONSORS_DB_ID`). The site
-  pulls from there; no code change needed.
+- **Update the committee page:** edit members in the CMS at **`/admin` → Committee**
+  (portraits come from **`/admin` → Media**). Changes appear on the live site within
+  seconds — no redeploy, no code change.
+- **Update the sponsors page:** edit the source in **Notion** (see
+  `NOTION_SPONSORS_DB_ID`). The site pulls from there; no code change needed.
 - **Create or manage an event:** publish it in **Eventbrite** (logged in via Google as
   `admin@masca.org.au`). It appears on the website automatically via the API — nothing
   to add or deploy on the site side.

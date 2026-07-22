@@ -9,13 +9,13 @@ describe("payload config", () => {
     expect(config.admin.user).toBe("users");
   });
 
-  it("defines exactly two collections: auth-enabled users and media uploads", async () => {
+  it("defines exactly three collections: auth-enabled users, media uploads, committee", async () => {
     const config = await configPromise;
     // Sanitization adds Payload-internal collections (payload-preferences,
-    // payload-migrations, ...); beyond those there must only be `users` and
-    // `media` (issue #4).
+    // payload-migrations, ...); beyond those there must only be `users`,
+    // `media` (issue #4) and `committee` (issue #5).
     const ours = config.collections.filter((c) => !c.slug.startsWith("payload-"));
-    expect(ours.map((c) => c.slug).sort()).toEqual(["media", "users"]);
+    expect(ours.map((c) => c.slug).sort()).toEqual(["committee", "media", "users"]);
     const users = ours.find((c) => c.slug === "users");
     expect(users?.auth).toBeTruthy();
     expect(users?.auth.disableLocalStrategy).toBeFalsy();
