@@ -248,6 +248,12 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URI,
     },
     migrationDir: path.resolve(dirname, "migrations"),
+    // Local dev points at the SAME production database, so dev mode must never
+    // push schema changes directly: a push stamps a `dev` row into
+    // payload_migrations, and the next `payload migrate` on Vercel hangs on an
+    // interactive data-loss prompt. Schema changes go through
+    // `payload migrate:create` + `payload migrate` instead.
+    push: false,
   }),
   email: resendAdapter({
     apiKey: process.env.RESEND_KEY || "",
