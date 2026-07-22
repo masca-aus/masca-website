@@ -36,12 +36,10 @@ The "if you only read one section" section.
 - **Styling:** Tailwind CSS
 - **Hosting / deploy:** Vercel (auto-deploys from the `main` branch)
 - **Contact form / email:** Resend
-- **Images:** Cloudinary
+- **CMS:** Payload (admin panel at `/admin`), backed by Supabase Postgres
+- **Images:** uploaded via the CMS into Supabase Storage (older pages still use Cloudinary URLs)
 - **Committee & sponsors content:** Notion
 - **Events / ticketing:** Eventbrite (auto-syncs to the site)
-
-There's no database or custom backend — content comes from the codebase, with
-images served from Cloudinary and the committee page sourced from Notion.
 
 ---
 
@@ -155,6 +153,11 @@ in Vercel — copy them into `.env.local` for local dev.
 | `NOTION_SPONSORS_DB_ID` | Notion database ID for the sponsors page |
 | `PAYLOAD_SECRET` | Payload CMS secret — signs admin login tokens. Any long random string; generate once, never rotate casually (rotating logs everyone out) |
 | `DATABASE_URI` | Supabase Postgres connection string — **must** be the transaction-mode pooler string (port 6543), not the direct connection |
+| `S3_ENDPOINT` | Supabase Storage S3 endpoint — Supabase dashboard → Storage → Settings → S3 Connection (looks like `https://<project>.storage.supabase.co/storage/v1/s3`) |
+| `S3_REGION` | Supabase project region (shown next to the S3 endpoint, e.g. `ap-southeast-2`) |
+| `S3_ACCESS_KEY_ID` | Supabase Storage S3 access key — create under Storage → Settings → S3 Access Keys |
+| `S3_SECRET_ACCESS_KEY` | Secret half of the S3 access key (shown once at creation — store in Notion) |
+| `S3_BUCKET` | Supabase Storage bucket for CMS image uploads (default `media`). **Must be created as a _public_ bucket** in Supabase → Storage, or uploaded images won't render |
 
 If you add a new variable, set it in **both** `.env.local` and Vercel, then redeploy.
 (Check Vercel for any additional variables not listed here.)
@@ -184,8 +187,10 @@ automatically — check that link before merging.
 
 - **Edit text:** in the page files under `app/` — find the page you want and edit
   the copy directly.
-- **Add or change images:** upload to **Cloudinary**, then reference the Cloudinary
-  URL in the page. Don't commit large image files into the repo.
+- **Add or change images:** upload them in the CMS at **`/admin` → Media** — files
+  land in the public Supabase Storage `media` bucket and each entry gets a permanent
+  URL. (Older pages still reference **Cloudinary** URLs directly; that keeps working.)
+  Don't commit large image files into the repo.
 - **Add a new page:** create a new folder under `app/` with a `page.tsx` inside
   (App Router convention) — copy an existing page as a template.
 - **Update the committee or sponsors page:** edit the source in **Notion** (separate
@@ -246,7 +251,9 @@ Track anything that costs money or expires, so nothing lapses silently.
   build, and confirm the domain hasn't expired at GoDaddy.
 - **A deploy didn't go live:** check Vercel → Deployments for the latest build
   status and error log.
-- **Images not loading:** check Cloudinary (account status, correct URLs).
+- **Images not loading:** for CMS uploads, check Supabase → Storage (bucket exists,
+  is **public**, and the `S3_*` env vars in Vercel are valid). For older pages,
+  check Cloudinary (account status, correct URLs).
 - **Contact form not sending:** check Resend (account status, `RESEND_*` env vars).
 - **Events not showing on the site:** confirm the event is **published** in Eventbrite
   (not draft), and that `EVENT_TOKEN` / `EVENT_ORG_ID` in Vercel are still valid.

@@ -9,16 +9,16 @@ describe("payload config", () => {
     expect(config.admin.user).toBe("users");
   });
 
-  it("defines exactly one collection: auth-enabled users with local (password) strategy", async () => {
+  it("defines exactly two collections: auth-enabled users and media uploads", async () => {
     const config = await configPromise;
     // Sanitization adds Payload-internal collections (payload-preferences,
-    // payload-migrations, ...); beyond those there must only be `users`.
+    // payload-migrations, ...); beyond those there must only be `users` and
+    // `media` (issue #4).
     const ours = config.collections.filter((c) => !c.slug.startsWith("payload-"));
-    expect(ours).toHaveLength(1);
-    const users = ours[0];
-    expect(users.slug).toBe("users");
-    expect(users.auth).toBeTruthy();
-    expect(users.auth.disableLocalStrategy).toBeFalsy();
+    expect(ours.map((c) => c.slug).sort()).toEqual(["media", "users"]);
+    const users = ours.find((c) => c.slug === "users");
+    expect(users?.auth).toBeTruthy();
+    expect(users?.auth.disableLocalStrategy).toBeFalsy();
   });
 
   it("uses the Postgres adapter fed by DATABASE_URI (Supabase pooler)", async () => {
