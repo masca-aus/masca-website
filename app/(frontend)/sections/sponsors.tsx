@@ -1,5 +1,5 @@
 import Button from "@/components/Button";
-import SponsorsMarquee from "@/app/sections/SponsorsMarquee";
+import SponsorsMarquee from "@/app/(frontend)/sections/SponsorsMarquee";
 import type { Sponsor } from "@/utils/sponsors";
 
 export default function SponsorsSection({ sponsors }: { sponsors: Sponsor[] }) {

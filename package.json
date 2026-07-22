@@ -5,16 +5,27 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "ci": "payload migrate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "payload": "payload",
+    "generate:types": "payload generate:types",
+    "generate:importmap": "payload generate:importmap",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@payloadcms/db-postgres": "3.86.0",
+    "@payloadcms/email-resend": "3.86.0",
+    "@payloadcms/next": "3.86.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
+    "graphql": "16.14.2",
     "gsap": "^3.15.0",
     "lucide-react": "^1.17.0",
     "next": "16.2.6",
+    "payload": "3.86.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.12.4",
@@ -29,6 +40,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }

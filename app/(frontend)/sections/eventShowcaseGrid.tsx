@@ -4,7 +4,7 @@ import { useMemo, useRef } from "react"
 import { gsap } from "gsap"
 import { useGSAP } from "@gsap/react"
 
-import EventCard from "@/app/events/EventCard"
+import EventCard from "@/app/(frontend)/events/EventCard"
 import type { Chapter, Event } from "@/utils/events"
 
 export default function EventShowcaseGrid({

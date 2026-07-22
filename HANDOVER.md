@@ -153,6 +153,8 @@ in Vercel — copy them into `.env.local` for local dev.
 | `NOTION_TOKEN` | Notion integration token — reads committee + sponsors content |
 | `NOTION_COMMITTEE_DB_ID` | Notion database ID for the committee page |
 | `NOTION_SPONSORS_DB_ID` | Notion database ID for the sponsors page |
+| `PAYLOAD_SECRET` | Payload CMS secret — signs admin login tokens. Any long random string; generate once, never rotate casually (rotating logs everyone out) |
+| `DATABASE_URI` | Supabase Postgres connection string — **must** be the transaction-mode pooler string (port 6543), not the direct connection |
 
 If you add a new variable, set it in **both** `.env.local` and Vercel, then redeploy.
 (Check Vercel for any additional variables not listed here.)
@@ -165,6 +167,11 @@ If you add a new variable, set it in **both** `.env.local` and Vercel, then rede
 2. Someone reviews and merges it (while the committee is small, self-merge is fine).
 3. Merging to `main` triggers Vercel to build and deploy automatically.
 4. Within a minute or two, the live site updates. No manual deploy step.
+
+**Database migrations:** the Vercel build command must be `npm run ci` (set in the
+Vercel project settings). That runs `payload migrate` against Supabase before
+`next build`, so schema changes ship with the code that needs them. Plain local
+builds (`npm run build`) skip migrations and don't need a database.
 
 To preview before going live: every pull request gets its own **Vercel preview URL**
 automatically — check that link before merging.
