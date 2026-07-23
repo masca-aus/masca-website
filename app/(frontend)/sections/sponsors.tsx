@@ -4,11 +4,12 @@ import type { Sponsor } from "@/utils/sponsors";
 
 export default function SponsorsSection({ sponsors }: { sponsors: Sponsor[] }) {
   return (
-    <section className="bg-gray-100 py-24 md:py-28">
+    // Padding sits on the section (not .container) so the marquee stays full-bleed.
+    <section className="bg-gray-100 section-pad">
       <div className="container flex flex-col gap-4">
         <header className="flex flex-col gap-4">
           <span className="eyebrow text-red-600">Powered by our partners</span>
-          <span className="title text-blue-600">Our Sponsors</span>
+          <h2 className="title text-blue-600">Our Sponsors</h2>
         </header>
 
         <p className="text-gray-700">

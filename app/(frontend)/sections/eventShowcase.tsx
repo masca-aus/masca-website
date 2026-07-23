@@ -10,10 +10,10 @@ export default async function EventShowcaseSection() {
 
   return (
     <section>
-      <div className="flex flex-col gap-8 container py-16">
+      <div className="flex flex-col gap-8 container section-pad">
         <header className="flex flex-col gap-4">
           <span className="eyebrow text-red-600">What&apos;s on kawan-kawan</span>
-          <span className="title text-blue-600">Upcoming Events</span>
+          <h2 className="title text-blue-600">Upcoming Events</h2>
         </header>
 
         <p className="text-gray-700">

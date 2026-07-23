@@ -19,13 +19,13 @@ export default async function YearbookSection() {
 
   return (
     <section className="bg-yellow-50">
-      <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-24 lg:gap-16 py-32">
+      <div className="container section-pad grid grid-cols-1 lg:grid-cols-2 items-center gap-24 lg:gap-16">
 
         {/* Left: the pitch */}
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
             <span className="eyebrow text-red-600">The Yearbook</span>
-            <span className="title text-blue-600">The Class of {latestYear}</span>
+            <h2 className="title text-blue-600">The Class of {latestYear}</h2>
           </header>
 
           <p className="font-secondary text-blue-600 italic text-xl leading-snug">

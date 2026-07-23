@@ -43,13 +43,13 @@ export default function FollowUsSection() {
 
   return (
     <section ref={sectionRef} className="bg-blue-50">
-      <div className="container grid grid-cols-1 items-center gap-16 py-20 md:py-28 lg:grid-cols-2 lg:py-32">
+      <div className="container section-pad grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
 
         {/* Left: the pitch */}
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
             <span className="eyebrow text-red-600">@masca_national</span>
-            <span className="title text-blue-600">See the community, every day</span>
+            <h2 className="title text-blue-600">See the community, every day</h2>
           </header>
 
           <p className="text-gray-700">
@@ -94,9 +94,15 @@ export default function FollowUsSection() {
                 <span className="text-caption text-gray-700">Malaysian Students&apos; Council of Australia</span>
               </div>
 
-              <span className="rounded-pill bg-blue-600 px-4 py-1.5 text-caption font-bold text-white">
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow masca_national on Instagram"
+                className="rounded-pill bg-blue-600 px-4 py-1.5 text-caption font-bold text-white transition-colors hover:bg-blue-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              >
                 Follow
-              </span>
+              </a>
             </div>
 
             {/* Feed grid */}

@@ -110,6 +110,20 @@ p {
   line-height: 1.2;
 }
 
+/* Shared vertical rhythm for landing sections: breathes at 80px on mobile,
+   grows to 128px on desktop. Keep sections on this instead of ad-hoc py-*. */
+.section-pad {
+  padding-block: 5rem;    /* py-20 */
+}
+
+@media (min-width: 48rem) {   /* md */
+  .section-pad { padding-block: 7rem; }   /* py-28 */
+}
+
+@media (min-width: 64rem) {   /* lg */
+  .section-pad { padding-block: 8rem; }   /* py-32 */
+}
+
 .container {
   width: 100%;
   max-width: 88rem;       /* max-w-300 */

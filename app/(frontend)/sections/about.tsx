@@ -53,14 +53,14 @@ export default function AboutSection() {
 
   return (
     <section ref={sectionRef}>
-      <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-16 py-32">
+      <div className="container section-pad grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
 
         {/* Right (desktop): the message — flipped from the usual text-left
             rhythm to break the page's repetition. Stays first on mobile. */}
         <div className="flex flex-col gap-6 lg:order-2">
           <header className="flex flex-col gap-3">
             <span className="eyebrow text-red-600">Who we are</span>
-            <span className="title text-blue-600">Beyond the bubble</span>
+            <h2 className="title text-blue-600">Beyond the bubble</h2>
           </header>
 
           <figure className="flex flex-col gap-2">

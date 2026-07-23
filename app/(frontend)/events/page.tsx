@@ -15,7 +15,7 @@ export default async function EventPage() {
   const events = await getUpcomingEvents();
 
   return (
-    <main>
+    <main id="main">
       <section className="flex flex-col justify-center bg-blue-600 pt-48 pb-32 min-h-80">
         <div className="container flex flex-col gap-24 max-w-2xl space-y-4">
           <span className="text-xs font-bold tracking-widest text-yellow-400 uppercase">

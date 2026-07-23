@@ -25,14 +25,14 @@ export default function StatesSection() {
 
   return (
     <section className="bg-gray-100">
-      <div className="container py-32 flex flex-col gap-8">
+      <div className="container section-pad flex flex-col gap-8">
 
         <header className="flex flex-col gap-4">
           <span className="eyebrow text-red-600">Chapters across australia</span>
-          <span className="title text-blue-600">Find your state, find your people</span>
+          <h2 className="title text-blue-600">Find your state, find your people</h2>
         </header>
 
-        <p className="text-gray-700">Each chapter is run by student leaders on the ground — pick yours to see local events, welfare contacts, and how to get involved.</p>
+        <p className="text-gray-700">Each chapter is run by student leaders on the ground — local events, welfare contacts, and ways to get involved, wherever you land.</p>
 
         {/* state boxes */}
         <div
@@ -86,7 +86,8 @@ function StateCard({ state }: { state: State }) {
         ref={cardRef}
         onMouseEnter={() => tl.current?.play()}
         onMouseLeave={() => tl.current?.reverse()}
-        className="relative h-full overflow-hidden flex flex-col bg-white border border-gray-300 rounded-lg p-4 cursor-pointer shadow-sm"
+        // No cursor-pointer: the card isn't a link (yet) — the hover is just play.
+        className="relative h-full overflow-hidden flex flex-col bg-white border border-gray-300 rounded-lg p-4 shadow-sm"
       >
         <NorthStar color={state.bg} className="absolute bottom-1 -right-2 h-12 w-12 opacity-50" />
         <span className="card-text text-h2 font-extrabold text-blue-600">{state.code}</span>

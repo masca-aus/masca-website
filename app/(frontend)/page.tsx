@@ -40,7 +40,7 @@ export default async function Home() {
   const sponsors = await getSponsors();
 
   return (
-   <main>
+   <main id="main">
       <HeroSection upcomingEvent={<UpcomingEvent />} />
       <AboutSection />
       <YearbookSection />

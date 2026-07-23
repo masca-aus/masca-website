@@ -41,7 +41,8 @@ export default async function UpcomingEvent() {
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={event.logo.url}
-          alt={event.name.text}
+          // Decorative: the event name is announced right below the banner.
+          alt=""
           className="h-32 w-full object-cover"
         />
       )}
@@ -55,11 +56,15 @@ export default async function UpcomingEvent() {
           </span>
           <span className="text-caption text-gray-300">Hosted by {host}</span>
         </div>
-        <a href={event.url} target="_blank" rel="noopener noreferrer" className="mt-1">
-          <Button variant="secondary" className="px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">
-            {soldOut ? "Sold out" : "Register now"}
-          </Button>
-        </a>
+        <Button
+          variant="secondary"
+          href={event.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider"
+        >
+          {soldOut ? "Sold out" : "Register now"}
+        </Button>
       </div>
     </div>
   )

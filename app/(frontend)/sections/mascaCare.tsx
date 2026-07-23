@@ -11,12 +11,12 @@ import Button from "@/components/Button";
 export default function MascaCareSection() {
   return (
     <section >
-      <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-24 lg:gap-16 py-32">
+      <div className="container section-pad grid grid-cols-1 lg:grid-cols-2 items-center gap-24 lg:gap-16">
         <div className="flex flex-col gap-6 lg:order-2">
 
           <header className="flex flex-col gap-4">
             <span className="eyebrow text-red-600">student welfare</span>
-            <span className="title text-blue-600">If something&apos;s not right, we&apos;re here</span>
+            <h2 className="title text-blue-600">If something&apos;s not right, we&apos;re here</h2>
           </header>
           
           <p className="font-secondary text-blue-600 italic">“Reach out — no judgement, no paperwork, no problem too small.”</p>
@@ -56,15 +56,18 @@ function MascaCareCard() {
   }, { scope: cardRef })
 
   return (
-    <Link 
-      ref={cardRef} 
-      href="/care" 
+    <Link
+      ref={cardRef}
+      href="/care"
       onMouseEnter={() => tweenRef.current?.play()}
       onMouseLeave={() => tweenRef.current?.reverse()}
-      className="relative isolate overflow-hidden flex flex-col justify-center w-full max-w-xl min-h-105 md:min-h-130 rounded-xl bg-blue-600 shadow-brand p-6 md:p-8"
+      onFocus={() => tweenRef.current?.play()}
+      onBlur={() => tweenRef.current?.reverse()}
+      className="relative isolate overflow-hidden flex flex-col justify-center w-full max-w-xl min-h-105 md:min-h-130 rounded-xl bg-blue-600 shadow-brand p-6 md:p-8 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-yellow-500"
     >
       <span className="eyebrow text-yellow-500">masca care</span>
-      <h2 className="text-yellow-500 leading-none mt-2 text-7xl md:text-8xl font-black">1800 <br/> MASCA</h2>
+      {/* Display number, not a document heading — the section's h2 sits above. */}
+      <p className="text-yellow-500 leading-none mt-2 text-7xl md:text-8xl font-black">1800 <br/> MASCA</p>
       <span className="text-caption text-white mt-3">Confidential. Free. Staffed by trained MASCA student leaders.</span>
 
       <div className="border-t border-blue-100/20 my-6"></div>

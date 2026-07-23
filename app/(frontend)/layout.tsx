@@ -189,6 +189,13 @@ export default function RootLayout({
           }}
         />
         <GsapInitializer />
+        {/* Keyboard users can jump past the navbar; visible only while focused. */}
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-blue-600 focus:px-5 focus:py-3 focus:text-sm focus:font-bold focus:text-white"
+        >
+          Skip to content
+        </a>
         <NavBar />
         {children}
         <Analytics/>

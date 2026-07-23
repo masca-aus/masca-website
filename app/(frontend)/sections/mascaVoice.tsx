@@ -59,16 +59,16 @@ export default function MascaVoiceSection() {
 
   return (
     <section ref={sectionRef} className="bg-blue-900">
-      <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-16 py-32">
+      <div className="container section-pad grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
 
         {/* Left: the message */}
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-3">
             <span className="eyebrow text-yellow-500">MASCAvoice</span>
-            <span className="title text-white inline-flex flex-col">
+            <h2 className="title text-white inline-flex flex-col">
               From silence to roar
               <Soundwave />
-            </span>
+            </h2>
           </header>
 
           <p className="font-secondary text-xl italic leading-snug text-yellow-500">

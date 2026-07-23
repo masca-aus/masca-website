@@ -19,11 +19,14 @@ export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNod
 
   return (
     <section ref={sectionRef} className="bg-blue-600">
+      {/* Fills one viewport (dvh, not vh — stable under mobile browser chrome).
+          pt clears the fixed navbar; content-center soaks up any remaining
+          height evenly instead of the old spacer rows piling it below the stats. */}
       <div
       className="
-          container grid gap-16 min-h-screen md:min-h-[110vh]
-          grid-cols-1 grid-rows-[1fr_auto_2fr] [grid-template-areas:'.'_'main'_'stats']
-          lg:grid-cols-2 md:grid-rows-[1fr_auto_2fr] md:[grid-template-areas:'._.'_'main_event'_'stats_.']
+          container grid content-center gap-12 md:gap-16 min-h-[88svh] pt-24 pb-16 md:pt-28
+          grid-cols-1 [grid-template-areas:'main'_'stats']
+          lg:grid-cols-2 lg:[grid-template-areas:'main_event'_'stats_.']
       "
       >
         <div className="[grid-area:main]">
@@ -34,7 +37,7 @@ export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNod
             <Statistic />
         </div>
 
-        <div className="hidden lg:inline-flex md:[grid-area:event] md:justify-self-center md:self-center">
+        <div className="hidden lg:inline-flex lg:[grid-area:event] lg:justify-self-center lg:self-center">
             {upcomingEvent}
         </div>
       </div>
@@ -69,7 +72,7 @@ function MainContent() {
         <Button href="/events" variant="accent">
           See What&apos;s On <span>&rarr;</span>
         </Button>
-        <Button href="/contact" variant="outline" className="text-white border-gray-300">
+        <Button href="/contact" variant="outlineLight">
           Contact Us
         </Button>
       </div>
@@ -86,16 +89,28 @@ function Statistic() {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    gsap.utils.toArray<HTMLElement>(".stat-value").forEach((e) => {
-      const target = Number(e.dataset.value);
-      const from = Number(e.dataset.from);
-      const suffix = e.dataset.suffix ?? "";
-      const proxy = { val: from };
-      gsap.to(proxy, {
-        val: target,
-        duration: 5,
-        ease: "power4.out",
-        onUpdate: () => { e.textContent = `${Math.round(proxy.val)}${suffix}`; },
+    const values = gsap.utils.toArray<HTMLElement>(".stat-value");
+    const mm = gsap.matchMedia();
+
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      values.forEach((e) => {
+        const target = Number(e.dataset.value);
+        const from = Number(e.dataset.from);
+        const suffix = e.dataset.suffix ?? "";
+        const proxy = { val: from };
+        gsap.to(proxy, {
+          val: target,
+          duration: 5,
+          ease: "power4.out",
+          onUpdate: () => { e.textContent = `${Math.round(proxy.val)}${suffix}`; },
+        });
+      });
+    });
+
+    // Reduced motion: no ticking numbers, just the final figures.
+    mm.add("(prefers-reduced-motion: reduce)", () => {
+      values.forEach((e) => {
+        e.textContent = `${e.dataset.value}${e.dataset.suffix ?? ""}`;
       });
     });
   }, { scope: rootRef });
