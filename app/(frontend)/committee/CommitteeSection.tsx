@@ -175,7 +175,7 @@ function MemberModal({
         <img
           src={member.img}
           alt={member.name}
-          className="aspect-[4/5] w-full rounded-t-2xl object-cover md:h-full md:w-2/5 md:shrink-0 md:rounded-l-2xl md:rounded-tr-none"
+          className="aspect-4/5 w-full rounded-t-2xl object-cover md:h-full md:w-2/5 md:shrink-0 md:rounded-l-2xl md:rounded-tr-none"
         />
 
         <div className="flex flex-col gap-6 p-6 md:flex-1 md:overflow-y-auto md:p-8">
