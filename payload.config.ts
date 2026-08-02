@@ -115,14 +115,19 @@ export default buildConfig({
       slug: "committee",
       admin: {
         useAsTitle: "name",
-        defaultColumns: ["name", "role", "year", "order"],
+        defaultColumns: ["name", "role", "year"],
       },
       // Anyone may read (the public site renders from this collection); only
       // the logged-in admin can create/update/delete.
       access: {
         read: () => true,
       },
-      defaultSort: "order",
+      // Drag-and-drop ordering in the admin list view via Payload's hidden
+      // `_order` key. The sequence is global across all years — filter the
+      // list to one year before dragging; the public page filters per year,
+      // so per-year relative order is all that matters.
+      orderable: true,
+      defaultSort: "_order",
       // Fields mirror the shape the committee page has always rendered, and
       // are validated here so bad entries are rejected at save time.
       fields: [
@@ -137,6 +142,20 @@ export default buildConfig({
           required: true,
           admin: {
             description: 'Committee position, e.g. "President".',
+          },
+        },
+        {
+          name: "university",
+          type: "text",
+          admin: {
+            description: 'Full name, e.g. "Monash University". Optional.',
+          },
+        },
+        {
+          name: "course",
+          type: "text",
+          admin: {
+            description: 'Degree or course name, e.g. "Bachelor of Commerce". Optional.',
           },
         },
         {
@@ -158,15 +177,6 @@ export default buildConfig({
           },
         },
         {
-          name: "order",
-          type: "number",
-          required: true,
-          admin: {
-            description:
-              "Sort position within the year's grid (1 = first). Lower numbers appear first.",
-          },
-        },
-        {
           name: "linkedin_url",
           type: "text",
           validate: (value: string | null | undefined) => {
@@ -184,9 +194,9 @@ export default buildConfig({
         {
           name: "bio",
           type: "textarea",
-          required: true,
           admin: {
-            description: "Shown in the expanded modal on the committee page.",
+            description:
+              "Shown in the expanded modal on the committee page. Optional — the modal simply omits it when empty.",
           },
         },
       ],

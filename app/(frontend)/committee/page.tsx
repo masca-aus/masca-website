@@ -17,7 +17,7 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function CommitteePage() {
-  // Sorted by `order` here on the server; the client section only ever filters.
+  // Sorted in admin drag order here on the server; the client section only filters.
   const members = await getCommittee();
   const years = getCommitteeYears(members);
 

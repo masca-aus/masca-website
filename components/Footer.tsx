@@ -19,7 +19,7 @@ const footerSections: { heading: string; links: FooterLink[] }[] = [
   {
     heading: "About",
     links: [
-      { label: "Sweet Home", href: "/" },
+      { label: "Home", href: "/" },
       { label: "Who we are", href: "/about" },
       { label: "The People", href: "/committee" },
       { label: "Contact us", href: "/contact" },

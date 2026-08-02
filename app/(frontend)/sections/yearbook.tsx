@@ -11,7 +11,7 @@ export default async function YearbookSection() {
   const years = getCommitteeYears(members) // newest-first
   const latestYear = years[0]
 
-  // Already sorted by `order` server-side; take the first handful for the fan.
+  // Already in admin drag order server-side; take the first handful for the fan.
   const featured = members.filter((m) => m.year === latestYear).slice(0, 5)
 
   // Nothing to tease — bail rather than render an empty card.

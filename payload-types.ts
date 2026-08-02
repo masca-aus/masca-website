@@ -169,25 +169,30 @@ export interface Media {
  */
 export interface Committee {
   id: number;
+  _order?: string | null;
   name: string;
   /**
    * Committee position, e.g. "President".
    */
   role: string;
+  /**
+   * Full name, e.g. "Monash University". Optional.
+   */
+  university?: string | null;
+  /**
+   * Degree or course name, e.g. "Bachelor of Commerce". Optional.
+   */
+  course?: string | null;
   portrait: number | Media;
   /**
    * Committee term, e.g. "2026/2027" — drives the year tabs on the page.
    */
   year: string;
-  /**
-   * Sort position within the year's grid (1 = first). Lower numbers appear first.
-   */
-  order: number;
   linkedin_url?: string | null;
   /**
-   * Shown in the expanded modal on the committee page.
+   * Shown in the expanded modal on the committee page. Optional — the modal simply omits it when empty.
    */
-  bio: string;
+  bio?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -334,11 +339,13 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "committee_select".
  */
 export interface CommitteeSelect<T extends boolean = true> {
+  _order?: T;
   name?: T;
   role?: T;
+  university?: T;
+  course?: T;
   portrait?: T;
   year?: T;
-  order?: T;
   linkedin_url?: T;
   bio?: T;
   updatedAt?: T;

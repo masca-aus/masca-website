@@ -21,7 +21,7 @@ export default function CommitteeSection({
 
   const gridRef = useRef<HTMLDivElement>(null)
 
-  // `members` is already sorted by `order` on the server; we only filter.
+  // `members` arrive already in admin drag order from the server; we only filter.
   const visible = useMemo(
     () => members.filter((m) => m.year === activeYear),
     [members, activeYear],
@@ -179,7 +179,7 @@ function MemberModal({
         />
 
         <div className="flex flex-col gap-6 p-6 md:flex-1 md:overflow-y-auto md:p-8">
-          {/* Name + role, stacked */}
+          {/* Name + role, stacked, with the study line beneath when known */}
           <div className="flex flex-col gap-1">
             <h2 className="text-h4 font-bold text-blue-600 leading-tight">
               {member.name}
@@ -187,12 +187,19 @@ function MemberModal({
             <span className="text-body-sm font-medium text-gray-700">
               {member.role}
             </span>
+            {(member.course || member.university) && (
+              <span className="text-caption text-gray-700/80">
+                {[member.course, member.university].filter(Boolean).join(" · ")}
+              </span>
+            )}
           </div>
 
-          {/* Bio — tight, legible reading block */}
-          <p className="text-body-sm leading-relaxed text-black/80">
-            {member.bio}
-          </p>
+          {/* Bio — tight, legible reading block; omitted when unset */}
+          {member.bio && (
+            <p className="text-body-sm leading-relaxed text-black/80">
+              {member.bio}
+            </p>
+          )}
 
           {/* Minimalist LinkedIn link */}
           {member.linkedin_url && (

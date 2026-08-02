@@ -28,17 +28,28 @@ const getField = async (name: string) => {
 };
 
 describe("committee collection (Payload-served committee page)", () => {
-  it("mirrors the member shape: required name/role/year/order/bio, optional linkedin_url", async () => {
-    for (const name of ["name", "role", "year", "bio"]) {
+  it("mirrors the member shape: required name/role/year, optional bio/uni/course/linkedin", async () => {
+    for (const name of ["name", "role", "year"]) {
       const field = await getField(name);
       expect("required" in field && field.required, `${name} required`).toBe(true);
     }
-    const order = await getField("order");
-    expect(order.type).toBe("number");
-    expect("required" in order && order.required).toBe(true);
+    for (const name of ["bio", "university", "course", "linkedin_url"]) {
+      const field = await getField(name);
+      expect("required" in field && field.required, `${name} optional`).toBeFalsy();
+    }
+    for (const name of ["university", "course"]) {
+      const field = await getField(name);
+      expect(field.type, `${name} is text`).toBe("text");
+    }
+  });
 
-    const linkedin = await getField("linkedin_url");
-    expect("required" in linkedin && linkedin.required).toBeFalsy();
+  it("orders by drag-and-drop instead of a manual order field", async () => {
+    const committee = await getCommitteeCollection();
+    expect(committee.orderable).toBe(true);
+    expect(committee.defaultSort).toBe("_order");
+    // The old numeric field is gone — `_order` is injected by Payload itself.
+    const order = committee.fields.find((f) => "name" in f && f.name === "order");
+    expect(order).toBeUndefined();
   });
 
   it("relates the portrait to the Media collection and requires it", async () => {
@@ -71,11 +82,10 @@ describe("committee collection (Payload-served committee page)", () => {
     expect(linkedin.validate("http://insecure.example" as never, {} as never)).not.toBe(true);
   });
 
-  it("is publicly readable and sorted by order in the admin list", async () => {
+  it("is publicly readable", async () => {
     const committee = await getCommitteeCollection();
     const canRead = committee.access.read({ req: { user: null } } as never);
     expect(canRead).toBe(true);
-    expect(committee.defaultSort).toBe("order");
   });
 
   it("revalidates the committee page (and homepage teaser) on change and delete", async () => {
@@ -99,6 +109,7 @@ describe("committee collection (Payload-served committee page)", () => {
 describe("toCommitteeMember (Payload doc → page shape)", () => {
   const doc: Committee = {
     id: 7,
+    _order: "a0",
     name: "Ava Tan",
     role: "President",
     portrait: {
@@ -109,7 +120,8 @@ describe("toCommitteeMember (Payload doc → page shape)", () => {
       createdAt: "2026-07-22T00:00:00.000Z",
     },
     year: "2026/2027",
-    order: 1,
+    university: "Monash University",
+    course: "Bachelor of Commerce",
     linkedin_url: "https://www.linkedin.com/in/example-ava",
     bio: "Leads MASCA's national strategy.",
     updatedAt: "2026-07-22T00:00:00.000Z",
@@ -123,15 +135,25 @@ describe("toCommitteeMember (Payload doc → page shape)", () => {
       role: "President",
       img: "https://test-project.storage.supabase.co/storage/v1/object/public/media/ava.jpg",
       year: "2026/2027",
-      order: 1,
+      university: "Monash University",
+      course: "Bachelor of Commerce",
       linkedin_url: "https://www.linkedin.com/in/example-ava",
       bio: "Leads MASCA's national strategy.",
     });
   });
 
-  it("coalesces a missing linkedin_url to undefined so the UI hides the link", () => {
-    const member = toCommitteeMember({ ...doc, linkedin_url: null });
+  it("coalesces missing optional fields to undefined so the UI hides them", () => {
+    const member = toCommitteeMember({
+      ...doc,
+      linkedin_url: null,
+      university: null,
+      course: null,
+      bio: null,
+    });
     expect(member.linkedin_url).toBeUndefined();
+    expect(member.university).toBeUndefined();
+    expect(member.course).toBeUndefined();
+    expect(member.bio).toBeUndefined();
   });
 
   it("degrades to an empty img rather than crashing when the portrait is unpopulated", () => {

@@ -18,21 +18,22 @@ export type CommitteeMember = {
   role: string
   img: string
   year: string
-  order: number
+  university?: string
+  course?: string
   linkedin_url?: string
-  bio: string
+  bio?: string
 }
 
 /**
- * Returns committee members sorted by `order` ascending, optionally filtered
- * to a single `year`.
+ * Returns committee members in admin drag order (`_order` ascending),
+ * optionally filtered to a single `year`.
  */
 export async function getCommittee(year?: string): Promise<CommitteeMember[]> {
   const payload = await getPayload({ config })
   const { docs } = await payload.find({
     collection: "committee",
     ...(year !== undefined ? { where: { year: { equals: year } } } : {}),
-    sort: "order",
+    sort: "_order",
     // The committee is a couple dozen people a year — fetch them all.
     pagination: false,
     // Populate the portrait relation so its Supabase Storage URL comes along.
@@ -58,9 +59,10 @@ export function toCommitteeMember(doc: Committee): CommitteeMember {
     role: doc.role,
     img: portrait?.url ?? "",
     year: doc.year,
-    order: doc.order,
-    // Empty string coalesces to undefined so the UI hides the link when unset.
+    // Empty strings coalesce to undefined so the UI hides what's unset.
+    university: doc.university || undefined,
+    course: doc.course || undefined,
     linkedin_url: doc.linkedin_url || undefined,
-    bio: doc.bio,
+    bio: doc.bio || undefined,
   }
 }
