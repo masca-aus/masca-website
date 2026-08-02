@@ -187,10 +187,11 @@ function MemberModal({
             <span className="text-body-sm font-medium text-gray-700">
               {member.role}
             </span>
-            {(member.course || member.university) && (
-              <span className="text-caption text-gray-700/80">
-                {[member.course, member.university].filter(Boolean).join(" · ")}
-              </span>
+            {member.course && (
+              <span className="text-caption text-gray-700/80">{member.course}</span>
+            )}
+            {member.university && (
+              <span className="text-caption text-gray-700/80">{member.university}</span>
             )}
           </div>
 
