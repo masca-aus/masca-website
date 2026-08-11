@@ -52,7 +52,7 @@ export default async function Home() {
       <MascaCareSection />
       <SponsorsSection sponsors={sponsors} />
       <FollowUsSection />
-      <JoinUsSection />
+      {/* <JoinUsSection /> */}
     </main>
   );
 }
