@@ -28,6 +28,7 @@ export default function StatisticSection() {
           duration: 5,
           ease: "power4.out",
           onUpdate: () => { e.textContent = `${Math.round(proxy.val)}${suffix}`; },
+          scrollTrigger: { trigger: rootRef.current, start: "top 85%", once: true },
         });
       });
     });
