@@ -19,27 +19,17 @@ export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNod
 
   return (
     <section ref={sectionRef} className="bg-blue-600">
-      {/* Fills one viewport (dvh, not vh — stable under mobile browser chrome).
-          pt clears the fixed navbar; content-center soaks up any remaining
-          height evenly instead of the old spacer rows piling it below the stats. */}
-      <div
-      className="
-          container grid content-center gap-12 md:gap-16 min-h-[88svh] pt-24 pb-16 md:pt-28
-          grid-cols-1 [grid-template-areas:'main'_'stats']
-          lg:grid-cols-2 lg:[grid-template-areas:'main_event'_'stats_.']
-      "
-      >
-        <div className="[grid-area:main]">
+      {/* Fills one viewport (svh, not vh — stable under mobile browser chrome).
+          pt clears the fixed navbar; items-center keeps both columns vertically
+          centered in the remaining height. */}
+      <div className="container flex items-center gap-12 md:gap-16 min-h-svh pt-24 pb-16 md:pt-28">
+        <div className="flex-1">
             <MainContent />
         </div>
 
-        <div className="[grid-area:stats]">
-            <Statistic />
-        </div>
-
-        <div className="hidden lg:inline-flex lg:[grid-area:event] lg:justify-self-center lg:self-center">
+        {/* <div className="hidden lg:flex flex-1 justify-center">
             {upcomingEvent}
-        </div>
+        </div> */}
       </div>
     </section>
   );
@@ -77,59 +67,5 @@ function MainContent() {
         </Button>
       </div>
     </header>
-  );
-}
-
-function Statistic() {
-  const stats = [
-    { from: 0, value: 33, suffix: "k+", label: "students reached" },
-    { from: 0, value: 7, suffix: "", label: "state chapters" },
-    { from: new Date().getFullYear(), value: 2001, suffix: "", label: "founded" },
-  ]
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(() => {
-    const values = gsap.utils.toArray<HTMLElement>(".stat-value");
-    const mm = gsap.matchMedia();
-
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      values.forEach((e) => {
-        const target = Number(e.dataset.value);
-        const from = Number(e.dataset.from);
-        const suffix = e.dataset.suffix ?? "";
-        const proxy = { val: from };
-        gsap.to(proxy, {
-          val: target,
-          duration: 5,
-          ease: "power4.out",
-          onUpdate: () => { e.textContent = `${Math.round(proxy.val)}${suffix}`; },
-        });
-      });
-    });
-
-    // Reduced motion: no ticking numbers, just the final figures.
-    mm.add("(prefers-reduced-motion: reduce)", () => {
-      values.forEach((e) => {
-        e.textContent = `${e.dataset.value}${e.dataset.suffix ?? ""}`;
-      });
-    });
-  }, { scope: rootRef });
-
-  return (
-    <div ref={rootRef} className="flex gap-4 border-t pt-8 border-blue-100/20">
-        {stats.map(({ from, value, suffix, label }) => (
-          <div key={label} className="flex flex-col">
-            <span
-              className="stat-value text-h2 font-bold text-yellow-500"
-              data-value={value}
-              data-from={from}
-              data-suffix={suffix}
-            >
-              {from}{suffix}
-            </span>
-            <span className="eyebrow text-gray-300">{label}</span>
-          </div>
-        ))}
-    </div>
   );
 }

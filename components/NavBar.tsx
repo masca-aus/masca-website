@@ -12,7 +12,7 @@ import Button from "./Button";
 
 const navLinks = [
   { name: "Home", href: "/"},
-  { name: "Events", href: "/events"},
+  // { name: "Events", href: "/events"},
   { name: "Welfare", href: "/care"},
   { name: "About", href: "/about"},
   { name: "Committee", href: "/committee"},

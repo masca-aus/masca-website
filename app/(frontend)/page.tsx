@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { SITE_NAME_FULL, SITE_DESCRIPTION } from "@/utils/seo";
 import HeroSection from "./sections/hero";
 import UpcomingEvent from "./sections/upcomingEvent";
+import StatisticSection from "./sections/statistic";
 import StatesSection from "./sections/states";
 import EventShowcaseSection from "./sections/eventShowcase";
 import MascaCareSection from "./sections/mascaCare";
@@ -42,10 +43,11 @@ export default async function Home() {
   return (
    <main id="main">
       <HeroSection upcomingEvent={<UpcomingEvent />} />
+      <StatisticSection />
       <AboutSection />
       <YearbookSection />
       <StatesSection />
-      <EventShowcaseSection />
+      {/* <EventShowcaseSection /> */}
       <MascaVoiceSection />
       <MascaCareSection />
       <SponsorsSection sponsors={sponsors} />
