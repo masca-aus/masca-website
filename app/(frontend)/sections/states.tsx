@@ -34,7 +34,6 @@ export default function StatesSection() {
 
         <p className="text-gray-700">Each chapter is run by student leaders on the ground — local events, welfare contacts, and ways to get involved, wherever you land.</p>
 
-        {/* state boxes */}
         <div
           ref={containerRef}
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-[1fr] gap-4"
@@ -54,8 +53,6 @@ function StateCard({ state }: { state: State }) {
   const tl = useRef<gsap.core.Timeline | null>(null)
 
   useGSAP(() => {
-    // Paused hover timeline: play() on enter, reverse() on leave.
-    // reverse() restores each element's original (recorded) color automatically.
     tl.current = gsap.timeline({ paused: true })
       .to(cardRef.current, {
         backgroundColor: state.bg,
@@ -78,15 +75,11 @@ function StateCard({ state }: { state: State }) {
   }, { scope: cardRef })
 
   return (
-    // Entrance reveal (parent's gsap.from) drives the wrapper's transform; the
-    // hover lift drives the inner article's. Keeping them on separate elements
-    // means a hover mid-reveal can't capture a transient y as its resting value.
     <div className="state-card h-full">
       <article
         ref={cardRef}
         onMouseEnter={() => tl.current?.play()}
         onMouseLeave={() => tl.current?.reverse()}
-        // No cursor-pointer: the card isn't a link (yet) — the hover is just play.
         className="relative h-full overflow-hidden flex flex-col bg-white border border-gray-300 rounded-lg p-4 shadow-sm"
       >
         <NorthStar color={state.bg} className="absolute bottom-1 -right-2 h-12 w-12 opacity-50" />
@@ -99,7 +92,6 @@ function StateCard({ state }: { state: State }) {
 }
 
 function NorthStar({ color, className }: { color: string; className?: string }) {
-  // 4-point sparkle: control points pulled toward center create the concave pinch.
   const d = "M50 0 C54 30 70 46 100 50 C70 54 54 70 50 100 C46 70 30 54 0 50 C30 46 46 30 50 0 Z"
 
   return (
@@ -108,23 +100,3 @@ function NorthStar({ color, className }: { color: string; className?: string }) 
     </svg>
   )
 }
-
-// function StarBurst({ color, className }: { color: string; className?: string }) {
-//   const points = 8
-//   const outer = 50
-//   const inner = 20 // larger inner radius = shorter, blunter points
-//   const cx = 50
-//   const cy = 50
-//
-//   const coords = Array.from({ length: points * 2 }, (_, i) => {
-//     const r = i % 2 === 0 ? outer : inner
-//     const angle = (Math.PI / points) * i - Math.PI / 2
-//     return `${(cx + r * Math.cos(angle)).toFixed(2)},${(cy + r * Math.sin(angle)).toFixed(2)}`
-//   }).join(" ")
-//
-//   return (
-//     <svg viewBox="0 0 100 100" className={className} aria-hidden="true">
-//       <polygon className="card-star" points={coords} fill={color} />
-//     </svg>
-//   )
-// }

@@ -15,22 +15,17 @@ export default function CommitteeSection({
   members: CommitteeMember[]
   years: string[]
 }) {
-  // Default to the most recent term (years arrive newest-first).
   const [activeYear, setActiveYear] = useState<string>(years[0])
   const [selected, setSelected] = useState<CommitteeMember | null>(null)
 
   const gridRef = useRef<HTMLDivElement>(null)
 
-  // `members` arrive already in admin drag order from the server; we only filter.
   const visible = useMemo(
     () => members.filter((m) => m.year === activeYear),
     [members, activeYear],
   )
 
-  // Staggered reveal as the grid scrolls into view; re-runs on year change so
-  // a freshly-filtered set animates in too.
   useGSAP(() => {
-    // The active year may have no members; skip to avoid a "target not found".
     if (visible.length === 0) return
     gsap.from(".member-card", {
       opacity: 0,
@@ -49,10 +44,6 @@ export default function CommitteeSection({
   return (
     <section>
       <div className="container py-24 flex flex-col gap-10">
-
-        {/* Year navigation — folder-style tabs sitting on the grid surface.
-            Driven entirely by the `years` array, so future terms append for
-            free. */}
         <div
           role="tablist"
           aria-label="Committee year"
@@ -79,7 +70,6 @@ export default function CommitteeSection({
           })}
         </div>
 
-        {/* Card grid — 2 columns on mobile, 3 on desktop. */}
         <div
           ref={gridRef}
           className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6"
@@ -109,7 +99,6 @@ function MemberModal({
   const boxRef = useRef<HTMLDivElement>(null)
   const tl = useRef<gsap.core.Timeline | null>(null)
 
-  // Build the open timeline and play it in on mount.
   useGSAP(() => {
     tl.current = gsap.timeline()
       .from(overlayRef.current, { autoAlpha: 0, duration: 0.25, ease: "none" })
@@ -122,7 +111,6 @@ function MemberModal({
       }, 0.05)
   }, { scope: overlayRef })
 
-  // Play the open timeline in reverse, then unmount once it finishes.
   const requestClose = useCallback(() => {
     const t = tl.current
     if (!t) return onClose()
@@ -130,7 +118,6 @@ function MemberModal({
     t.timeScale(1.5).reverse()
   }, [onClose])
 
-  // Close on Escape and lock background scroll while open.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") requestClose()
@@ -151,7 +138,6 @@ function MemberModal({
       aria-modal="true"
       aria-label={`${member.name}, ${member.role}`}
       onClick={(e) => {
-        // Backdrop click closes; clicks inside the box are ignored.
         if (e.target === e.currentTarget) requestClose()
       }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-blue-950/60 backdrop-blur-sm p-4 sm:p-6"
@@ -160,7 +146,6 @@ function MemberModal({
         ref={boxRef}
         className="relative flex max-h-[90vh] w-full max-w-md flex-col overflow-y-auto rounded-2xl bg-white shadow-brand md:max-h-[80vh] md:max-w-6xl md:flex-row md:overflow-hidden"
       >
-        {/* Minimal close control, top-right */}
         <button
           type="button"
           onClick={requestClose}
@@ -170,8 +155,6 @@ function MemberModal({
           Close <X className="h-3.5 w-3.5" aria-hidden />
         </button>
 
-        {/* Portrait — sharp top corners on mobile, left edge on desktop */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={member.img}
           alt={member.name}
@@ -179,7 +162,6 @@ function MemberModal({
         />
 
         <div className="flex flex-col gap-6 p-6 md:flex-1 md:overflow-y-auto md:p-8">
-          {/* Name + role, stacked, with the study line beneath when known */}
           <div className="flex flex-col gap-1">
             <h2 className="text-h4 font-bold text-blue-600 leading-tight">
               {member.name}
@@ -195,14 +177,12 @@ function MemberModal({
             )}
           </div>
 
-          {/* Bio — tight, legible reading block; omitted when unset */}
           {member.bio && (
             <p className="text-body-sm leading-relaxed text-black/80">
               {member.bio}
             </p>
           )}
 
-          {/* Minimalist LinkedIn link */}
           {member.linkedin_url && (
             <a
               href={member.linkedin_url}
@@ -220,9 +200,6 @@ function MemberModal({
   )
 }
 
-// Lucide dropped its brand icons, and the codebase already favours inline
-// SVGs (see the NorthStar in the states section), so the LinkedIn mark lives
-// here as a tiny currentColor glyph.
 function LinkedInIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">

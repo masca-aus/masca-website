@@ -10,8 +10,6 @@ import Button from "@/components/Button"
 
 const INSTAGRAM_URL = "https://www.instagram.com/masca_national/"
 
-// Nine brand cast illustrations stand in for a real post grid — authentic art,
-// no fabricated screenshots. Each tile rotates through a brand tint.
 const FEED_TILES = [
   { src: "/casts/Group 0.svg", tint: "bg-blue-100" },
   { src: "/casts/Group 3.svg", tint: "bg-red-100" },
@@ -28,8 +26,6 @@ export default function FollowUsSection() {
   const sectionRef = useRef<HTMLElement>(null)
 
   useGSAP(() => {
-    // Tiles pop into the "feed" as the section scrolls in — same entrance
-    // language as the About network bubbles.
     gsap.from(".ig-tile", {
       scale: 0.6,
       autoAlpha: 0,
@@ -44,8 +40,6 @@ export default function FollowUsSection() {
   return (
     <section ref={sectionRef} className="bg-blue-50">
       <div className="container section-pad grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
-
-        {/* Left: the pitch */}
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
             <span className="eyebrow text-red-600">@masca_national</span>
@@ -70,13 +64,9 @@ export default function FollowUsSection() {
           </Button>
         </div>
 
-        {/* Right: a faux Instagram profile card */}
         <div className="flex justify-center lg:justify-end">
           <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-brand md:p-6">
-
-            {/* Profile header */}
             <div className="flex items-center gap-4">
-              {/* Gradient ring = the one unmistakable Instagram cue */}
               <span className="rounded-pill bg-gradient-to-tr from-yellow-500 via-red-600 to-blue-600 p-[3px]">
                 <span className="flex rounded-pill bg-white p-[3px]">
                   <Image
@@ -105,7 +95,6 @@ export default function FollowUsSection() {
               </a>
             </div>
 
-            {/* Feed grid */}
             <div className="mt-5 grid grid-cols-3 gap-1.5">
               {FEED_TILES.map((tile, i) => (
                 <span
@@ -120,7 +109,6 @@ export default function FollowUsSection() {
                     height={120}
                     className="h-[88%] w-[88%] object-contain transition-transform duration-300 group-hover:scale-105"
                   />
-                  {/* A single heart cue on hover keeps it feeling like a live feed */}
                   {i === 4 && (
                     <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-blue-900/30 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                       <HeartGlyph className="h-7 w-7 text-white" />
@@ -137,8 +125,6 @@ export default function FollowUsSection() {
   )
 }
 
-// Inline glyphs (matching the codebase's inline-SVG habit) so we don't lean on
-// the project's unusual lucide-react pin.
 function InstagramGlyph({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className={className}>

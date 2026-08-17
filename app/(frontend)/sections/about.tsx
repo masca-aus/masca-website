@@ -7,7 +7,6 @@ import { useGSAP } from "@gsap/react"
 
 import Button from "@/components/Button"
 
-// John Ng's Dialektós piece — the framing this section is built on.
 const DIALEKTOS_URL =
   "https://mascavoice.kit.com/posts/dialektos-ep1-beyond-the-bubble-with-john-ng-masca-national-chairperson-25-26"
 
@@ -15,7 +14,6 @@ export default function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null)
 
   useGSAP(() => {
-    // Bubbles pop in around the hub as the section scrolls into view.
     gsap.from(".bubble", {
       scale: 0,
       autoAlpha: 0,
@@ -26,7 +24,6 @@ export default function AboutSection() {
       scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
     })
 
-    // Bridges + the outer "bigger bubble" draw themselves in — the signature motion.
     gsap.effects.writeInOnScroll(".bridge", {
       trigger: sectionRef.current,
       stagger: 0.07,
@@ -34,7 +31,6 @@ export default function AboutSection() {
 
     const mm = gsap.matchMedia()
 
-    // The outer bubbles drift on their own clocks — a living network.
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       gsap.utils.toArray<HTMLElement>(".bubble-float").forEach((node) => {
         gsap.to(node, {
@@ -54,9 +50,6 @@ export default function AboutSection() {
   return (
     <section ref={sectionRef}>
       <div className="container section-pad grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
-
-        {/* Right (desktop): the message — flipped from the usual text-left
-            rhythm to break the page's repetition. Stays first on mobile. */}
         <div className="flex flex-col gap-6 lg:order-2">
           <header className="flex flex-col gap-3">
             <span className="eyebrow text-red-600">Who we are</span>
@@ -107,12 +100,9 @@ export default function AboutSection() {
   )
 }
 
-// Hub-and-spoke network: a central MASCA bubble wired to chapter bubbles, the
-// whole thing wrapped in one larger "bigger bubble". Bridges are stroked paths
-// so they can draw themselves in; bubbles sit on top to hide the joins.
+
 function BubbleNetwork() {
   const C = { x: 210, y: 190 }
-  // Eight chapters evenly spaced around the hub (every 45°, radius 125).
   const peripherals = [
     { x: 210, y: 65, label: "VIC" },
     { x: 298, y: 102, label: "NSW" },
@@ -121,9 +111,9 @@ function BubbleNetwork() {
     { x: 210, y: 315, label: "SA" },
     { x: 122, y: 278, label: "ACT" },
     { x: 85, y: 190, label: "TAS" },
-    { x: 122, y: 102, label: "NZ" },
+    // { x: 122, y: 102, label: "NZ" },
   ]
-  // A few extra ties between chapters so it reads as a web, not just a wheel.
+
   const crossLinks: [number, number][] = [[0, 1], [2, 3], [4, 5], [6, 7]]
 
   return (
@@ -133,20 +123,16 @@ function BubbleNetwork() {
       role="img"
       aria-label="MASCA at the centre of a network linking student chapters across Australia"
     >
-      {/* Outer 'bigger bubble' */}
       <circle className="bridge" cx={C.x} cy={C.y} r="178" fill="none" stroke="#010066" strokeOpacity="0.15" strokeWidth="2" />
 
-      {/* Spokes: hub → each chapter */}
       {peripherals.map((p, i) => (
         <path key={`spoke-${i}`} className="bridge" d={`M${C.x} ${C.y} L${p.x} ${p.y}`} stroke="#010066" strokeOpacity="0.45" strokeWidth="2" strokeLinecap="round" />
       ))}
 
-      {/* Cross-links: chapter ↔ chapter */}
       {crossLinks.map(([a, b], i) => (
         <path key={`cross-${i}`} className="bridge" d={`M${peripherals[a].x} ${peripherals[a].y} L${peripherals[b].x} ${peripherals[b].y}`} stroke="#CC0001" strokeOpacity="0.4" strokeWidth="1.5" strokeLinecap="round" />
       ))}
 
-      {/* Chapter bubbles */}
       {peripherals.map((p, i) => (
         <g key={`bubble-${i}`} className="bubble bubble-float">
           <circle cx={p.x} cy={p.y} r="30" fill="#010066" stroke="#FFCC00" strokeWidth="2" />
@@ -156,7 +142,6 @@ function BubbleNetwork() {
         </g>
       ))}
 
-      {/* Central hub */}
       <g className="bubble">
         <circle cx={C.x} cy={C.y} r="48" fill="#FFCC00" />
         <text x={C.x} y={C.y} textAnchor="middle" dominantBaseline="central" className="fill-blue-900 font-primary text-[18px] font-black tracking-wide">

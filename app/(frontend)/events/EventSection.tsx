@@ -10,7 +10,6 @@ import EventCard from "./EventCard"
 export default function EventList({ events, chapters }: { events: Event[]; chapters: Chapter[] }) {
   const [selected, setSelected] = useState<string>("all")
 
-  // O(1) lookup of chapter metadata from an event's organizer id
   const chapterById = useMemo(
     () => Object.fromEntries(chapters.map((c) => [c.id, c])),
     [chapters],
@@ -21,13 +20,11 @@ export default function EventList({ events, chapters }: { events: Event[]; chapt
     [events, selected],
   )
 
-  // Synthetic "All" pill prepended to the real chapters
   const pills: Chapter[] = [{ id: "all", name: "All" }, ...chapters]
 
   const gridRef = useRef<HTMLDivElement>(null)
 
   useGSAP(() => {
-    // No events → no .event-card nodes; bail to avoid GSAP's "target not found".
     if (events.length === 0) return
     gsap.from(".event-card", {
       opacity: 0,
@@ -45,7 +42,6 @@ export default function EventList({ events, chapters }: { events: Event[]; chapt
 
   return (
     <div className="flex flex-col gap-8 container py-16">
-      {/* Chapter filter — same pattern as the topic chips in ContactForm */}
       <fieldset className="flex flex-col">
         <div className="flex flex-wrap gap-4 mt-2">
           {pills.map((c) => {
@@ -69,7 +65,6 @@ export default function EventList({ events, chapters }: { events: Event[]; chapt
         </div>
       </fieldset>
 
-      {/* Events grid */}
       {filtered.length === 0 ? (
         <p className="text-center text-gray-500">No upcoming events for this chapter.</p>
       ) : (

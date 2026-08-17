@@ -4,7 +4,6 @@ import type { Sponsor } from "@/utils/sponsors";
 
 export default function SponsorsSection({ sponsors }: { sponsors: Sponsor[] }) {
   return (
-    // Padding sits on the section (not .container) so the marquee stays full-bleed.
     <section className="bg-gray-100 section-pad">
       <div className="container flex flex-col gap-4">
         <header className="flex flex-col gap-4">
@@ -19,10 +18,9 @@ export default function SponsorsSection({ sponsors }: { sponsors: Sponsor[] }) {
       </div>
 
       {sponsors.length > 0 ? (
-        /* Full-bleed logo marquee; edge fades melt the rail into the section */
         <div className="relative my-12">
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-gray-100 to-transparent md:w-32" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-gray-100 to-transparent md:w-32" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-linear-to-r from-gray-100 to-transparent md:w-32" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-linear-to-l from-gray-100 to-transparent md:w-32" />
           <SponsorsMarquee sponsors={sponsors} />
         </div>
       ) : (
@@ -41,7 +39,6 @@ export default function SponsorsSection({ sponsors }: { sponsors: Sponsor[] }) {
   );
 }
 
-// The collection starts empty — better an honest joke than fake logos.
 function EmptyMarquee() {
   return (
     <div className="container my-12 flex flex-col items-center gap-4 py-8 text-center">

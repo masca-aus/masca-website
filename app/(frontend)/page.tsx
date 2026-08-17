@@ -16,9 +16,6 @@ import JoinUsSection from "./sections/joinUs";
 import { getSponsors } from "@/utils/sponsors";
 
 export const metadata: Metadata = {
-  // Homepage uses an absolute, keyword-rich title that matches the WebSite
-  // schema's `name` and og:site_name exactly, so every site-name signal Google
-  // reads says the full form with the acronym.
   title: { absolute: SITE_NAME_FULL },
   description: SITE_DESCRIPTION,
   alternates: { canonical: "/" },

@@ -6,13 +6,11 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ] as const
 
-/** Parse Eventbrite's "local" ISO ("2026-07-03T09:00:00") into y/m/d. */
 function ymd(local: string) {
   const [y, m, d] = local.split("T")[0].split("-").map(Number)
   return { y, m, d }
 }
 
-/** "3 July 2026" (single day) or "3–5 July 2026" (multi-day in one month). */
 function dateRange(startLocal: string, endLocal: string) {
   const s = ymd(startLocal)
   const e = ymd(endLocal)
@@ -24,7 +22,6 @@ function dateRange(startLocal: string, endLocal: string) {
 }
 
 export default async function UpcomingEvent() {
-  // Ordered start_asc in getUpcomingEvents, so the first is the next one up.
   const [event] = await getUpcomingEvents()
   if (!event) return null
 
@@ -35,13 +32,9 @@ export default async function UpcomingEvent() {
 
   return (
     <div className="flex flex-col items-start border border-blue-100/20 rounded-lg bg-blue-500 mx-8 w-72 sm:w-80 overflow-hidden">
-      {/* Event banner — Eventbrite hosts logos on evbuc.com, so a plain <img>
-          avoids configuring next.config images.remotePatterns. */}
       {event.logo?.url && (
-        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={event.logo.url}
-          // Decorative: the event name is announced right below the banner.
           alt=""
           className="h-32 w-full object-cover"
         />

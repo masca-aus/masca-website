@@ -26,7 +26,6 @@ export default function MascaCareSection() {
 
         <div className="flex justify-center lg:order-1 lg:justify-start">
           <div className="relative">
-            {/* Hand-drawn nudge: cursive note + looping arrow curling into the card */}
             <div className="pointer-events-none absolute -top-14 left-4 z-10 flex items-start gap-1 -rotate-6 md:-top-16 md:left-8">
               <span className="font-accent text-2xl leading-none text-red-600 md:text-3xl">
                 click to learn more
@@ -66,7 +65,6 @@ function MascaCareCard() {
       className="relative isolate overflow-hidden flex flex-col justify-center w-full max-w-xl min-h-105 md:min-h-130 rounded-xl bg-blue-600 shadow-brand p-6 md:p-8 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-yellow-500"
     >
       <span className="eyebrow text-yellow-500">masca care</span>
-      {/* Display number, not a document heading — the section's h2 sits above. */}
       <p className="text-yellow-500 leading-none mt-2 text-7xl md:text-8xl font-black">1800 <br/> MASCA</p>
       <span className="text-caption text-white mt-3">Confidential. Free. Staffed by trained MASCA student leaders.</span>
 
@@ -88,7 +86,6 @@ function MascaCareCard() {
   )
 }
 
-// Doodle-style looping arrow that curls and points down-right (into the card).
 function LoopArrow({ className = "" }: { className?: string }) {
   return (
     <svg

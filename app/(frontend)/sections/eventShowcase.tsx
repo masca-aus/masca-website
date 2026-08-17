@@ -4,8 +4,6 @@ import { CHAPTERS, getUpcomingEvents } from "@/utils/events"
 import EventShowcaseGrid from "./eventShowcaseGrid"
 
 export default async function EventShowcaseSection() {
-  // Fetch hits the same cached Eventbrite response as /events (revalidate: 1h
-  // in utils/events.ts), so this doesn't cost an extra API call.
   const events = (await getUpcomingEvents()).slice(0, 3)
 
   return (

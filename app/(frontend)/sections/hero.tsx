@@ -19,9 +19,6 @@ export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNod
 
   return (
     <section ref={sectionRef} className="bg-blue-600">
-      {/* Fills one viewport (svh, not vh — stable under mobile browser chrome).
-          pt clears the fixed navbar; items-center keeps both columns vertically
-          centered in the remaining height. */}
       <div className="container flex items-center gap-12 md:gap-16 min-h-svh pt-24 pb-16 md:pt-28">
         <div className="flex-1">
             <MainContent />
@@ -42,8 +39,6 @@ function MainContent() {
         founded 2001 &middot; 6 states &middot; 1 territory
       </span>
       <h1 className="text-white text-5xl md:text-6xl lg:text-7xl">
-        {/* Full brand name in the heading for crawlers and screen readers; the
-            creative line below is the visible treatment. */}
         <span className="sr-only">
           Malaysian Students&apos; Council of Australia (MASCA)
         </span>

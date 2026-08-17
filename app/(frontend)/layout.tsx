@@ -132,14 +132,6 @@ export default function RootLayout({
 }>) {
   const peeps = getCastPeeps();
 
-  // One @graph holding two linked entities:
-  //  - WebSite  → drives the site name Google renders for the homepage. Its
-  //    single `name` is the full form with the acronym baked in, so the only
-  //    site name Google can show is the complete title. We deliberately do NOT
-  //    give the WebSite an `alternateName: "MASCA"`, which would invite Google
-  //    to display the bare acronym.
-  //  - Organization (NGO) → the entity for the Knowledge Graph. Here the
-  //    `alternateName: "MASCA"` is correct and useful for entity recognition.
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -163,9 +155,6 @@ export default function RootLayout({
         areaServed: "AU",
         sameAs: SITE_SOCIALS,
       },
-      // Main navigation hint: exposes the key sections to crawlers. Mirrors the
-      // visible header (components/NavBar.tsx). A hint only — sitelinks remain
-      // algorithmic and cannot be forced by markup.
       ...SITE_NAV.map((item, i) => ({
         "@type": "SiteNavigationElement",
         "@id": `${SITE_URL}/#nav-${i + 1}`,
@@ -189,7 +178,6 @@ export default function RootLayout({
           }}
         />
         <GsapInitializer />
-        {/* Keyboard users can jump past the navbar; visible only while focused. */}
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-blue-600 focus:px-5 focus:py-3 focus:text-sm focus:font-bold focus:text-white"
