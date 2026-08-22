@@ -11,11 +11,13 @@ import { useEffect, useRef, useState, type Ref } from "react";
 import Button from "./Button";
 
 const navLinks = [
-  { name: "Home", href: "/"},
-  // { name: "Events", href: "/events"},
-  { name: "Welfare", href: "/care"},
+  // { name: "Home", href: "/"},
   { name: "About", href: "/about"},
+  { name: "Events", href: "/events"},
+  { name: "Welfare", href: "/welfare"},
   { name: "Committee", href: "/committee"},
+  { name: "Career", href: "/career"},
+  { name: "Unite", href: "/unite"},
 ]
 
 type IsActive = (href: string) => boolean

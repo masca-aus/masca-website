@@ -6,6 +6,7 @@ import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 
 import Button from "@/components/Button"
+import { STATES } from "@/utils/states"
 
 const DIALEKTOS_URL =
   "https://mascavoice.kit.com/posts/dialektos-ep1-beyond-the-bubble-with-john-ng-masca-national-chairperson-25-26"
@@ -32,9 +33,36 @@ export default function AboutSection() {
     const mm = gsap.matchMedia()
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
+      gsap.set(".bubble", {
+        scale: 0,
+        autoAlpha: 0,
+        transformOrigin: "center center",
+      })
+      gsap.set(".bridge", { drawSVG: "0%" })
+
+      // One timeline so the quote's story lands in order: the bubbles
+      // exist first, then the bridges link them.
+      gsap.timeline({
+        scrollTrigger: { trigger: sectionRef.current, start: "top 70%" },
+      })
+        .to(".bubble", {
+          scale: 1,
+          autoAlpha: 1,
+          duration: 0.5,
+          stagger: { each: 0.06, from: "random" },
+          ease: "entranceEase",
+        })
+        .to(".bridge", {
+          drawSVG: "100%",
+          duration: 0.4,
+          stagger: 0.06,
+          ease: "power1.out",
+        }, "-=0.35")
+
+      // The bubbles drift on their own clocks — a living network.
       gsap.utils.toArray<HTMLElement>(".bubble-float").forEach((node) => {
         gsap.to(node, {
-          y: gsap.utils.random(-10, 10, 1),
+          y: gsap.utils.random(-9, 9, 1),
           x: gsap.utils.random(-6, 6, 1),
           duration: gsap.utils.random(2.4, 3.8),
           ease: "sine.inOut",
@@ -56,9 +84,13 @@ export default function AboutSection() {
             <h2 className="title text-blue-600">Beyond the bubble</h2>
           </header>
 
-          <figure className="flex flex-col gap-2">
-            <blockquote className="font-secondary text-lg italic leading-snug text-blue-600 md:text-xl">
-              “Don&apos;t stay in your bubble — build a bigger one.”
+          <figure className="flex flex-col gap-2 border-l-4 border-yellow-500 pl-5">
+            <blockquote className="font-secondary text-xl italic leading-snug text-blue-600 md:text-2xl">
+              “Don&apos;t stay in your bubble —{" "}
+              <span className="underline decoration-yellow-500 decoration-[3px] underline-offset-4">
+                build a bigger one
+              </span>
+              .”
             </blockquote>
             <figcaption className="text-caption text-gray-700">
               —{" "}
@@ -81,8 +113,8 @@ export default function AboutSection() {
           </p>
 
           <p className="text-gray-700">
-            We&apos;re the keeper of the campfire — the wood, the shelter, and the 
-            continuity that keeps it burning, year after year. 
+            We&apos;re the keeper of the campfire — the wood, the shelter, and the
+            continuity that keeps it burning, year after year.
           </p>
 
           <Button variant="accent" href="/about" className="self-start mt-2">
@@ -118,10 +150,10 @@ function BubbleNetwork() {
 
   return (
     <svg
-      viewBox="0 0 420 380"
+      viewBox="70 36 305 334"
       className="h-auto w-full max-w-md overflow-visible"
       role="img"
-      aria-label="MASCA at the centre of a network linking student chapters across Australia"
+      aria-label="MASCA chapter bubbles across Australia and New Zealand, joined together by bridges"
     >
       <circle className="bridge" cx={C.x} cy={C.y} r="178" fill="none" stroke="#010066" strokeOpacity="0.15" strokeWidth="2" />
 
@@ -130,7 +162,21 @@ function BubbleNetwork() {
       ))}
 
       {crossLinks.map(([a, b], i) => (
-        <path key={`cross-${i}`} className="bridge" d={`M${peripherals[a].x} ${peripherals[a].y} L${peripherals[b].x} ${peripherals[b].y}`} stroke="#CC0001" strokeOpacity="0.4" strokeWidth="1.5" strokeLinecap="round" />
+        <path
+          key={`cross-${i}`}
+          className="bridge"
+          d={arc(chapters[a], chapters[b], i % 2 ? -26 : 26)}
+          fill="none" stroke="#CC0001" strokeOpacity="0.35" strokeWidth="1.5" strokeLinecap="round"
+        />
+      ))}
+
+      {/* Student specks */}
+      {dots.map((d, i) => (
+        <circle
+          key={`dot-${i}`}
+          className="bubble bubble-float"
+          cx={d.x} cy={d.y} r={d.r} fill={d.fill} opacity={d.opacity}
+        />
       ))}
 
       {peripherals.map((p, i) => (
