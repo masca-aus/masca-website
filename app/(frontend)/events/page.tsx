@@ -4,6 +4,8 @@ import { pageMetadata } from "@/utils/seo";
 import { CHAPTERS, getUpcomingEvents } from "@/utils/events";
 import EventSection from "./EventSection";
 
+import UnderConstruction from "@/components/UnderConstruction";
+
 export const metadata: Metadata = pageMetadata({
   title: "Events",
   description:
@@ -16,7 +18,7 @@ export default async function EventPage() {
 
   return (
     <main id="main">
-      <section className="flex flex-col justify-center bg-blue-600 pt-48 pb-32 min-h-80">
+      {/* <section className="flex flex-col justify-center bg-blue-600 pt-48 pb-32 min-h-80">
         <div className="container flex flex-col gap-24 max-w-2xl space-y-4">
           <span className="text-xs font-bold tracking-widest text-yellow-400 uppercase">
             Events Calendar
@@ -27,7 +29,8 @@ export default async function EventPage() {
         </div>
       </section>
       
-      <EventSection events={events} chapters={CHAPTERS} />
+      <EventSection events={events} chapters={CHAPTERS} /> */}
+      return <UnderConstruction />;
     </main>
   );
 }

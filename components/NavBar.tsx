@@ -11,10 +11,10 @@ import { useEffect, useRef, useState, type Ref } from "react";
 import Button from "./Button";
 
 const navLinks = [
-  { name: "Home", href: "/"},
+  // { name: "Home", href: "/"},
   { name: "About", href: "/about"},
   { name: "Events", href: "/events"},
-  { name: "Welfare", href: "/care"},
+  { name: "Welfare", href: "/welfare"},
   { name: "Committee", href: "/committee"},
   { name: "Career", href: "/career"},
   { name: "Unite", href: "/unite"},
