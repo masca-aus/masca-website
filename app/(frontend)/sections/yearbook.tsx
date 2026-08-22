@@ -18,7 +18,7 @@ export default async function YearbookSection() {
   if (featured.length === 0) return null
 
   return (
-    <section className="bg-yellow-50">
+    <section className="bg-gray-100">
       <div className="container section-pad grid grid-cols-1 lg:grid-cols-2 items-center gap-24 lg:gap-16">
 
         {/* Left: the pitch */}

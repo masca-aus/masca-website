@@ -42,7 +42,7 @@ export default function FollowUsSection() {
   }, { scope: sectionRef })
 
   return (
-    <section ref={sectionRef} className="bg-blue-50">
+    <section ref={sectionRef} className="bg-white">
       <div className="container section-pad grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
 
         {/* Left: the pitch */}

@@ -24,7 +24,7 @@ export default function StatesSection() {
   }, { scope: containerRef })
 
   return (
-    <section className="bg-gray-100">
+    <section className="bg-white">
       <div className="container section-pad flex flex-col gap-8">
 
         <header className="flex flex-col gap-4">
