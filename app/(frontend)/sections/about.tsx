@@ -8,6 +8,7 @@ import { useGSAP } from "@gsap/react"
 import Button from "@/components/Button"
 import { STATES } from "@/utils/states"
 
+// John Ng's Dialektós piece — the framing this section is built on.
 const DIALEKTOS_URL =
   "https://mascavoice.kit.com/posts/dialektos-ep1-beyond-the-bubble-with-john-ng-masca-national-chairperson-25-26"
 
@@ -15,23 +16,11 @@ export default function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null)
 
   useGSAP(() => {
-    gsap.from(".bubble", {
-      scale: 0,
-      autoAlpha: 0,
-      transformOrigin: "center center",
-      duration: 0.5,
-      stagger: 0.08,
-      ease: "entranceEase",
-      scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
-    })
-
-    gsap.effects.writeInOnScroll(".bridge", {
-      trigger: sectionRef.current,
-      stagger: 0.07,
-    })
-
     const mm = gsap.matchMedia()
 
+    // Every animation here is entrance/ambient flourish, so reduced-motion
+    // users simply get the finished picture: nothing below runs for them, and
+    // the SVG renders fully drawn on its own.
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       gsap.set(".bubble", {
         scale: 0,
@@ -78,6 +67,9 @@ export default function AboutSection() {
   return (
     <section ref={sectionRef}>
       <div className="container section-pad grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
+
+        {/* Right (desktop): the message — flipped from the usual text-left
+            rhythm to break the page's repetition. Stays first on mobile. */}
         <div className="flex flex-col gap-6 lg:order-2">
           <header className="flex flex-col gap-3">
             <span className="eyebrow text-red-600">Who we are</span>
@@ -132,21 +124,49 @@ export default function AboutSection() {
   )
 }
 
-
+// The quote, drawn: chapter bubbles in their own colours tied peer-to-peer.
+// Deliberately no hub node — the copy says MASCA is the bridges between
+// clubs, not another club at the centre, so the middle stays empty. Bridges
+// are stroked paths so they can draw themselves in; bubbles render on top to
+// hide the joins.
 function BubbleNetwork() {
-  const C = { x: 210, y: 190 }
-  const peripherals = [
-    { x: 210, y: 65, label: "VIC" },
-    { x: 298, y: 102, label: "NSW" },
-    { x: 335, y: 190, label: "QLD" },
-    { x: 298, y: 278, label: "WA" },
-    { x: 210, y: 315, label: "SA" },
-    { x: 122, y: 278, label: "ACT" },
-    { x: 85, y: 190, label: "TAS" },
-    // { x: 122, y: 102, label: "NZ" },
+  // Organic cluster — varied sizes and off-grid positions so it reads as a
+  // living community, not a diagram. Indexed against STATES (VIC NSW QLD WA
+  // SA ACT TAS NZ) so chapter colours stay single-sourced.
+  const spots = [
+    { x: 150, y: 130, r: 34 }, // VIC
+    { x: 290, y: 120, r: 32 }, // NSW
+    { x: 338, y: 225, r: 28 }, // QLD
+    { x: 148, y: 302, r: 30 }, // WA
+    { x: 242, y: 332, r: 26 }, // SA
+    { x: 103, y: 218, r: 24 }, // ACT
+    { x: 312, y: 308, r: 25 }, // TAS
+    { x: 218, y: 72,  r: 24 }, // NZ
+  ]
+  const chapters = STATES.map((state, i) => ({ ...state, ...spots[i] }))
+
+  // Neighbour ties around the cluster, plus long ties arcing through the
+  // middle — right where a hub would sit if MASCA were one.
+  const links: [number, number][] = [[7, 1], [1, 2], [2, 6], [6, 4], [4, 3], [3, 5], [5, 0], [0, 7]]
+  const crossLinks: [number, number][] = [[0, 6], [5, 2]]
+
+  // Unlabelled specks: the students behind the chapters.
+  const dots = [
+    { x: 196, y: 180, r: 4, fill: "#34389A", opacity: 0.35 },
+    { x: 262, y: 168, r: 3, fill: "#CC0001", opacity: 0.3 },
+    { x: 238, y: 268, r: 5, fill: "#FFCC00", opacity: 0.6 },
+    { x: 172, y: 262, r: 3, fill: "#010066", opacity: 0.25 },
   ]
 
-  const crossLinks: [number, number][] = [[0, 1], [2, 3], [4, 5], [6, 7]]
+  // Gentle quadratic arc between two bubbles; bow > 0 bends left of travel.
+  const arc = (a: { x: number; y: number }, b: { x: number; y: number }, bow: number) => {
+    const mx = (a.x + b.x) / 2
+    const my = (a.y + b.y) / 2
+    const len = Math.hypot(b.x - a.x, b.y - a.y)
+    const nx = -(b.y - a.y) / len
+    const ny = (b.x - a.x) / len
+    return `M${a.x} ${a.y} Q${mx + nx * bow} ${my + ny * bow} ${b.x} ${b.y}`
+  }
 
   return (
     <svg
@@ -155,12 +175,15 @@ function BubbleNetwork() {
       role="img"
       aria-label="MASCA chapter bubbles across Australia and New Zealand, joined together by bridges"
     >
-      <circle className="bridge" cx={C.x} cy={C.y} r="178" fill="none" stroke="#010066" strokeOpacity="0.15" strokeWidth="2" />
-
-      {peripherals.map((p, i) => (
-        <path key={`spoke-${i}`} className="bridge" d={`M${C.x} ${C.y} L${p.x} ${p.y}`} stroke="#010066" strokeOpacity="0.45" strokeWidth="2" strokeLinecap="round" />
+      {/* Bridges: chapter ↔ chapter, no hub */}
+      {links.map(([a, b], i) => (
+        <path
+          key={`link-${i}`}
+          className="bridge"
+          d={arc(chapters[a], chapters[b], i % 2 ? 16 : -16)}
+          fill="none" stroke="#010066" strokeOpacity="0.3" strokeWidth="1.75" strokeLinecap="round"
+        />
       ))}
-
       {crossLinks.map(([a, b], i) => (
         <path
           key={`cross-${i}`}
@@ -179,21 +202,26 @@ function BubbleNetwork() {
         />
       ))}
 
-      {peripherals.map((p, i) => (
-        <g key={`bubble-${i}`} className="bubble bubble-float">
-          <circle cx={p.x} cy={p.y} r="30" fill="#010066" stroke="#FFCC00" strokeWidth="2" />
-          <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" className="fill-white font-primary text-[13px] font-bold">
-            {p.label}
+      {/* Chapter bubbles, each in its own chapter colour */}
+      {chapters.map((c) => (
+        <g key={c.code} className="bubble bubble-float">
+          <circle cx={c.x} cy={c.y} r={c.r} fill={c.bg} />
+          {/* Soap-bubble glint */}
+          <circle
+            cx={c.x - c.r * 0.35} cy={c.y - c.r * 0.35} r={c.r * 0.18}
+            fill="#FFFFFF" opacity="0.35"
+          />
+          <text
+            x={c.x} y={c.y}
+            textAnchor="middle" dominantBaseline="central"
+            fill={c.fg} fontSize={Math.max(10, Math.round(c.r * 0.42))}
+            className="font-primary font-bold"
+          >
+            {c.code}
           </text>
         </g>
       ))}
 
-      <g className="bubble">
-        <circle cx={C.x} cy={C.y} r="48" fill="#FFCC00" />
-        <text x={C.x} y={C.y} textAnchor="middle" dominantBaseline="central" className="fill-blue-900 font-primary text-[18px] font-black tracking-wide">
-          MASCA
-        </text>
-      </g>
     </svg>
   )
 }
