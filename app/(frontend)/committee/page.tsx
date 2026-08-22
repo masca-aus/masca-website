@@ -4,11 +4,6 @@ import { pageMetadata } from "@/utils/seo";
 import { getCommittee, getCommitteeYears } from "@/utils/committee";
 import CommitteeSection from "./CommitteeSection";
 
-// Statically rendered: Payload is queried once at build time (no per-request
-// DB query). afterChange/afterDelete hooks on the committee collection call
-// revalidatePath, so an edit in /admin regenerates this page in seconds — no
-// ISR timer needed.
-
 export const metadata: Metadata = pageMetadata({
   title: "Committee",
   description:
@@ -17,7 +12,6 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function CommitteePage() {
-  // Sorted in admin drag order here on the server; the client section only filters.
   const members = await getCommittee();
   const years = getCommitteeYears(members);
 
@@ -44,7 +38,6 @@ export default async function CommitteePage() {
   );
 }
 
-// The collection starts empty — better an honest joke than fabricated people.
 function EmptyYearbook() {
   return (
     <section>

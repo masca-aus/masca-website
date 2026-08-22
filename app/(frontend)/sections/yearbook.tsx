@@ -4,17 +4,12 @@ import { getCommittee, getCommitteeYears } from "@/utils/committee"
 import YearbookStack from "./yearbookStack"
 
 export default async function YearbookSection() {
-  // Same Payload Local API query as /committee, run at build/revalidate time.
-  // The committee collection's hooks revalidate this page too, so the teaser
-  // never goes stale.
   const members = await getCommittee()
-  const years = getCommitteeYears(members) // newest-first
+  const years = getCommitteeYears(members)
   const latestYear = years[0]
 
-  // Already in admin drag order server-side; take the first handful for the fan.
   const featured = members.filter((m) => m.year === latestYear).slice(0, 5)
 
-  // Nothing to tease — bail rather than render an empty card.
   if (featured.length === 0) return null
 
   return (
@@ -43,7 +38,6 @@ export default async function YearbookSection() {
           </Button>
         </div>
 
-        {/* Right: the fanned snapshots */}
         <YearbookStack members={featured} />
 
       </div>

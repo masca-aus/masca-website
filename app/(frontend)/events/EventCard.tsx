@@ -10,12 +10,9 @@ import { STATES } from "@/utils/states"
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] as const
 
-// Chapter pill colours, keyed by state code. National / unknown chapters fall
-// back to the MASCA brand blue + yellow.
 const STATE_BY_CODE = Object.fromEntries(STATES.map((s) => [s.code, s]))
 const BRAND_PILL = { bg: "#010066", fg: "#FFCC00" }
 
-/** Parse Eventbrite's "local" ISO ("2026-06-12T18:00:00") into ymd/hour. */
 function parseLocal(local: string) {
   const [date, time] = local.split("T")
   const [y, m, d] = date.split("-").map(Number)
@@ -38,8 +35,6 @@ function priceLabel(event: Event) {
   const ta = event.ticket_availability
   if (!ta) return "TBA"
   const min = ta.minimum_ticket_price
-  // `is_free` is unset for many free events; a $0 minimum ticket price is the
-  // reliable signal, so treat both as free entry.
   const value = min ? parseFloat(min.major_value) : 0
   if (ta.is_free || !min || value === 0) return "Free entry"
   return `$${value.toFixed(0)}`
@@ -74,12 +69,8 @@ export default function EventCard({ event, chapter }: { event: Event; chapter?: 
       onMouseEnter={() => tweenRef.current?.play()}
       onMouseLeave={() => tweenRef.current?.reverse()}
     >
-      {/* Top banner — Eventbrite logo if present, else blue gradient */}
       <div className="relative min-h-44 bg-linear-to-br from-blue-900 to-blue-950">
         {event.logo?.url && (
-          // Plain <img>: Eventbrite hosts logos on evbuc.com; using <img>
-          // avoids configuring next.config images.remotePatterns.
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={event.logo.url}
             alt={event.name.text}
@@ -108,7 +99,6 @@ export default function EventCard({ event, chapter }: { event: Event; chapter?: 
         )}
       </div>
 
-      {/* Body */}
       <div className="flex flex-col gap-6 p-6">
         <div className="flex flex-col gap-2">
           <h3 className="text-h4 font-bold text-blue-600">{event.name.text}</h3>

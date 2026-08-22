@@ -6,11 +6,7 @@ import { useGSAP } from "@gsap/react"
 
 import type { CommitteeMember } from "@/utils/committee"
 
-/**
- * The landing-page tease for /committee: a handful of real committee portraits
- * fanned out like snapshots pulled from a yearbook. Cards deal themselves in on
- * scroll and the fan spreads on hover. Decorative — the CTA button is the link.
- */
+
 export default function YearbookStack({ members }: { members: CommitteeMember[] }) {
   const rootRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
@@ -23,9 +19,6 @@ export default function YearbookStack({ members }: { members: CommitteeMember[] 
   useGSAP(() => {
     const cards = gsap.utils.toArray<HTMLElement>(".polaroid")
 
-    // Place the fan from measured widths so it fits whatever column it lands in.
-    // Rotation is symmetric around the centre card; x-spacing auto-shrinks on
-    // narrow screens. Re-run on resize so the fan reflows.
     const layout = () => {
       if (cards.length === 0) return
       const stageW = stageRef.current?.offsetWidth ?? 0
@@ -39,11 +32,10 @@ export default function YearbookStack({ members }: { members: CommitteeMember[] 
           x: (i - mid) * step,
           rotation: (i - mid) * 7,
           transformOrigin: "center center",
-          zIndex: Math.round(n - Math.abs(i - mid)), // centre card on top
+          zIndex: Math.round(n - Math.abs(i - mid)),
         })
       })
 
-      // Rebuild the hover-spread timeline against the fresh spacing.
       hoverTl.current?.kill()
       const tl = gsap.timeline({ paused: true })
       cards.forEach((card, i) => {
@@ -62,8 +54,6 @@ export default function YearbookStack({ members }: { members: CommitteeMember[] 
 
     const mm = gsap.matchMedia()
 
-    // Deal the cards in; x/rotation are absent from the vars so the fan layout
-    // set above is preserved throughout the tween.
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       if (cards.length === 0) return
       gsap.from(cards, {
@@ -77,18 +67,14 @@ export default function YearbookStack({ members }: { members: CommitteeMember[] 
       })
     })
 
-    // Hand-drawn loop arrow draws itself in — the site's signature scroll motion.
     gsap.effects.writeInOnScroll(".yearbook-doodle", { trigger: stageRef.current })
 
     window.addEventListener("resize", layout)
     return () => window.removeEventListener("resize", layout)
-    // Scope to the wrapper (not stageRef) so `.yearbook-doodle` — a sibling of
-    // the stage — stays inside the scope and the draw-in resolves it.
   }, { scope: rootRef })
 
   return (
     <div ref={rootRef} className="relative flex justify-center lg:justify-end">
-      {/* Hand-drawn nudge curling into the stack (mirrors MascaCare). */}
       <div className="pointer-events-none absolute -top-12 left-0 z-20 flex items-start gap-1 -rotate-6 md:-top-14 lg:left-4" aria-hidden>
         <span className="font-accent text-2xl leading-none text-red-600 md:text-3xl">
           the people behind it all
@@ -108,12 +94,10 @@ export default function YearbookStack({ members }: { members: CommitteeMember[] 
             className="polaroid absolute left-1/2 top-1/2 w-36 rounded-sm bg-white p-2.5 pb-6 shadow-lg sm:w-44"
           >
             {i === centerIndex && (
-              // A strip of "washi tape" across the top card's corner.
               <span className="absolute -top-3 left-1/2 h-6 w-16 -translate-x-1/2 -rotate-3 rounded-xs bg-yellow-500/80" aria-hidden />
             )}
 
             <div className="relative aspect-3/4 overflow-hidden rounded-xs bg-blue-50">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={member.img}
                 alt={member.name}
@@ -135,7 +119,6 @@ export default function YearbookStack({ members }: { members: CommitteeMember[] 
   )
 }
 
-// Doodle-style looping arrow that curls and points down-right (into the stack).
 function LoopArrow({ className = "" }: { className?: string }) {
   return (
     <svg

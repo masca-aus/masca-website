@@ -33,7 +33,6 @@ export default function StatisticSection() {
       });
     });
 
-    // Reduced motion: no ticking numbers, just the final figures.
     mm.add("(prefers-reduced-motion: reduce)", () => {
       values.forEach((e) => {
         e.textContent = `${e.dataset.value}${e.dataset.suffix ?? ""}`;

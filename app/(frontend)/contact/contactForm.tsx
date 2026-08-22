@@ -10,8 +10,6 @@ const STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "Others"];
 
 const initialState: SendState = { status: "idle" };
 
-// Shared field/label styles, matching FormField so the inline <select> and
-// <textarea> sit on the same design-system tokens as the text inputs.
 const fieldClass =
   "rounded-md border-2 border-blue-100 bg-white px-4 py-3 text-body text-black outline-none transition-colors placeholder:text-gray-300 focus:border-blue-600 focus:shadow-sm";
 const labelClass = "text-body-sm font-bold text-gray-700";
@@ -23,13 +21,6 @@ export function ContactSection() {
 
   return (
     <section className="container py-16 font-primary">
-      {/* <p className="eyebrow text-red-600">Send us a message</p>
-      <h2 className="title mt-3 text-blue-600">
-        Tell us what you&apos;re working on.
-      </h2>
-      <p className="mt-6 max-w-xl text-body text-gray-700">
-        Fill in the form — a real student officer reads it and replies.
-      </p> */}
 
       <form action={formAction} className="flex flex-col gap-8">
         <div className="grid gap-6 sm:grid-cols-2">
@@ -37,13 +28,10 @@ export function ContactSection() {
           <FormField label="Email" name="email" type="email" placeholder="you@gmail.edu.au" required />
           <FormField label="Affiliation" name="affiliation" placeholder="University, company, or society " />
 
-          {/* Select — FormField is input-only, so rendered inline with matching styles */}
           <div className="flex flex-col gap-2">
             <label htmlFor="state" className={labelClass}>
               State chapter
             </label>
-            {/* appearance-none lets the padding size the select like the text
-                inputs; the chevron is re-added manually since it's removed too */}
             <div className="relative">
               <select
                 id="state"
@@ -73,10 +61,8 @@ export function ContactSection() {
           </div>
         </div>
 
-        {/* Carries the active pill so the action CCs the matching inbox */}
         <input type="hidden" name="topic" value={topic} />
 
-        {/* Topic chips */}
         <fieldset className="flex flex-col">
           <legend className={labelClass}>What&apos;s it about?</legend>
           <div className="flex flex-wrap gap-4 mt-2">
@@ -101,7 +87,6 @@ export function ContactSection() {
           </div>
         </fieldset>
 
-        {/* Message */}
         <div className="flex flex-col gap-2">
           <label htmlFor="message" className={labelClass}>
             Your message
@@ -109,7 +94,6 @@ export function ContactSection() {
           <textarea id="message" name="notes" rows={6} required className={`${fieldClass} resize-y`} />
         </div>
 
-        {/* Consent */}
         <label className="flex items-center gap-3 text-body-sm text-gray-700">
           <input
             type="checkbox"
@@ -127,7 +111,6 @@ export function ContactSection() {
           </span>
         </label>
 
-        {/* Submit */}
         <div className="flex flex-wrap items-center gap-5">
           <Button
             variant="accent"
