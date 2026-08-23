@@ -18,23 +18,24 @@ export default async function YearbookSection() {
 
         {/* Left: the pitch */}
         <div className="flex flex-col gap-6">
-          <header className="flex flex-col gap-4">
+          <header className="flex flex-col gap-3">
             <span className="eyebrow text-red-600">The Yearbook</span>
             <h2 className="title text-blue-600">The Class of {latestYear}</h2>
           </header>
 
-          <p className="font-secondary text-blue-600 italic text-xl leading-snug">
+          {/* Same pull-quote treatment as the About section's yellow rule */}
+          <blockquote className="border-l-4 border-yellow-500 pl-5 font-secondary text-blue-600 italic text-xl leading-snug md:text-2xl">
             “Elected each year — by students, for students.”
-          </p>
+          </blockquote>
 
           <p className="text-gray-700">
-            Every chapter, every event, every late-night welfare call traces back to a
-            committee of Malaysian students who put their hands up. Meet the people steering
-            MASCA this year — the friendly faces behind the council.
+            Every chapter, every event, every late-night welfare call traces back
+            to a committee of Malaysian students who put their hands up. Flip
+            through this year&apos;s class — and the classes that came before them.
           </p>
 
-          <Button href="/committee" className="self-start mt-4">
-            Flip through the yearbook <span aria-hidden>&rarr;</span>
+          <Button href="/committee" className="self-start mt-2">
+            Open the yearbook <span aria-hidden>&rarr;</span>
           </Button>
         </div>
 

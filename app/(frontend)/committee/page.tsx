@@ -17,17 +17,7 @@ export default async function CommitteePage() {
 
   return (
     <main id="main">
-      <section className="flex flex-col justify-center bg-blue-600 pt-48 pb-32 min-h-80">
-        <div className="container flex flex-col gap-24 max-w-2xl space-y-4">
-          <span className="text-xs font-bold tracking-widest text-yellow-400 uppercase">
-            The Yearbook
-          </span>
-          <p className="text-base leading-relaxed text-blue-100/80 md:text-lg max-w-xl">
-            The student leaders steering MASCA — elected each year to represent
-            Malaysian students across Australia.
-          </p>
-        </div>
-      </section>
+      <HeroBand />
 
       {members.length > 0 ? (
         <CommitteeSection members={members} years={years} />
@@ -35,6 +25,29 @@ export default async function CommitteePage() {
         <EmptyYearbook />
       )}
     </main>
+  );
+}
+
+// Same hero recipe as /about and /care: brand-blue band, yellow eyebrow,
+// soft blue-100 body. The brush script picks out the phrase the whole page
+// is built around.
+function HeroBand() {
+  return (
+    <section className="flex flex-col justify-center bg-blue-600 pt-48 pb-32 min-h-80">
+      <div className="container flex flex-col gap-6">
+        <span className="eyebrow text-yellow-500">the yearbook</span>
+        <h1 className="max-w-3xl text-white text-4xl md:text-5xl lg:text-6xl">
+          Meet the students{" "}
+          <span className="font-accent font-normal text-yellow-500">
+            steering MASCA
+          </span>
+        </h1>
+        <p className="max-w-xl text-blue-100/80 md:text-lg">
+          Elected each year to represent Malaysian students across Australia —
+          these are the faces behind the council.
+        </p>
+      </div>
+    </section>
   );
 }
 

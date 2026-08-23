@@ -25,15 +25,7 @@ export default function MascaCareSection() {
         </div>
 
         <div className="flex justify-center lg:order-1 lg:justify-start">
-          <div className="relative">
-            <div className="pointer-events-none absolute -top-14 left-4 z-10 flex items-start gap-1 -rotate-6 md:-top-16 md:left-8">
-              <span className="font-accent text-2xl leading-none text-red-600 md:text-3xl">
-                click to learn more
-              </span>
-              <LoopArrow className="w-11 shrink-0 text-red-600 md:w-12" />
-            </div>
-            <MascaCareCard />
-          </div>
+          <MascaCareCard />
         </div>
       </div>
     </section>
@@ -84,24 +76,4 @@ function MascaCareCard() {
       </span>
     </Link>
   )
-}
-
-function LoopArrow({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 120 110"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      className={className}
-    >
-      {/* swoop + single loop, ending lower-right */}
-      <path d="M6 24 C 34 2 76 4 80 38 C 82 56 58 60 56 42 C 55 30 74 31 80 45 C 92 72 96 84 108 94" />
-      {/* arrowhead, tip at the path end */}
-      <path d="M90 92 L108 94 L102 74" />
-    </svg>
-  );
 }
