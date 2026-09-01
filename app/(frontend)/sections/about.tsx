@@ -131,8 +131,9 @@ export default function AboutSection() {
 // hide the joins.
 function BubbleNetwork() {
   // Organic cluster — varied sizes and off-grid positions so it reads as a
-  // living community, not a diagram. Indexed against STATES (VIC NSW QLD WA
-  // SA ACT TAS NZ) so chapter colours stay single-sourced.
+  // living community, not a diagram. Australian chapters only (NZ excluded),
+  // indexed against STATES (VIC NSW QLD WA SA ACT TAS) so chapter colours
+  // stay single-sourced.
   const spots = [
     { x: 150, y: 130, r: 34 }, // VIC
     { x: 290, y: 120, r: 32 }, // NSW
@@ -141,13 +142,14 @@ function BubbleNetwork() {
     { x: 242, y: 332, r: 26 }, // SA
     { x: 103, y: 218, r: 24 }, // ACT
     { x: 312, y: 308, r: 25 }, // TAS
-    { x: 218, y: 72,  r: 24 }, // NZ
   ]
-  const chapters = STATES.map((state, i) => ({ ...state, ...spots[i] }))
+  const chapters = STATES
+    .filter((state) => state.code !== "NZ")
+    .map((state, i) => ({ ...state, ...spots[i] }))
 
   // Neighbour ties around the cluster, plus long ties arcing through the
   // middle — right where a hub would sit if MASCA were one.
-  const links: [number, number][] = [[7, 1], [1, 2], [2, 6], [6, 4], [4, 3], [3, 5], [5, 0], [0, 7]]
+  const links: [number, number][] = [[0, 1], [1, 2], [2, 6], [6, 4], [4, 3], [3, 5], [5, 0]]
   const crossLinks: [number, number][] = [[0, 6], [5, 2]]
 
   // Unlabelled specks: the students behind the chapters.
@@ -170,10 +172,10 @@ function BubbleNetwork() {
 
   return (
     <svg
-      viewBox="70 36 305 334"
+      viewBox="70 76 305 294"
       className="h-auto w-full max-w-md overflow-visible"
       role="img"
-      aria-label="MASCA chapter bubbles across Australia and New Zealand, joined together by bridges"
+      aria-label="MASCA chapter bubbles across Australia, joined together by bridges"
     >
       {/* Bridges: chapter ↔ chapter, no hub */}
       {links.map(([a, b], i) => (

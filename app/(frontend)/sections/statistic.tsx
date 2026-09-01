@@ -7,8 +7,8 @@ import { useGSAP } from "@gsap/react";
 
 export default function StatisticSection() {
   const stats = [
-    { from: 0, value: 33, suffix: "k+", label: "students reached" },
-    { from: 0, value: 7, suffix: "", label: "state chapters" },
+    { from: 0, value: 14, suffix: "k+", label: "students reached" },
+    { from: 0, value: 7, suffix: "", label: "states and territories" },
     { from: new Date().getFullYear(), value: 2001, suffix: "", label: "founded" },
   ]
   const rootRef = useRef<HTMLElement>(null);

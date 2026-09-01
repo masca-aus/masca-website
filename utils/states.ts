@@ -16,5 +16,5 @@ export const STATES: State[] = [
   { code: "SA", name: "South Australia", capital: "Adelaide", bg: "#FBE700", fg: "#000000" },
   { code: "ACT", name: "A. Capital Territory", capital: "Canberra", bg: "#298A43", fg: "#FFFFFF" },
   { code: "TAS", name: "Tasmania", capital: "Hobart", bg: "#9E00A3", fg: "#FFFFFF" },
-  { code: "NZ", name: "New Zealand", capital: "Wellington", bg: "#00E8E8", fg: "#000000" },
+  // { code: "NZ", name: "New Zealand", capital: "Wellington", bg: "#00E8E8", fg: "#000000" },
 ]

@@ -30,7 +30,7 @@ export function ContactSection() {
 
           <div className="flex flex-col gap-2">
             <label htmlFor="state" className={labelClass}>
-              State chapter
+              State/Territory
             </label>
             <div className="relative">
               <select

@@ -28,7 +28,7 @@ export default function StatesSection() {
       <div className="container section-pad flex flex-col gap-8">
 
         <header className="flex flex-col gap-4">
-          <span className="eyebrow text-red-600">Chapters across australia</span>
+          <span className="eyebrow text-red-600">States and Territories</span>
           <h2 className="title text-blue-600">Find your state, find your people</h2>
         </header>
 
