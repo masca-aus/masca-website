@@ -21,6 +21,18 @@ describe("payload config", () => {
     expect(users?.auth.disableLocalStrategy).toBeFalsy();
   });
 
+  it("only allows an authenticated user to unlock their own account", async () => {
+    const config = await configPromise;
+    const users = config.collections.find((collection) => collection.slug === "users");
+    const canUnlock = users?.access.unlock;
+
+    expect(canUnlock).toBeTypeOf("function");
+    expect(await canUnlock?.({ req: { user: null } } as never)).toBe(false);
+    expect(
+      await canUnlock?.({ req: { user: { id: 42 } } } as never),
+    ).toEqual({ id: { equals: 42 } });
+  });
+
   it("uses the Postgres adapter fed by DATABASE_URI (Supabase pooler)", async () => {
     const config = await configPromise;
     expect(config.db.name).toBe("postgres");

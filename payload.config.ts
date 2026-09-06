@@ -84,6 +84,12 @@ export default buildConfig({
       admin: {
         useAsTitle: "email",
       },
+      access: {
+        // Payload <=3.88 permits any authenticated user to unlock another
+        // account by default. Restrict the operation to the caller's own row.
+        unlock: ({ req }) =>
+          req.user ? { id: { equals: req.user.id } } : false,
+      },
       // `auth: true` gives email+password login and the forgot-password flow;
       // reset emails go out through the Resend adapter below.
       auth: true,
