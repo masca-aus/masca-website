@@ -11,6 +11,18 @@ represent or imply affiliation with your own organisation.
 
 Follow these steps to set up and run the application locally.
 
+### Prerequisites
+
+- Node.js 22 LTS (run `nvm use` if you use nvm)
+- npm 11 (the version is pinned in `package.json`)
+
+Enable the pinned package manager once after installing Node:
+
+```bash
+corepack enable
+corepack install
+```
+
 ### 1. Clone the Repository
 
 ```bash
@@ -20,10 +32,10 @@ cd your-repo-name
 
 ### 2. Install Dependencies
 
-Install the project dependencies using your preferred package manager:
+Install the exact dependency versions recorded in the lockfile:
 
 ```bash
-npm install
+npm ci
 ```
 
 ### 3. Environment Variables
