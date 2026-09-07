@@ -87,6 +87,11 @@ export default buildConfig({
         Logo: "/components/admin/MascaBrand#MascaLogo",
         Icon: "/components/admin/MascaBrand#MascaIcon",
       },
+      views: {
+        dashboard: {
+          Component: "/components/admin/MascaDashboard#MascaDashboard",
+        },
+      },
     },
     importMap: {
       baseDir: dirname,

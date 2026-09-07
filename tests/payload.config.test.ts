@@ -17,6 +17,7 @@ describe("payload config", () => {
     ]);
     expect(config.admin.components.graphics.Logo).toBeTruthy();
     expect(config.admin.components.graphics.Icon).toBeTruthy();
+    expect(config.admin.components.views.dashboard.Component).toBeTruthy();
   });
 
   it("defines exactly four collections: auth-enabled users, media, committee, sponsors", async () => {

@@ -69,3 +69,304 @@ html[data-theme="light"] {
   color: #fff;
   background: var(--masca-red);
 }
+
+.masca-dashboard {
+  --dashboard-surface: #fff;
+  --dashboard-surface-muted: #f7f7fb;
+  --dashboard-border: #dedeea;
+  --dashboard-text: #101018;
+  --dashboard-text-muted: #666678;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  width: min(100%, 96rem);
+  padding: 2.5rem var(--gutter-h) 4rem;
+  color: var(--dashboard-text);
+}
+
+html[data-theme="dark"] .masca-dashboard {
+  --dashboard-surface: #202024;
+  --dashboard-surface-muted: #18181c;
+  --dashboard-border: #393940;
+  --dashboard-text: #f7f7fb;
+  --dashboard-text-muted: #aaaaba;
+}
+
+.masca-dashboard__hero {
+  position: relative;
+  display: flex;
+  min-height: 15rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  overflow: hidden;
+  padding: clamp(2rem, 5vw, 4rem);
+  border-radius: 1.5rem;
+  color: #fff;
+  background:
+    radial-gradient(circle at 92% 15%, rgb(255 204 0 / 95%) 0 0.45rem, transparent 0.5rem),
+    radial-gradient(circle at 87% 22%, rgb(204 0 1 / 90%) 0 3rem, transparent 3.05rem),
+    linear-gradient(125deg, var(--masca-blue-dark), var(--masca-blue) 62%, #1b1e80);
+  box-shadow: 0 22px 55px rgb(1 0 102 / 18%);
+}
+
+.masca-dashboard__hero::after {
+  position: absolute;
+  right: -4rem;
+  bottom: -7rem;
+  width: 18rem;
+  height: 18rem;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 999px;
+  content: "";
+}
+
+.masca-dashboard__hero-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 44rem;
+}
+
+.masca-dashboard__eyebrow {
+  display: block;
+  margin-bottom: 0.7rem;
+  color: var(--masca-blue);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.masca-dashboard__hero .masca-dashboard__eyebrow {
+  color: var(--masca-yellow);
+}
+
+.masca-dashboard__hero h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2.4rem, 6vw, 4.7rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.masca-dashboard__hero p {
+  max-width: 40rem;
+  margin: 1.25rem 0 0;
+  color: rgb(255 255 255 / 78%);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.masca-dashboard__site-link {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1.05rem;
+  border: 1px solid rgb(255 255 255 / 35%);
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.masca-dashboard__site-link:hover {
+  border-color: #fff;
+  background: rgb(255 255 255 / 12%);
+}
+
+.masca-dashboard__site-link svg,
+.masca-dashboard__admin a svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.masca-dashboard__section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.masca-dashboard__section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.masca-dashboard__section-heading h2,
+.masca-dashboard__admin h2 {
+  margin: 0;
+  color: var(--dashboard-text);
+  font-size: 1.65rem;
+  letter-spacing: -0.025em;
+}
+
+.masca-dashboard__section-heading p,
+.masca-dashboard__admin p {
+  max-width: 30rem;
+  margin: 0;
+  color: var(--dashboard-text-muted);
+  line-height: 1.55;
+}
+
+.masca-dashboard__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.masca-dashboard__card {
+  position: relative;
+  display: flex;
+  min-height: 19rem;
+  flex-direction: column;
+  gap: 1.4rem;
+  overflow: hidden;
+  padding: 1.5rem;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 1.15rem;
+  background: var(--dashboard-surface);
+  box-shadow: 0 7px 24px rgb(1 0 102 / 5%);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.masca-dashboard__card:hover {
+  border-color: color-mix(in srgb, var(--card-accent) 55%, var(--dashboard-border));
+  box-shadow: 0 15px 35px rgb(1 0 102 / 10%);
+  transform: translateY(-3px);
+}
+
+.masca-dashboard__card[data-accent="blue"] { --card-accent: var(--masca-blue); }
+.masca-dashboard__card[data-accent="yellow"] { --card-accent: #c39b00; }
+.masca-dashboard__card[data-accent="red"] { --card-accent: var(--masca-red); }
+
+.masca-dashboard__card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0.3rem;
+  background: var(--card-accent);
+  content: "";
+}
+
+.masca-dashboard__card-icon {
+  display: grid;
+  width: 3.2rem;
+  height: 3.2rem;
+  place-items: center;
+  border-radius: 0.9rem;
+  color: var(--card-accent);
+  background: color-mix(in srgb, var(--card-accent) 10%, transparent);
+}
+
+.masca-dashboard__card-icon svg {
+  width: 1.7rem;
+  height: 1.7rem;
+}
+
+.masca-dashboard__card-copy {
+  flex: 1;
+}
+
+.masca-dashboard__card-copy h3 {
+  margin: 0 0 0.65rem;
+  color: var(--dashboard-text);
+  font-size: 1.25rem;
+}
+
+.masca-dashboard__card-copy p {
+  margin: 0;
+  color: var(--dashboard-text-muted);
+  line-height: 1.55;
+}
+
+.masca-dashboard__card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--dashboard-border);
+}
+
+.masca-dashboard__card-actions a,
+.masca-dashboard__admin a {
+  color: var(--dashboard-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.masca-dashboard__card-actions a:hover,
+.masca-dashboard__admin a:hover {
+  color: var(--card-accent, var(--masca-blue));
+}
+
+.masca-dashboard__card-actions .masca-dashboard__add-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--card-accent);
+  font-size: 0.85rem;
+}
+
+.masca-dashboard__add-link svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.masca-dashboard__admin {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.5rem 1.7rem;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 1.15rem;
+  background: var(--dashboard-surface-muted);
+}
+
+.masca-dashboard__admin p {
+  margin-top: 0.45rem;
+}
+
+.masca-dashboard__admin a {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 64rem) {
+  .masca-dashboard__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .masca-dashboard__card {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 48rem) {
+  .masca-dashboard {
+    gap: 2rem;
+    padding-top: 1.25rem;
+  }
+
+  .masca-dashboard__hero,
+  .masca-dashboard__section-heading,
+  .masca-dashboard__admin {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .masca-dashboard__hero {
+    min-height: 20rem;
+  }
+
+  .masca-dashboard__section-heading {
+    gap: 0.75rem;
+  }
+}
