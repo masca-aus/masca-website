@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import CookiePreferencesButton from "@/components/CookiePreferencesButton";
+
 // `external: true` opens the link in a new tab (use for off-site URLs).
 type FooterLink = { label: string; href: string; external?: boolean };
 
@@ -34,6 +36,16 @@ const footerSections: { heading: string; links: FooterLink[] }[] = [
       { label: "Linkedin", href: "https://www.linkedin.com/company/masca-amplifies/posts/?feedView=all", external: true },
     ],
   },
+  {
+    heading: "Legal & access",
+    links: [
+      { label: "Privacy policy", href: "/privacy" },
+      { label: "Terms of use", href: "/terms" },
+      { label: "Cookie notice", href: "/cookies" },
+      { label: "Data protection & PDPA", href: "/data-protection" },
+      { label: "Accessibility", href: "/accessibility" },
+    ],
+  },
 ];
 
 export default function Footer() {
@@ -41,7 +53,7 @@ export default function Footer() {
     <footer className="bg-blue-600 text-white">
 
       <div className="max-w-7xl mx-auto px-6 py-16 sm:px-10 md:px-16 md:py-24 lg:py-32">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 items-start md:grid-cols-[2fr_1fr_1fr_1fr] md:gap-10">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 items-start md:grid-cols-[1.75fr_1fr_1fr_1fr_1.25fr] md:gap-8">
 
           <div className="col-span-2 flex flex-col gap-4 md:col-span-1">
             <div className="flex gap-4 items-center">
@@ -71,6 +83,13 @@ export default function Footer() {
                     </Link>
                   </li>
                 ))}
+                {section.heading === "Legal & access" && (
+                  <li>
+                    <CookiePreferencesButton
+                      className="inline-block cursor-pointer py-0.5 text-left transition-colors hover:text-white"
+                    />
+                  </li>
+                )}
               </ul>
             </div>
           ))}
