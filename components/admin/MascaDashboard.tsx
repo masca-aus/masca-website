@@ -32,7 +32,7 @@ const contentAreas = [
 
 export function MascaDashboard() {
   return (
-    <main className="masca-dashboard">
+    <main className="masca-dashboard" style={{ marginInline: "auto" }}>
       <section className="masca-dashboard__hero">
         <div className="masca-dashboard__hero-copy">
           <span className="masca-dashboard__eyebrow">MASCA Content Management</span>
