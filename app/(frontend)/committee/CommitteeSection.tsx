@@ -90,9 +90,6 @@ export default function CommitteeSection({
                   {group.label}
                 </h2>
                 <span className="h-px flex-1 bg-gray-300" aria-hidden />
-                <span className="text-caption font-semibold text-gray-700">
-                  {group.members.length} {group.members.length === 1 ? "member" : "members"}
-                </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
