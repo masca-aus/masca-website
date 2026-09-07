@@ -1,4 +1,28 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+const { capturedDatabasePool } = vi.hoisted(() => ({
+  capturedDatabasePool: {
+    connectionString: undefined as string | undefined,
+    max: undefined as number | undefined,
+  },
+}));
+
+vi.mock("@payloadcms/db-postgres", async () => {
+  const actual = await vi.importActual<typeof import("@payloadcms/db-postgres")>(
+    "@payloadcms/db-postgres",
+  );
+
+  return {
+    ...actual,
+    postgresAdapter: (
+      options: Parameters<typeof actual.postgresAdapter>[0],
+    ) => {
+      capturedDatabasePool.connectionString = options.pool?.connectionString;
+      capturedDatabasePool.max = options.pool?.max;
+      return actual.postgresAdapter(options);
+    },
+  };
+});
 
 import configPromise from "@payload-config";
 
@@ -47,6 +71,18 @@ describe("payload config", () => {
   it("uses the Postgres adapter fed by DATABASE_URI (Supabase pooler)", async () => {
     const config = await configPromise;
     expect(config.db.name).toBe("postgres");
+  });
+
+  it("limits each serverless instance to two database connections", async () => {
+    await configPromise;
+    expect(capturedDatabasePool.max).toBe(2);
+  });
+
+  it("uses Supabase transaction mode for website and CMS traffic", async () => {
+    await configPromise;
+    expect(capturedDatabasePool.connectionString).toBe(
+      "postgresql://user:pass@aws-0-ap-southeast-2.pooler.supabase.com:6543/postgres",
+    );
   });
 
   it("sends email (incl. password resets) through Resend from the org inbox", async () => {

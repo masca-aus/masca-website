@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "ci": "payload migrate && next build",
+    "ci": "PAYLOAD_MIGRATING=true payload migrate && next build",
     "start": "next start",
     "lint": "eslint",
     "payload": "payload",

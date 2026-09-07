@@ -10,6 +10,36 @@ import { buildConfig } from "payload";
 
 import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
 
+export function createDatabasePoolConfig(
+  connectionString: string | undefined,
+  isMigration = process.env.PAYLOAD_MIGRATING === "true",
+) {
+  let selectedConnectionString = connectionString;
+
+  if (connectionString && !isMigration) {
+    try {
+      const databaseURL = new URL(connectionString);
+      const isSupabaseSharedPooler =
+        databaseURL.hostname === "pooler.supabase.com" ||
+        databaseURL.hostname.endsWith(".pooler.supabase.com");
+
+      if (isSupabaseSharedPooler && databaseURL.port === "5432") {
+        databaseURL.port = "6543";
+        selectedConnectionString = databaseURL.toString();
+      }
+    } catch {
+      // Let the Postgres adapter report malformed connection strings itself.
+    }
+  }
+
+  return {
+    connectionString: selectedConnectionString,
+    // Payload reserves one client for its reconnect listener, so two is the
+    // smallest pool that still leaves a client available for real queries.
+    max: 2,
+  };
+}
+
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Supabase Storage speaks the S3 protocol at <project>/storage/v1/s3; the same
@@ -290,9 +320,7 @@ export default buildConfig({
   db: postgresAdapter({
     // Transaction-mode pooler connection string — required on Vercel
     // serverless where connections must not be held open.
-    pool: {
-      connectionString: process.env.DATABASE_URI,
-    },
+    pool: createDatabasePoolConfig(process.env.DATABASE_URI),
     migrationDir: path.resolve(dirname, "migrations"),
     // Local dev points at the SAME production database, so dev mode must never
     // push schema changes directly: a push stamps a `dev` row into
