@@ -76,6 +76,13 @@ html[data-theme="light"] {
   --dashboard-border: #dedeea;
   --dashboard-text: #101018;
   --dashboard-text-muted: #666678;
+  --dashboard-blue-accent: var(--masca-blue);
+  --dashboard-red-accent: var(--masca-red);
+  --dashboard-yellow-accent: #8a6a00;
+  --dashboard-hero-start: var(--masca-blue-dark);
+  --dashboard-hero-middle: var(--masca-blue);
+  --dashboard-hero-end: #1b1e80;
+  --dashboard-hero-muted: #d0d0e7;
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
@@ -85,11 +92,18 @@ html[data-theme="light"] {
 }
 
 html[data-theme="dark"] .masca-dashboard {
-  --dashboard-surface: #202024;
-  --dashboard-surface-muted: #18181c;
-  --dashboard-border: #393940;
-  --dashboard-text: #f7f7fb;
-  --dashboard-text-muted: #aaaaba;
+  --dashboard-surface: #24242b;
+  --dashboard-surface-muted: #1c1d24;
+  --dashboard-border: #484954;
+  --dashboard-text: #fbfbff;
+  --dashboard-text-muted: #c4c5d2;
+  --dashboard-blue-accent: #9aa9ff;
+  --dashboard-red-accent: #ff7375;
+  --dashboard-yellow-accent: #ffda4d;
+  --dashboard-hero-start: #162b73;
+  --dashboard-hero-middle: #263b92;
+  --dashboard-hero-end: #40358f;
+  --dashboard-hero-muted: #e0e2f3;
 }
 
 .masca-dashboard__hero {
@@ -106,8 +120,18 @@ html[data-theme="dark"] .masca-dashboard {
   background:
     radial-gradient(circle at 92% 15%, rgb(255 204 0 / 95%) 0 0.45rem, transparent 0.5rem),
     radial-gradient(circle at 87% 22%, rgb(204 0 1 / 90%) 0 3rem, transparent 3.05rem),
-    linear-gradient(125deg, var(--masca-blue-dark), var(--masca-blue) 62%, #1b1e80);
+    linear-gradient(
+      125deg,
+      var(--dashboard-hero-start),
+      var(--dashboard-hero-middle) 62%,
+      var(--dashboard-hero-end)
+    );
   box-shadow: 0 22px 55px rgb(1 0 102 / 18%);
+}
+
+html[data-theme="dark"] .masca-dashboard__hero {
+  border: 1px solid rgb(154 169 255 / 35%);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 32%);
 }
 
 .masca-dashboard__hero::after {
@@ -130,7 +154,7 @@ html[data-theme="dark"] .masca-dashboard {
 .masca-dashboard__eyebrow {
   display: block;
   margin-bottom: 0.7rem;
-  color: var(--masca-blue);
+  color: var(--dashboard-blue-accent);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.13em;
@@ -152,7 +176,7 @@ html[data-theme="dark"] .masca-dashboard {
 .masca-dashboard__hero p {
   max-width: 40rem;
   margin: 1.25rem 0 0;
-  color: rgb(255 255 255 / 78%);
+  color: var(--dashboard-hero-muted);
   font-size: 1rem;
   line-height: 1.65;
 }
@@ -176,6 +200,11 @@ html[data-theme="dark"] .masca-dashboard {
 .masca-dashboard__site-link:hover {
   border-color: #fff;
   background: rgb(255 255 255 / 12%);
+}
+
+.masca-dashboard__site-link:focus-visible {
+  outline: 3px solid var(--masca-yellow);
+  outline-offset: 4px;
 }
 
 .masca-dashboard__site-link svg,
@@ -240,9 +269,9 @@ html[data-theme="dark"] .masca-dashboard {
   transform: translateY(-3px);
 }
 
-.masca-dashboard__card[data-accent="blue"] { --card-accent: var(--masca-blue); }
-.masca-dashboard__card[data-accent="yellow"] { --card-accent: #c39b00; }
-.masca-dashboard__card[data-accent="red"] { --card-accent: var(--masca-red); }
+.masca-dashboard__card[data-accent="blue"] { --card-accent: var(--dashboard-blue-accent); }
+.masca-dashboard__card[data-accent="yellow"] { --card-accent: var(--dashboard-yellow-accent); }
+.masca-dashboard__card[data-accent="red"] { --card-accent: var(--dashboard-red-accent); }
 
 .masca-dashboard__card::before {
   position: absolute;
@@ -310,6 +339,13 @@ html[data-theme="dark"] .masca-dashboard {
   gap: 0.35rem;
   color: var(--card-accent);
   font-size: 0.85rem;
+}
+
+.masca-dashboard__card-actions a:focus-visible,
+.masca-dashboard__admin a:focus-visible {
+  border-radius: 0.2rem;
+  outline: 3px solid var(--dashboard-blue-accent);
+  outline-offset: 4px;
 }
 
 .masca-dashboard__add-link svg {
