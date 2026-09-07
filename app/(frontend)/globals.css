@@ -131,6 +131,22 @@ p {
   padding-inline: 2rem;   /* px-8 */
 }
 
+.committee-department__marker {
+  width: 0.65rem;
+  height: 2rem;
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: var(--color-blue-600);
+}
+
+.committee-department[data-accent="slate"] .committee-department__marker { background: #477080; }
+.committee-department[data-accent="sky"] .committee-department__marker { background: #1683c4; }
+.committee-department[data-accent="green"] .committee-department__marker { background: #388c55; }
+.committee-department[data-accent="yellow"] .committee-department__marker { background: var(--color-yellow-800); }
+.committee-department[data-accent="orange"] .committee-department__marker { background: #d66b35; }
+.committee-department[data-accent="red"] .committee-department__marker { background: var(--color-red-600); }
+.committee-department[data-accent="gray"] .committee-department__marker { background: var(--color-gray-700); }
+
 @media (min-width: 48rem) {   /* md */
   .container { padding-inline: 4rem; }   /* px-16 */
 }
@@ -142,5 +158,4 @@ p {
 @media (min-width: 80rem) {   /* xl */
   .container { padding-inline: 8rem; }   /* px-32 */
 }
-
 

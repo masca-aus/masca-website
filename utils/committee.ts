@@ -11,11 +11,21 @@ import { getPayload } from "payload"
 
 import config from "@payload-config"
 import type { Committee } from "@/payload-types"
+export type CommitteeDepartment =
+  | "chairs"
+  | "secretariat"
+  | "treasury"
+  | "amplifies"
+  | "careers"
+  | "cares"
+  | "unites"
+  | "unassigned"
 
 export type CommitteeMember = {
   id: string
   name: string
   role: string
+  department: CommitteeDepartment
   img: string
   year: string
   university?: string
@@ -57,6 +67,7 @@ export function toCommitteeMember(doc: Committee): CommitteeMember {
     id: String(doc.id),
     name: doc.name,
     role: doc.role,
+    department: doc.department,
     img: portrait?.url ?? "",
     year: doc.year,
     // Empty strings coalesce to undefined so the UI hides what's unset.

@@ -6,6 +6,7 @@ import { useGSAP } from "@gsap/react"
 import { X } from "lucide-react"
 
 import type { CommitteeMember } from "@/utils/committee"
+import { getCommitteeGroups } from "@/utils/committeeGroups"
 import CommitteeCard from "./CommitteeCard"
 
 export default function CommitteeSection({
@@ -24,6 +25,8 @@ export default function CommitteeSection({
     () => members.filter((m) => m.year === activeYear),
     [members, activeYear],
   )
+
+  const groups = useMemo(() => getCommitteeGroups(visible), [visible])
 
   useGSAP(() => {
     if (visible.length === 0) return
@@ -70,12 +73,38 @@ export default function CommitteeSection({
           })}
         </div>
 
-        <div
-          ref={gridRef}
-          className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6"
-        >
-          {visible.map((member) => (
-            <CommitteeCard key={member.id} member={member} onOpen={setSelected} />
+        <div ref={gridRef} className="flex flex-col gap-16">
+          {groups.map((group) => (
+            <section
+              key={group.department}
+              aria-labelledby={`department-${group.department}`}
+              className="committee-department flex flex-col gap-6"
+              data-accent={group.accent}
+            >
+              <div className="flex items-center gap-4">
+                <span className="committee-department__marker" aria-hidden />
+                <h2
+                  id={`department-${group.department}`}
+                  className="text-2xl font-bold text-blue-600 md:text-3xl"
+                >
+                  {group.label}
+                </h2>
+                <span className="h-px flex-1 bg-gray-300" aria-hidden />
+                <span className="text-caption font-semibold text-gray-700">
+                  {group.members.length} {group.members.length === 1 ? "member" : "members"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
+                {group.members.map((member) => (
+                  <CommitteeCard
+                    key={member.id}
+                    member={member}
+                    onOpen={setSelected}
+                  />
+                ))}
+              </div>
+            </section>
           ))}
         </div>
 

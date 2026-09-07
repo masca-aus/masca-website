@@ -176,6 +176,10 @@ export interface Committee {
    */
   role: string;
   /**
+   * Controls the department section on the public committee page. Use Unassigned only while reviewing legacy records.
+   */
+  department: 'chairs' | 'secretariat' | 'treasury' | 'amplifies' | 'careers' | 'cares' | 'unites' | 'unassigned';
+  /**
    * Full name, e.g. "Monash University". Optional.
    */
   university?: string | null;
@@ -342,6 +346,7 @@ export interface CommitteeSelect<T extends boolean = true> {
   _order?: T;
   name?: T;
   role?: T;
+  department?: T;
   university?: T;
   course?: T;
   portrait?: T;

@@ -11,6 +11,11 @@ import { revalidatePath } from "next/cache";
 
 import configPromise from "@payload-config";
 import { toCommitteeMember } from "@/utils/committee";
+import { getCommitteeGroups } from "@/utils/committeeGroups";
+import {
+  COMMITTEE_DEPARTMENT_OPTIONS,
+  COMMITTEE_DEPARTMENTS,
+} from "@/utils/committeeDepartments";
 import type { Committee } from "@/payload-types";
 
 const getCommitteeCollection = async () => {
@@ -28,8 +33,8 @@ const getField = async (name: string) => {
 };
 
 describe("committee collection (Payload-served committee page)", () => {
-  it("mirrors the member shape: required name/role/year, optional bio/uni/course/linkedin", async () => {
-    for (const name of ["name", "role", "year"]) {
+  it("mirrors the member shape: required name/role/department/year, optional bio/uni/course/linkedin", async () => {
+    for (const name of ["name", "role", "department", "year"]) {
       const field = await getField(name);
       expect("required" in field && field.required, `${name} required`).toBe(true);
     }
@@ -41,6 +46,15 @@ describe("committee collection (Payload-served committee page)", () => {
       const field = await getField(name);
       expect(field.type, `${name} is text`).toBe("text");
     }
+  });
+
+  it("offers the fixed MASCA departments plus an explicit legacy review bucket", async () => {
+    const department = await getField("department");
+    expect(department.type).toBe("select");
+    expect("options" in department && department.options).toEqual(
+      COMMITTEE_DEPARTMENT_OPTIONS,
+    );
+    expect("defaultValue" in department && department.defaultValue).toBe("unassigned");
   });
 
   it("orders by drag-and-drop instead of a manual order field", async () => {
@@ -112,6 +126,7 @@ describe("toCommitteeMember (Payload doc → page shape)", () => {
     _order: "a0",
     name: "Ava Tan",
     role: "President",
+    department: "chairs",
     portrait: {
       id: 1,
       alt: "Ava Tan",
@@ -133,6 +148,7 @@ describe("toCommitteeMember (Payload doc → page shape)", () => {
       id: "7",
       name: "Ava Tan",
       role: "President",
+      department: "chairs",
       img: "https://test-project.storage.supabase.co/storage/v1/object/public/media/ava.jpg",
       year: "2026/2027",
       university: "Monash University",
@@ -159,5 +175,60 @@ describe("toCommitteeMember (Payload doc → page shape)", () => {
   it("degrades to an empty img rather than crashing when the portrait is unpopulated", () => {
     const member = toCommitteeMember({ ...doc, portrait: 1 });
     expect(member.img).toBe("");
+  });
+});
+
+describe("getCommitteeGroups", () => {
+  const member = (id: string, department: Committee["department"]) =>
+    toCommitteeMember({
+      id: Number(id),
+      _order: id,
+      name: `Member ${id}`,
+      role: "Executive",
+      department,
+      portrait: 1,
+      year: "2026/2027",
+      updatedAt: "2026-07-22T00:00:00.000Z",
+      createdAt: "2026-07-22T00:00:00.000Z",
+    });
+
+  it("groups members in the fixed department order while preserving member order", () => {
+    const groups = getCommitteeGroups([
+      member("1", "treasury"),
+      member("2", "chairs"),
+      member("3", "treasury"),
+      member("4", "amplifies"),
+    ]);
+
+    expect(groups.map((group) => group.department)).toEqual([
+      "chairs",
+      "treasury",
+      "amplifies",
+    ]);
+    expect(groups[1]?.members.map(({ id }) => id)).toEqual(["1", "3"]);
+  });
+
+  it("keeps legacy unassigned records visible at the end for safe review", () => {
+    const groups = getCommitteeGroups([
+      member("1", "unassigned"),
+      member("2", "cares"),
+    ]);
+
+    expect(groups.map((group) => group.department)).toEqual([
+      "cares",
+      "unassigned",
+    ]);
+  });
+
+  it("defines the seven public MASCA departments in the agreed order", () => {
+    expect(COMMITTEE_DEPARTMENTS.map(({ label }) => label)).toEqual([
+      "Chairs",
+      "Secretariat",
+      "Treasury",
+      "Amplifies",
+      "Careers",
+      "Cares",
+      "Unites",
+    ]);
   });
 });

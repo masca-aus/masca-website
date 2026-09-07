@@ -8,6 +8,8 @@ import { resendAdapter } from "@payloadcms/email-resend";
 import { s3Storage } from "@payloadcms/storage-s3";
 import { buildConfig } from "payload";
 
+import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
+
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Supabase Storage speaks the S3 protocol at <project>/storage/v1/s3; the same
@@ -74,6 +76,18 @@ const revalidateSponsorPages = () => {
 export default buildConfig({
   admin: {
     user: "users",
+    meta: {
+      titleSuffix: "— MASCA CMS",
+      icons: [
+        { rel: "icon", type: "image/x-icon", url: "/logo/favicon.ico" },
+      ],
+    },
+    components: {
+      graphics: {
+        Logo: "/components/admin/MascaBrand#MascaLogo",
+        Icon: "/components/admin/MascaBrand#MascaIcon",
+      },
+    },
     importMap: {
       baseDir: dirname,
     },
@@ -121,7 +135,7 @@ export default buildConfig({
       slug: "committee",
       admin: {
         useAsTitle: "name",
-        defaultColumns: ["name", "role", "year"],
+        defaultColumns: ["name", "role", "department", "year"],
       },
       // Anyone may read (the public site renders from this collection); only
       // the logged-in admin can create/update/delete.
@@ -148,6 +162,17 @@ export default buildConfig({
           required: true,
           admin: {
             description: 'Committee position, e.g. "President".',
+          },
+        },
+        {
+          name: "department",
+          type: "select",
+          required: true,
+          defaultValue: "unassigned",
+          options: COMMITTEE_DEPARTMENT_OPTIONS,
+          admin: {
+            description:
+              "Controls the department section on the public committee page. Use Unassigned only while reviewing legacy records.",
           },
         },
         {

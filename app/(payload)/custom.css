@@ -1,1 +1,71 @@
-/* Custom styles for the Payload admin panel. */
+/* MASCA's public brand, adapted conservatively to Payload's admin tokens. */
+:root {
+  --masca-blue: #010066;
+  --masca-blue-dark: #00004d;
+  --masca-blue-soft: #f2f2f8;
+  --masca-red: #cc0001;
+  --masca-yellow: #ffcc00;
+  --style-radius-s: 6px;
+  --style-radius-m: 10px;
+  --style-radius-l: 16px;
+}
+
+html[data-theme="light"] {
+  --theme-success-500: var(--masca-blue);
+  --theme-success-600: var(--masca-blue);
+  --theme-success-700: var(--masca-blue-dark);
+  --theme-bg: #ffffff;
+}
+
+.masca-admin-logo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: flex-start;
+  color: var(--masca-blue);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.masca-admin-logo img {
+  display: block;
+  width: min(12rem, 100%);
+  height: auto;
+}
+
+.masca-admin-icon {
+  display: block;
+  width: 2.25rem;
+  height: 2.25rem;
+  object-fit: contain;
+}
+
+.nav {
+  border-right: 1px solid #e5e5f0;
+  background: linear-gradient(180deg, #fff 0%, var(--masca-blue-soft) 100%);
+}
+
+.btn--style-primary {
+  --bg-color: var(--masca-blue);
+  --hover-bg: var(--masca-blue-dark);
+  --color: #fff;
+  font-weight: 600;
+}
+
+.pill--style-light,
+.table tbody tr:hover {
+  background-color: var(--masca-blue-soft);
+}
+
+.login__wrap {
+  border-top: 6px solid var(--masca-blue);
+  border-radius: var(--style-radius-l);
+  box-shadow: 0 18px 50px rgb(1 0 102 / 12%);
+}
+
+::selection {
+  color: #fff;
+  background: var(--masca-red);
+}

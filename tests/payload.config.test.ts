@@ -9,6 +9,16 @@ describe("payload config", () => {
     expect(config.admin.user).toBe("users");
   });
 
+  it("brands the admin panel as the MASCA CMS", async () => {
+    const config = await configPromise;
+    expect(config.admin.meta.titleSuffix).toBe("— MASCA CMS");
+    expect(config.admin.meta.icons).toEqual([
+      { rel: "icon", type: "image/x-icon", url: "/logo/favicon.ico" },
+    ]);
+    expect(config.admin.components.graphics.Logo).toBeTruthy();
+    expect(config.admin.components.graphics.Icon).toBeTruthy();
+  });
+
   it("defines exactly four collections: auth-enabled users, media, committee, sponsors", async () => {
     const config = await configPromise;
     // Sanitization adds Payload-internal collections (payload-preferences,
