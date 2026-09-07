@@ -1,43 +1,5 @@
 @import "tailwindcss";
 
-@layer components {
-  .legal-copy {
-    @apply space-y-10 text-base leading-7;
-  }
-
-  .legal-copy section {
-    @apply scroll-mt-28;
-  }
-
-  .legal-copy h2 {
-    @apply mb-4 text-2xl font-bold leading-tight text-blue-700 sm:text-3xl;
-  }
-
-  .legal-copy h3 {
-    @apply mb-2 mt-6 text-lg font-bold text-blue-700;
-  }
-
-  .legal-copy p + p {
-    @apply mt-4;
-  }
-
-  .legal-copy ul {
-    @apply mt-4 list-disc space-y-2 pl-6;
-  }
-
-  .legal-copy ol {
-    @apply mt-4 list-decimal space-y-2 pl-6;
-  }
-
-  .legal-copy a {
-    @apply font-semibold text-blue-600 underline decoration-blue-300 underline-offset-4;
-  }
-
-  .legal-copy a:hover {
-    @apply text-blue-500;
-  }
-}
-
 @theme {
   /* primary colours 60% */
   --color-blue-900: #00004D; /* Darkest: Used for hover/press states */

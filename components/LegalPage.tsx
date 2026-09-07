@@ -54,7 +54,9 @@ export default function LegalPage({
           </Link>
         </aside>
 
-        <article className="legal-copy min-w-0 text-gray-700">{children}</article>
+        <article className="min-w-0 flex flex-col gap-12 text-base leading-7 text-gray-700 lg:gap-14 [&_section]:scroll-mt-28 [&_h2]:mb-5 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:leading-tight [&_h2]:text-blue-700 sm:[&_h2]:text-3xl [&_h3]:mb-3 [&_h3]:mt-8 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-blue-700 [&_p+p]:mt-4 [&_ul]:mt-4 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6 [&_ol]:mt-4 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_a]:font-semibold [&_a]:text-blue-600 [&_a]:underline [&_a]:decoration-blue-300 [&_a]:underline-offset-4 hover:[&_a]:text-blue-500">
+          {children}
+        </article>
       </div>
     </main>
   );
