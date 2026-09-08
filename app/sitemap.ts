@@ -16,6 +16,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/about", changeFrequency: "monthly", priority: 0.7 },
     { path: "/care", changeFrequency: "monthly", priority: 0.7 },
     { path: "/contact", changeFrequency: "yearly", priority: 0.6 },
+    { path: "/privacy", changeFrequency: "yearly", priority: 0.4 },
+    { path: "/terms", changeFrequency: "yearly", priority: 0.4 },
+    { path: "/cookies", changeFrequency: "yearly", priority: 0.4 },
+    { path: "/data-protection", changeFrequency: "yearly", priority: 0.4 },
+    { path: "/accessibility", changeFrequency: "yearly", priority: 0.4 },
   ];
 
   return routes.map(({ path, changeFrequency, priority }) => ({

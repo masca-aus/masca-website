@@ -12,7 +12,8 @@ export default defineConfig({
     // Dummy values so payload.config.ts can be imported without real secrets.
     env: {
       PAYLOAD_SECRET: "test-secret",
-      DATABASE_URI: "postgresql://user:pass@localhost:6543/test",
+      DATABASE_URI:
+        "postgresql://user:pass@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres",
       RESEND_KEY: "test-resend-key",
       S3_ENDPOINT: "https://test-project.storage.supabase.co/storage/v1/s3",
       S3_REGION: "ap-southeast-2",

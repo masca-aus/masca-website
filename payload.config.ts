@@ -8,6 +8,38 @@ import { resendAdapter } from "@payloadcms/email-resend";
 import { s3Storage } from "@payloadcms/storage-s3";
 import { buildConfig } from "payload";
 
+import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
+
+export function createDatabasePoolConfig(
+  connectionString: string | undefined,
+  isMigration = process.env.PAYLOAD_MIGRATING === "true",
+) {
+  let selectedConnectionString = connectionString;
+
+  if (connectionString && !isMigration) {
+    try {
+      const databaseURL = new URL(connectionString);
+      const isSupabaseSharedPooler =
+        databaseURL.hostname === "pooler.supabase.com" ||
+        databaseURL.hostname.endsWith(".pooler.supabase.com");
+
+      if (isSupabaseSharedPooler && databaseURL.port === "5432") {
+        databaseURL.port = "6543";
+        selectedConnectionString = databaseURL.toString();
+      }
+    } catch {
+      // Let the Postgres adapter report malformed connection strings itself.
+    }
+  }
+
+  return {
+    connectionString: selectedConnectionString,
+    // Payload reserves one client for its reconnect listener, so two is the
+    // smallest pool that still leaves a client available for real queries.
+    max: 2,
+  };
+}
+
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Supabase Storage speaks the S3 protocol at <project>/storage/v1/s3; the same
@@ -74,6 +106,23 @@ const revalidateSponsorPages = () => {
 export default buildConfig({
   admin: {
     user: "users",
+    meta: {
+      titleSuffix: "— MASCA CMS",
+      icons: [
+        { rel: "icon", type: "image/x-icon", url: "/logo/favicon.ico" },
+      ],
+    },
+    components: {
+      graphics: {
+        Logo: "/components/admin/MascaBrand#MascaLogo",
+        Icon: "/components/admin/MascaBrand#MascaIcon",
+      },
+      views: {
+        dashboard: {
+          Component: "/components/admin/MascaDashboard#MascaDashboard",
+        },
+      },
+    },
     importMap: {
       baseDir: dirname,
     },
@@ -83,6 +132,12 @@ export default buildConfig({
       slug: "users",
       admin: {
         useAsTitle: "email",
+      },
+      access: {
+        // Payload <=3.88 permits any authenticated user to unlock another
+        // account by default. Restrict the operation to the caller's own row.
+        unlock: ({ req }) =>
+          req.user ? { id: { equals: req.user.id } } : false,
       },
       // `auth: true` gives email+password login and the forgot-password flow;
       // reset emails go out through the Resend adapter below.
@@ -115,7 +170,7 @@ export default buildConfig({
       slug: "committee",
       admin: {
         useAsTitle: "name",
-        defaultColumns: ["name", "role", "year"],
+        defaultColumns: ["name", "role", "department", "year"],
       },
       // Anyone may read (the public site renders from this collection); only
       // the logged-in admin can create/update/delete.
@@ -142,6 +197,17 @@ export default buildConfig({
           required: true,
           admin: {
             description: 'Committee position, e.g. "President".',
+          },
+        },
+        {
+          name: "department",
+          type: "select",
+          required: true,
+          defaultValue: "unassigned",
+          options: COMMITTEE_DEPARTMENT_OPTIONS,
+          admin: {
+            description:
+              "Controls the department section on the public committee page. Use Unassigned only while reviewing legacy records.",
           },
         },
         {
@@ -254,9 +320,7 @@ export default buildConfig({
   db: postgresAdapter({
     // Transaction-mode pooler connection string — required on Vercel
     // serverless where connections must not be held open.
-    pool: {
-      connectionString: process.env.DATABASE_URI,
-    },
+    pool: createDatabasePoolConfig(process.env.DATABASE_URI),
     migrationDir: path.resolve(dirname, "migrations"),
     // Local dev points at the SAME production database, so dev mode must never
     // push schema changes directly: a push stamps a `dev` row into

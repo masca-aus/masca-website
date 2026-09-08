@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local"
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next"
-import { SpeedInsights } from "@vercel/speed-insights/next"
 
 import GsapInitializer from "@/utils/GsapInitializer";
 import NavBar from "@/components/NavBar";
 import WalkingCrowd from "@/components/WalkingCrowd";
 import Footer from "@/components/Footer";
+import PrivacyPreferences from "@/components/PrivacyPreferences";
 import { getCastPeeps } from "@/utils/casts";
 import {
   SITE_URL,
@@ -186,8 +185,7 @@ export default function RootLayout({
         </a>
         <NavBar />
         {children}
-        <Analytics/>
-        <SpeedInsights />
+        <PrivacyPreferences />
         <WalkingCrowd peeps={peeps} />
         <Footer />
       </body>
