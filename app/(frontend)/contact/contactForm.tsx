@@ -4,9 +4,13 @@ import { useActionState, useState } from "react";
 import FormField from "@/components/FormField";
 import Button from "@/components/Button";
 import { sendEmail, type SendState } from "@/utils/email";
-
-const TOPICS = ["General", "Events", "Welfare", "Career", "Academic", "Sponsors"] as const;
-const STATES = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "Others"];
+import {
+  CONTACT_STATES,
+  CONTACT_TOPICS,
+  type ContactTopic,
+  DEFAULT_CONTACT_STATE,
+  DEFAULT_CONTACT_TOPIC,
+} from "@/utils/contactOptions";
 
 const initialState: SendState = { status: "idle" };
 
@@ -15,7 +19,7 @@ const fieldClass =
 const labelClass = "text-body-sm font-bold text-gray-700";
 
 export function ContactSection() {
-  const [topic, setTopic] = useState<(typeof TOPICS)[number]>("General");
+  const [topic, setTopic] = useState<ContactTopic>(DEFAULT_CONTACT_TOPIC);
   const [keepOnFile, setKeepOnFile] = useState(true);
   const [state, formAction, pending] = useActionState(sendEmail, initialState);
 
@@ -36,10 +40,10 @@ export function ContactSection() {
               <select
                 id="state"
                 name="state"
-                defaultValue="VIC"
+                defaultValue={DEFAULT_CONTACT_STATE}
                 className={`${fieldClass} w-full appearance-none pr-10`}
               >
-                {STATES.map((s) => (
+                {CONTACT_STATES.map((s) => (
                   <option key={s}>{s}</option>
                 ))}
               </select>
@@ -66,7 +70,7 @@ export function ContactSection() {
         <fieldset className="flex flex-col">
           <legend className={labelClass}>What&apos;s it about?</legend>
           <div className="flex flex-wrap gap-4 mt-2">
-            {TOPICS.map((t) => {
+            {CONTACT_TOPICS.map((t) => {
               const active = topic === t;
               return (
                 <button

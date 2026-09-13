@@ -1,33 +1,16 @@
 "use server"
 
 import { Resend } from "resend"
+import {
+  DEFAULT_CONTACT_TOPIC,
+  OWNER_EMAIL,
+  STATE_CC,
+  TOPIC_CC,
+  isContactState,
+  isContactTopic,
+} from "./contactOptions"
 
 const resend = new Resend(process.env.RESEND_KEY)
-
-const OWNER_EMAIL = "hello@masca.org.au"
-
-// Each contact topic pill routes a copy to the inbox that owns it.
-const TOPIC_CC: Record<string, string | null> = {
-  General: "admin@masca.org.au",
-  Events: "amplifies@masca.org.au",
-  Welfare: "cares@masca.org.au",
-  Careers: "ambitions@masca.org.au",
-  Academic: "ambitions@masca.org.au",
-  Sponsors: "deputy.chairperson@masca.org.au"
-}
-
-// Each state chapter can also CC its own inbox. `null` means that chapter has
-// no dedicated inbox, so no chapter copy is sent.
-const STATE_CC: Record<string, string | null> = {
-  NSW: "chairperson@nsw.masca.org.au",
-  VIC: "chairperson@vic.masca.org.au",
-  QLD: null,
-  WA: null,
-  SA: null,
-  TAS: null,
-  ACT: null,
-  Others: null,
-}
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -60,11 +43,15 @@ export async function sendEmail(
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
 
   // Topic owns the primary CC; the chosen state chapter adds its own inbox
-  // when it has one (deduped so a shared address isn't CC'd twice).
-  const cc = [TOPIC_CC[topic], STATE_CC[state]].filter(
+  // when it has one (deduped so a shared address isn't CC'd twice). Unknown
+  // values (tampered form data) fall back to no CC rather than throwing.
+  const cc = [
+    isContactTopic(topic) ? TOPIC_CC[topic] : null,
+    isContactState(state) ? STATE_CC[state] : null,
+  ].filter(
     (addr, i, all): addr is string => Boolean(addr) && all.indexOf(addr) === i,
   )
-  const topicLabel = topic || "General"
+  const topicLabel = topic || DEFAULT_CONTACT_TOPIC
 
   const row = (label: string, value: string) =>
     value
