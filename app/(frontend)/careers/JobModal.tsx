@@ -20,8 +20,12 @@ export default function JobModal({
   returnFocusRef: RefObject<HTMLElement | null>
 }) {
   return (
-    <ModalShell labelledBy="job-modal-title" onClose={onClose} returnFocusRef={returnFocusRef}>
-      <JobDetails job={job} headingId="job-modal-title" stickyActions />
+    <ModalShell
+      labelledBy="job-modal-title"
+      onClose={onClose}
+      returnFocusRef={returnFocusRef}
+    >
+      <JobDetails job={job} headingId="job-modal-title" />
     </ModalShell>
   )
 }

@@ -7,7 +7,7 @@ import Button from "@/components/Button"
 import { countActiveFilters, type CareerFilters, type Facet } from "@/utils/careerFilters"
 import type { BoardFacets } from "./BoardToolbar"
 import { INTL_LABEL, LEGEND, NEXT_INTL, PILL_ACTIVE, PILL_BASE, PILL_IDLE, toggle } from "./boardStyles"
-import ModalShell, { useRequestClose } from "./ModalShell"
+import ModalShell, { CloseButton, useRequestClose } from "./ModalShell"
 
 // The filter sheet, opened from the toolbar's Filters button. Pills apply as
 // they're tapped — the list updates behind the overlay and the Done button
@@ -42,15 +42,24 @@ export default function FilterModal({
   const matches = visible === total ? `All ${total} roles` : `${visible} of ${total} roles`
 
   return (
-    <ModalShell labelledBy="filter-modal-title" onClose={onClose} returnFocusRef={returnFocusRef} size="lg">
+    <ModalShell
+      labelledBy="filter-modal-title"
+      onClose={onClose}
+      returnFocusRef={returnFocusRef}
+      size="lg"
+      footer={<SheetFooter active={countActiveFilters(filters)} visible={visible} onClear={onClear} />}
+    >
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-1">
-          <h2 id="filter-modal-title" className="text-h2 font-bold leading-tight text-blue-600">
-            Filters
-          </h2>
-          <p role="status" aria-live="polite" aria-atomic="true" className="text-body-sm text-gray-700">
-            {matches}
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <h2 id="filter-modal-title" className="text-h2 font-bold leading-tight text-blue-600">
+              Filters
+            </h2>
+            <p role="status" aria-live="polite" aria-atomic="true" className="text-body-sm text-gray-700">
+              {matches}
+            </p>
+          </div>
+          <CloseButton />
         </div>
 
         <fieldset className="flex flex-col gap-2">
@@ -121,14 +130,12 @@ export default function FilterModal({
             }
           />
         )}
-
-        <SheetFooter active={countActiveFilters(filters)} visible={visible} onClear={onClear} />
       </div>
     </ModalShell>
   )
 }
 
-/** Clear all + the Done button, pinned to the bottom of the scrolling sheet. */
+/** Clear all + the Done button, pinned below the scrolling body. */
 function SheetFooter({ active, visible, onClear }: { active: number; visible: number; onClear: () => void }) {
   const requestClose = useRequestClose()
   const doneRef = useRef<HTMLButtonElement>(null)
@@ -140,7 +147,7 @@ function SheetFooter({ active, visible, onClear }: { active: number; visible: nu
   }
 
   return (
-    <div className="sticky bottom-0 -mx-6 -mb-6 flex flex-wrap items-center justify-end gap-3 border-t border-gray-300 bg-white/95 px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:-mx-8 sm:-mb-8 sm:px-8 sm:pb-4">
+    <div className="flex flex-wrap items-center justify-end gap-3">
       {active > 0 && (
         <Button variant="ghost" type="button" onClick={clearAll} className="mr-auto text-body-sm">
           Clear all
