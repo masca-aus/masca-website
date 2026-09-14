@@ -7,6 +7,8 @@ import { useGSAP } from "@gsap/react";
 
 import { InAustralia }  from "@/components/TextSVG";
 import Button from "@/components/Button";
+import { Briefcase } from "lucide-react";
+import HeroSilhouettes from "./heroSilhouttes";
 
 
 export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNode }) {
@@ -18,8 +20,9 @@ export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNod
   }, { scope: sectionRef })
 
   return (
-    <section ref={sectionRef} className="bg-blue-600">
-      <div className="container flex items-center gap-12 md:gap-16 min-h-svh pt-24 pb-16 md:pt-28">
+    <section ref={sectionRef} className="relative isolate overflow-hidden bg-blue-600">
+      <HeroSilhouettes className="-z-10" />
+      <div className="container flex items-center gap-12 md:gap-16 min-h-svh pt-24 pb-16 md:pt-28 z-10">
         <div className="flex-1">
             <MainContent />
         </div>
@@ -57,8 +60,8 @@ function MainContent() {
         <Button href="/events" variant="accent">
           See What&apos;s On <span>&rarr;</span>
         </Button>
-        <Button href="/contact" variant="outlineLight">
-          Contact Us
+        <Button href="/careers" variant="outlineLight">
+          <Briefcase /> Careers Board
         </Button>
       </div>
     </header>

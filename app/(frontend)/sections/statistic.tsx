@@ -43,7 +43,7 @@ export default function StatisticSection() {
   return (
     <section ref={rootRef} className="bg-blue-600">
       <div className="container pb-16">
-        <div className="flex justify-between gap-4 border-t pt-8 border-blue-100/20">
+        <div className="flex justify-between gap-4 border-t pt-8 border-blue-500">
           {stats.map(({ from, value, suffix, label }) => (
             <div key={label} className="flex flex-col">
               <span

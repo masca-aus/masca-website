@@ -19,6 +19,7 @@ type Pillar = {
   bg: string
   /** Text colour once flooded */
   fg: string
+  text: string
 }
 
 const PILLARS: Pillar[] = [
@@ -31,6 +32,7 @@ const PILLARS: Pillar[] = [
     href: "/careers",
     bg: "#010066",
     fg: "#FFFFFF",
+    text: "text-blue-600",
   },
   {
     key: "cares",
@@ -41,6 +43,7 @@ const PILLARS: Pillar[] = [
     href: "/welfare",
     bg: "#CC0001",
     fg: "#FFFFFF",
+    text: "text-red-800",
   },
   {
     key: "unites",
@@ -51,6 +54,7 @@ const PILLARS: Pillar[] = [
     href: "/unite",
     bg: "#FFCC00",
     fg: "#00004D",
+    text: "text-yellow-800",
   },
 ]
 
@@ -161,7 +165,7 @@ function PillarCard({ pillar }: { pillar: Pillar }) {
           className={`${cardClasses} focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-red-600`}
         >
           {inner}
-          <span className="card-text text-caption font-bold text-red-600 mt-auto pt-2">
+          <span className={`card-text text-caption font-bold ${pillar.text} mt-auto pt-2`}>
             Explore {pillar.name} <span aria-hidden>&rarr;</span>
           </span>
         </Link>
