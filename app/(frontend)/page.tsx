@@ -47,10 +47,9 @@ export default async function Home() {
       <StatesSection />
       <EventShowcaseSection />
       <CareerSpotlightSection />
-      <MascaVoiceSection />
       <MascaCareSection />
-
       <SponsorsSection sponsors={sponsors} />
+      <MascaVoiceSection />
       <FollowUsSection />
       <JoinUsSection />
     </main>
