@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  EMPTY_BOARD_URL,
   EMPTY_FILTERS,
   applyFilters,
   countActiveFilters,
@@ -12,6 +13,9 @@ import {
   hasAnyFilter,
   isValidJobId,
   matchesFilters,
+  pageCount,
+  pageOf,
+  pageSlice,
   parseBoardUrl,
   parseFilters,
   serialiseBoardUrl,
@@ -83,21 +87,56 @@ describe("URL round trip", () => {
     expect(parseFilters(serialised)).toEqual(filters);
   });
 
-  it("carries the selected role alongside the filters, validating the id", () => {
-    expect(parseBoardUrl(null)).toEqual({ ...EMPTY_FILTERS, job: null });
+  it("carries the selected role alongside the filters, tidying the id like the sheet does", () => {
+    expect(parseBoardUrl(null)).toEqual({ ...EMPTY_FILTERS, job: null, page: null, per: 10 });
     expect(parseBoardUrl(new URLSearchParams("job=acme-dev&loc=vic"))).toEqual({
-      ...EMPTY_FILTERS,
+      ...EMPTY_BOARD_URL,
       locations: ["vic"],
       job: "acme-dev",
     });
-    expect(parseBoardUrl(new URLSearchParams("job=../x")).job).toBeNull();
+    // A pasted id is slugified the way the sheet slugifies ids; one with
+    // nothing usable in it is dropped.
+    expect(parseBoardUrl(new URLSearchParams("job=NLB%20Tech%20Intern%202027")).job).toBe("nlb-tech-intern-2027");
+    expect(parseBoardUrl(new URLSearchParams("job=../x")).job).toBe("x");
+    expect(parseBoardUrl(new URLSearchParams("job=%3F%3F")).job).toBeNull();
     expect(isValidJobId("nlb-tech-intern-2027")).toBe(true);
     expect(isValidJobId("Not A Slug")).toBe(false);
 
-    expect(serialiseBoardUrl({ ...EMPTY_FILTERS, job: null })).toBe("");
-    expect(serialiseBoardUrl({ ...EMPTY_FILTERS, types: ["internship", "graduate"], job: "acme-dev" })).toBe(
+    expect(serialiseBoardUrl(EMPTY_BOARD_URL)).toBe("");
+    expect(serialiseBoardUrl({ ...EMPTY_BOARD_URL, types: ["internship", "graduate"], job: "acme-dev" })).toBe(
       "type=internship,graduate&job=acme-dev",
     );
+  });
+
+  it("keeps the page and page size, spelling out page 1 only beside a selected role", () => {
+    expect(parseBoardUrl(new URLSearchParams("page=3&per=20"))).toEqual({ ...EMPTY_BOARD_URL, page: 3, per: 20 });
+    // Nonsense falls back rather than breaking the link.
+    expect(parseBoardUrl(new URLSearchParams("page=0&per=7"))).toEqual(EMPTY_BOARD_URL);
+    expect(parseBoardUrl(new URLSearchParams("page=abc&per=")).page).toBeNull();
+    expect(parseBoardUrl(new URLSearchParams("page=123456")).page).toBeNull();
+
+    expect(serialiseBoardUrl({ ...EMPTY_BOARD_URL, page: 1 })).toBe("");
+    expect(serialiseBoardUrl({ ...EMPTY_BOARD_URL, page: 3, per: 20 })).toBe("per=20&page=3");
+    // With a role selected the page is always explicit, so a shared `?job=`
+    // link (no page) is the only form that derives its page from the role.
+    expect(serialiseBoardUrl({ ...EMPTY_BOARD_URL, page: 1, job: "acme-dev" })).toBe("page=1&job=acme-dev");
+    expect(serialiseBoardUrl({ ...EMPTY_BOARD_URL, page: null, job: "acme-dev" })).toBe("job=acme-dev");
+    const state = { ...EMPTY_BOARD_URL, q: "kopi", page: 2, per: 50 as const, job: "kopi-barista" };
+    expect(parseBoardUrl(new URLSearchParams(serialiseBoardUrl(state)))).toEqual(state);
+  });
+
+  it("does the page arithmetic", () => {
+    expect(pageCount(0, 10)).toBe(1);
+    expect(pageCount(10, 10)).toBe(1);
+    expect(pageCount(11, 10)).toBe(2);
+    expect(pageOf(0, 10)).toBe(1);
+    expect(pageOf(9, 10)).toBe(1);
+    expect(pageOf(10, 10)).toBe(2);
+    expect(pageOf(-1, 10)).toBe(1);
+    const items = Array.from({ length: 23 }, (_, i) => i);
+    expect(pageSlice(items, 1, 10)).toEqual(items.slice(0, 10));
+    expect(pageSlice(items, 3, 10)).toEqual([20, 21, 22]);
+    expect(pageSlice(items, 4, 10)).toEqual([]);
   });
 
   it("counts engaged groups, ignoring search and sort", () => {

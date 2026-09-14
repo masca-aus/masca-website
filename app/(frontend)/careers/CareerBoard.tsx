@@ -9,6 +9,7 @@ import {
   useState,
   useSyncExternalStore,
   type KeyboardEvent,
+  type RefObject,
 } from "react"
 import { gsap } from "gsap"
 import { useGSAP } from "@gsap/react"
@@ -22,13 +23,20 @@ import {
   getLocationFacets,
   getStudyLevelFacets,
   getTypeFacets,
+  pageCount,
+  pageOf,
+  pageSlice,
   parseBoardUrl,
   serialiseBoardUrl,
+  type BoardUrlState,
   type CareerFilters,
+  type PageSize,
 } from "@/utils/careerFilters"
 import type { Job } from "@/utils/careers"
 import BoardEmpty from "./BoardEmpty"
+import BoardPagination from "./BoardPagination"
 import BoardToolbar from "./BoardToolbar"
+import FilterModal from "./FilterModal"
 import JobCard from "./JobCard"
 import JobDetails from "./JobDetails"
 import JobModal from "./JobModal"
@@ -37,17 +45,27 @@ import { pushQuery, readQuery, serverQuery, subscribeToQuery, writeQuery } from 
 // The interactive board. It receives every live role from the server and
 // filters client-side (a sheet is a few hundred rows at most).
 //
-// Filters and the selected role live in the query string
-// (`?type=internship&loc=vic&job=acme-dev`) so a view can be shared or
-// reloaded — see boardUrl.ts for why that is the store rather than
+// Filters, the selected role, the page and the page size live in the query
+// string (`?type=internship&loc=vic&page=2&job=acme-dev`) so a view can be
+// shared or reloaded — see boardUrl.ts for why that is the store rather than
 // useSearchParams (which would force the list behind a Suspense fallback)
 // or page-level searchParams (which would make the page dynamic).
+//
+// On desktop the toolbar sticks under the site header and the details panel
+// sticks under the toolbar, scrolling on its own; both offsets are measured
+// after mount (useStickyChrome). Below lg everything scrolls with the page
+// and a tapped card opens a sheet instead.
 //
 // Nothing here calls Date: every relative label arrives precomputed in the
 // job props, so server and client render the same markup.
 
-const PAGE_SIZE = 24
 const DESKTOP_QUERY = "(min-width: 1024px)"
+/** NavBar's desktop height (py-4 around a 44px button) until it has been measured. */
+const NAV_HEIGHT_FALLBACK = 76
+/** Where a page change scrolls the list to below lg: under the 56px header, plus air. */
+const MOBILE_SCROLL_MARGIN = 80
+/** Room under the details panel so its bottom edge clears the viewport. */
+const PANEL_BOTTOM_GAP = 24
 
 function subscribeToViewport(listener: () => void) {
   const mq = window.matchMedia(DESKTOP_QUERY)
@@ -63,9 +81,12 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
   const isDesktop = useSyncExternalStore(subscribeToViewport, readIsDesktop, serverIsDesktop)
   const urlState = useMemo(() => parseBoardUrl(new URLSearchParams(query)), [query])
   const linkedId = urlState.job
+  const per = urlState.per
   const urlFilters = useMemo<CareerFilters>(() => {
-    const { job, ...filters } = urlState
+    const { job, page, per, ...filters } = urlState
     void job
+    void page
+    void per
     return filters
   }, [urlState])
 
@@ -74,20 +95,16 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
   const [typed, setTyped] = useState<string | null>(null)
   const searchValue = typed ?? urlFilters.q
   const deferredSearch = useDeferredValue(searchValue)
-  const [limit, setLimit] = useState(PAGE_SIZE)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const listRef = useRef<HTMLUListElement>(null)
   const detailRef = useRef<HTMLElement>(null)
+  const toolbarRef = useRef<HTMLDivElement>(null)
+  const filtersButtonRef = useRef<HTMLButtonElement>(null)
   const returnFocusRef = useRef<HTMLElement | null>(null)
   // True while the phone sheet sits on a history entry we pushed, so its
   // Close button can pop that entry and hardware Back does the same thing.
   const pushedSheetRef = useRef(false)
-  // Handlers read the latest filters from here, so memoised cards don't
-  // re-render on every keystroke just because a callback identity changed.
-  const latest = useRef({ urlFilters, searchValue })
-  useEffect(() => {
-    latest.current = { urlFilters, searchValue }
-  })
 
   const jobById = useMemo(() => new Map(jobs.map((j) => [j.id, j])), [jobs])
   const effectiveFilters = useMemo(
@@ -108,55 +125,83 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
   // A linked role stays selected even when the filters would hide it.
   const linkedJob = linkedId ? jobById.get(linkedId) : undefined
   const linkedMissing = linkedId !== null && !linkedJob
-  const selectedJob = linkedJob ?? visible[0] ?? null
+
+  // --- pagination ---------------------------------------------------------
+  // While the search box is ahead of the URL the list shows its first page;
+  // the debounced write below makes that official. A shared `?job=` link
+  // names no page, so it opens on the page that holds the role.
+  const pages = pageCount(visible.length, per)
+  const searching = effectiveFilters.q !== urlFilters.q
+  const requested = searching
+    ? 1
+    : (urlState.page ?? (linkedJob ? pageOf(visible.findIndex((j) => j.id === linkedJob.id), per) : 1))
+  const page = Math.min(Math.max(1, requested), pages)
+  const shown = pageSlice(visible, page, per)
+  const firstIndex = (page - 1) * per
+
+  const selectedJob = linkedJob ?? shown[0] ?? null
   const outsideFilters = selectedJob !== null && !visible.some((j) => j.id === selectedJob.id)
-  const shown = visible.slice(0, limit)
   // Roving tabindex: exactly one rendered card is in the tab order.
   const focusId = shown.some((j) => j.id === selectedJob?.id) ? selectedJob?.id : shown[0]?.id
   // The sheet only exists below lg; on desktop the sticky panel shows it.
   const modalOpen = !isDesktop && linkedJob !== undefined
 
   // --- writes -------------------------------------------------------------
-  const write = useCallback(
-    (filters: CareerFilters, jobId: string | null) => writeQuery(serialiseBoardUrl({ ...filters, job: jobId })),
+  // Handlers read the latest state from here, so memoised cards don't
+  // re-render on every keystroke just because a callback identity changed.
+  const latest = useRef({ urlState, searchValue, page })
+  useEffect(() => {
+    latest.current = { urlState, searchValue, page }
+  })
+
+  /** Writes the URL: the current state, the live search text, then `patch`. */
+  const commit = useCallback(
+    (patch: Partial<BoardUrlState>, mode: "replace" | "push" = "replace"): boolean => {
+      const { urlState, searchValue, page } = latest.current
+      const next = serialiseBoardUrl({ ...urlState, q: searchValue.trim(), page, ...patch })
+      if (mode === "push") return pushQuery(next)
+      writeQuery(next)
+      return true
+    },
     [],
   )
 
+  // Any filter change restarts at page 1; the selected role rides along.
   const updateFilters = useCallback(
     (patch: Partial<CareerFilters>) => {
-      write({ ...urlFilters, ...patch, q: searchValue.trim() }, linkedId)
-      setLimit(PAGE_SIZE)
+      commit({ ...patch, page: 1 })
     },
-    [write, urlFilters, searchValue, linkedId],
+    [commit],
   )
 
   const clearFilters = useCallback(() => {
     setTyped(null)
-    write(EMPTY_FILTERS, linkedId)
-    setLimit(PAGE_SIZE)
-  }, [write, linkedId])
+    commit({ ...EMPTY_FILTERS, page: 1 })
+  }, [commit])
+
+  const openFilters = useCallback(() => setFiltersOpen(true), [])
+  const closeFilters = useCallback(() => setFiltersOpen(false), [])
 
   // Debounced: the URL follows the search box a beat behind the keystrokes.
   useEffect(() => {
     if (typed === null) return
-    const timer = setTimeout(() => write({ ...urlFilters, q: typed.trim() }, linkedId), 250)
+    const timer = setTimeout(() => commit({ q: typed.trim(), page: 1 }), 250)
     return () => clearTimeout(timer)
-  }, [typed, urlFilters, linkedId, write])
+  }, [typed, commit])
 
   const select = useCallback(
     (job: Job, viaKeyboard: boolean, element: HTMLElement) => {
       returnFocusRef.current = element
-      const filters = { ...latest.current.urlFilters, q: latest.current.searchValue.trim() }
       if (readIsDesktop()) {
-        write(filters, job.id)
+        commit({ job: job.id })
         // Enter on a card lands keyboard users on the panel; mouse clicks don't move focus.
         if (viaKeyboard) detailRef.current?.focus()
       } else {
         // The sheet gets its own history entry so hardware Back closes it.
-        pushedSheetRef.current = pushQuery(serialiseBoardUrl({ ...filters, job: job.id }))
+        pushedSheetRef.current = commit({ job: job.id }, "push")
       }
     },
-    [write],
+    [commit],
   )
 
   // Closing the sheet drops the role from the URL, so a refresh on the phone
@@ -166,9 +211,34 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
       pushedSheetRef.current = false
       window.history.back()
     } else {
-      write({ ...latest.current.urlFilters, q: latest.current.searchValue.trim() }, null)
+      commit({ job: null })
     }
-  }, [write])
+  }, [commit])
+
+  // A new page shows its first role in the panel. The list scrolls back to
+  // its top when the pager was reached by scrolling past that top.
+  const goToPage = useCallback(
+    (next: number) => {
+      commit({ page: next, job: null })
+      const list = listRef.current
+      if (!list) return
+      const margin = parseFloat(getComputedStyle(list).scrollMarginTop) || 0
+      if (list.getBoundingClientRect().top < margin) {
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        list.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" })
+      }
+    },
+    [commit],
+  )
+
+  // Resizing the page keeps the selected card (else the first one) in view.
+  const changePageSize = (next: PageSize) => {
+    const anchor =
+      selectedJob && shown.some((j) => j.id === selectedJob.id)
+        ? visible.findIndex((j) => j.id === selectedJob.id)
+        : firstIndex
+    commit({ per: next, page: pageOf(anchor, next) })
+  }
 
   // Arrow keys move through the list; on desktop they also change the panel.
   const onListKeyDown = (event: KeyboardEvent<HTMLUListElement>) => {
@@ -187,14 +257,19 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
     const target = buttons[next]
     target.focus()
     const id = target.dataset.jobId
-    if (id && readIsDesktop()) write({ ...urlFilters, q: searchValue.trim() }, id)
+    if (id && readIsDesktop()) commit({ job: id })
   }
+
+  // --- sticky chrome (desktop) --------------------------------------------
+  const chrome = useStickyChrome(toolbarRef, isDesktop)
+  const panelTop = chrome.nav + chrome.toolbar
 
   // --- entrance animation -----------------------------------------------
   // First paint: the events-page stagger on scroll (skipped for deep links,
   // whose first paint is replaced a moment later by the filtered view).
   // Later: only cards that weren't on screen before fade in, so typing that
-  // narrows the list and "Show more" never re-animate what's already there.
+  // narrows the list never re-animates what's already there — while a new
+  // page, all fresh cards, gets the full stagger.
   const shownIds = shown.map((j) => j.id)
   const listKey = shownIds.join("|")
   const prevIdsRef = useRef<Set<string> | null>(null)
@@ -235,20 +310,32 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
 
   return (
     <section className="bg-gray-100">
-      <div className="container flex flex-col gap-8 py-16">
-        <BoardToolbar
-          filters={urlFilters}
-          searchValue={searchValue}
-          onSearchChange={(value) => {
-            setTyped(value)
-            setLimit(PAGE_SIZE)
-          }}
-          onChange={updateFilters}
-          onClear={clearFilters}
-          facets={facets}
-          total={jobs.length}
-          visible={visible.length}
-        />
+      <div className="container flex flex-col gap-6 py-16">
+        {/* Stuck flush under the fixed header on desktop; the padding paints
+            over cards sliding underneath and the shadow appears once stuck. */}
+        <div
+          ref={toolbarRef}
+          style={{ top: chrome.nav }}
+          className={`bg-gray-100 lg:sticky lg:z-30 lg:-mx-4 lg:-mt-4 lg:px-4 lg:pt-4 lg:pb-4 lg:transition-shadow lg:duration-200 ${
+            chrome.stuck ? "lg:shadow-[0_14px_14px_-14px_rgba(1,0,102,0.3)]" : ""
+          }`}
+        >
+          <BoardToolbar
+            filters={urlFilters}
+            searchValue={searchValue}
+            onSearchChange={setTyped}
+            onChange={updateFilters}
+            onClear={clearFilters}
+            facets={facets}
+            total={jobs.length}
+            visible={visible.length}
+            per={per}
+            onPerChange={changePageSize}
+            filtersOpen={filtersOpen}
+            onOpenFilters={openFilters}
+            filtersButtonRef={filtersButtonRef}
+          />
+        </div>
 
         {linkedMissing && (
           <p role="status" className="rounded-lg border border-yellow-100 bg-yellow-50 p-4 text-body-sm text-blue-900">
@@ -305,6 +392,7 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
                 role="list"
                 aria-label="Open roles"
                 onKeyDown={onListKeyDown}
+                style={{ scrollMarginTop: isDesktop ? panelTop : MOBILE_SCROLL_MARGIN }}
                 className="flex flex-col gap-3"
               >
                 {shown.map((job) => (
@@ -317,25 +405,26 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
                   />
                 ))}
               </ul>
-              {visible.length > shown.length && (
-                <Button
-                  variant="outline"
-                  type="button"
-                  aria-controls="job-list"
-                  onClick={() => setLimit((l) => l + PAGE_SIZE)}
-                  className="self-center"
-                >
-                  Show more roles ({visible.length - shown.length} left)
-                </Button>
+              {pages > 1 && (
+                <BoardPagination
+                  page={page}
+                  count={pages}
+                  from={firstIndex + 1}
+                  to={firstIndex + shown.length}
+                  total={visible.length}
+                  onChange={goToPage}
+                />
               )}
             </div>
 
+            {/* Desktop panel: pinned under the toolbar, scrolling on its own. */}
             <aside
               ref={detailRef}
               id="job-detail"
               tabIndex={-1}
               aria-labelledby="job-detail-title"
-              className="hidden rounded-2xl bg-white p-8 shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 lg:sticky lg:top-28 lg:block lg:max-h-[calc(100dvh-8rem)] lg:overflow-y-auto"
+              style={{ top: panelTop, maxHeight: `calc(100dvh - ${panelTop + PANEL_BOTTOM_GAP}px)` }}
+              className="hidden rounded-2xl bg-white p-8 shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 lg:sticky lg:block lg:overflow-y-auto lg:overscroll-contain"
             >
               {selectedJob && (
                 <JobDetails job={selectedJob} headingId="job-detail-title" outsideFilters={outsideFilters} />
@@ -355,6 +444,58 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
           <JobModal job={linkedJob} onClose={closeModal} returnFocusRef={returnFocusRef} />
         </div>
       )}
+
+      {filtersOpen && (
+        <FilterModal
+          filters={urlFilters}
+          facets={facets}
+          visible={visible.length}
+          total={jobs.length}
+          onChange={updateFilters}
+          onClear={clearFilters}
+          onClose={closeFilters}
+          returnFocusRef={filtersButtonRef}
+        />
+      )}
     </section>
   )
+}
+
+/**
+ * Heights the desktop sticky layout hangs off: the fixed site header (the
+ * toolbar sticks flush under it) and the toolbar (the details panel sticks
+ * under that). Both are measured after mount, so the server and the
+ * hydrating client render the same fallbacks. `stuck` drives the toolbar's
+ * shadow. Inactive below lg, where nothing sticks.
+ */
+function useStickyChrome(toolbarRef: RefObject<HTMLElement | null>, active: boolean) {
+  const [nav, setNav] = useState(NAV_HEIGHT_FALLBACK)
+  const [toolbar, setToolbar] = useState(0)
+  const [stuck, setStuck] = useState(false)
+
+  useEffect(() => {
+    if (!active || typeof ResizeObserver === "undefined") return
+    const header = document.querySelector<HTMLElement>("body > header")
+    const bar = toolbarRef.current
+    // ResizeObserver reports once on observe(), so no first measurement is taken here.
+    const observer = new ResizeObserver(() => {
+      if (header) setNav(Math.round(header.getBoundingClientRect().height))
+      if (bar) setToolbar(Math.round(bar.getBoundingClientRect().height))
+    })
+    if (header) observer.observe(header)
+    if (bar) observer.observe(bar)
+    return () => observer.disconnect()
+  }, [toolbarRef, active])
+
+  useEffect(() => {
+    if (!active) return
+    const onScroll = () => {
+      const bar = toolbarRef.current
+      if (bar) setStuck(bar.getBoundingClientRect().top <= nav + 0.5)
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [toolbarRef, active, nav])
+
+  return { nav, toolbar, stuck: stuck && active }
 }

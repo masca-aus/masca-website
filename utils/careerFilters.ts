@@ -4,9 +4,10 @@
 //
 //   /careers?q=intern&type=internship,graduate&loc=vic&intl=yes&sort=closing
 //
-// Defaults are omitted when serialising so untouched filters leave the URL
-// clean. Unknown values are dropped rather than thrown: a mangled link still
-// opens the board.
+// The view state rides alongside: `job` (the selected role), `page` and
+// `per` (cards per page). Defaults are omitted when serialising so an
+// untouched board leaves the URL clean. Unknown values are dropped rather
+// than thrown: a mangled link still opens the board.
 
 import {
   JOB_LOCATIONS,
@@ -55,7 +56,7 @@ export const EMPTY_FILTERS: CareerFilters = {
   sort: "newest",
 }
 
-/** Query-string keys. `job` is the selected role and lives beside these. */
+/** Query-string keys. `job`, `page` and `per` are view state and live beside the filters. */
 export const FILTER_PARAMS = {
   q: "q",
   types: "type",
@@ -65,7 +66,16 @@ export const FILTER_PARAMS = {
   industries: "industry",
   sort: "sort",
   job: "job",
+  page: "page",
+  per: "per",
 } as const
+
+/** Cards per page. The first entry is the default and stays out of the URL. */
+export const PAGE_SIZES = [10, 20, 50] as const
+export type PageSize = (typeof PAGE_SIZES)[number]
+export const DEFAULT_PAGE_SIZE: PageSize = PAGE_SIZES[0]
+
+const isPageSize = (n: number): n is PageSize => (PAGE_SIZES as readonly number[]).includes(n)
 
 type ParamSource = Pick<URLSearchParams, "get">
 
@@ -107,8 +117,26 @@ export function serialiseFilters(filters: CareerFilters): URLSearchParams {
   return params
 }
 
-/** Filters plus the selected role — everything the board keeps in the URL. */
-export type BoardUrlState = CareerFilters & { job: string | null }
+/** Filters plus the view state — selected role, page, page size — the board keeps in the URL. */
+export type BoardUrlState = CareerFilters & {
+  job: string | null
+  /**
+   * 1-based page, or null when the URL doesn't say. A shared `?job=` link
+   * carries no page and the board opens it on the page that holds the role;
+   * the board's own writes always name the page (`?job=x&page=1`), so a
+   * filter change can never yank the list to wherever the selected role
+   * moved.
+   */
+  page: number | null
+  per: PageSize
+}
+
+export const EMPTY_BOARD_URL: BoardUrlState = {
+  ...EMPTY_FILTERS,
+  job: null,
+  page: null,
+  per: DEFAULT_PAGE_SIZE,
+}
 
 /** Deep-link ids are slugs; anything else in `?job=` is ignored. */
 export function isValidJobId(id: string): boolean {
@@ -116,19 +144,44 @@ export function isValidJobId(id: string): boolean {
 }
 
 export function parseBoardUrl(params: ParamSource | null): BoardUrlState {
-  if (!params) return { ...EMPTY_FILTERS, job: null }
+  if (!params) return { ...EMPTY_BOARD_URL }
   // Tolerate the id as a committee member typed it ("NLB Tech Intern 2027"):
   // the sheet tidies ids to slugs, so tidy the link the same way.
   const job = slugify(params.get(FILTER_PARAMS.job) ?? "")
-  return { ...parseFilters(params), job: job && isValidJobId(job) ? job : null }
+  const page = params.get(FILTER_PARAMS.page) ?? ""
+  const per = Number(params.get(FILTER_PARAMS.per))
+  return {
+    ...parseFilters(params),
+    job: job && isValidJobId(job) ? job : null,
+    page: /^[1-9]\d{0,4}$/.test(page) ? Number(page) : null,
+    per: isPageSize(per) ? per : DEFAULT_PAGE_SIZE,
+  }
 }
 
 /** Query string without the leading "?"; "" when everything is default. */
 export function serialiseBoardUrl(state: BoardUrlState): string {
   const params = serialiseFilters(state)
+  if (state.per !== DEFAULT_PAGE_SIZE) params.set(FILTER_PARAMS.per, String(state.per))
+  // Page 1 is only spelled out beside a selected role — see BoardUrlState.page.
+  if (state.page !== null && (state.page > 1 || state.job)) params.set(FILTER_PARAMS.page, String(state.page))
   if (state.job) params.set(FILTER_PARAMS.job, state.job)
   // Commas are legal in a query string and read better than %2C.
   return params.toString().replace(/%2C/g, ",")
+}
+
+/** Pages that `total` items make at `per` a page — never fewer than one. */
+export function pageCount(total: number, per: number): number {
+  return Math.max(1, Math.ceil(total / per))
+}
+
+/** The 1-based page holding the item at 0-based `index` (a missing item, -1, lands on page 1). */
+export function pageOf(index: number, per: number): number {
+  return Math.floor(Math.max(0, index) / per) + 1
+}
+
+/** The items on 1-based `page`. */
+export function pageSlice<T>(items: T[], page: number, per: number): T[] {
+  return items.slice((page - 1) * per, page * per)
 }
 
 /** Number of engaged filter groups — search and sort don't count. */

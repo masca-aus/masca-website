@@ -6,8 +6,10 @@ import sitemap from "../app/sitemap";
 import BoardEmpty from "@/app/(frontend)/careers/BoardEmpty";
 import CareerBoard from "@/app/(frontend)/careers/CareerBoard";
 import CompanyMark, { initials } from "@/app/(frontend)/careers/CompanyMark";
+import FilterModal from "@/app/(frontend)/careers/FilterModal";
 import JobDetails, { descriptionBlocks, jobShareUrl } from "@/app/(frontend)/careers/JobDetails";
 import Footer from "@/components/Footer";
+import { EMPTY_FILTERS, getIndustryFacets, getLocationFacets, getStudyLevelFacets, getTypeFacets } from "@/utils/careerFilters";
 import type { Job } from "@/utils/careers";
 import { SITE_NAV } from "@/utils/seo";
 
@@ -88,14 +90,62 @@ describe("CareerBoard (static render)", () => {
     expect(html).toContain('id="job-detail-title"');
   });
 
-  it("renders the count, the pill groups and the international toggle unpressed", () => {
+  it("renders the count, the sort and page-size controls and the international toggle unpressed", () => {
     expect(html).toContain("3 roles");
     expect(html).toContain("Open to international students");
     expect(html).toContain('aria-pressed="false"');
     expect(html).not.toContain('aria-pressed="true"');
-    for (const label of ["Type", "Where", "Study level", "Industry", "Internship", "Casual", "VIC", "Remote", "Banking"]) {
+    expect(html).toContain("Newest first");
+    expect(html).toContain("10 per page");
+  });
+
+  it("keeps the pill groups behind a closed Filters button", () => {
+    expect(html).toContain('aria-haspopup="dialog"');
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).not.toContain('role="dialog"');
+    for (const legend of ["Where", "Study level", "Industry"]) expect(html).not.toContain(legend);
+  });
+
+  it("shows ten roles a page with a pager, and no pager when one page is enough", () => {
+    expect(html).not.toContain('aria-label="Pages of roles"');
+    const many = Array.from({ length: 12 }, (_, i) => makeJob({ id: `role-${i}`, title: `Role ${i}` }));
+    const paged = renderToStaticMarkup(<CareerBoard jobs={many} />);
+    expect(paged.match(/data-job-id=/g)).toHaveLength(10);
+    expect(paged).toContain('aria-label="Pages of roles"');
+    expect(paged).toContain("of 2");
+    expect(paged).toContain("of 12");
+    expect(paged).toContain('aria-label="Previous page"');
+  });
+});
+
+describe("FilterModal (static render)", () => {
+  it("lists every pill group with counts and the live match line", () => {
+    const facets = {
+      types: getTypeFacets(jobs),
+      locations: getLocationFacets(jobs),
+      levels: getStudyLevelFacets(jobs),
+      industries: getIndustryFacets(jobs),
+    };
+    const html = renderToStaticMarkup(
+      <FilterModal
+        filters={{ ...EMPTY_FILTERS, types: ["casual"] }}
+        facets={facets}
+        visible={1}
+        total={3}
+        onChange={() => {}}
+        onClear={() => {}}
+        onClose={() => {}}
+        returnFocusRef={{ current: null }}
+      />,
+    );
+    expect(html).toContain('role="dialog"');
+    for (const label of ["Working rights", "Type", "Where", "Study level", "Industry", "Internship", "Casual", "VIC", "Remote", "Banking"]) {
       expect(html).toContain(label);
     }
+    expect(html).toContain("1 of 3 roles");
+    expect(html).toContain("Show 1 role");
+    expect(html).toContain("Clear all");
+    expect(html).toContain('aria-pressed="true"');
   });
 
   it("shows the student-facing badges on cards", () => {

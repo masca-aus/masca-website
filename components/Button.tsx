@@ -9,6 +9,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   href?: string;
   target?: string;
   rel?: string;
+  /** Reaches the <button> (React 19 ref-as-prop); ignored for links. */
+  ref?: React.Ref<HTMLButtonElement>;
   children: React.ReactNode;
 }
 
