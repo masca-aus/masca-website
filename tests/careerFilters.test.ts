@@ -37,9 +37,8 @@ function makeJob(overrides: Partial<Job>): Job {
     company: "Acme",
     type: "internship",
     country: { key: "australia", label: "Australia" },
-    state: { key: "vic", label: "VIC" },
-    nationwide: false,
-    location: "VIC",
+    state: { key: "victoria", label: "Victoria" },
+    location: "Victoria",
     international: "yes",
     studyLevels: ["any"],
     applyHref: "https://acme.example/apply",
@@ -54,20 +53,20 @@ function makeJob(overrides: Partial<Job>): Job {
 
 // Added dates descend in this order so "newest" keeps them as listed.
 const intlVic = makeJob({ id: "intl-vic", title: "Data Intern", company: "Nasi Lemak Bank", industry: "Banking", industryKey: "banking", tags: ["python"], added: "2026-09-13" });
-const citizensNsw = makeJob({ id: "cit-nsw", type: "graduate", state: { key: "nsw", label: "NSW" }, location: "NSW", international: "no", industry: "banking", industryKey: "banking", studyLevels: ["final", "graduate"], added: "2026-09-12" });
+const citizensNsw = makeJob({ id: "cit-nsw", type: "graduate", state: { key: "new-south-wales", label: "New South Wales" }, location: "New South Wales", international: "no", industry: "banking", industryKey: "banking", studyLevels: ["final", "graduate"], added: "2026-09-12" });
 const unsureRemote = makeJob({ id: "unsure-remote", type: "casual", country: { key: "malaysia", label: "Malaysia" }, state: undefined, city: { key: "kuala-lumpur", label: "Kuala Lumpur" }, location: "Kuala Lumpur", workMode: "remote", international: "unsure", industry: "Hospitality", industryKey: "hospitality", studyLevels: ["penultimate"], description: "Weekend shifts with kopi on tap", added: "2026-09-11" });
 const all = [intlVic, citizensNsw, unsureRemote];
 
 describe("URL round trip", () => {
   it("parses known values and drops unknown ones", () => {
     const params = new URLSearchParams(
-      "q=%20intern%20&type=internship,ceo,Graduate&country=malaysia&state=vic,Mars!&city=kuala-lumpur&mode=remote,office&intl=yes&level=final,any,bogus&industry=banking&sort=closing",
+      "q=%20intern%20&type=internship,ceo,Graduate&country=malaysia&state=victoria,Mars!&city=kuala-lumpur&mode=remote,office&intl=yes&level=final,any,bogus&industry=banking&sort=closing",
     );
     expect(parseFilters(params)).toEqual({
       q: "intern",
       types: ["internship", "graduate"],
       countries: ["malaysia"],
-      states: ["vic"],
+      states: ["victoria"],
       cities: ["kuala-lumpur"],
       modes: ["remote"],
       intl: "yes",
@@ -84,7 +83,7 @@ describe("URL round trip", () => {
       q: "kopi",
       types: ["casual"],
       countries: ["australia"],
-      states: ["vic", "nsw"],
+      states: ["victoria", "new-south-wales"],
       cities: ["melbourne"],
       modes: ["remote", "hybrid"],
       intl: "maybe",
@@ -94,16 +93,16 @@ describe("URL round trip", () => {
     };
     const serialised = serialiseFilters(filters);
     expect(serialised.toString()).toBe(
-      "q=kopi&type=casual&country=australia&state=vic%2Cnsw&city=melbourne&mode=remote%2Chybrid&intl=maybe&level=penultimate&industry=hospitality&sort=closing",
+      "q=kopi&type=casual&country=australia&state=victoria%2Cnew-south-wales&city=melbourne&mode=remote%2Chybrid&intl=maybe&level=penultimate&industry=hospitality&sort=closing",
     );
     expect(parseFilters(serialised)).toEqual(filters);
   });
 
   it("carries the selected role alongside the filters, tidying the id like the sheet does", () => {
     expect(parseBoardUrl(null)).toEqual({ ...EMPTY_FILTERS, job: null, page: null, per: 10 });
-    expect(parseBoardUrl(new URLSearchParams("job=acme-dev&state=vic"))).toEqual({
+    expect(parseBoardUrl(new URLSearchParams("job=acme-dev&state=victoria"))).toEqual({
       ...EMPTY_BOARD_URL,
-      states: ["vic"],
+      states: ["victoria"],
       job: "acme-dev",
     });
     // A pasted id is slugified the way the sheet slugifies ids; one with
@@ -167,21 +166,12 @@ describe("matching", () => {
       "intl-vic",
       "unsure-remote",
     ]);
-    expect(applyFilters(all, { ...EMPTY_FILTERS, types: ["casual"], states: ["vic"] })).toEqual([]);
+    expect(applyFilters(all, { ...EMPTY_FILTERS, types: ["casual"], states: ["victoria"] })).toEqual([]);
     expect(applyFilters(all, { ...EMPTY_FILTERS, countries: ["malaysia"] }).map((j) => j.id)).toEqual(["unsure-remote"]);
     expect(applyFilters(all, { ...EMPTY_FILTERS, cities: ["kuala-lumpur"] }).map((j) => j.id)).toEqual(["unsure-remote"]);
-    expect(applyFilters(all, { ...EMPTY_FILTERS, states: ["vic", "nsw"] }).map((j) => j.id)).toEqual(["intl-vic", "cit-nsw"]);
-  });
-
-  it("an Australia-wide role matches every Australian state pill, but not a Malaysian one", () => {
-    const nationwide = makeJob({ id: "wide", state: { key: "australia-wide", label: "Australia-wide" }, nationwide: true, location: "Australia-wide" });
-    expect(applyFilters([nationwide], { ...EMPTY_FILTERS, states: ["qld"] }).map((j) => j.id)).toEqual(["wide"]);
-    expect(applyFilters([nationwide], { ...EMPTY_FILTERS, states: ["australia-wide"] }).map((j) => j.id)).toEqual(["wide"]);
-    expect(applyFilters([nationwide], { ...EMPTY_FILTERS, states: ["selangor"] })).toEqual([]);
-    expect(getStateFacets([nationwide, intlVic]).map((f) => [f.key, f.count])).toEqual([
-      ["vic", 2],
-      ["australia-wide", 1],
-    ]);
+    expect(applyFilters(all, { ...EMPTY_FILTERS, states: ["victoria", "new-south-wales"] }).map((j) => j.id)).toEqual(["intl-vic", "cit-nsw"]);
+    // A role with no state never matches a state pill.
+    expect(applyFilters(all, { ...EMPTY_FILTERS, states: ["selangor"] })).toEqual([]);
   });
 
   it("work mode is its own group; roles that don't say never match a mode pill", () => {
@@ -216,7 +206,7 @@ describe("matching", () => {
   it("search requires every term, across title, company, tags, labels and description", () => {
     expect(matchesFilters(intlVic, { ...EMPTY_FILTERS, q: "nasi python" })).toBe(true);
     expect(matchesFilters(intlVic, { ...EMPTY_FILTERS, q: "nasi sydney" })).toBe(false);
-    expect(matchesFilters(citizensNsw, { ...EMPTY_FILTERS, q: "NSW graduate" })).toBe(true);
+    expect(matchesFilters(citizensNsw, { ...EMPTY_FILTERS, q: "south wales graduate" })).toBe(true);
     expect(matchesFilters(unsureRemote, { ...EMPTY_FILTERS, q: "kopi" })).toBe(true);
     expect(matchesFilters(unsureRemote, { ...EMPTY_FILTERS, q: "Penultimate" })).toBe(true);
   });
@@ -242,9 +232,13 @@ describe("facets", () => {
       ["graduate", 1],
       ["casual", 1],
     ]);
+    // Place facets are alphabetical, spelled the way the sheet spells them.
     expect(getStateFacets(all).map((f) => [f.key, f.count])).toEqual([
-      ["vic", 1],
-      ["nsw", 1],
+      ["new-south-wales", 1],
+      ["victoria", 1],
+    ]);
+    expect(getStateFacets([makeJob({ state: { key: "victoria", label: "victoria" } }), intlVic])).toEqual([
+      { key: "victoria", label: "victoria", count: 2 },
     ]);
     expect(getCountryFacets(all)).toEqual([
       { key: "australia", label: "Australia", count: 2 },

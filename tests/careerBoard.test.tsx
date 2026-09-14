@@ -32,9 +32,8 @@ function makeJob(overrides: Partial<Job>): Job {
     company: "Acme",
     type: "internship",
     country: { key: "australia", label: "Australia" },
-    state: { key: "vic", label: "VIC" },
-    nationwide: false,
-    location: "VIC",
+    state: { key: "victoria", label: "Victoria" },
+    location: "Victoria",
     international: "yes",
     studyLevels: ["any"],
     applyHref: "https://acme.example/apply",
@@ -71,7 +70,7 @@ const emailJob = makeJob({
   company: "Kopi Corner",
   type: "casual",
   city: { key: "carlton", label: "Carlton" },
-  location: "Carlton, VIC",
+  location: "Carlton, Victoria",
   international: "unsure",
   applyHref: "mailto:jobs@kopi.example",
   applyKind: "email",
@@ -178,7 +177,7 @@ describe("FilterModal (static render)", () => {
       />,
     );
     expect(html).toContain('role="dialog"');
-    for (const label of ["Working rights", "Type", "Country", "State", "City", "Work mode", "Study level", "Industry", "Internship", "Casual", "Australia", "VIC", "Carlton", "Remote", "Banking"]) {
+    for (const label of ["Working rights", "Type", "Country", "State", "City", "Work mode", "Study level", "Industry", "Internship", "Casual", "Australia", "Victoria", "Carlton", "Remote", "Banking"]) {
       expect(html).toContain(label);
     }
     expect(html).toContain("1 of 3 roles");
