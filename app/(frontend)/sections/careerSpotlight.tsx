@@ -40,10 +40,9 @@ export default async function CareerSpotlightSection() {
         {/* Left: the pitch */}
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
-            <span className="eyebrow text-yellow-500">masca careers &middot; the jobs board</span>
+            <span className="eyebrow text-yellow-500">the jobs board</span>
             <h2 className="title text-white">
-              Jom, find your{" "}
-              <span className="font-accent font-normal text-yellow-500">next big break</span>
+              Find your next opportunity
             </h2>
           </header>
 
