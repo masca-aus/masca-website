@@ -42,7 +42,7 @@ export default async function CareerSpotlightSection() {
           <header className="flex flex-col gap-4">
             <span className="eyebrow text-yellow-500">the jobs board</span>
             <h2 className="title text-white">
-              Find your next opportunity
+              Find your next <span className="text-yellow-500">opportunity</span>
             </h2>
           </header>
 

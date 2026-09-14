@@ -1,4 +1,4 @@
-import { Clock, Globe, GraduationCap, Info, Lock, Star } from "lucide-react"
+import { Briefcase, Clock, Globe, GraduationCap, Info, Lock, Star } from "lucide-react"
 
 import {
   JOB_TYPE_LABEL,
@@ -30,7 +30,7 @@ export function WorkingRightsBadge({
         <Globe className="size-3" aria-hidden />
         {compact ? (
           <>
-            <span aria-hidden>Intl OK</span>
+            <span aria-hidden>International</span>
             <span className="sr-only">Open to international students</span>
           </>
         ) : (
@@ -81,7 +81,10 @@ export function ClosingChip({ job }: { job: Pick<Job, "daysLeft" | "closesLabel"
 }
 
 export function TypeBadge({ type }: { type: Job["type"] }) {
-  return <span className={`${BADGE} bg-gray-100 text-gray-700`}>{JOB_TYPE_LABEL[type]}</span>
+  return <span className={`${BADGE} bg-gray-100 text-blue-900`}>
+    <Briefcase className="size-3" aria-hidden />
+    {JOB_TYPE_LABEL[type]}
+  </span>
 }
 
 /** First non-"any" level, with a "+n" for the rest. Nothing for "any". */
@@ -90,7 +93,7 @@ export function StudyLevelBadge({ levels }: { levels: Job["studyLevels"] }) {
   if (named.length === 0) return null
   // Blue text on the yellow tint: yellow-800 on yellow-50 is only 2.9:1.
   return (
-    <span className={`${BADGE} bg-yellow-50 text-blue-900`}>
+    <span className={`${BADGE} bg-gray-100 text-blue-900`}>
       <GraduationCap className="size-3" aria-hidden />
       {STUDY_LEVEL_LABEL[named[0]]}
       {named.length > 1 && (

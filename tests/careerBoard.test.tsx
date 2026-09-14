@@ -132,7 +132,7 @@ describe("CareerBoard (static render)", () => {
   });
 
   it("shows the student-facing badges on cards", () => {
-    expect(html).toContain("Intl OK");
+    expect(html).toContain("International");
     expect(html).toContain("Closes in 3 days");
     expect(html).toContain("Featured");
     expect(html).toContain("Penultimate");

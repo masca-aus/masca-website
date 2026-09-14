@@ -15,9 +15,9 @@ export const LEGEND = "text-body-sm font-bold text-gray-700"
 /** The toggle cycles off → yes; from the empty state's "maybe" a tap tightens back to yes. */
 export const NEXT_INTL: Record<IntlFilter, IntlFilter> = { off: "yes", yes: "off", maybe: "yes" }
 export const INTL_LABEL: Record<IntlFilter, { full: string; short: string }> = {
-  off: { full: "Open to international students", short: "Intl OK" },
-  yes: { full: "Open to international students", short: "Intl OK" },
-  maybe: { full: "Open to international students, incl. unconfirmed", short: "Intl OK + unconfirmed" },
+  off: { full: "Open to international students", short: "International" },
+  yes: { full: "Open to international students", short: "International" },
+  maybe: { full: "Open to international students, incl. unconfirmed", short: "International + unconfirmed" },
 }
 
 export function toggle<T>(list: T[], value: T): T[] {

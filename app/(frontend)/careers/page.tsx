@@ -93,9 +93,6 @@ function CtaBand() {
           <Button href="/contact" variant="accent">
             Post a role <span aria-hidden>&rarr;</span>
           </Button>
-          <Button href="mailto:careers@masca.org.au" variant="outlineLight">
-            Email careers@masca.org.au
-          </Button>
         </div>
       </div>
     </section>

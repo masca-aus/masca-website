@@ -60,37 +60,40 @@ function JobCard({
           selected ? "border-blue-600 bg-blue-50" : "border-transparent"
         }`}
       >
-        <div className="flex gap-3">
-          <CompanyMark name={job.company} logoUrl={job.logoUrl} />
+        <div className="flex flex-col gap-4">
+          {/* Row 1: logo | (title + company) */}
+          <div className="flex gap-3">
+            <CompanyMark name={job.company} logoUrl={job.logoUrl} />
 
-          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-            {/* The chip wraps beneath the title on narrow phones rather than squeezing it. */}
-            <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
-              <h3 className="line-clamp-2 min-w-0 flex-1 basis-40 text-body font-bold leading-tight text-blue-600">
-                {job.title}
-              </h3>
-              <ClosingChip job={job} />
-            </div>
+            <div className="flex min-w-0 flex-1 flex-col">
+              {/* The chip wraps beneath the title on narrow phones rather than squeezing it. */}
+              <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+                <h3 className="line-clamp-2 min-w-0 flex-1 basis-40 text-body font-bold leading-tight text-blue-600">
+                  {job.title}
+                </h3>
+                <ClosingChip job={job} />
+              </div>
 
-            <p className="truncate text-body-sm text-gray-700">
-              {job.company}
-              {location && <span className="text-gray-700/80"> · {location}</span>}
-            </p>
-
-            <div className="flex flex-wrap gap-1.5">
-              {job.featured && <FeaturedBadge />}
-              <WorkingRightsBadge value={job.international} compact />
-              <TypeBadge type={job.type} />
-              <StudyLevelBadge levels={job.studyLevels} />
-            </div>
-
-            {(job.isNew || job.addedLabel) && (
-              <p className="flex items-center gap-2 text-caption text-gray-700">
-                {job.isNew && <NewBadge />}
-                {job.addedLabel && <span>{job.addedLabel}</span>}
+              <p className="truncate text-body-sm text-gray-700">
+                {job.company}
               </p>
-            )}
+            </div>
           </div>
+
+          {/* Row 2: tags */}
+          <div className="flex flex-wrap gap-3">
+            {job.featured && <FeaturedBadge />}
+            <WorkingRightsBadge value={job.international} compact />
+            <TypeBadge type={job.type} />
+            <StudyLevelBadge levels={job.studyLevels} />
+          </div>
+
+          {(job.isNew || job.addedLabel) && (
+            <p className="flex items-center gap-2 text-caption text-gray-700">
+              {job.isNew && <NewBadge />}
+              {job.addedLabel && <span>{job.addedLabel}</span>}
+            </p>
+          )}
         </div>
       </button>
     </li>
