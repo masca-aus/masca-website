@@ -9,7 +9,6 @@ import {
   useState,
   useSyncExternalStore,
   type KeyboardEvent,
-  type RefObject,
 } from "react"
 import { gsap } from "gsap"
 import { useGSAP } from "@gsap/react"
@@ -51,21 +50,14 @@ import { pushQuery, readQuery, serverQuery, subscribeToQuery, writeQuery } from 
 // useSearchParams (which would force the list behind a Suspense fallback)
 // or page-level searchParams (which would make the page dynamic).
 //
-// On desktop the toolbar sticks under the site header and the details panel
-// sticks under the toolbar, scrolling on its own; both offsets are measured
-// after mount (useStickyChrome). Below lg everything scrolls with the page
-// and a tapped card opens a sheet instead.
+// On desktop the details panel is pinned beside the list and scrolls on its
+// own; the toolbar and the list scroll with the page. Below lg a tapped card
+// opens a sheet instead of the panel.
 //
 // Nothing here calls Date: every relative label arrives precomputed in the
 // job props, so server and client render the same markup.
 
 const DESKTOP_QUERY = "(min-width: 1024px)"
-/** NavBar's desktop height (py-4 around a 44px button) until it has been measured. */
-const NAV_HEIGHT_FALLBACK = 76
-/** Where a page change scrolls the list to below lg: under the 56px header, plus air. */
-const MOBILE_SCROLL_MARGIN = 80
-/** Room under the details panel so its bottom edge clears the viewport. */
-const PANEL_BOTTOM_GAP = 24
 
 function subscribeToViewport(listener: () => void) {
   const mq = window.matchMedia(DESKTOP_QUERY)
@@ -99,7 +91,6 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
 
   const listRef = useRef<HTMLUListElement>(null)
   const detailRef = useRef<HTMLElement>(null)
-  const toolbarRef = useRef<HTMLDivElement>(null)
   const filtersButtonRef = useRef<HTMLButtonElement>(null)
   const returnFocusRef = useRef<HTMLElement | null>(null)
   // True while the phone sheet sits on a history entry we pushed, so its
@@ -216,7 +207,8 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
   }, [commit])
 
   // A new page shows its first role in the panel. The list scrolls back to
-  // its top when the pager was reached by scrolling past that top.
+  // its top (under the fixed header — see its scroll-mt classes) when the
+  // pager was reached by scrolling past that top.
   const goToPage = useCallback(
     (next: number) => {
       commit({ page: next, job: null })
@@ -259,10 +251,6 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
     const id = target.dataset.jobId
     if (id && readIsDesktop()) commit({ job: id })
   }
-
-  // --- sticky chrome (desktop) --------------------------------------------
-  const chrome = useStickyChrome(toolbarRef, isDesktop)
-  const panelTop = chrome.nav + chrome.toolbar
 
   // --- entrance animation -----------------------------------------------
   // First paint: the events-page stagger on scroll (skipped for deep links,
@@ -310,32 +298,22 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
 
   return (
     <section className="bg-gray-100">
-      <div className="container flex flex-col gap-6 py-16">
-        {/* Stuck flush under the fixed header on desktop; the padding paints
-            over cards sliding underneath and the shadow appears once stuck. */}
-        <div
-          ref={toolbarRef}
-          style={{ top: chrome.nav }}
-          className={`bg-gray-100 lg:sticky lg:z-30 lg:-mx-4 lg:-mt-4 lg:px-4 lg:pt-4 lg:pb-4 lg:transition-shadow lg:duration-200 ${
-            chrome.stuck ? "lg:shadow-[0_14px_14px_-14px_rgba(1,0,102,0.3)]" : ""
-          }`}
-        >
-          <BoardToolbar
-            filters={urlFilters}
-            searchValue={searchValue}
-            onSearchChange={setTyped}
-            onChange={updateFilters}
-            onClear={clearFilters}
-            facets={facets}
-            total={jobs.length}
-            visible={visible.length}
-            per={per}
-            onPerChange={changePageSize}
-            filtersOpen={filtersOpen}
-            onOpenFilters={openFilters}
-            filtersButtonRef={filtersButtonRef}
-          />
-        </div>
+      <div className="container flex flex-col gap-8 py-16">
+        <BoardToolbar
+          filters={urlFilters}
+          searchValue={searchValue}
+          onSearchChange={setTyped}
+          onChange={updateFilters}
+          onClear={clearFilters}
+          facets={facets}
+          total={jobs.length}
+          visible={visible.length}
+          per={per}
+          onPerChange={changePageSize}
+          filtersOpen={filtersOpen}
+          onOpenFilters={openFilters}
+          filtersButtonRef={filtersButtonRef}
+        />
 
         {linkedMissing && (
           <p role="status" className="rounded-lg border border-yellow-100 bg-yellow-50 p-4 text-body-sm text-blue-900">
@@ -392,8 +370,7 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
                 role="list"
                 aria-label="Open roles"
                 onKeyDown={onListKeyDown}
-                style={{ scrollMarginTop: isDesktop ? panelTop : MOBILE_SCROLL_MARGIN }}
-                className="flex flex-col gap-3"
+                className="flex scroll-mt-20 flex-col gap-3 lg:scroll-mt-28"
               >
                 {shown.map((job) => (
                   <JobCard
@@ -417,14 +394,13 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
               )}
             </div>
 
-            {/* Desktop panel: pinned under the toolbar, scrolling on its own. */}
+            {/* Desktop panel: pinned under the fixed header, scrolling on its own. */}
             <aside
               ref={detailRef}
               id="job-detail"
               tabIndex={-1}
               aria-labelledby="job-detail-title"
-              style={{ top: panelTop, maxHeight: `calc(100dvh - ${panelTop + PANEL_BOTTOM_GAP}px)` }}
-              className="hidden rounded-2xl bg-white p-8 shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 lg:sticky lg:block lg:overflow-y-auto lg:overscroll-contain"
+              className="hidden rounded-2xl bg-white p-8 shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 lg:sticky lg:top-28 lg:block lg:max-h-[calc(100dvh-8rem)] lg:overflow-y-auto lg:overscroll-contain"
             >
               {selectedJob && (
                 <JobDetails job={selectedJob} headingId="job-detail-title" outsideFilters={outsideFilters} />
@@ -459,43 +435,4 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
       )}
     </section>
   )
-}
-
-/**
- * Heights the desktop sticky layout hangs off: the fixed site header (the
- * toolbar sticks flush under it) and the toolbar (the details panel sticks
- * under that). Both are measured after mount, so the server and the
- * hydrating client render the same fallbacks. `stuck` drives the toolbar's
- * shadow. Inactive below lg, where nothing sticks.
- */
-function useStickyChrome(toolbarRef: RefObject<HTMLElement | null>, active: boolean) {
-  const [nav, setNav] = useState(NAV_HEIGHT_FALLBACK)
-  const [toolbar, setToolbar] = useState(0)
-  const [stuck, setStuck] = useState(false)
-
-  useEffect(() => {
-    if (!active || typeof ResizeObserver === "undefined") return
-    const header = document.querySelector<HTMLElement>("body > header")
-    const bar = toolbarRef.current
-    // ResizeObserver reports once on observe(), so no first measurement is taken here.
-    const observer = new ResizeObserver(() => {
-      if (header) setNav(Math.round(header.getBoundingClientRect().height))
-      if (bar) setToolbar(Math.round(bar.getBoundingClientRect().height))
-    })
-    if (header) observer.observe(header)
-    if (bar) observer.observe(bar)
-    return () => observer.disconnect()
-  }, [toolbarRef, active])
-
-  useEffect(() => {
-    if (!active) return
-    const onScroll = () => {
-      const bar = toolbarRef.current
-      if (bar) setStuck(bar.getBoundingClientRect().top <= nav + 0.5)
-    }
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [toolbarRef, active, nav])
-
-  return { nav, toolbar, stuck: stuck && active }
 }

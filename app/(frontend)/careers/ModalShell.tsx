@@ -9,8 +9,8 @@ import { X } from "lucide-react"
 // GSAP in/out, Escape, scroll lock) plus a focus trap and focus return, which
 // a sheet a student reads for a while needs. Slides up from the bottom on
 // phones and sits centred on wider screens. Render it at the section level,
-// not inside the sticky toolbar: a fixed overlay inside that stacking context
-// would paint under the site header.
+// after the site header in DOM order, so its z-50 overlay paints over the
+// header's.
 
 const FOCUSABLE =
   'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])'

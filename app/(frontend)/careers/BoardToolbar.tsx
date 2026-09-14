@@ -29,8 +29,7 @@ import SelectField from "./SelectField"
 // international-students toggle (the one filter every visa holder taps, so it
 // stays out of the sheet), a chip for each applied filter, then the count,
 // sort and page size. The pill groups themselves live in FilterModal and open
-// on demand; on desktop CareerBoard keeps this whole bar stuck under the
-// site header.
+// on demand.
 
 export type BoardFacets = {
   types: Facet<JobType>[]
