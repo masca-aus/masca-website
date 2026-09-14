@@ -44,6 +44,7 @@ export const JOB_TYPE_LABEL: Record<JobType, string> = {
   other: "Other",
 }
 
+/** Where the role is. How it is worked (remote / hybrid / on-site) is `WorkMode`. */
 export const JOB_LOCATIONS = [
   "vic",
   "nsw",
@@ -53,7 +54,6 @@ export const JOB_LOCATIONS = [
   "act",
   "tas",
   "nt",
-  "remote",
   "australia",
   "malaysia",
   "other",
@@ -69,10 +69,19 @@ export const JOB_LOCATION_LABEL: Record<JobLocation, string> = {
   act: "ACT",
   tas: "TAS",
   nt: "NT",
-  remote: "Remote",
   australia: "Australia-wide",
   malaysia: "Malaysia",
   other: "Other",
+}
+
+/** How the role is worked — its own sheet column, kept apart from where. */
+export const WORK_MODES = ["onsite", "hybrid", "remote"] as const
+export type WorkMode = (typeof WORK_MODES)[number]
+
+export const WORK_MODE_LABEL: Record<WorkMode, string> = {
+  onsite: "On-site",
+  hybrid: "Hybrid",
+  remote: "Remote",
 }
 
 /** Whether the role is open to international (student-visa) applicants. */
@@ -137,10 +146,12 @@ export type Job = {
   /** Sanitised https URL. */
   logoUrl?: string
   type: JobType
-  /** Canonical locations; empty when the sheet left the cell blank. */
+  /** Canonical places; empty when the sheet left the cell blank. */
   locations: JobLocation[]
-  /** Free-text location detail beyond the codes, e.g. "Melbourne (hybrid)". */
+  /** Free-text place detail beyond the codes, e.g. "Melbourne" or "Carlton". */
   locationNote?: string
+  /** On-site / hybrid / remote; undefined when the sheet doesn't say. */
+  workMode?: WorkMode
   /** Industry as typed (first-seen casing); `industryKey` is the facet slug. */
   industry?: string
   industryKey?: string
@@ -181,6 +192,7 @@ export type SheetField =
   | "logoUrl"
   | "type"
   | "locations"
+  | "workMode"
   | "industry"
   | "international"
   | "studyLevels"
@@ -203,6 +215,7 @@ export const TEMPLATE_HEADERS: Record<SheetField, string> = {
   company: "Company",
   type: "Type",
   locations: "Location",
+  workMode: "Work mode",
   international: "International students",
   studyLevels: "Study level",
   closes: "Closes",
@@ -219,7 +232,7 @@ export const TEMPLATE_HEADERS: Record<SheetField, string> = {
 }
 
 export const TEMPLATE_HEADER_ORDER: SheetField[] = [
-  "published", "featured", "title", "company", "type", "locations", "international", "studyLevels",
+  "published", "featured", "title", "company", "type", "locations", "workMode", "international", "studyLevels",
   "closes", "apply", "industry", "eligibility", "pay", "description", "tags", "companyWebsite",
   "logoUrl", "added", "id",
 ]
@@ -236,6 +249,9 @@ const HEADER_SYNONYMS: Record<string, SheetField> = {
   logourl: "logoUrl", logo: "logoUrl", logolink: "logoUrl", companylogo: "logoUrl", image: "logoUrl",
   type: "type", jobtype: "type", roletype: "type", category: "type", kind: "type",
   locations: "locations", location: "locations", locations1: "locations", state: "locations", states: "locations", where: "locations", city: "locations",
+  workmode: "workMode", mode: "workMode", arrangement: "workMode", workarrangement: "workMode", workstyle: "workMode",
+  worksetting: "workMode", workplace: "workMode", locationtype: "workMode", remotehybrid: "workMode", hybridremote: "workMode",
+  remotehybridonsite: "workMode", onsitehybridremote: "workMode", onsiteremote: "workMode", remoteonsite: "workMode", remoteorhybrid: "workMode",
   industry: "industry", industries: "industry", sector: "industry", field: "industry",
   internationalstudents: "international", international: "international", intl: "international",
   intlstudents: "international", workingrights: "international", opentointernational: "international",
@@ -316,7 +332,6 @@ const LOCATION_ALIASES: Record<string, JobLocation> = {
   act: "act", australiancapitalterritory: "act", canberra: "act",
   tas: "tas", tasmania: "tas",
   nt: "nt", northernterritory: "nt",
-  remote: "remote", wfh: "remote", workfromhome: "remote", online: "remote", virtual: "remote", anywhere: "remote",
   australia: "australia", australiawide: "australia", national: "australia", nationwide: "australia",
   allstates: "australia", anywhereinaustralia: "australia", aus: "australia", au: "australia",
   multiple: "australia", various: "australia",
@@ -337,6 +352,19 @@ const CITY_ALIASES: Record<string, JobLocation> = {
   selangor: "malaysia", cyberjaya: "malaysia", putrajaya: "malaysia", sabah: "malaysia", sarawak: "malaysia",
   singapore: "other", sg: "other", nz: "other", newzealand: "other",
 }
+
+/** Work mode cell values — also the mode words that ride along in a Location cell. */
+const WORK_MODE_ALIASES: Record<string, WorkMode> = {
+  onsite: "onsite", inoffice: "onsite", inperson: "onsite", office: "onsite", campus: "onsite", oncampus: "onsite",
+  facetoface: "onsite", inhouse: "onsite",
+  hybrid: "hybrid", flexible: "hybrid", flex: "hybrid", mixed: "hybrid", partlyremote: "hybrid", partremote: "hybrid",
+  remote: "remote", fullyremote: "remote", wfh: "remote", workfromhome: "remote", online: "remote", virtual: "remote",
+  anywhere: "remote", remotefirst: "remote",
+}
+
+/** Mode words a committee member may tuck into Location: "Melbourne (hybrid)", "Remote". */
+const MODE_IN_PLACE =
+  /\b(?:fully[- ])?(?:remote|hybrid|on[- ]?site|in[- ]office|in[- ]person|wfh|work from home|online|virtual|anywhere)\b/gi
 
 const STUDY_LEVEL_ALIASES: Record<string, StudyLevel> = {
   any: "any", all: "any", anyyear: "any", allyears: "any", open: "any", anylevel: "any", allstudents: "any",
@@ -719,24 +747,40 @@ export function toJob(row: SheetRow, ctx: ToJobContext): ToJobResult {
     else warn(`Type "${row.type}" isn't one of the options — shown as Other`)
   }
 
+  // Work mode has its own column; a mode word tucked into Location
+  // ("Melbourne (hybrid)", "Remote") fills it in when that column is blank.
+  let workMode: WorkMode | undefined
+  if (row.workMode) {
+    const mapped = WORK_MODE_ALIASES[squash(row.workMode)]
+    if (mapped) workMode = mapped
+    else warn(`Work mode "${row.workMode}" isn't one of the options — use On-site, Hybrid or Remote`)
+  }
+
   const locations: JobLocation[] = []
   const notes: string[] = []
   for (const token of splitList(row.locations)) {
-    // "Melbourne (hybrid)" — hybrid/on-site is a mode, not a place.
-    const place = token.replace(/\b(hybrid|on-?site|in[- ]office|in[- ]person)\b/gi, "").replace(/[()]/g, "").trim()
+    const modeFromPlace = (token.match(MODE_IN_PLACE) ?? []).map((w) => WORK_MODE_ALIASES[squash(w)]).find(Boolean)
+    if (modeFromPlace && !workMode) workMode = modeFromPlace
+    const place = token
+      .replace(MODE_IN_PLACE, "")
+      .replace(/[()]/g, " ")
+      .replace(/^[\s,;:/|–—-]+|[\s,;:/|–—-]+$/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+    // A token that was only a mode word ("Remote") names no place.
+    if (!place) continue
     const key = squash(place)
     const region = LOCATION_ALIASES[key]
     const city = CITY_ALIASES[key]
     if (region) {
       if (!locations.includes(region)) locations.push(region)
-      if (place !== token) notes.push(token)
     } else if (city) {
       if (!locations.includes(city)) locations.push(city)
-      notes.push(token)
+      notes.push(place)
     } else if (key) {
       if (!locations.includes("other")) locations.push("other")
-      notes.push(token)
-      warn(`Location "${token}" isn't a state or one of the options — filed under Other`)
+      notes.push(place)
+      warn(`Location "${place}" isn't a state or one of the options — filed under Other`)
     }
   }
 
@@ -805,6 +849,7 @@ export function toJob(row: SheetRow, ctx: ToJobContext): ToJobResult {
     type,
     locations,
     locationNote: notes.length ? notes.join(", ") : undefined,
+    workMode,
     industry,
     industryKey: industry ? slugify(industry) || undefined : undefined,
     international,
@@ -938,7 +983,7 @@ export function parseSheet(csv: string, today: string): ParsedSheet {
   if (undated > 0) {
     info.push(
       undated === jobs.length
-        ? `None of the ${jobs.length === 1 ? "role has" : `${jobs.length} roles have`} an Added date — fill Added so "Newest first" means something and students can see how fresh a role is`
+        ? `${jobs.length === 1 ? "The only role has no" : `None of the ${jobs.length} roles have an`} Added date — fill Added so "Newest first" means something and students can see how fresh a role is`
         : `${undated} ${undated === 1 ? "role has" : "roles have"} no Added date — they sort as newest; fill Added so students can see how fresh they are`,
     )
   }

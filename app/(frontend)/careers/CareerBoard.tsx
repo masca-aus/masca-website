@@ -22,6 +22,7 @@ import {
   getLocationFacets,
   getStudyLevelFacets,
   getTypeFacets,
+  getWorkModeFacets,
   pageCount,
   pageOf,
   pageSlice,
@@ -107,6 +108,7 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
     () => ({
       types: getTypeFacets(jobs),
       locations: getLocationFacets(jobs),
+      modes: getWorkModeFacets(jobs),
       levels: getStudyLevelFacets(jobs),
       industries: getIndustryFacets(jobs),
     }),

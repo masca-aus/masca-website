@@ -1,12 +1,14 @@
-import { Clock, Globe, GraduationCap, Info, Lock, MapPin, Star } from "lucide-react"
+import { Clock, Globe, GraduationCap, Info, Lock, Star } from "lucide-react"
 
 import {
   JOB_LOCATION_LABEL,
   JOB_TYPE_LABEL,
   STUDY_LEVEL_LABEL,
+  WORK_MODE_LABEL,
   formatClosesLabel,
   type Job,
   type JobLocation,
+  type WorkMode,
 } from "@/utils/careers"
 import { STATES } from "@/utils/states"
 
@@ -135,14 +137,6 @@ export function LocationPill({ location }: { location: JobLocation }) {
       </span>
     )
   }
-  if (location === "remote") {
-    return (
-      <span className={`${BADGE} bg-gray-100 text-gray-700`}>
-        <MapPin className="size-3" aria-hidden />
-        {label}
-      </span>
-    )
-  }
   if (location === "malaysia") {
     return <span className={`${BADGE} bg-yellow-100 text-blue-900`}>{label}</span>
   }
@@ -156,8 +150,14 @@ export function LocationPill({ location }: { location: JobLocation }) {
   )
 }
 
-/** "VIC, NSW" or "Melbourne (hybrid)" — the one-line location summary for cards. */
-export function locationSummary(job: Pick<Job, "locations" | "locationNote">): string {
-  if (job.locationNote) return job.locationNote
-  return job.locations.map((l) => JOB_LOCATION_LABEL[l]).join(", ")
+/** On-site / Hybrid / Remote, in the same calm gray as the type chip. */
+export function WorkModePill({ mode }: { mode: WorkMode }) {
+  return <span className={`${BADGE} bg-gray-100 text-gray-700`}>{WORK_MODE_LABEL[mode]}</span>
+}
+
+/** "VIC, NSW · Hybrid", "Melbourne · On-site" or "Remote" — the one-line summary for cards. */
+export function locationSummary(job: Pick<Job, "locations" | "locationNote" | "workMode">): string {
+  const place = job.locationNote || job.locations.map((l) => JOB_LOCATION_LABEL[l]).join(", ")
+  const mode = job.workMode ? WORK_MODE_LABEL[job.workMode] : ""
+  return [place, mode].filter(Boolean).join(" · ")
 }

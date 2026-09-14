@@ -57,6 +57,8 @@ describe("header mapping", () => {
     expect(headerField("apply_link")).toBe("apply");
     expect(headerField("Application URL")).toBe("apply");
     expect(headerField("Location(s)")).toBe("locations");
+    expect(headerField("Work mode")).toBe("workMode");
+    expect(headerField("Remote / Hybrid / On-site")).toBe("workMode");
     expect(headerField("Closing date")).toBe("closes");
     expect(headerField("Deadline")).toBe("closes");
     expect(headerField("Int'l students")).toBe("international");
@@ -210,7 +212,8 @@ describe("toJob", () => {
       logoUrl: "https://cdn.example/logo.png",
       type: "internship",
       locations: ["vic", "nsw"],
-      locationNote: "Melbourne (hybrid)",
+      locationNote: "Melbourne",
+      workMode: "hybrid",
       industry: "Banking",
       industryKey: "banking",
       international: "yes",
@@ -317,11 +320,31 @@ describe("toJob", () => {
       locations: ["malaysia"],
       locationNote: "Kuala Lumpur",
     });
-    expect(job({ ...fullRow, locations: "Remote" })).toMatchObject({ locations: ["remote"], locationNote: undefined });
     const geelong = toJob({ ...fullRow, id: undefined, locations: "Geelong, Melb CBD" }, ctx);
     expect("job" in geelong && geelong.job).toMatchObject({ locations: ["vic", "other"], locationNote: "Geelong, Melb CBD" });
     expect(geelong.warnings).toEqual(['Row 2: Location "Melb CBD" isn\'t a state or one of the options — filed under Other']);
     expect(job({ ...fullRow, locations: undefined }).locations).toEqual([]);
+  });
+
+  it("reads work mode from its own column, or from a mode word left in Location", () => {
+    const base = { ...fullRow, id: undefined, locations: "VIC" };
+    expect(job({ ...base, workMode: "On-site" }).workMode).toBe("onsite");
+    expect(job({ ...base, workMode: "WFH" }).workMode).toBe("remote");
+    expect(job({ ...base, workMode: "Flexible" }).workMode).toBe("hybrid");
+    expect(job(base).workMode).toBeUndefined();
+    // "Remote" in Location is a mode, not a place; "Melbourne (hybrid)" is both.
+    expect(job({ ...base, locations: "Remote" })).toMatchObject({ locations: [], locationNote: undefined, workMode: "remote" });
+    expect(job({ ...base, locations: "Remote - Australia wide" })).toMatchObject({ locations: ["australia"], workMode: "remote" });
+    expect(job({ ...base, locations: "Sydney (on-site), Remote" })).toMatchObject({
+      locations: ["nsw"],
+      locationNote: "Sydney",
+      workMode: "onsite",
+    });
+    // The column wins over a stray word; an unreadable column falls back to it, with a warning.
+    expect(job({ ...base, locations: "Melbourne (hybrid)", workMode: "Remote" }).workMode).toBe("remote");
+    const odd = toJob({ ...base, locations: "Melbourne (hybrid)", workMode: "4 days" }, ctx);
+    expect("job" in odd && odd.job.workMode).toBe("hybrid");
+    expect(odd.warnings).toEqual(['Row 2: Work mode "4 days" isn\'t one of the options — use On-site, Hybrid or Remote']);
   });
 
   it("drops an http logo and a bad website with warnings, keeping the row", () => {
@@ -423,6 +446,7 @@ describe("parseSheet", () => {
     expect(parsed.info).toEqual([
       "No Published column — every row is live",
       "No Closes column — roles never expire automatically",
+      'The only role has no Added date — fill Added so "Newest first" means something and students can see how fresh a role is',
     ]);
   });
 

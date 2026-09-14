@@ -79,6 +79,12 @@ export default function FilterModal({
           onToggle={(v) => onChange({ locations: toggle(filters.locations, v) })}
         />
         <PillGroup
+          legend="Work mode"
+          facets={facets.modes}
+          selected={filters.modes}
+          onToggle={(v) => onChange({ modes: toggle(filters.modes, v) })}
+        />
+        <PillGroup
           legend="Study level"
           facets={facets.levels}
           selected={filters.levels}

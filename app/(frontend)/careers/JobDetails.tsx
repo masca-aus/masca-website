@@ -23,7 +23,7 @@ import {
   type Job,
 } from "@/utils/careers"
 import CompanyMark from "./CompanyMark"
-import { FeaturedBadge, LocationPill, NewBadge, WorkingRightsBadge } from "./JobBadges"
+import { FeaturedBadge, LocationPill, NewBadge, WorkModePill, WorkingRightsBadge } from "./JobBadges"
 
 // Full listing, shared by the desktop panel and the mobile modal. Everything
 // here is plain text from the sheet rendered through React (no HTML), and
@@ -96,11 +96,12 @@ export default function JobDetails({
 
       <dl className="grid grid-cols-[auto_1fr] items-start gap-x-3 gap-y-3 text-body-sm text-gray-700">
         <MetaRow icon={<MapPin className="size-4" aria-hidden />} label="Location">
-          {job.locations.length > 0 ? (
+          {job.locations.length > 0 || job.workMode ? (
             <span className="flex flex-wrap items-center gap-1.5">
               {job.locations.map((l) => (
                 <LocationPill key={l} location={l} />
               ))}
+              {job.workMode && <WorkModePill mode={job.workMode} />}
               {job.locationNote && <span className="text-caption text-gray-700/80">{job.locationNote}</span>}
             </span>
           ) : (

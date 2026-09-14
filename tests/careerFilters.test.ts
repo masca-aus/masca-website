@@ -10,6 +10,7 @@ import {
   getLocationFacets,
   getStudyLevelFacets,
   getTypeFacets,
+  getWorkModeFacets,
   hasAnyFilter,
   isValidJobId,
   matchesFilters,
@@ -49,18 +50,19 @@ function makeJob(overrides: Partial<Job>): Job {
 // Added dates descend in this order so "newest" keeps them as listed.
 const intlVic = makeJob({ id: "intl-vic", title: "Data Intern", company: "Nasi Lemak Bank", industry: "Banking", industryKey: "banking", tags: ["python"], added: "2026-09-13" });
 const citizensNsw = makeJob({ id: "cit-nsw", type: "graduate", locations: ["nsw"], international: "no", industry: "banking", industryKey: "banking", studyLevels: ["final", "graduate"], added: "2026-09-12" });
-const unsureRemote = makeJob({ id: "unsure-remote", type: "casual", locations: ["remote", "malaysia"], international: "unsure", industry: "Hospitality", industryKey: "hospitality", studyLevels: ["penultimate"], description: "Weekend shifts with kopi on tap", added: "2026-09-11" });
+const unsureRemote = makeJob({ id: "unsure-remote", type: "casual", locations: ["malaysia"], workMode: "remote", international: "unsure", industry: "Hospitality", industryKey: "hospitality", studyLevels: ["penultimate"], description: "Weekend shifts with kopi on tap", added: "2026-09-11" });
 const all = [intlVic, citizensNsw, unsureRemote];
 
 describe("URL round trip", () => {
   it("parses known values and drops unknown ones", () => {
     const params = new URLSearchParams(
-      "q=%20intern%20&type=internship,ceo,Graduate&loc=vic,mars&intl=yes&level=final,any,bogus&industry=banking&sort=closing",
+      "q=%20intern%20&type=internship,ceo,Graduate&loc=vic,mars&mode=remote,office&intl=yes&level=final,any,bogus&industry=banking&sort=closing",
     );
     expect(parseFilters(params)).toEqual({
       q: "intern",
       types: ["internship", "graduate"],
       locations: ["vic"],
+      modes: ["remote"],
       intl: "yes",
       levels: ["final"],
       industries: ["banking"],
@@ -74,7 +76,8 @@ describe("URL round trip", () => {
     const filters: CareerFilters = {
       q: "kopi",
       types: ["casual"],
-      locations: ["remote", "malaysia"],
+      locations: ["vic", "malaysia"],
+      modes: ["remote", "hybrid"],
       intl: "maybe",
       levels: ["penultimate"],
       industries: ["hospitality"],
@@ -82,7 +85,7 @@ describe("URL round trip", () => {
     };
     const serialised = serialiseFilters(filters);
     expect(serialised.toString()).toBe(
-      "q=kopi&type=casual&loc=remote%2Cmalaysia&intl=maybe&level=penultimate&industry=hospitality&sort=closing",
+      "q=kopi&type=casual&loc=vic%2Cmalaysia&mode=remote%2Chybrid&intl=maybe&level=penultimate&industry=hospitality&sort=closing",
     );
     expect(parseFilters(serialised)).toEqual(filters);
   });
@@ -143,6 +146,7 @@ describe("URL round trip", () => {
     expect(countActiveFilters(EMPTY_FILTERS)).toBe(0);
     expect(countActiveFilters({ ...EMPTY_FILTERS, q: "x", sort: "closing" })).toBe(0);
     expect(countActiveFilters({ ...EMPTY_FILTERS, types: ["casual"], intl: "yes" })).toBe(2);
+    expect(countActiveFilters({ ...EMPTY_FILTERS, modes: ["remote"] })).toBe(1);
     expect(hasAnyFilter({ ...EMPTY_FILTERS, q: "x" })).toBe(true);
     expect(hasAnyFilter(EMPTY_FILTERS)).toBe(false);
   });
@@ -156,6 +160,12 @@ describe("matching", () => {
     ]);
     expect(applyFilters(all, { ...EMPTY_FILTERS, types: ["casual"], locations: ["vic"] })).toEqual([]);
     expect(applyFilters(all, { ...EMPTY_FILTERS, locations: ["malaysia"] }).map((j) => j.id)).toEqual(["unsure-remote"]);
+  });
+
+  it("work mode is its own group; roles that don't say never match a mode pill", () => {
+    expect(applyFilters(all, { ...EMPTY_FILTERS, modes: ["remote"] }).map((j) => j.id)).toEqual(["unsure-remote"]);
+    expect(applyFilters(all, { ...EMPTY_FILTERS, modes: ["onsite", "hybrid"] })).toEqual([]);
+    expect(matchesFilters(unsureRemote, { ...EMPTY_FILTERS, q: "remote" })).toBe(true);
   });
 
   it("international: yes excludes unsure roles, maybe keeps them", () => {
@@ -213,9 +223,9 @@ describe("facets", () => {
     expect(getLocationFacets(all).map((f) => [f.key, f.count])).toEqual([
       ["vic", 1],
       ["nsw", 1],
-      ["remote", 1],
       ["malaysia", 1],
     ]);
+    expect(getWorkModeFacets(all)).toEqual([{ key: "remote", label: "Remote", count: 1 }]);
     // "any" roles count toward every level; the "any" pill itself is never offered.
     expect(getStudyLevelFacets(all).map((f) => [f.key, f.count])).toEqual([
       ["pre-penultimate", 1],

@@ -2,7 +2,7 @@
 // its tests. Filter state round-trips through the URL query string so a
 // filtered view can be shared or reloaded:
 //
-//   /careers?q=intern&type=internship,graduate&loc=vic&intl=yes&sort=closing
+//   /careers?q=intern&type=internship,graduate&loc=vic&mode=remote&intl=yes&sort=closing
 //
 // The view state rides alongside: `job` (the selected role), `page` and
 // `per` (cards per page). Defaults are omitted when serialising so an
@@ -16,6 +16,8 @@ import {
   JOB_TYPE_LABEL,
   STUDY_LEVELS,
   STUDY_LEVEL_LABEL,
+  WORK_MODES,
+  WORK_MODE_LABEL,
   slugify,
   sortJobs,
   type Job,
@@ -23,6 +25,7 @@ import {
   type JobSort,
   type JobType,
   type StudyLevel,
+  type WorkMode,
 } from "./careers"
 
 /** A pasted paragraph must not become a multi-kilobyte query string. */
@@ -39,6 +42,7 @@ export type CareerFilters = {
   q: string
   types: JobType[]
   locations: JobLocation[]
+  modes: WorkMode[]
   intl: IntlFilter
   levels: StudyLevel[]
   /** Industry facet keys (see `getIndustryFacets`). */
@@ -50,6 +54,7 @@ export const EMPTY_FILTERS: CareerFilters = {
   q: "",
   types: [],
   locations: [],
+  modes: [],
   intl: "off",
   levels: [],
   industries: [],
@@ -61,6 +66,7 @@ export const FILTER_PARAMS = {
   q: "q",
   types: "type",
   locations: "loc",
+  modes: "mode",
   intl: "intl",
   levels: "level",
   industries: "industry",
@@ -81,6 +87,7 @@ type ParamSource = Pick<URLSearchParams, "get">
 
 const isJobType = (v: string): v is JobType => (JOB_TYPES as readonly string[]).includes(v)
 const isJobLocation = (v: string): v is JobLocation => (JOB_LOCATIONS as readonly string[]).includes(v)
+const isWorkMode = (v: string): v is WorkMode => (WORK_MODES as readonly string[]).includes(v)
 const isStudyLevel = (v: string): v is StudyLevel => (STUDY_LEVELS as readonly string[]).includes(v)
 
 function list(raw: string | null): string[] {
@@ -97,6 +104,7 @@ export function parseFilters(params: ParamSource): CareerFilters {
     q: (params.get(FILTER_PARAMS.q) ?? "").trim().slice(0, MAX_QUERY_LENGTH),
     types: list(params.get(FILTER_PARAMS.types)).filter(isJobType),
     locations: list(params.get(FILTER_PARAMS.locations)).filter(isJobLocation),
+    modes: list(params.get(FILTER_PARAMS.modes)).filter(isWorkMode),
     intl: intl === "yes" || intl === "maybe" ? intl : "off",
     levels: list(params.get(FILTER_PARAMS.levels)).filter(isStudyLevel).filter((l) => l !== "any"),
     industries: list(params.get(FILTER_PARAMS.industries)),
@@ -110,6 +118,7 @@ export function serialiseFilters(filters: CareerFilters): URLSearchParams {
   if (filters.q) params.set(FILTER_PARAMS.q, filters.q.slice(0, MAX_QUERY_LENGTH))
   if (filters.types.length) params.set(FILTER_PARAMS.types, filters.types.join(","))
   if (filters.locations.length) params.set(FILTER_PARAMS.locations, filters.locations.join(","))
+  if (filters.modes.length) params.set(FILTER_PARAMS.modes, filters.modes.join(","))
   if (filters.intl !== "off") params.set(FILTER_PARAMS.intl, filters.intl)
   if (filters.levels.length) params.set(FILTER_PARAMS.levels, filters.levels.join(","))
   if (filters.industries.length) params.set(FILTER_PARAMS.industries, filters.industries.join(","))
@@ -189,6 +198,7 @@ export function countActiveFilters(filters: CareerFilters): number {
   return (
     (filters.types.length ? 1 : 0) +
     (filters.locations.length ? 1 : 0) +
+    (filters.modes.length ? 1 : 0) +
     (filters.intl !== "off" ? 1 : 0) +
     (filters.levels.length ? 1 : 0) +
     (filters.industries.length ? 1 : 0)
@@ -208,6 +218,7 @@ export function searchHaystack(job: Job): string {
     JOB_TYPE_LABEL[job.type],
     ...job.locations.map((l) => JOB_LOCATION_LABEL[l]),
     job.locationNote,
+    job.workMode && WORK_MODE_LABEL[job.workMode],
     ...job.studyLevels.map((l) => STUDY_LEVEL_LABEL[l]),
     job.eligibility,
     job.pay,
@@ -237,6 +248,7 @@ export function matchesIntl(job: Job, intl: IntlFilter): boolean {
 export function matchesFilters(job: Job, filters: CareerFilters): boolean {
   if (filters.types.length && !filters.types.includes(job.type)) return false
   if (filters.locations.length && !job.locations.some((l) => filters.locations.includes(l))) return false
+  if (filters.modes.length && !(job.workMode && filters.modes.includes(job.workMode))) return false
   if (!matchesIntl(job, filters.intl)) return false
   if (
     filters.levels.length &&
@@ -295,6 +307,14 @@ export function getLocationFacets(jobs: Job[]): Facet<JobLocation>[] {
     key,
     label: JOB_LOCATION_LABEL[key],
     count: jobs.filter((j) => j.locations.includes(key)).length,
+  })).filter((f) => f.count > 0)
+}
+
+export function getWorkModeFacets(jobs: Job[]): Facet<WorkMode>[] {
+  return WORK_MODES.map((key) => ({
+    key,
+    label: WORK_MODE_LABEL[key],
+    count: jobs.filter((j) => j.workMode === key).length,
   })).filter((f) => f.count > 0)
 }
 

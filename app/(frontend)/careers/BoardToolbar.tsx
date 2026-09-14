@@ -17,10 +17,12 @@ import {
   JOB_LOCATION_LABEL,
   JOB_TYPE_LABEL,
   STUDY_LEVEL_LABEL,
+  WORK_MODE_LABEL,
   type JobLocation,
   type JobSort,
   type JobType,
   type StudyLevel,
+  type WorkMode,
 } from "@/utils/careers"
 import { FIELD, INTL_LABEL, NEXT_INTL, PILL_ACTIVE, PILL_BASE, PILL_IDLE, toggle } from "./boardStyles"
 import SelectField from "./SelectField"
@@ -34,6 +36,7 @@ import SelectField from "./SelectField"
 export type BoardFacets = {
   types: Facet<JobType>[]
   locations: Facet<JobLocation>[]
+  modes: Facet<WorkMode>[]
   levels: Facet<StudyLevel>[]
   industries: Facet[]
 }
@@ -215,6 +218,11 @@ function appliedChips(
       key: `loc:${v}`,
       label: JOB_LOCATION_LABEL[v],
       remove: () => onChange({ locations: toggle(filters.locations, v) }),
+    })),
+    ...filters.modes.map((v) => ({
+      key: `mode:${v}`,
+      label: WORK_MODE_LABEL[v],
+      remove: () => onChange({ modes: toggle(filters.modes, v) }),
     })),
     ...filters.levels.map((v) => ({
       key: `level:${v}`,

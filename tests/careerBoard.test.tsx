@@ -9,7 +9,14 @@ import CompanyMark, { initials } from "@/app/(frontend)/careers/CompanyMark";
 import FilterModal from "@/app/(frontend)/careers/FilterModal";
 import JobDetails, { descriptionBlocks, jobShareUrl } from "@/app/(frontend)/careers/JobDetails";
 import Footer from "@/components/Footer";
-import { EMPTY_FILTERS, getIndustryFacets, getLocationFacets, getStudyLevelFacets, getTypeFacets } from "@/utils/careerFilters";
+import {
+  EMPTY_FILTERS,
+  getIndustryFacets,
+  getLocationFacets,
+  getStudyLevelFacets,
+  getTypeFacets,
+  getWorkModeFacets,
+} from "@/utils/careerFilters";
 import type { Job } from "@/utils/careers";
 import { SITE_NAV } from "@/utils/seo";
 
@@ -71,7 +78,8 @@ const citizensOnly = makeJob({
   title: "Policy Graduate",
   company: "Department of Teh Tarik",
   type: "graduate",
-  locations: ["act", "remote"],
+  locations: ["act"],
+  workMode: "remote",
   international: "no",
   added: "2026-09-01",
   addedLabel: "Added 2 weeks ago",
@@ -125,6 +133,7 @@ describe("CareerBoard (static render)", () => {
     expect(html).toContain("Penultimate");
     expect(html).toContain("Rolling");
     expect(html).toContain("Carlton");
+    expect(html).toContain("ACT · Remote");
   });
 
   it("never emits sheet text as HTML and only links to sanitised targets", () => {
@@ -141,6 +150,7 @@ describe("FilterModal (static render)", () => {
     const facets = {
       types: getTypeFacets(jobs),
       locations: getLocationFacets(jobs),
+      modes: getWorkModeFacets(jobs),
       levels: getStudyLevelFacets(jobs),
       industries: getIndustryFacets(jobs),
     };
@@ -157,7 +167,7 @@ describe("FilterModal (static render)", () => {
       />,
     );
     expect(html).toContain('role="dialog"');
-    for (const label of ["Working rights", "Type", "Where", "Study level", "Industry", "Internship", "Casual", "VIC", "Remote", "Banking"]) {
+    for (const label of ["Working rights", "Type", "Where", "Work mode", "Study level", "Industry", "Internship", "Casual", "VIC", "Remote", "Banking"]) {
       expect(html).toContain(label);
     }
     expect(html).toContain("1 of 3 roles");
