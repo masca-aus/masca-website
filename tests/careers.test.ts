@@ -335,7 +335,8 @@ describe("toJob", () => {
       city: { key: "kuala-lumpur", label: "Kuala Lumpur" },
       location: "Kuala Lumpur",
     });
-    expect(job({ ...bare, country: "MY" })).toMatchObject({ country: { key: "malaysia", label: "Malaysia" }, location: "Malaysia" });
+    // Country alone has no City, State line; the country shows on its own line instead.
+    expect(job({ ...bare, country: "MY" })).toMatchObject({ country: { key: "malaysia", label: "Malaysia" }, location: undefined });
     expect(job({ ...bare, state: "Selangor", city: "Petaling Jaya" })).toMatchObject({
       country: { key: "malaysia", label: "Malaysia" },
       state: { key: "selangor", label: "Selangor" },
@@ -362,7 +363,7 @@ describe("toJob", () => {
       city: { key: "melbourne", label: "Melbourne" },
       location: "Melbourne, VIC",
     });
-    expect(job({ ...bare, locations: "Malaysia" })).toMatchObject({ country: { key: "malaysia", label: "Malaysia" }, location: "Malaysia" });
+    expect(job({ ...bare, locations: "Malaysia" })).toMatchObject({ country: { key: "malaysia", label: "Malaysia" }, location: undefined });
     expect(job({ ...bare, locations: "NSW, Sydney", state: "VIC" })).toMatchObject({ state: vic, city: { key: "sydney", label: "Sydney" } });
     const two = toJob({ ...bare, locations: "VIC, NSW" }, ctx);
     expect("job" in two && two.job).toMatchObject({ state: vic, city: undefined });

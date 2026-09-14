@@ -143,7 +143,7 @@ export type Job = {
   city?: Named
   /** State said "Australia-wide": the role matches every Australian state pill. */
   nationwide: boolean
-  /** "Melbourne, VIC", "VIC" or "Malaysia" — the one line cards and the panel show. */
+  /** "Melbourne, VIC" or "VIC" — the City, State line; undefined when both are blank (the country has its own line). */
   location?: string
   /** On-site / hybrid / remote; undefined when the sheet doesn't say. */
   workMode?: WorkMode
@@ -876,7 +876,7 @@ export function toJob(row: SheetRow, ctx: ToJobContext): ToJobResult {
       warn(`couldn't tell which country "${where}" is in — fill in Country so the role shows up in the Where filters`)
     }
   }
-  const location = [city?.label, state?.label].filter(Boolean).join(", ") || country?.label
+  const location = [city?.label, state?.label].filter(Boolean).join(", ") || undefined
 
   let tags = splitList(row.tags)
   if (tags.length > MAX_TAGS) {

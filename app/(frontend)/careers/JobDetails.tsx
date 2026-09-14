@@ -8,6 +8,7 @@ import {
   CalendarClock,
   Check,
   Clock,
+  Earth,
   ExternalLink,
   GraduationCap,
   Link2,
@@ -96,10 +97,20 @@ export default function JobDetails({
 
       <dl className="grid grid-cols-[auto_1fr] items-start gap-x-3 gap-y-3 text-body-sm text-gray-700">
         <MetaRow icon={<MapPin className="size-4" aria-hidden />} label="Location">
-          {job.location || job.workMode ? (
-            <span className="flex flex-wrap items-center gap-2">
-              {job.location && <span>{job.location}</span>}
-              {job.workMode && <WorkModePill mode={job.workMode} />}
+          {job.location || job.workMode || job.country ? (
+            <span className="flex flex-col gap-1">
+              {(job.location || job.workMode) && (
+                <span className="flex flex-wrap items-center gap-2">
+                  {job.location && <span>{job.location}</span>}
+                  {job.workMode && <WorkModePill mode={job.workMode} />}
+                </span>
+              )}
+              {job.country && (
+                <span className="flex items-center gap-1.5 text-caption text-gray-700/80">
+                  <Earth className="size-3.5 shrink-0" aria-hidden />
+                  {job.country.label}
+                </span>
+              )}
             </span>
           ) : (
             "Location not listed"
