@@ -73,10 +73,22 @@ export default function FilterModal({
           onToggle={(v) => onChange({ types: toggle(filters.types, v) })}
         />
         <PillGroup
-          legend="Where"
-          facets={facets.locations}
-          selected={filters.locations}
-          onToggle={(v) => onChange({ locations: toggle(filters.locations, v) })}
+          legend="Country"
+          facets={facets.countries}
+          selected={filters.countries}
+          onToggle={(v) => onChange({ countries: toggle(filters.countries, v) })}
+        />
+        <PillGroup
+          legend="State"
+          facets={facets.states}
+          selected={filters.states}
+          onToggle={(v) => onChange({ states: toggle(filters.states, v) })}
+        />
+        <PillGroup
+          legend="City"
+          facets={facets.cities}
+          selected={filters.cities}
+          onToggle={(v) => onChange({ cities: toggle(filters.cities, v) })}
         />
         <PillGroup
           legend="Work mode"

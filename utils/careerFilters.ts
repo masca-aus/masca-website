@@ -2,7 +2,7 @@
 // its tests. Filter state round-trips through the URL query string so a
 // filtered view can be shared or reloaded:
 //
-//   /careers?q=intern&type=internship,graduate&loc=vic&mode=remote&intl=yes&sort=closing
+//   /careers?q=intern&type=internship,graduate&state=vic&city=melbourne&mode=remote&intl=yes&sort=closing
 //
 // The view state rides alongside: `job` (the selected role), `page` and
 // `per` (cards per page). Defaults are omitted when serialising so an
@@ -10,20 +10,20 @@
 // than thrown: a mangled link still opens the board.
 
 import {
-  JOB_LOCATIONS,
-  JOB_LOCATION_LABEL,
+  AU_STATES,
   JOB_TYPES,
   JOB_TYPE_LABEL,
   STUDY_LEVELS,
   STUDY_LEVEL_LABEL,
   WORK_MODES,
   WORK_MODE_LABEL,
+  isAuState,
   slugify,
   sortJobs,
   type Job,
-  type JobLocation,
   type JobSort,
   type JobType,
+  type Named,
   type StudyLevel,
   type WorkMode,
 } from "./careers"
@@ -41,7 +41,10 @@ export type IntlFilter = "off" | "yes" | "maybe"
 export type CareerFilters = {
   q: string
   types: JobType[]
-  locations: JobLocation[]
+  /** Facet keys of the country / state / city pills (see the `get*Facets` helpers). */
+  countries: string[]
+  states: string[]
+  cities: string[]
   modes: WorkMode[]
   intl: IntlFilter
   levels: StudyLevel[]
@@ -53,7 +56,9 @@ export type CareerFilters = {
 export const EMPTY_FILTERS: CareerFilters = {
   q: "",
   types: [],
-  locations: [],
+  countries: [],
+  states: [],
+  cities: [],
   modes: [],
   intl: "off",
   levels: [],
@@ -65,7 +70,9 @@ export const EMPTY_FILTERS: CareerFilters = {
 export const FILTER_PARAMS = {
   q: "q",
   types: "type",
-  locations: "loc",
+  countries: "country",
+  states: "state",
+  cities: "city",
   modes: "mode",
   intl: "intl",
   levels: "level",
@@ -86,7 +93,8 @@ const isPageSize = (n: number): n is PageSize => (PAGE_SIZES as readonly number[
 type ParamSource = Pick<URLSearchParams, "get">
 
 const isJobType = (v: string): v is JobType => (JOB_TYPES as readonly string[]).includes(v)
-const isJobLocation = (v: string): v is JobLocation => (JOB_LOCATIONS as readonly string[]).includes(v)
+/** Place and industry keys are slugs; anything else in the URL is dropped. */
+const isSlug = (v: string) => /^[a-z0-9-]{1,60}$/.test(v)
 const isWorkMode = (v: string): v is WorkMode => (WORK_MODES as readonly string[]).includes(v)
 const isStudyLevel = (v: string): v is StudyLevel => (STUDY_LEVELS as readonly string[]).includes(v)
 
@@ -103,7 +111,9 @@ export function parseFilters(params: ParamSource): CareerFilters {
   return {
     q: (params.get(FILTER_PARAMS.q) ?? "").trim().slice(0, MAX_QUERY_LENGTH),
     types: list(params.get(FILTER_PARAMS.types)).filter(isJobType),
-    locations: list(params.get(FILTER_PARAMS.locations)).filter(isJobLocation),
+    countries: list(params.get(FILTER_PARAMS.countries)).filter(isSlug),
+    states: list(params.get(FILTER_PARAMS.states)).filter(isSlug),
+    cities: list(params.get(FILTER_PARAMS.cities)).filter(isSlug),
     modes: list(params.get(FILTER_PARAMS.modes)).filter(isWorkMode),
     intl: intl === "yes" || intl === "maybe" ? intl : "off",
     levels: list(params.get(FILTER_PARAMS.levels)).filter(isStudyLevel).filter((l) => l !== "any"),
@@ -117,7 +127,9 @@ export function serialiseFilters(filters: CareerFilters): URLSearchParams {
   const params = new URLSearchParams()
   if (filters.q) params.set(FILTER_PARAMS.q, filters.q.slice(0, MAX_QUERY_LENGTH))
   if (filters.types.length) params.set(FILTER_PARAMS.types, filters.types.join(","))
-  if (filters.locations.length) params.set(FILTER_PARAMS.locations, filters.locations.join(","))
+  if (filters.countries.length) params.set(FILTER_PARAMS.countries, filters.countries.join(","))
+  if (filters.states.length) params.set(FILTER_PARAMS.states, filters.states.join(","))
+  if (filters.cities.length) params.set(FILTER_PARAMS.cities, filters.cities.join(","))
   if (filters.modes.length) params.set(FILTER_PARAMS.modes, filters.modes.join(","))
   if (filters.intl !== "off") params.set(FILTER_PARAMS.intl, filters.intl)
   if (filters.levels.length) params.set(FILTER_PARAMS.levels, filters.levels.join(","))
@@ -197,7 +209,9 @@ export function pageSlice<T>(items: T[], page: number, per: number): T[] {
 export function countActiveFilters(filters: CareerFilters): number {
   return (
     (filters.types.length ? 1 : 0) +
-    (filters.locations.length ? 1 : 0) +
+    (filters.countries.length ? 1 : 0) +
+    (filters.states.length ? 1 : 0) +
+    (filters.cities.length ? 1 : 0) +
     (filters.modes.length ? 1 : 0) +
     (filters.intl !== "off" ? 1 : 0) +
     (filters.levels.length ? 1 : 0) +
@@ -216,8 +230,10 @@ export function searchHaystack(job: Job): string {
     job.company,
     job.industry,
     JOB_TYPE_LABEL[job.type],
-    ...job.locations.map((l) => JOB_LOCATION_LABEL[l]),
-    job.locationNote,
+    job.location,
+    job.country?.label,
+    job.state?.label,
+    job.city?.label,
     job.workMode && WORK_MODE_LABEL[job.workMode],
     ...job.studyLevels.map((l) => STUDY_LEVEL_LABEL[l]),
     job.eligibility,
@@ -244,10 +260,18 @@ export function matchesIntl(job: Job, intl: IntlFilter): boolean {
   return job.international !== "no"
 }
 
+/** An Australia-wide role matches every Australian state pill, but not a Malaysian one. */
+function matchesState(job: Job, states: string[]): boolean {
+  if (job.state && states.includes(job.state.key)) return true
+  return job.nationwide && states.some(isAuState)
+}
+
 /** OR within a group, AND across groups; a job open to "any" level matches every level pill. */
 export function matchesFilters(job: Job, filters: CareerFilters): boolean {
   if (filters.types.length && !filters.types.includes(job.type)) return false
-  if (filters.locations.length && !job.locations.some((l) => filters.locations.includes(l))) return false
+  if (filters.countries.length && !(job.country && filters.countries.includes(job.country.key))) return false
+  if (filters.states.length && !matchesState(job, filters.states)) return false
+  if (filters.cities.length && !(job.city && filters.cities.includes(job.city.key))) return false
   if (filters.modes.length && !(job.workMode && filters.modes.includes(job.workMode))) return false
   if (!matchesIntl(job, filters.intl)) return false
   if (
@@ -302,12 +326,34 @@ export function getTypeFacets(jobs: Job[]): Facet<JobType>[] {
   })).filter((f) => f.count > 0)
 }
 
-export function getLocationFacets(jobs: Job[]): Facet<JobLocation>[] {
-  return JOB_LOCATIONS.map((key) => ({
-    key,
-    label: JOB_LOCATION_LABEL[key],
-    count: jobs.filter((j) => j.locations.includes(key)).length,
-  })).filter((f) => f.count > 0)
+/** Facets for a place column: merged by key, first-seen label. */
+function namedFacets(values: (Named | undefined)[]): Facet[] {
+  const facets = new Map<string, Facet>()
+  for (const value of values) {
+    if (!value) continue
+    const existing = facets.get(value.key)
+    if (existing) existing.count++
+    else facets.set(value.key, { key: value.key, label: value.label, count: 1 })
+  }
+  return [...facets.values()]
+}
+const byLabel = (a: Facet, b: Facet) => a.label.localeCompare(b.label)
+
+export function getCountryFacets(jobs: Job[]): Facet[] {
+  return namedFacets(jobs.map((j) => j.country)).sort(byLabel)
+}
+
+/** Australian states in chapter order, then the rest alphabetically; Australia-wide roles count toward every Australian state. */
+export function getStateFacets(jobs: Job[]): Facet[] {
+  const facets = namedFacets(jobs.map((j) => j.state))
+  const nationwide = jobs.filter((j) => j.nationwide).length
+  for (const facet of facets) if (isAuState(facet.key)) facet.count += nationwide
+  const rank = (f: Facet) => (isAuState(f.key) ? (AU_STATES as readonly string[]).indexOf(f.key) : AU_STATES.length)
+  return facets.sort((a, b) => rank(a) - rank(b) || byLabel(a, b))
+}
+
+export function getCityFacets(jobs: Job[]): Facet[] {
+  return namedFacets(jobs.map((j) => j.city)).sort(byLabel)
 }
 
 export function getWorkModeFacets(jobs: Job[]): Facet<WorkMode>[] {

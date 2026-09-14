@@ -18,8 +18,10 @@ import {
   EMPTY_FILTERS,
   applyFilters,
   countHiddenOnlyByIntl,
+  getCityFacets,
+  getCountryFacets,
   getIndustryFacets,
-  getLocationFacets,
+  getStateFacets,
   getStudyLevelFacets,
   getTypeFacets,
   getWorkModeFacets,
@@ -107,7 +109,9 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
   const facets = useMemo(
     () => ({
       types: getTypeFacets(jobs),
-      locations: getLocationFacets(jobs),
+      countries: getCountryFacets(jobs),
+      states: getStateFacets(jobs),
+      cities: getCityFacets(jobs),
       modes: getWorkModeFacets(jobs),
       levels: getStudyLevelFacets(jobs),
       industries: getIndustryFacets(jobs),

@@ -14,11 +14,9 @@ import {
   type PageSize,
 } from "@/utils/careerFilters"
 import {
-  JOB_LOCATION_LABEL,
   JOB_TYPE_LABEL,
   STUDY_LEVEL_LABEL,
   WORK_MODE_LABEL,
-  type JobLocation,
   type JobSort,
   type JobType,
   type StudyLevel,
@@ -35,7 +33,9 @@ import SelectField from "./SelectField"
 
 export type BoardFacets = {
   types: Facet<JobType>[]
-  locations: Facet<JobLocation>[]
+  countries: Facet[]
+  states: Facet[]
+  cities: Facet[]
   modes: Facet<WorkMode>[]
   levels: Facet<StudyLevel>[]
   industries: Facet[]
@@ -207,17 +207,27 @@ function appliedChips(
   facets: BoardFacets,
   onChange: (patch: Partial<CareerFilters>) => void,
 ): Chip[] {
-  const industryLabel = (key: string) => facets.industries.find((f) => f.key === key)?.label ?? key
+  const labelOf = (list: Facet[], key: string) => list.find((f) => f.key === key)?.label ?? key
   return [
     ...filters.types.map((v) => ({
       key: `type:${v}`,
       label: JOB_TYPE_LABEL[v],
       remove: () => onChange({ types: toggle(filters.types, v) }),
     })),
-    ...filters.locations.map((v) => ({
-      key: `loc:${v}`,
-      label: JOB_LOCATION_LABEL[v],
-      remove: () => onChange({ locations: toggle(filters.locations, v) }),
+    ...filters.countries.map((v) => ({
+      key: `country:${v}`,
+      label: labelOf(facets.countries, v),
+      remove: () => onChange({ countries: toggle(filters.countries, v) }),
+    })),
+    ...filters.states.map((v) => ({
+      key: `state:${v}`,
+      label: labelOf(facets.states, v),
+      remove: () => onChange({ states: toggle(filters.states, v) }),
+    })),
+    ...filters.cities.map((v) => ({
+      key: `city:${v}`,
+      label: labelOf(facets.cities, v),
+      remove: () => onChange({ cities: toggle(filters.cities, v) }),
     })),
     ...filters.modes.map((v) => ({
       key: `mode:${v}`,
@@ -231,7 +241,7 @@ function appliedChips(
     })),
     ...filters.industries.map((v) => ({
       key: `industry:${v}`,
-      label: industryLabel(v),
+      label: labelOf(facets.industries, v),
       remove: () => onChange({ industries: toggle(filters.industries, v) }),
     })),
   ]

@@ -1,25 +1,20 @@
 import { Clock, Globe, GraduationCap, Info, Lock, Star } from "lucide-react"
 
 import {
-  JOB_LOCATION_LABEL,
   JOB_TYPE_LABEL,
   STUDY_LEVEL_LABEL,
   WORK_MODE_LABEL,
   formatClosesLabel,
   type Job,
-  type JobLocation,
   type WorkMode,
 } from "@/utils/careers"
-import { STATES } from "@/utils/states"
 
 // Small, text-first chips shared by the card and the details panel. Colour is
 // never the only signal: every chip carries words a screen reader gets too.
+// Where a role is stays plain text ("Melbourne, VIC") — see locationSummary.
 
 const BADGE =
   "inline-flex items-center gap-1 whitespace-nowrap rounded-pill px-2.5 py-0.5 text-caption font-bold"
-
-const STATE_BY_CODE = Object.fromEntries(STATES.map((s) => [s.code, s]))
-const BRAND_PILL = { bg: "#010066", fg: "#FFCC00" }
 
 /** The decisive chip for a student on a visa. `compact` shortens it for cards. */
 export function WorkingRightsBadge({
@@ -126,38 +121,13 @@ export function NewBadge() {
   )
 }
 
-/** State pills borrow the chapter colours from the events cards. */
-export function LocationPill({ location }: { location: JobLocation }) {
-  const label = JOB_LOCATION_LABEL[location]
-  const state = STATE_BY_CODE[label]
-  if (state) {
-    return (
-      <span className={BADGE} style={{ backgroundColor: state.bg, color: state.fg }}>
-        {label}
-      </span>
-    )
-  }
-  if (location === "malaysia") {
-    return <span className={`${BADGE} bg-yellow-100 text-blue-900`}>{label}</span>
-  }
-  if (location === "other") {
-    return <span className={`${BADGE} border border-gray-300 text-gray-700`}>{label}</span>
-  }
-  return (
-    <span className={BADGE} style={{ backgroundColor: BRAND_PILL.bg, color: BRAND_PILL.fg }}>
-      {label}
-    </span>
-  )
-}
-
 /** On-site / Hybrid / Remote, in the same calm gray as the type chip. */
 export function WorkModePill({ mode }: { mode: WorkMode }) {
   return <span className={`${BADGE} bg-gray-100 text-gray-700`}>{WORK_MODE_LABEL[mode]}</span>
 }
 
-/** "VIC, NSW · Hybrid", "Melbourne · On-site" or "Remote" — the one-line summary for cards. */
-export function locationSummary(job: Pick<Job, "locations" | "locationNote" | "workMode">): string {
-  const place = job.locationNote || job.locations.map((l) => JOB_LOCATION_LABEL[l]).join(", ")
+/** "Melbourne, VIC · Hybrid", "Malaysia" or "Remote" — the one-line summary for cards. */
+export function locationSummary(job: Pick<Job, "location" | "workMode">): string {
   const mode = job.workMode ? WORK_MODE_LABEL[job.workMode] : ""
-  return [place, mode].filter(Boolean).join(" · ")
+  return [job.location, mode].filter(Boolean).join(" · ")
 }

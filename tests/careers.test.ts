@@ -30,7 +30,10 @@ const fullRow: SheetRow = {
   companyWebsite: "nasilemakbank.example",
   logoUrl: "https://cdn.example/logo.png",
   type: "Internship",
-  locations: "Melbourne (hybrid), NSW",
+  country: "Australia",
+  state: "Victoria",
+  city: "Melbourne",
+  workMode: "Hybrid",
   industry: "Banking",
   international: "Yes",
   studyLevels: "Penultimate, Final year",
@@ -56,6 +59,9 @@ describe("header mapping", () => {
     expect(headerField("Apply link *")).toBe("apply");
     expect(headerField("apply_link")).toBe("apply");
     expect(headerField("Application URL")).toBe("apply");
+    expect(headerField("Country")).toBe("country");
+    expect(headerField("State / Territory")).toBe("state");
+    expect(headerField("City")).toBe("city");
     expect(headerField("Location(s)")).toBe("locations");
     expect(headerField("Work mode")).toBe("workMode");
     expect(headerField("Remote / Hybrid / On-site")).toBe("workMode");
@@ -211,8 +217,11 @@ describe("toJob", () => {
       companyWebsite: "https://nasilemakbank.example/",
       logoUrl: "https://cdn.example/logo.png",
       type: "internship",
-      locations: ["vic", "nsw"],
-      locationNote: "Melbourne",
+      country: { key: "australia", label: "Australia" },
+      state: { key: "vic", label: "VIC" },
+      city: { key: "melbourne", label: "Melbourne" },
+      nationwide: false,
+      location: "Melbourne, VIC",
       workMode: "hybrid",
       industry: "Banking",
       industryKey: "banking",
@@ -313,36 +322,69 @@ describe("toJob", () => {
     expect(job({ ...fullRow, studyLevels: "Masters" }).studyLevels).toEqual(["postgraduate"]);
   });
 
-  it("maps locations to regions, keeps cities as a note, and files unknowns under Other", () => {
-    expect(job({ ...fullRow, locations: "VIC/NSW/QLD" }).locations).toEqual(["vic", "nsw", "qld"]);
-    expect(job({ ...fullRow, locations: "Australia wide" }).locations).toEqual(["australia"]);
-    expect(job({ ...fullRow, locations: "Kuala Lumpur" })).toMatchObject({
-      locations: ["malaysia"],
-      locationNote: "Kuala Lumpur",
+  const bare = { ...fullRow, id: undefined, country: undefined, state: undefined, city: undefined };
+  const australia = { key: "australia", label: "Australia" };
+  const vic = { key: "vic", label: "VIC" };
+
+  it("reads Country, State and City, derives what's blank, and shows City, State", () => {
+    expect(job({ ...bare, state: "VIC" })).toMatchObject({ country: australia, state: vic, city: undefined, nationwide: false, location: "VIC" });
+    expect(job({ ...bare, city: "Geelong" })).toMatchObject({ country: australia, state: vic, location: "Geelong, VIC" });
+    expect(job({ ...bare, city: "Kuala Lumpur" })).toMatchObject({
+      country: { key: "malaysia", label: "Malaysia" },
+      state: undefined,
+      city: { key: "kuala-lumpur", label: "Kuala Lumpur" },
+      location: "Kuala Lumpur",
     });
-    const geelong = toJob({ ...fullRow, id: undefined, locations: "Geelong, Melb CBD" }, ctx);
-    expect("job" in geelong && geelong.job).toMatchObject({ locations: ["vic", "other"], locationNote: "Geelong, Melb CBD" });
-    expect(geelong.warnings).toEqual(['Row 2: Location "Melb CBD" isn\'t a state or one of the options — filed under Other']);
-    expect(job({ ...fullRow, locations: undefined }).locations).toEqual([]);
+    expect(job({ ...bare, country: "MY" })).toMatchObject({ country: { key: "malaysia", label: "Malaysia" }, location: "Malaysia" });
+    expect(job({ ...bare, state: "Selangor", city: "Petaling Jaya" })).toMatchObject({
+      country: { key: "malaysia", label: "Malaysia" },
+      state: { key: "selangor", label: "Selangor" },
+      location: "Petaling Jaya, Selangor",
+    });
+    expect(job({ ...bare, state: "Australia wide" })).toMatchObject({
+      country: australia,
+      state: { key: "australia-wide", label: "Australia-wide" },
+      nationwide: true,
+      location: "Australia-wide",
+    });
+    expect(job(bare)).toMatchObject({ country: undefined, state: undefined, city: undefined, nationwide: false, location: undefined });
+
+    const lone = toJob({ ...bare, city: "Reykjavik" }, ctx);
+    expect("job" in lone && lone.job).toMatchObject({ country: undefined, location: "Reykjavik" });
+    expect(lone.warnings).toEqual([
+      'Row 2: couldn\'t tell which country "Reykjavik" is in — fill in Country so the role shows up in the Where filters',
+    ]);
   });
 
-  it("reads work mode from its own column, or from a mode word left in Location", () => {
-    const base = { ...fullRow, id: undefined, locations: "VIC" };
+  it("still reads a legacy single Location cell, with the columns winning", () => {
+    expect(job({ ...bare, locations: "VIC, Melbourne" })).toMatchObject({
+      state: vic,
+      city: { key: "melbourne", label: "Melbourne" },
+      location: "Melbourne, VIC",
+    });
+    expect(job({ ...bare, locations: "Malaysia" })).toMatchObject({ country: { key: "malaysia", label: "Malaysia" }, location: "Malaysia" });
+    expect(job({ ...bare, locations: "NSW, Sydney", state: "VIC" })).toMatchObject({ state: vic, city: { key: "sydney", label: "Sydney" } });
+    const two = toJob({ ...bare, locations: "VIC, NSW" }, ctx);
+    expect("job" in two && two.job).toMatchObject({ state: vic, city: undefined });
+    expect(two.warnings).toEqual([
+      'Row 2: Location "NSW" was ignored — one state per row (use Australia-wide for roles open in several)',
+    ]);
+  });
+
+  it("reads work mode from its own column, or from a mode word left in a legacy Location cell", () => {
+    const base = { ...fullRow, id: undefined, workMode: undefined };
     expect(job({ ...base, workMode: "On-site" }).workMode).toBe("onsite");
     expect(job({ ...base, workMode: "WFH" }).workMode).toBe("remote");
     expect(job({ ...base, workMode: "Flexible" }).workMode).toBe("hybrid");
     expect(job(base).workMode).toBeUndefined();
-    // "Remote" in Location is a mode, not a place; "Melbourne (hybrid)" is both.
-    expect(job({ ...base, locations: "Remote" })).toMatchObject({ locations: [], locationNote: undefined, workMode: "remote" });
-    expect(job({ ...base, locations: "Remote - Australia wide" })).toMatchObject({ locations: ["australia"], workMode: "remote" });
-    expect(job({ ...base, locations: "Sydney (on-site), Remote" })).toMatchObject({
-      locations: ["nsw"],
-      locationNote: "Sydney",
-      workMode: "onsite",
-    });
+    // "Remote" in a Location cell is a mode, not a place; "Melbourne (hybrid)" is both.
+    const legacy = { ...bare, workMode: undefined };
+    expect(job({ ...legacy, locations: "Remote" })).toMatchObject({ location: undefined, workMode: "remote" });
+    expect(job({ ...legacy, locations: "Remote - Australia wide" })).toMatchObject({ nationwide: true, location: "Australia-wide", workMode: "remote" });
+    expect(job({ ...legacy, locations: "Sydney (on-site), Remote" })).toMatchObject({ location: "Sydney, NSW", workMode: "onsite" });
     // The column wins over a stray word; an unreadable column falls back to it, with a warning.
-    expect(job({ ...base, locations: "Melbourne (hybrid)", workMode: "Remote" }).workMode).toBe("remote");
-    const odd = toJob({ ...base, locations: "Melbourne (hybrid)", workMode: "4 days" }, ctx);
+    expect(job({ ...legacy, locations: "Melbourne (hybrid)", workMode: "Remote" }).workMode).toBe("remote");
+    const odd = toJob({ ...legacy, locations: "Melbourne (hybrid)", workMode: "4 days" }, ctx);
     expect("job" in odd && odd.job.workMode).toBe("hybrid");
     expect(odd.warnings).toEqual(['Row 2: Work mode "4 days" isn\'t one of the options — use On-site, Hybrid or Remote']);
   });

@@ -11,8 +11,10 @@ import JobDetails, { descriptionBlocks, jobShareUrl } from "@/app/(frontend)/car
 import Footer from "@/components/Footer";
 import {
   EMPTY_FILTERS,
+  getCityFacets,
+  getCountryFacets,
   getIndustryFacets,
-  getLocationFacets,
+  getStateFacets,
   getStudyLevelFacets,
   getTypeFacets,
   getWorkModeFacets,
@@ -29,7 +31,10 @@ function makeJob(overrides: Partial<Job>): Job {
     title: "Software Intern",
     company: "Acme",
     type: "internship",
-    locations: ["vic"],
+    country: { key: "australia", label: "Australia" },
+    state: { key: "vic", label: "VIC" },
+    nationwide: false,
+    location: "VIC",
     international: "yes",
     studyLevels: ["any"],
     applyHref: "https://acme.example/apply",
@@ -65,8 +70,8 @@ const emailJob = makeJob({
   title: "Weekend Barista",
   company: "Kopi Corner",
   type: "casual",
-  locations: ["vic"],
-  locationNote: "Carlton",
+  city: { key: "carlton", label: "Carlton" },
+  location: "Carlton, VIC",
   international: "unsure",
   applyHref: "mailto:jobs@kopi.example",
   applyKind: "email",
@@ -78,7 +83,8 @@ const citizensOnly = makeJob({
   title: "Policy Graduate",
   company: "Department of Teh Tarik",
   type: "graduate",
-  locations: ["act"],
+  state: { key: "act", label: "ACT" },
+  location: "ACT",
   workMode: "remote",
   international: "no",
   added: "2026-09-01",
@@ -149,7 +155,9 @@ describe("FilterModal (static render)", () => {
   it("lists every pill group with counts and the live match line", () => {
     const facets = {
       types: getTypeFacets(jobs),
-      locations: getLocationFacets(jobs),
+      countries: getCountryFacets(jobs),
+      states: getStateFacets(jobs),
+      cities: getCityFacets(jobs),
       modes: getWorkModeFacets(jobs),
       levels: getStudyLevelFacets(jobs),
       industries: getIndustryFacets(jobs),
@@ -167,7 +175,7 @@ describe("FilterModal (static render)", () => {
       />,
     );
     expect(html).toContain('role="dialog"');
-    for (const label of ["Working rights", "Type", "Where", "Work mode", "Study level", "Industry", "Internship", "Casual", "VIC", "Remote", "Banking"]) {
+    for (const label of ["Working rights", "Type", "Country", "State", "City", "Work mode", "Study level", "Industry", "Internship", "Casual", "Australia", "VIC", "Carlton", "Remote", "Banking"]) {
       expect(html).toContain(label);
     }
     expect(html).toContain("1 of 3 roles");
