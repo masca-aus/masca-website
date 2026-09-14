@@ -39,14 +39,15 @@ export default function JobDetails({
   job,
   headingId,
   outsideFilters = false,
-  stickyActions = false,
+  showActions = true,
 }: {
   job: Job
   headingId: string
   /** The role was reached by link and the current filters would hide it. */
   outsideFilters?: boolean
-  /** Pin the Apply bar to the bottom of a scrolling sheet (mobile modal). */
-  stickyActions?: boolean
+  /** Render the Apply bar inline. Off in the phone sheet, which puts
+      JobActions in the shell's pinned footer instead. */
+  showActions?: boolean
 }) {
   const closes = formatClosesLabel(job)
   const levels = job.studyLevels.includes("any")
@@ -170,7 +171,7 @@ export default function JobDetails({
         </ul>
       )}
 
-      <Actions job={job} sticky={stickyActions} />
+      {showActions && <JobActions job={job} />}
 
       <p className="text-caption text-gray-700/80">
         Link dead or details wrong?{" "}
@@ -282,7 +283,8 @@ const noSubscribe = () => () => {}
 const readCanShare = () => typeof navigator.share === "function"
 const serverCanShare = () => false
 
-function Actions({ job, sticky }: { job: Job; sticky: boolean }) {
+/** Apply / copy / share. Inline in the desktop panel, in the shell footer on phones. */
+export function JobActions({ job }: { job: Job }) {
   const [copied, setCopied] = useState<"idle" | "copied" | "failed">("idle")
   const canShare = useSyncExternalStore(noSubscribe, readCanShare, serverCanShare)
 
@@ -315,16 +317,8 @@ function Actions({ job, sticky }: { job: Job; sticky: boolean }) {
     }
   }
 
-  // In the phone sheet the pinned bar renders last (order-last), so the
-  // "link dead?" note that follows it in the DOM isn't stranded beneath it.
   return (
-    <div
-      className={`flex flex-wrap items-center gap-3 ${
-        sticky
-          ? "order-last sticky bottom-0 -mx-6 -mb-6 border-t border-gray-300 bg-white/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:static sm:order-0 sm:m-0 sm:border-0 sm:bg-transparent sm:p-0"
-          : ""
-      }`}
-    >
+    <div className="flex flex-wrap items-center gap-3">
       {/* Apply fills the leftover width of a phone row; the rest keep their natural size. */}
       {job.applyKind === "email" ? (
         <Button variant="accent" href={job.applyHref} className="grow sm:grow-0">

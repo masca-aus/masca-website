@@ -3,11 +3,12 @@
 import type { RefObject } from "react"
 
 import type { Job } from "@/utils/careers"
-import JobDetails from "./JobDetails"
+import JobDetails, { JobActions } from "./JobDetails"
 import ModalShell from "./ModalShell"
 
 // Mobile-only sheet for a listing; on desktop the sticky panel shows the same
-// JobDetails. The sheet chrome (overlay, focus trap, Escape) is ModalShell's.
+// JobDetails. The sheet chrome (overlay, focus trap, Escape) is ModalShell's,
+// and the Apply bar rides in its pinned footer rather than the scrolling body.
 
 export default function JobModal({
   job,
@@ -24,8 +25,9 @@ export default function JobModal({
       labelledBy="job-modal-title"
       onClose={onClose}
       returnFocusRef={returnFocusRef}
+      footer={<JobActions job={job} />}
     >
-      <JobDetails job={job} headingId="job-modal-title" />
+      <JobDetails job={job} headingId="job-modal-title" showActions={false} />
     </ModalShell>
   )
 }

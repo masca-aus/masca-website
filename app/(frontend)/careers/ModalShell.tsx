@@ -22,21 +22,6 @@ export function useRequestClose(): () => void {
   return useContext(RequestCloseContext)
 }
 
-/** The sheet's dismiss control, rendered inline beside the sheet's title. */
-export function CloseButton({ className = "" }: { className?: string }) {
-  const requestClose = useRequestClose()
-  return (
-    <button
-      type="button"
-      onClick={requestClose}
-      aria-label="Close"
-      className={`-mr-2 -mt-1.5 inline-flex size-11 shrink-0 items-center justify-center rounded-pill text-gray-700 transition-colors hover:text-blue-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${className}`}
-    >
-      <X className="size-6" strokeWidth={2.5} aria-hidden />
-    </button>
-  )
-}
-
 export default function ModalShell({
   labelledBy,
   onClose,
@@ -126,23 +111,36 @@ export default function ModalShell({
       }}
       className="fixed inset-0 z-50 flex items-end justify-center bg-blue-950/60 backdrop-blur-sm sm:items-center sm:p-6"
     >
+      {/* The column is transparent to clicks so the dead space around the X
+          still counts as tapping the overlay; the button and sheet opt back in. */}
       <div
         ref={boxRef}
         tabIndex={-1}
-        className={`flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-brand focus:outline-none sm:rounded-2xl ${
+        className={`pointer-events-none flex max-h-[92dvh] w-full flex-col items-end gap-2 focus:outline-none ${
           size === "lg" ? "sm:max-w-2xl" : "sm:max-w-xl"
         }`}
       >
-        <RequestCloseContext value={requestClose}>
-          {/* min-h-0 lets the body shrink inside the column so it, not the
-              sheet, is what scrolls. */}
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 sm:p-8">{children}</div>
-          {footer && (
-            <div className="shrink-0 border-t border-gray-300 bg-white px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-8 sm:pb-4">
-              {footer}
-            </div>
-          )}
-        </RequestCloseContext>
+        <button
+          type="button"
+          onClick={requestClose}
+          aria-label="Close"
+          className="pointer-events-auto mr-4 inline-flex size-11 shrink-0 items-center justify-center rounded-pill text-white/90 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:mr-0"
+        >
+          <X className="size-6" strokeWidth={2.5} aria-hidden />
+        </button>
+
+        {/* min-h-0 lets the sheet shrink under the column's max height, so the
+            body — not the sheet — is what scrolls. */}
+        <div className="pointer-events-auto flex min-h-0 w-full flex-col overflow-hidden rounded-t-3xl bg-white shadow-brand sm:rounded-2xl">
+          <RequestCloseContext value={requestClose}>
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6 sm:p-8">{children}</div>
+            {footer && (
+              <div className="shrink-0 border-t border-gray-300 bg-white px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-8 sm:pb-4">
+                {footer}
+              </div>
+            )}
+          </RequestCloseContext>
+        </div>
       </div>
     </div>
   )

@@ -7,7 +7,7 @@ import Button from "@/components/Button"
 import { countActiveFilters, type CareerFilters, type Facet } from "@/utils/careerFilters"
 import type { BoardFacets } from "./BoardToolbar"
 import { INTL_LABEL, LEGEND, NEXT_INTL, PILL_ACTIVE, PILL_BASE, PILL_IDLE, toggle } from "./boardStyles"
-import ModalShell, { CloseButton, useRequestClose } from "./ModalShell"
+import ModalShell, { useRequestClose } from "./ModalShell"
 
 // The filter sheet, opened from the toolbar's Filters button. Pills apply as
 // they're tapped — the list updates behind the overlay and the Done button
@@ -59,7 +59,6 @@ export default function FilterModal({
               {matches}
             </p>
           </div>
-          <CloseButton />
         </div>
 
         <fieldset className="flex flex-col gap-2">
