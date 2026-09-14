@@ -304,7 +304,7 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
 
   return (
     <section className="bg-gray-100">
-      <div className="container flex flex-col gap-8 py-16">
+      <div className="container flex flex-col gap-6 py-10 md:gap-8 md:py-16">
         <BoardToolbar
           filters={urlFilters}
           searchValue={searchValue}
@@ -367,7 +367,7 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
             />
           )
         ) : (
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
+          <div className="grid gap-6 md:gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
             <div className="flex flex-col gap-4">
               <h2 className="sr-only">Open roles</h2>
               <ul

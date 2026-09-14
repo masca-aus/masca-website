@@ -315,18 +315,23 @@ function Actions({ job, sticky }: { job: Job; sticky: boolean }) {
     }
   }
 
+  // In the phone sheet the pinned bar renders last (order-last), so the
+  // "link dead?" note that follows it in the DOM isn't stranded beneath it.
   return (
     <div
       className={`flex flex-wrap items-center gap-3 ${
-        sticky ? "sticky bottom-0 -mx-6 -mb-6 border-t border-gray-300 bg-white/95 p-4 backdrop-blur-sm sm:static sm:m-0 sm:border-0 sm:bg-transparent sm:p-0" : ""
+        sticky
+          ? "order-last sticky bottom-0 -mx-6 -mb-6 border-t border-gray-300 bg-white/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:static sm:order-0 sm:m-0 sm:border-0 sm:bg-transparent sm:p-0"
+          : ""
       }`}
     >
+      {/* Apply fills the leftover width of a phone row; the rest keep their natural size. */}
       {job.applyKind === "email" ? (
-        <Button variant="accent" href={job.applyHref}>
+        <Button variant="accent" href={job.applyHref} className="grow sm:grow-0">
           Apply by email <span aria-hidden>&rarr;</span>
         </Button>
       ) : (
-        <Button variant="accent" href={job.applyHref} target="_blank" rel="noopener noreferrer">
+        <Button variant="accent" href={job.applyHref} target="_blank" rel="noopener noreferrer" className="grow sm:grow-0">
           Apply now <span aria-hidden>&rarr;</span>
           <span className="sr-only">(opens in a new tab)</span>
         </Button>

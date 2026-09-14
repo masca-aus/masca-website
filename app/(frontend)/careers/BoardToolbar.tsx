@@ -30,6 +30,10 @@ import SelectField from "./SelectField"
 // stays out of the sheet), a chip for each applied filter, then the count,
 // sort and page size. The pill groups themselves live in FilterModal and open
 // on demand.
+//
+// On a phone the same pieces stack in fixed rows rather than wrapping where
+// they happen to fall: search; Filters + Intl side by side; chips; the count
+// with Clear filters; Sort + Show side by side.
 
 export type BoardFacets = {
   types: Facet<JobType>[]
@@ -91,39 +95,40 @@ export default function BoardToolbar({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex min-w-0 flex-1 basis-72 gap-3">
-          <label htmlFor={searchId} className="sr-only">
-            Search roles
-          </label>
-          <div className="relative min-w-0 flex-1">
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-gray-700" aria-hidden />
-            <input
-              id={searchId}
-              type="search"
-              enterKeyHint="search"
-              autoComplete="off"
-              maxLength={MAX_QUERY_LENGTH}
-              value={searchValue}
-              onChange={(e) => onSearchChange(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Escape" && searchValue) {
-                  e.preventDefault()
-                  onSearchChange("")
-                }
-              }}
-              placeholder="Search roles, companies or tags…"
-              className={`${FIELD} w-full pl-11`}
-            />
-          </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        <label htmlFor={searchId} className="sr-only">
+          Search roles
+        </label>
+        <div className="relative min-w-0 sm:flex-1 sm:basis-72">
+          <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-gray-700" aria-hidden />
+          <input
+            id={searchId}
+            type="search"
+            enterKeyHint="search"
+            autoComplete="off"
+            maxLength={MAX_QUERY_LENGTH}
+            value={searchValue}
+            onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape" && searchValue) {
+                e.preventDefault()
+                onSearchChange("")
+              }
+            }}
+            placeholder="Search roles, companies or tags…"
+            className={`${FIELD} w-full pl-11`}
+          />
+        </div>
 
+        {/* Two equal halves on a phone; natural widths beside the search box from sm. */}
+        <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center">
           <button
             ref={filtersButtonRef}
             type="button"
             aria-haspopup="dialog"
             aria-expanded={filtersOpen}
             onClick={onOpenFilters}
-            className={`${PILL_BASE} inline-flex shrink-0 items-center gap-2 py-2.5 ${active > 0 ? PILL_ACTIVE : PILL_IDLE}`}
+            className={`${PILL_BASE} inline-flex shrink-0 items-center justify-center gap-2 py-2.5 ${active > 0 ? PILL_ACTIVE : PILL_IDLE}`}
           >
             <SlidersHorizontal className="size-4" aria-hidden />
             Filters
@@ -134,21 +139,21 @@ export default function BoardToolbar({
               </span>
             )}
           </button>
-        </div>
 
-        <button
-          type="button"
-          aria-pressed={intlOn}
-          onClick={() => onChange({ intl: NEXT_INTL[filters.intl] })}
-          className={`${PILL_BASE} inline-flex items-center gap-2 py-2.5 ${intlOn ? PILL_ACTIVE : PILL_IDLE}`}
-        >
-          <Globe className="size-4" aria-hidden />
-          <span className="hidden sm:inline">{intlLabel.full}</span>
-          <span className="sm:hidden" aria-hidden>
-            {intlLabel.short}
-          </span>
-          <span className="sr-only sm:hidden">{intlLabel.full}</span>
-        </button>
+          <button
+            type="button"
+            aria-pressed={intlOn}
+            onClick={() => onChange({ intl: NEXT_INTL[filters.intl] })}
+            className={`${PILL_BASE} inline-flex items-center justify-center gap-2 py-2.5 ${intlOn ? PILL_ACTIVE : PILL_IDLE}`}
+          >
+            <Globe className="size-4" aria-hidden />
+            <span className="hidden sm:inline">{intlLabel.full}</span>
+            <span className="sm:hidden" aria-hidden>
+              {intlLabel.short}
+            </span>
+            <span className="sr-only sm:hidden">{intlLabel.full}</span>
+          </button>
+        </div>
       </div>
 
       {chips.length > 0 && (
@@ -173,22 +178,30 @@ export default function BoardToolbar({
         </ul>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-body-sm text-gray-700">
-        <p role="status" aria-live="polite" aria-atomic="true" className="font-bold">
-          {count}
-        </p>
-
-        <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-col gap-3 text-body-sm text-gray-700 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="flex min-h-10 items-center justify-between gap-4 sm:justify-start">
+          <p role="status" aria-live="polite" aria-atomic="true" className="font-bold">
+            {count}
+          </p>
           {filtered && (
             <Button variant="ghost" type="button" onClick={onClear} className="text-body-sm">
               Clear filters
             </Button>
           )}
-          <SelectField id={sortId} label="Sort" value={filters.sort} onChange={(e) => onChange({ sort: e.target.value as JobSort })}>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:gap-4">
+          <SelectField
+            id={sortId}
+            label="Sort"
+            fill
+            value={filters.sort}
+            onChange={(e) => onChange({ sort: e.target.value as JobSort })}
+          >
             <option value="newest">Newest first</option>
             <option value="closing">Closing soon</option>
           </SelectField>
-          <SelectField id={perId} label="Show" value={per} onChange={(e) => onPerChange(Number(e.target.value) as PageSize)}>
+          <SelectField id={perId} label="Show" fill value={per} onChange={(e) => onPerChange(Number(e.target.value) as PageSize)}>
             {PAGE_SIZES.map((n) => (
               <option key={n} value={n}>
                 {n} per page

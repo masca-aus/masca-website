@@ -162,7 +162,7 @@ function PillarCard({ pillar }: { pillar: Pillar }) {
         >
           {inner}
           <span className="card-text text-caption font-bold text-red-600 mt-auto pt-2">
-            Explore MASCA Care <span aria-hidden>&rarr;</span>
+            Explore {pillar.name} <span aria-hidden>&rarr;</span>
           </span>
         </Link>
       ) : (

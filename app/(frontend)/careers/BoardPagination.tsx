@@ -32,7 +32,10 @@ export default function BoardPagination({
   }
 
   return (
-    <nav aria-label="Pages of roles" className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+    <nav
+      aria-label="Pages of roles"
+      className="flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-between sm:gap-x-4"
+    >
       <p aria-live="polite" aria-atomic="true" className="text-body-sm text-gray-700">
         <span className="sr-only">Showing roles </span>
         <span className="font-bold">

@@ -140,7 +140,7 @@ function SheetFooter({ active, visible, onClear }: { active: number; visible: nu
   }
 
   return (
-    <div className="sticky bottom-0 -mx-6 -mb-6 flex flex-wrap items-center justify-end gap-3 border-t border-gray-300 bg-white/95 px-6 py-4 backdrop-blur-sm sm:-mx-8 sm:-mb-8 sm:px-8">
+    <div className="sticky bottom-0 -mx-6 -mb-6 flex flex-wrap items-center justify-end gap-3 border-t border-gray-300 bg-white/95 px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:-mx-8 sm:-mb-8 sm:px-8 sm:pb-4">
       {active > 0 && (
         <Button variant="ghost" type="button" onClick={clearAll} className="mr-auto text-body-sm">
           Clear all
