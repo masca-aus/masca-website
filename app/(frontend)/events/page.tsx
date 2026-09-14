@@ -98,7 +98,7 @@ function CtaBand() {
         <span className="eyebrow text-yellow-500">hosting something?</span>
         <h2 className="title max-w-2xl text-white">
           Running an event?{" "}
-          <span className="font-accent font-normal text-yellow-500">Get it on the calendar</span>
+          <span className="text-yellow-500">Get it on the calendar.</span>
         </h2>
         <p className="max-w-xl text-gray-300">
           Chapters, student societies and partners — send us the details and we&apos;ll
