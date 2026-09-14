@@ -15,6 +15,7 @@ import {
   JOB_TYPE_LABEL,
   STUDY_LEVELS,
   STUDY_LEVEL_LABEL,
+  slugify,
   sortJobs,
   type Job,
   type JobLocation,
@@ -22,6 +23,9 @@ import {
   type JobType,
   type StudyLevel,
 } from "./careers"
+
+/** A pasted paragraph must not become a multi-kilobyte query string. */
+export const MAX_QUERY_LENGTH = 120
 
 /**
  * International-students filter. "yes" shows only roles confirmed open to
@@ -80,7 +84,7 @@ export function parseFilters(params: ParamSource): CareerFilters {
   const intl = params.get(FILTER_PARAMS.intl)
   const sort = params.get(FILTER_PARAMS.sort)
   return {
-    q: (params.get(FILTER_PARAMS.q) ?? "").trim(),
+    q: (params.get(FILTER_PARAMS.q) ?? "").trim().slice(0, MAX_QUERY_LENGTH),
     types: list(params.get(FILTER_PARAMS.types)).filter(isJobType),
     locations: list(params.get(FILTER_PARAMS.locations)).filter(isJobLocation),
     intl: intl === "yes" || intl === "maybe" ? intl : "off",
@@ -93,7 +97,7 @@ export function parseFilters(params: ParamSource): CareerFilters {
 /** Only non-default values are written, so a fresh board has an empty query. */
 export function serialiseFilters(filters: CareerFilters): URLSearchParams {
   const params = new URLSearchParams()
-  if (filters.q) params.set(FILTER_PARAMS.q, filters.q)
+  if (filters.q) params.set(FILTER_PARAMS.q, filters.q.slice(0, MAX_QUERY_LENGTH))
   if (filters.types.length) params.set(FILTER_PARAMS.types, filters.types.join(","))
   if (filters.locations.length) params.set(FILTER_PARAMS.locations, filters.locations.join(","))
   if (filters.intl !== "off") params.set(FILTER_PARAMS.intl, filters.intl)
@@ -113,7 +117,9 @@ export function isValidJobId(id: string): boolean {
 
 export function parseBoardUrl(params: ParamSource | null): BoardUrlState {
   if (!params) return { ...EMPTY_FILTERS, job: null }
-  const job = params.get(FILTER_PARAMS.job)
+  // Tolerate the id as a committee member typed it ("NLB Tech Intern 2027"):
+  // the sheet tidies ids to slugs, so tidy the link the same way.
+  const job = slugify(params.get(FILTER_PARAMS.job) ?? "")
   return { ...parseFilters(params), job: job && isValidJobId(job) ? job : null }
 }
 

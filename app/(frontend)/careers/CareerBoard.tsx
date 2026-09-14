@@ -82,6 +82,12 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
   // True while the phone sheet sits on a history entry we pushed, so its
   // Close button can pop that entry and hardware Back does the same thing.
   const pushedSheetRef = useRef(false)
+  // Handlers read the latest filters from here, so memoised cards don't
+  // re-render on every keystroke just because a callback identity changed.
+  const latest = useRef({ urlFilters, searchValue })
+  useEffect(() => {
+    latest.current = { urlFilters, searchValue }
+  })
 
   const jobById = useMemo(() => new Map(jobs.map((j) => [j.id, j])), [jobs])
   const effectiveFilters = useMemo(
@@ -104,8 +110,9 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
   const linkedMissing = linkedId !== null && !linkedJob
   const selectedJob = linkedJob ?? visible[0] ?? null
   const outsideFilters = selectedJob !== null && !visible.some((j) => j.id === selectedJob.id)
-  const focusId = outsideFilters || !selectedJob ? visible[0]?.id : selectedJob.id
   const shown = visible.slice(0, limit)
+  // Roving tabindex: exactly one rendered card is in the tab order.
+  const focusId = shown.some((j) => j.id === selectedJob?.id) ? selectedJob?.id : shown[0]?.id
   // The sheet only exists below lg; on desktop the sticky panel shows it.
   const modalOpen = !isDesktop && linkedJob !== undefined
 
@@ -139,7 +146,7 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
   const select = useCallback(
     (job: Job, viaKeyboard: boolean, element: HTMLElement) => {
       returnFocusRef.current = element
-      const filters = { ...urlFilters, q: searchValue.trim() }
+      const filters = { ...latest.current.urlFilters, q: latest.current.searchValue.trim() }
       if (readIsDesktop()) {
         write(filters, job.id)
         // Enter on a card lands keyboard users on the panel; mouse clicks don't move focus.
@@ -149,7 +156,7 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
         pushedSheetRef.current = pushQuery(serialiseBoardUrl({ ...filters, job: job.id }))
       }
     },
-    [write, urlFilters, searchValue],
+    [write],
   )
 
   // Closing the sheet drops the role from the URL, so a refresh on the phone
@@ -159,9 +166,9 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
       pushedSheetRef.current = false
       window.history.back()
     } else {
-      write({ ...urlFilters, q: searchValue.trim() }, null)
+      write({ ...latest.current.urlFilters, q: latest.current.searchValue.trim() }, null)
     }
-  }, [write, urlFilters, searchValue])
+  }, [write])
 
   // Arrow keys move through the list; on desktop they also change the panel.
   const onListKeyDown = (event: KeyboardEvent<HTMLUListElement>) => {
@@ -184,18 +191,22 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
   }
 
   // --- entrance animation -----------------------------------------------
-  // First run: the events-page stagger on scroll. Later runs (a filter
-  // changed the list): a short fade with an explicit end state, so an
-  // interrupted tween can never leave cards stuck invisible.
-  const listKey = shown.map((j) => j.id).join("|")
-  const firstRun = useRef(true)
+  // First paint: the events-page stagger on scroll (skipped for deep links,
+  // whose first paint is replaced a moment later by the filtered view).
+  // Later: only cards that weren't on screen before fade in, so typing that
+  // narrows the list and "Show more" never re-animate what's already there.
+  const shownIds = shown.map((j) => j.id)
+  const listKey = shownIds.join("|")
+  const prevIdsRef = useRef<Set<string> | null>(null)
   useGSAP(
     () => {
       const cards = gsap.utils.toArray<HTMLElement>(".job-card", listRef.current)
+      const previous = prevIdsRef.current
+      prevIdsRef.current = new Set(shownIds)
       if (cards.length === 0) return
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-      if (firstRun.current) {
-        firstRun.current = false
+      if (previous === null) {
+        if (window.location.search) return
         gsap.from(cards, {
           opacity: 0,
           y: 32,
@@ -208,8 +219,10 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
         })
         return
       }
+      const fresh = cards.filter((card) => !previous.has(card.dataset.jobId ?? ""))
+      if (fresh.length === 0) return
       gsap.fromTo(
-        cards,
+        fresh,
         { opacity: 0, y: 12 },
         { opacity: 1, y: 0, duration: 0.35, stagger: { each: 0.03 }, ease: "entranceEase", overwrite: true, clearProps: "transform" },
       )
@@ -238,7 +251,7 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
         />
 
         {linkedMissing && (
-          <p role="status" className="rounded-lg border border-yellow-100 bg-yellow-50 p-4 text-body-sm text-yellow-800">
+          <p role="status" className="rounded-lg border border-yellow-100 bg-yellow-50 p-4 text-body-sm text-blue-900">
             That role&apos;s closed or been taken down. Here&apos;s what&apos;s still open.
           </p>
         )}
@@ -285,8 +298,10 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
         ) : (
           <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
             <div className="flex flex-col gap-4">
+              <h2 className="sr-only">Open roles</h2>
               <ul
                 ref={listRef}
+                id="job-list"
                 role="list"
                 aria-label="Open roles"
                 onKeyDown={onListKeyDown}
@@ -306,6 +321,7 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
                 <Button
                   variant="outline"
                   type="button"
+                  aria-controls="job-list"
                   onClick={() => setLimit((l) => l + PAGE_SIZE)}
                   className="self-center"
                 >
@@ -319,7 +335,7 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
               id="job-detail"
               tabIndex={-1}
               aria-labelledby="job-detail-title"
-              className="hidden rounded-2xl bg-white p-8 shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 lg:sticky lg:top-28 lg:block lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto"
+              className="hidden rounded-2xl bg-white p-8 shadow-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 lg:sticky lg:top-28 lg:block lg:max-h-[calc(100dvh-8rem)] lg:overflow-y-auto"
             >
               {selectedJob && (
                 <JobDetails job={selectedJob} headingId="job-detail-title" outsideFilters={outsideFilters} />
@@ -329,8 +345,9 @@ export default function CareerBoard({ jobs }: { jobs: Job[] }) {
         )}
       </div>
 
-      <p className="sr-only" aria-live="polite">
-        {selectedJob ? `Showing ${selectedJob.title} at ${selectedJob.company}` : ""}
+      {/* Desktop only: below lg the sheet's dialog title is the announcement. */}
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {isDesktop && selectedJob ? `Showing ${selectedJob.title} at ${selectedJob.company}` : ""}
       </p>
 
       {modalOpen && linkedJob && (
