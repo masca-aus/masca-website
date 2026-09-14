@@ -7,6 +7,7 @@ import StatisticSection from "./sections/statistic";
 import StatesSection from "./sections/states";
 import EventShowcaseSection from "./sections/eventShowcase";
 import MascaCareSection from "./sections/mascaCare";
+import CareerSpotlightSection from "./sections/careerSpotlight";
 import MascaVoiceSection from "./sections/mascaVoice";
 import YearbookSection from "./sections/yearbook";
 import AboutSection from "./sections/about";
@@ -45,8 +46,10 @@ export default async function Home() {
       <YearbookSection />
       <StatesSection />
       <EventShowcaseSection />
+      <CareerSpotlightSection />
       <MascaVoiceSection />
       <MascaCareSection />
+
       <SponsorsSection sponsors={sponsors} />
       <FollowUsSection />
       <JoinUsSection />

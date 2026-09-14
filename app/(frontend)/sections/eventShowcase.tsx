@@ -9,7 +9,9 @@ export default async function EventShowcaseSection() {
   const events = ((await tryGetUpcomingEvents()) ?? []).slice(0, 3)
 
   return (
-    <section>
+    // Soft blue tint so the band reads as its own section after the white
+    // states grid; the white event cards sit on it with their shadows.
+    <section className="bg-blue-50">
       <div className="flex flex-col gap-8 container section-pad">
         <header className="flex flex-col gap-4">
           <span className="eyebrow text-red-600">What&apos;s on kawan-kawan</span>
