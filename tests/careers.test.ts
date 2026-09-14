@@ -62,7 +62,7 @@ describe("header mapping", () => {
     expect(headerField("Country")).toBe("country");
     expect(headerField("State / Territory")).toBe("state");
     expect(headerField("City")).toBe("city");
-    expect(headerField("Location(s)")).toBe("locations");
+    expect(headerField("Location(s)")).toBe("city");
     expect(headerField("Work mode")).toBe("workMode");
     expect(headerField("Remote / Hybrid / On-site")).toBe("workMode");
     expect(headerField("Closing date")).toBe("closes");
@@ -218,10 +218,9 @@ describe("toJob", () => {
       logoUrl: "https://cdn.example/logo.png",
       type: "internship",
       country: { key: "australia", label: "Australia" },
-      state: { key: "vic", label: "VIC" },
+      state: { key: "victoria", label: "Victoria" },
       city: { key: "melbourne", label: "Melbourne" },
-      nationwide: false,
-      location: "Melbourne, VIC",
+      location: "Melbourne, Victoria",
       workMode: "hybrid",
       industry: "Banking",
       industryKey: "banking",

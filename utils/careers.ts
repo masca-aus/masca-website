@@ -44,26 +44,11 @@ export const JOB_TYPE_LABEL: Record<JobType, string> = {
   other: "Other",
 }
 
-/** A country, state or city as it reads on the site, plus its facet key (a slug). */
+/**
+ * A country, state or city exactly as the sheet spells it, plus its facet key
+ * (a slug, so "Victoria" and "victoria" are one pill and one URL value).
+ */
 export type Named = { key: string; label: string }
-
-/** Australian state codes in chapter order — the order the State pills take. */
-export const AU_STATES = ["vic", "nsw", "qld", "wa", "sa", "act", "tas", "nt"] as const
-export type AuState = (typeof AU_STATES)[number]
-export const AU_STATE_LABEL: Record<AuState, string> = {
-  vic: "VIC",
-  nsw: "NSW",
-  qld: "QLD",
-  wa: "WA",
-  sa: "SA",
-  act: "ACT",
-  tas: "TAS",
-  nt: "NT",
-}
-export const isAuState = (key: string): key is AuState => (AU_STATES as readonly string[]).includes(key)
-
-/** The State that means "every state": such a role matches every Australian state pill. */
-export const NATIONWIDE_LABEL = "Australia-wide"
 
 /** How the role is worked — its own sheet column, kept apart from where. */
 export const WORK_MODES = ["onsite", "hybrid", "remote"] as const
@@ -137,13 +122,11 @@ export type Job = {
   /** Sanitised https URL. */
   logoUrl?: string
   type: JobType
-  /** Where the role is, from the Country / State / City columns; undefined when blank. */
+  /** The Country / State / City cells as typed (the sheet's dropdowns hold full names); undefined when blank. */
   country?: Named
   state?: Named
   city?: Named
-  /** State said "Australia-wide": the role matches every Australian state pill. */
-  nationwide: boolean
-  /** "Melbourne, VIC" or "VIC" — the City, State line; undefined when both are blank (the country has its own line). */
+  /** "Melbourne, Victoria" or "Victoria" — the City, State line; undefined when both are blank. */
   location?: string
   /** On-site / hybrid / remote; undefined when the sheet doesn't say. */
   workMode?: WorkMode
@@ -189,8 +172,6 @@ export type SheetField =
   | "country"
   | "state"
   | "city"
-  /** The old single "Location" cell, still read as a fallback. */
-  | "locations"
   | "workMode"
   | "industry"
   | "international"
@@ -206,7 +187,7 @@ export type SheetField =
   | "featured"
   | "id"
 
-/** Header name per field. All but the legacy Location are in the template, in `TEMPLATE_HEADER_ORDER`. */
+/** The header row of the template sheet, in template order. */
 export const TEMPLATE_HEADERS: Record<SheetField, string> = {
   published: "Published",
   featured: "Featured",
@@ -216,7 +197,6 @@ export const TEMPLATE_HEADERS: Record<SheetField, string> = {
   country: "Country",
   state: "State",
   city: "City",
-  locations: "Location",
   workMode: "Work mode",
   international: "International students",
   studyLevels: "Study level",
@@ -253,7 +233,8 @@ const HEADER_SYNONYMS: Record<string, SheetField> = {
   country: "country", countries: "country", nation: "country",
   state: "state", states: "state", territory: "state", stateterritory: "state", region: "state", province: "state",
   city: "city", cities: "city", suburb: "city", town: "city", citysuburb: "city", cityorsuburb: "city", citytown: "city",
-  locations: "locations", location: "locations", locations1: "locations", where: "locations",
+  // An older sheet's single Location column shows as typed, in the city's place.
+  location: "city", locations: "city", where: "city",
   workmode: "workMode", mode: "workMode", arrangement: "workMode", workarrangement: "workMode", workstyle: "workMode",
   worksetting: "workMode", workplace: "workMode", locationtype: "workMode", remotehybrid: "workMode", hybridremote: "workMode",
   remotehybridonsite: "workMode", onsitehybridremote: "workMode", onsiteremote: "workMode", remoteonsite: "workMode", remoteorhybrid: "workMode",
@@ -327,68 +308,10 @@ const TYPE_ALIASES: Record<string, JobType> = {
   scholarship: "other", competition: "other", hackathon: "other",
 }
 
-/** Country cell spellings → the name shown on the site. Anything else is kept as typed. */
-const COUNTRY_ALIASES: Record<string, string> = {
-  australia: "Australia", au: "Australia", aus: "Australia", australiawide: "Australia",
-  malaysia: "Malaysia", my: "Malaysia", mys: "Malaysia",
-  singapore: "Singapore", sg: "Singapore", newzealand: "New Zealand", nz: "New Zealand",
-  unitedkingdom: "United Kingdom", uk: "United Kingdom", unitedstates: "United States", usa: "United States",
-  us: "United States", hongkong: "Hong Kong", hk: "Hong Kong", indonesia: "Indonesia", china: "China", japan: "Japan",
-}
-
-const AU_STATE_ALIASES: Record<string, AuState> = {
-  vic: "vic", victoria: "vic",
-  nsw: "nsw", newsouthwales: "nsw",
-  qld: "qld", queensland: "qld",
-  wa: "wa", westernaustralia: "wa",
-  sa: "sa", southaustralia: "sa",
-  act: "act", australiancapitalterritory: "act",
-  tas: "tas", tasmania: "tas",
-  nt: "nt", northernterritory: "nt",
-}
-
-/** State values that mean "every state". */
-const NATIONWIDE = new Set([
-  "all", "allstates", "anystate", "any", "australiawide", "nationwide", "national", "anywhereinaustralia",
-  "multiple", "various", "interstate",
-])
-
-/** Malaysian states, so a row with only a State still gets its country. */
-const MY_STATES = new Set([
-  "selangor", "penang", "pulaupinang", "johor", "sabah", "sarawak", "perak", "kedah", "kelantan", "terengganu",
-  "pahang", "negerisembilan", "melaka", "malacca", "perlis", "kualalumpur", "kl", "wpkualalumpur",
-  "wilayahpersekutuan", "putrajaya", "labuan",
-])
-
-/** Cities the site can place on its own when State or Country is blank. */
-const CITY_STATE: Record<string, AuState> = {
-  melbourne: "vic", melb: "vic", geelong: "vic", ballarat: "vic", bendigo: "vic",
-  sydney: "nsw", syd: "nsw", newcastle: "nsw", wollongong: "nsw", parramatta: "nsw",
-  brisbane: "qld", bris: "qld", goldcoast: "qld", townsville: "qld", cairns: "qld",
-  perth: "wa", adelaide: "sa", canberra: "act", hobart: "tas", launceston: "tas", darwin: "nt",
-}
-const CITY_COUNTRY: Record<string, string> = {
-  kualalumpur: "Malaysia", kl: "Malaysia", penang: "Malaysia", georgetown: "Malaysia", johorbahru: "Malaysia",
-  jb: "Malaysia", petalingjaya: "Malaysia", pj: "Malaysia", shahalam: "Malaysia", cyberjaya: "Malaysia",
-  putrajaya: "Malaysia", ipoh: "Malaysia", kuching: "Malaysia", kotakinabalu: "Malaysia", melaka: "Malaysia",
-  malacca: "Malaysia", singapore: "Singapore", auckland: "New Zealand", wellington: "New Zealand",
-  london: "United Kingdom", hongkong: "Hong Kong", jakarta: "Indonesia",
-}
-
+/** A country, state or city cell longer than this is cut short (with a warning). */
 const MAX_PLACE_LENGTH = 60
-const named = (label: string): Named => ({ key: slugify(label), label })
-const auState = (code: AuState): Named => ({ key: code, label: AU_STATE_LABEL[code] })
 
-/** Canonical Australian code, "Australia-wide", or the state as typed (Selangor, say). */
-function readState(raw: string): { state: Named; nationwide: boolean } {
-  const key = squash(raw)
-  const code = AU_STATE_ALIASES[key]
-  if (code) return { state: auState(code), nationwide: false }
-  if (NATIONWIDE.has(key)) return { state: named(NATIONWIDE_LABEL), nationwide: true }
-  return { state: named(raw), nationwide: false }
-}
-
-/** Work mode cell values — also the mode words that ride along in a Location cell. */
+/** Work mode cell values. */
 const WORK_MODE_ALIASES: Record<string, WorkMode> = {
   onsite: "onsite", inoffice: "onsite", inperson: "onsite", office: "onsite", campus: "onsite", oncampus: "onsite",
   facetoface: "onsite", inhouse: "onsite",
@@ -396,10 +319,6 @@ const WORK_MODE_ALIASES: Record<string, WorkMode> = {
   remote: "remote", fullyremote: "remote", wfh: "remote", workfromhome: "remote", online: "remote", virtual: "remote",
   anywhere: "remote", remotefirst: "remote",
 }
-
-/** Mode words a committee member may tuck into Location: "Melbourne (hybrid)", "Remote". */
-const MODE_IN_PLACE =
-  /\b(?:fully[- ])?(?:remote|hybrid|on[- ]?site|in[- ]office|in[- ]person|wfh|work from home|online|virtual|anywhere)\b/gi
 
 const STUDY_LEVEL_ALIASES: Record<string, StudyLevel> = {
   any: "any", all: "any", anyyear: "any", allyears: "any", open: "any", anylevel: "any", allstudents: "any",
@@ -782,8 +701,6 @@ export function toJob(row: SheetRow, ctx: ToJobContext): ToJobResult {
     else warn(`Type "${row.type}" isn't one of the options — shown as Other`)
   }
 
-  // Work mode has its own column; a mode word tucked into a legacy Location
-  // cell ("Melbourne (hybrid)", "Remote") fills it in when that column is blank.
   let workMode: WorkMode | undefined
   if (row.workMode) {
     const mapped = WORK_MODE_ALIASES[squash(row.workMode)]
@@ -830,52 +747,16 @@ export function toJob(row: SheetRow, ctx: ToJobContext): ToJobResult {
   const pay = clip(row.pay, MAX_PAY_LENGTH, "Pay")
 
   // --- where ---------------------------------------------------------------
-  // Country / State / City read as typed (Australian states become their
-  // code, "all states" becomes Australia-wide) and whatever is blank is
-  // derived: a known city gives its state, a state or city gives its country.
-  const tidy = (value: string, label: string) => clip(value, MAX_PLACE_LENGTH, label) as string
-  let country = row.country ? named(COUNTRY_ALIASES[squash(row.country)] ?? tidy(row.country, "Country")) : undefined
-  let state: Named | undefined
-  let nationwide = false
-  if (row.state) ({ state, nationwide } = readState(tidy(row.state, "State")))
-  let city = row.city ? named(tidy(row.city, "City")) : undefined
-
-  // A legacy single Location cell ("VIC, Melbourne", "Malaysia", "Remote")
-  // fills whatever the columns left blank; its mode words fill Work mode.
-  for (const token of splitList(row.locations)) {
-    const modeFromPlace = (token.match(MODE_IN_PLACE) ?? []).map((w) => WORK_MODE_ALIASES[squash(w)]).find(Boolean)
-    if (modeFromPlace && !workMode) workMode = modeFromPlace
-    const place = token
-      .replace(MODE_IN_PLACE, "")
-      .replace(/[()]/g, " ")
-      .replace(/^[\s,;:/|–—-]+|[\s,;:/|–—-]+$/g, "")
-      .replace(/\s+/g, " ")
-      .trim()
-    const key = squash(place)
-    if (!key) continue
-    if (AU_STATE_ALIASES[key] || NATIONWIDE.has(key)) {
-      if (state) warn(`Location "${place}" was ignored — one state per row (use Australia-wide for roles open in several)`)
-      else ({ state, nationwide } = readState(place))
-    } else if (COUNTRY_ALIASES[key]) {
-      if (!country) country = named(COUNTRY_ALIASES[key])
-    } else if (!city) {
-      city = named(place)
-    } else {
-      warn(`Location "${place}" was ignored — put the country, state and city in their own columns`)
-    }
+  // Country, State and City are dropdowns of full names in the sheet and show
+  // exactly as typed; the site only slugs them for the filter pills and URL.
+  const place = (value: string | undefined, label: string): Named | undefined => {
+    const text = clip(value, MAX_PLACE_LENGTH, label)
+    const key = text ? slugify(text) : ""
+    return text && key ? { key, label: text } : undefined
   }
-
-  const cityKey = city ? squash(city.label) : ""
-  if (!state && CITY_STATE[cityKey]) state = auState(CITY_STATE[cityKey])
-  if (!country) {
-    if (nationwide || (state && isAuState(state.key))) country = named("Australia")
-    else if (state && MY_STATES.has(squash(state.label))) country = named("Malaysia")
-    else if (CITY_COUNTRY[cityKey]) country = named(CITY_COUNTRY[cityKey])
-    else if (state || city) {
-      const where = [city?.label, state?.label].filter(Boolean).join(", ")
-      warn(`couldn't tell which country "${where}" is in — fill in Country so the role shows up in the Where filters`)
-    }
-  }
+  const country = place(row.country, "Country")
+  const state = place(row.state, "State")
+  const city = place(row.city, "City")
   const location = [city?.label, state?.label].filter(Boolean).join(", ") || undefined
 
   let tags = splitList(row.tags)
@@ -906,7 +787,6 @@ export function toJob(row: SheetRow, ctx: ToJobContext): ToJobResult {
     country,
     state,
     city,
-    nationwide,
     location,
     workMode,
     industry,

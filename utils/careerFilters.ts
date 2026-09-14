@@ -2,7 +2,7 @@
 // its tests. Filter state round-trips through the URL query string so a
 // filtered view can be shared or reloaded:
 //
-//   /careers?q=intern&type=internship,graduate&state=vic&city=melbourne&mode=remote&intl=yes&sort=closing
+//   /careers?q=intern&type=internship,graduate&state=victoria&city=melbourne&mode=remote&intl=yes&sort=closing
 //
 // The view state rides alongside: `job` (the selected role), `page` and
 // `per` (cards per page). Defaults are omitted when serialising so an
@@ -10,14 +10,12 @@
 // than thrown: a mangled link still opens the board.
 
 import {
-  AU_STATES,
   JOB_TYPES,
   JOB_TYPE_LABEL,
   STUDY_LEVELS,
   STUDY_LEVEL_LABEL,
   WORK_MODES,
   WORK_MODE_LABEL,
-  isAuState,
   slugify,
   sortJobs,
   type Job,
@@ -260,17 +258,11 @@ export function matchesIntl(job: Job, intl: IntlFilter): boolean {
   return job.international !== "no"
 }
 
-/** An Australia-wide role matches every Australian state pill, but not a Malaysian one. */
-function matchesState(job: Job, states: string[]): boolean {
-  if (job.state && states.includes(job.state.key)) return true
-  return job.nationwide && states.some(isAuState)
-}
-
 /** OR within a group, AND across groups; a job open to "any" level matches every level pill. */
 export function matchesFilters(job: Job, filters: CareerFilters): boolean {
   if (filters.types.length && !filters.types.includes(job.type)) return false
   if (filters.countries.length && !(job.country && filters.countries.includes(job.country.key))) return false
-  if (filters.states.length && !matchesState(job, filters.states)) return false
+  if (filters.states.length && !(job.state && filters.states.includes(job.state.key))) return false
   if (filters.cities.length && !(job.city && filters.cities.includes(job.city.key))) return false
   if (filters.modes.length && !(job.workMode && filters.modes.includes(job.workMode))) return false
   if (!matchesIntl(job, filters.intl)) return false
@@ -326,7 +318,7 @@ export function getTypeFacets(jobs: Job[]): Facet<JobType>[] {
   })).filter((f) => f.count > 0)
 }
 
-/** Facets for a place column: merged by key, first-seen label. */
+/** Facets for a place column: merged by key, first-seen spelling, alphabetical. */
 function namedFacets(values: (Named | undefined)[]): Facet[] {
   const facets = new Map<string, Facet>()
   for (const value of values) {
@@ -335,25 +327,19 @@ function namedFacets(values: (Named | undefined)[]): Facet[] {
     if (existing) existing.count++
     else facets.set(value.key, { key: value.key, label: value.label, count: 1 })
   }
-  return [...facets.values()]
+  return [...facets.values()].sort((a, b) => a.label.localeCompare(b.label))
 }
-const byLabel = (a: Facet, b: Facet) => a.label.localeCompare(b.label)
 
 export function getCountryFacets(jobs: Job[]): Facet[] {
-  return namedFacets(jobs.map((j) => j.country)).sort(byLabel)
+  return namedFacets(jobs.map((j) => j.country))
 }
 
-/** Australian states in chapter order, then the rest alphabetically; Australia-wide roles count toward every Australian state. */
 export function getStateFacets(jobs: Job[]): Facet[] {
-  const facets = namedFacets(jobs.map((j) => j.state))
-  const nationwide = jobs.filter((j) => j.nationwide).length
-  for (const facet of facets) if (isAuState(facet.key)) facet.count += nationwide
-  const rank = (f: Facet) => (isAuState(f.key) ? (AU_STATES as readonly string[]).indexOf(f.key) : AU_STATES.length)
-  return facets.sort((a, b) => rank(a) - rank(b) || byLabel(a, b))
+  return namedFacets(jobs.map((j) => j.state))
 }
 
 export function getCityFacets(jobs: Job[]): Facet[] {
-  return namedFacets(jobs.map((j) => j.city)).sort(byLabel)
+  return namedFacets(jobs.map((j) => j.city))
 }
 
 export function getWorkModeFacets(jobs: Job[]): Facet<WorkMode>[] {
