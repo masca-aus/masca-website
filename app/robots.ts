@@ -7,6 +7,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      // Plain-text sheet health report for the Careers committee.
+      disallow: "/careers/health",
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,

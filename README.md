@@ -55,3 +55,14 @@ Start the application locally on [http://localhost:3000](http://localhost:3000):
 ```bash
 npm run dev
 ```
+
+## Careers board (Google Sheet)
+
+`/careers` is driven by a Google Sheet kept by the Careers team — no CMS, no
+API key. The sheet is shared "Anyone with the link → Viewer" and read as CSV
+every five minutes. To connect one, set `CAREERS_SHEET_ID` (and
+`CAREERS_SHEET_GID` if the `Jobs` tab isn't the first tab) in `.env.local` or
+Vercel. Leave them blank and the page shows a friendly "board's still being
+pinned up" state. The committee guide, column reference and template live in
+[docs/careers-board.md](./docs/careers-board.md); `/careers/health` reports
+what the site is (and isn't) reading.

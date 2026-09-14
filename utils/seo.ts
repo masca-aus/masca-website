@@ -31,6 +31,7 @@ export const SITE_DESCRIPTION =
 export const SITE_NAV: { name: string; path: string }[] = [
   { name: "About", path: "/about" },
   { name: "Events", path: "/events" },
+  { name: "Careers", path: "/careers" },
   { name: "Welfare", path: "/care" },
   { name: "Committee", path: "/committee" },
   { name: "Contact", path: "/contact" },
