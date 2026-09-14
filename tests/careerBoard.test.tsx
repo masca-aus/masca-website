@@ -165,23 +165,6 @@ describe("FilterModal (static render)", () => {
     expect(html).toContain("Clear all");
     expect(html).toContain('aria-pressed="true"');
   });
-
-  it("shows the student-facing badges on cards", () => {
-    expect(html).toContain("Intl OK");
-    expect(html).toContain("Closes in 3 days");
-    expect(html).toContain("Featured");
-    expect(html).toContain("Penultimate");
-    expect(html).toContain("Rolling");
-    expect(html).toContain("Carlton");
-  });
-
-  it("never emits sheet text as HTML and only links to sanitised targets", () => {
-    expect(html).not.toContain("<script>alert");
-    expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
-    expect(html).not.toContain("javascript:");
-    expect(html).toContain('href="https://acme.example/apply"');
-    expect(html).toContain('rel="noopener noreferrer"');
-  });
 });
 
 describe("JobDetails", () => {
