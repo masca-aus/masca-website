@@ -64,14 +64,17 @@ function JobCard({
           <CompanyMark name={job.company} logoUrl={job.logoUrl} />
 
           <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-            <div className="flex items-start justify-between gap-3">
-              <h3 className="line-clamp-2 text-body font-bold leading-tight text-blue-600">{job.title}</h3>
+            {/* The chip wraps beneath the title on narrow phones rather than squeezing it. */}
+            <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+              <h3 className="line-clamp-2 min-w-0 flex-1 basis-40 text-body font-bold leading-tight text-blue-600">
+                {job.title}
+              </h3>
               <ClosingChip job={job} />
             </div>
 
             <p className="truncate text-body-sm text-gray-700">
               {job.company}
-              {location && <span className="text-gray-700/70"> · {location}</span>}
+              {location && <span className="text-gray-700/80"> · {location}</span>}
             </p>
 
             <div className="flex flex-wrap gap-1.5">
@@ -82,7 +85,7 @@ function JobCard({
             </div>
 
             {(job.isNew || job.addedLabel) && (
-              <p className="flex items-center gap-2 text-caption text-gray-700/80">
+              <p className="flex items-center gap-2 text-caption text-gray-700">
                 {job.isNew && <NewBadge />}
                 {job.addedLabel && <span>{job.addedLabel}</span>}
               </p>

@@ -95,7 +95,7 @@ export default function JobModal({
     >
       <div
         ref={boxRef}
-        className="relative flex max-h-[92vh] w-full flex-col overflow-y-auto rounded-t-3xl bg-white p-6 pt-14 shadow-brand sm:max-w-xl sm:rounded-2xl sm:p-8 sm:pt-14"
+        className="relative flex max-h-[92dvh] w-full flex-col overflow-y-auto rounded-t-3xl bg-white p-6 pt-14 shadow-brand sm:max-w-xl sm:rounded-2xl sm:p-8 sm:pt-14"
       >
         <button
           ref={closeRef}

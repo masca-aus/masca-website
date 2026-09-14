@@ -5,10 +5,12 @@ import { Globe, Search, SlidersHorizontal } from "lucide-react"
 
 import Button from "@/components/Button"
 import {
+  MAX_QUERY_LENGTH,
   countActiveFilters,
   hasAnyFilter,
   type CareerFilters,
   type Facet,
+  type IntlFilter,
 } from "@/utils/careerFilters"
 import type { JobLocation, JobSort, JobType, StudyLevel } from "@/utils/careers"
 
@@ -26,13 +28,21 @@ export type BoardFacets = {
 const INDUSTRY_PREVIEW = 10
 
 const PILL_BASE =
-  "rounded-pill border-2 px-4 py-1.5 text-body-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+  "min-h-10 rounded-pill border-2 px-4 py-1.5 text-body-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
 const PILL_ACTIVE = "border-blue-600 bg-blue-600 text-white"
 const PILL_IDLE = "border-blue-100 bg-white text-blue-600 hover:border-blue-600"
 
 const FIELD =
   "rounded-md border-2 border-blue-100 bg-white px-4 py-3 text-body text-black outline-none transition-colors placeholder:text-gray-300 focus:border-blue-600 focus:shadow-sm"
 const LEGEND = "text-body-sm font-bold text-gray-700"
+
+/** The toggle cycles off → yes; from the empty state's "maybe" a tap tightens back to yes. */
+const NEXT_INTL: Record<IntlFilter, IntlFilter> = { off: "yes", yes: "off", maybe: "yes" }
+const INTL_LABEL: Record<IntlFilter, { full: string; short: string }> = {
+  off: { full: "Open to international students", short: "Intl OK" },
+  yes: { full: "Open to international students", short: "Intl OK" },
+  maybe: { full: "Open to international students, incl. unconfirmed", short: "Intl OK + unconfirmed" },
+}
 
 function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
@@ -67,6 +77,7 @@ export default function BoardToolbar({
   const active = countActiveFilters(filters)
   const filtered = hasAnyFilter(filters) || searchValue.trim() !== ""
   const intlOn = filters.intl !== "off"
+  const intlLabel = INTL_LABEL[filters.intl]
   const industries = allIndustries ? facets.industries : facets.industries.slice(0, INDUSTRY_PREVIEW)
 
   const count =
@@ -75,7 +86,7 @@ export default function BoardToolbar({
       : `${visible} of ${total} roles`
 
   return (
-    <div className="flex flex-col gap-5 lg:sticky lg:top-24 lg:z-10 lg:-mx-4 lg:rounded-2xl lg:bg-gray-100/95 lg:px-4 lg:py-4 lg:backdrop-blur-sm">
+    <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <label htmlFor={searchId} className="sr-only">
           Search roles
@@ -87,6 +98,7 @@ export default function BoardToolbar({
             type="search"
             enterKeyHint="search"
             autoComplete="off"
+            maxLength={MAX_QUERY_LENGTH}
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
             onKeyDown={(e) => {
@@ -104,15 +116,15 @@ export default function BoardToolbar({
           <button
             type="button"
             aria-pressed={intlOn}
-            onClick={() => onChange({ intl: intlOn ? "off" : "yes" })}
+            onClick={() => onChange({ intl: NEXT_INTL[filters.intl] })}
             className={`${PILL_BASE} inline-flex items-center gap-2 py-2.5 ${intlOn ? PILL_ACTIVE : PILL_IDLE}`}
           >
             <Globe className="size-4" aria-hidden />
-            <span className="hidden sm:inline">Open to international students</span>
+            <span className="hidden sm:inline">{intlLabel.full}</span>
             <span className="sm:hidden" aria-hidden>
-              Intl OK
+              {intlLabel.short}
             </span>
-            <span className="sr-only sm:hidden">Open to international students</span>
+            <span className="sr-only sm:hidden">{intlLabel.full}</span>
           </button>
 
           <button
@@ -125,7 +137,10 @@ export default function BoardToolbar({
             <SlidersHorizontal className="size-4" aria-hidden />
             Filters
             {active > 0 && (
-              <span className="rounded-pill bg-red-600 px-1.5 text-caption text-white">{active}</span>
+              <span className="rounded-pill bg-red-600 px-1.5 text-caption text-white">
+                {active}
+                <span className="sr-only"> active</span>
+              </span>
             )}
           </button>
         </div>
@@ -172,7 +187,7 @@ export default function BoardToolbar({
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 text-body-sm text-gray-700">
-        <p role="status" aria-live="polite" className="font-bold">
+        <p role="status" aria-live="polite" aria-atomic="true" className="font-bold">
           {count}
         </p>
 
@@ -241,8 +256,11 @@ function PillGroup<K extends string>({
               className={`${PILL_BASE} ${active ? PILL_ACTIVE : PILL_IDLE}`}
             >
               {facet.label}
-              <span className="ml-1.5 text-caption font-semibold opacity-70" aria-label={`${facet.count} roles`}>
+              <span className="ml-1.5 text-caption font-semibold opacity-80" aria-hidden>
                 {facet.count}
+              </span>
+              <span className="sr-only">
+                , {facet.count} {facet.count === 1 ? "role" : "roles"}
               </span>
             </button>
           )

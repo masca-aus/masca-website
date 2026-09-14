@@ -31,7 +31,7 @@ export default async function CareersPage() {
       ) : (
         <section>
           <BoardEmpty
-            variant={board.status === "ok" ? "none" : "unconfigured"}
+            variant={board.status === "ok" ? "none" : board.status}
             actions={
               board.status === "ok" ? (
                 <Button href="/contact" variant="primary">

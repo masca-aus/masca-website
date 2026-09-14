@@ -91,11 +91,17 @@ export function TypeBadge({ type }: { type: Job["type"] }) {
 export function StudyLevelBadge({ levels }: { levels: Job["studyLevels"] }) {
   const named = levels.filter((l) => l !== "any")
   if (named.length === 0) return null
+  // Blue text on the yellow tint: yellow-800 on yellow-50 is only 2.9:1.
   return (
-    <span className={`${BADGE} bg-yellow-50 text-yellow-800`}>
+    <span className={`${BADGE} bg-yellow-50 text-blue-900`}>
       <GraduationCap className="size-3" aria-hidden />
       {STUDY_LEVEL_LABEL[named[0]]}
-      {named.length > 1 && <span aria-label={`and ${named.length - 1} more`}> +{named.length - 1}</span>}
+      {named.length > 1 && (
+        <>
+          <span aria-hidden> +{named.length - 1}</span>
+          <span className="sr-only">, and {named.length - 1} more</span>
+        </>
+      )}
     </span>
   )
 }
@@ -138,7 +144,7 @@ export function LocationPill({ location }: { location: JobLocation }) {
     )
   }
   if (location === "malaysia") {
-    return <span className={`${BADGE} bg-yellow-100 text-yellow-800`}>{label}</span>
+    return <span className={`${BADGE} bg-yellow-100 text-blue-900`}>{label}</span>
   }
   if (location === "other") {
     return <span className={`${BADGE} border border-gray-300 text-gray-700`}>{label}</span>

@@ -6,6 +6,7 @@ import type { ReactNode } from "react"
 
 export type BoardEmptyVariant =
   | "unconfigured"
+  | "unavailable"
   | "none"
   | "no-match"
   | "no-match-intl"
@@ -15,6 +16,10 @@ const COPY: Record<BoardEmptyVariant, { accent: string; body: string }> = {
   unconfigured: {
     accent: "the board's still being pinned up",
     body: "The Careers team is loading the first batch of roles. Check back soon — or tell us about one you'd like to see.",
+  },
+  unavailable: {
+    accent: "the board took a teh tarik break",
+    body: "We couldn't reach the listings just now. They'll be back within a few minutes — or tell us about a role you'd like to see.",
   },
   none: {
     accent: "nothing on the board yet, lah",
@@ -63,8 +68,8 @@ export default function BoardEmpty({
       <span className="-rotate-2 font-accent text-3xl leading-tight text-red-600 md:text-4xl">{accent}</span>
       <p className="max-w-md text-gray-700">{body}</p>
       {actions && <div className="mt-2 flex flex-wrap justify-center gap-4">{actions}</div>}
-      {variant === "unconfigured" && (
-        <p className="text-caption text-gray-700/60">Committee? See /careers/health.</p>
+      {(variant === "unconfigured" || variant === "unavailable") && (
+        <p className="text-caption text-gray-700">Committee? See /careers/health.</p>
       )}
     </div>
   )

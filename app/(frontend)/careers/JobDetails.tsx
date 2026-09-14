@@ -74,7 +74,7 @@ export default function JobDetails({
             ) : (
               <span className="font-bold">{job.company}</span>
             )}
-            {job.industry && <span className="text-gray-700/70"> · {job.industry}</span>}
+            {job.industry && <span className="text-gray-700/80"> · {job.industry}</span>}
           </p>
           {(job.featured || job.isNew) && (
             <div className="flex flex-wrap items-center gap-2">
@@ -87,7 +87,7 @@ export default function JobDetails({
       </header>
 
       {outsideFilters && (
-        <p role="status" className="rounded-lg border border-yellow-100 bg-yellow-50 p-3 text-body-sm text-yellow-800">
+        <p role="status" className="rounded-lg border border-yellow-100 bg-yellow-50 p-3 text-body-sm text-blue-900">
           Shown because you followed a link — it&apos;s outside your current filters.
         </p>
       )}
@@ -111,10 +111,10 @@ export default function JobDetails({
         <MetaRow icon={<CalendarClock className="size-4" aria-hidden />} label="Closing date">
           <span className={job.isClosingSoon ? "font-bold text-red-600" : undefined}>{closes}</span>
           {job.daysLeft !== undefined && job.daysLeft > 7 && (
-            <span className="text-gray-700/70"> · {job.daysLeft} days left</span>
+            <span className="text-gray-700/80"> · {job.daysLeft} days left</span>
           )}
           {job.daysLeft === undefined && (
-            <span className="text-gray-700/70"> — no closing date listed, so apply early.</span>
+            <span className="text-gray-700/80"> — no closing date listed, so apply early.</span>
           )}
         </MetaRow>
 
@@ -208,10 +208,11 @@ function WorkingRightsCallout({ value }: { value: Job["international"] }) {
       </div>
     )
   }
+  // Blue text on the yellow tint: yellow-800 on yellow-50 is only 2.9:1.
   return (
-    <div className="flex flex-col gap-1 rounded-lg border border-yellow-100 bg-yellow-50 p-4 text-body-sm text-yellow-800">
+    <div className="flex flex-col gap-1 rounded-lg border border-yellow-100 bg-yellow-50 p-4 text-body-sm text-blue-900">
       <WorkingRightsBadge value={value} />
-      <p className="text-yellow-800">
+      <p className="text-blue-900">
         The listing doesn&apos;t say. Email the recruiter before you sink time in, and ask about
         student-visa work conditions.
       </p>

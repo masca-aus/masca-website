@@ -1,12 +1,14 @@
 'use client'
 
-import { useEffect } from "react"
+import { startTransition, useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 import Button from "@/components/Button"
 
-// Route error boundary: reached only when the sheet can't be read and there
-// is no previously generated page to fall back on (a first deploy, or a
-// cold cache). The message stays in MASCA's voice; the cause is in the logs.
+// Route error boundary. In production the page is prerendered, and a sheet
+// that can't be read at build time renders the "unavailable" state instead
+// of throwing, so this mostly appears in development or after a cache purge.
+// The message stays in MASCA's voice; the cause is in the logs.
 
 export default function CareersError({
   error,
@@ -15,9 +17,19 @@ export default function CareersError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const router = useRouter()
+
   useEffect(() => {
     console.error(error)
   }, [error])
+
+  // reset() alone only re-renders the boundary; the server component has to
+  // be fetched again for a retry to mean anything.
+  const retry = () =>
+    startTransition(() => {
+      router.refresh()
+      reset()
+    })
 
   return (
     <main id="main">
@@ -33,7 +45,7 @@ export default function CareersError({
             roles aren&apos;t going anywhere.
           </p>
           <div className="mt-2 flex flex-wrap gap-4">
-            <Button variant="accent" type="button" onClick={reset}>
+            <Button variant="accent" type="button" onClick={retry}>
               Try again
             </Button>
             <Button href="/" variant="outlineLight">

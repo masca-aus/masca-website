@@ -350,9 +350,30 @@ describe("toJob", () => {
     expect("job" in toJob({ ...fullRow, id: undefined, added: "2026-01-01" }, ctx)).toBe(true);
   });
 
-  it("treats a blank Featured cell and Sheets error tokens as unset", () => {
+  it("treats a blank Featured cell and Sheets error tokens as unset, and tick marks as ticked", () => {
     expect(job({ ...fullRow, featured: undefined }).featured).toBe(false);
     expect(job({ ...fullRow, featured: "FALSE" }).featured).toBe(false);
+    expect(job({ ...fullRow, featured: "✓" }).featured).toBe(true);
+    expect("job" in toJob({ ...fullRow, published: "✔" }, { ...ctx, hasPublishedColumn: true })).toBe(true);
+  });
+
+  it("treats a future Added date as undated with a warning, and flags a far-off Closes", () => {
+    const future = toJob({ ...fullRow, id: undefined, added: "2027-09-10" }, ctx);
+    expect("job" in future && future.job).toMatchObject({ added: undefined, addedLabel: undefined, isNew: false });
+    expect(future.warnings).toEqual(['Row 2: Added "2027-09-10" is in the future — check the date']);
+    const farOff = toJob({ ...fullRow, id: undefined, closes: "2029-01-01" }, ctx);
+    expect("job" in farOff && farOff.job.closes).toBe("2029-01-01");
+    expect(farOff.warnings).toEqual(['Row 2: Closes "2029-01-01" is more than two years away — check the year']);
+  });
+
+  it("warns about a punctuation placeholder in Closes instead of treating it as rolling", () => {
+    const result = toJob({ ...fullRow, id: undefined, closes: "?" }, ctx);
+    expect("job" in result && result.job.closes).toBeUndefined();
+    expect(result.warnings).toEqual(['Row 2: Closes: couldn\'t read the date "?" — use YYYY-MM-DD']);
+  });
+
+  it("strips zero-width characters pasted into links", () => {
+    expect(job({ ...fullRow, apply: "https://x.example/apply​" }).applyHref).toBe("https://x.example/apply");
   });
 });
 
