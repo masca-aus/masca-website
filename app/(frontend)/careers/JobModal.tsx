@@ -30,10 +30,12 @@ export default function JobModal({
   const closeRef = useRef<HTMLButtonElement>(null)
   const tl = useRef<gsap.core.Timeline | null>(null)
 
+  // Fade with `opacity`, not `autoAlpha`: autoAlpha starts at
+  // visibility:hidden, which makes the initial focus() below a no-op.
   useGSAP(() => {
     tl.current = gsap.timeline()
-      .from(overlayRef.current, { autoAlpha: 0, duration: 0.25, ease: "none" })
-      .from(boxRef.current, { autoAlpha: 0, y: 32, duration: 0.4, ease: "entranceEase" }, 0.05)
+      .from(overlayRef.current, { opacity: 0, duration: 0.25, ease: "none" })
+      .from(boxRef.current, { opacity: 0, y: 32, duration: 0.4, ease: "entranceEase" }, 0.05)
   }, { scope: overlayRef })
 
   const requestClose = useCallback(() => {
@@ -44,6 +46,9 @@ export default function JobModal({
   }, [onClose])
 
   useEffect(() => {
+    // The opener sets the ref before the sheet mounts; read it now, since the
+    // ref may point elsewhere by the time the cleanup runs.
+    const returnTo = returnFocusRef.current
     closeRef.current?.focus()
     const previous = document.body.style.overflow
     document.body.style.overflow = "hidden"
@@ -73,7 +78,7 @@ export default function JobModal({
     return () => {
       document.removeEventListener("keydown", onKey)
       document.body.style.overflow = previous
-      returnFocusRef.current?.focus()
+      returnTo?.focus()
     }
   }, [requestClose, returnFocusRef])
 

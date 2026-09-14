@@ -356,17 +356,28 @@ const INTERNATIONAL_NO = new Set([
   "prcitizen", "prcitizens", "closed", "auonly", "auscitizens", "notopen", "noteligible",
 ])
 const INTERNATIONAL_UNSURE = new Set(["unsure", "unknown", "tbc", "tba", "maybe", "notsure", "unclear", "depends", "checklisting"])
-const TRUTHY = new Set(["true", "yes", "y", "1", "x", "✓", "✔", "☑", "on", "live", "published", "featured"])
-const ROLLING = new Set(["rolling", "asap", "ongoing", "open", "untilfilled", "tba", "tbc", "na", "none", "nodeadline", "", "unknown", "rollingapplications"])
+const TRUTHY = new Set(["true", "yes", "y", "1", "x", "on", "live", "published", "featured"])
+const TICKS = /^[✓✔☑]$/
+const FALSY = new Set(["false", "no", "n", "0", "off", "draft", "hidden"])
+const ROLLING = new Set(["rolling", "asap", "ongoing", "open", "untilfilled", "tba", "tbc", "na", "none", "nodeadline", "unknown", "rollingapplications"])
 const SHEET_ERRORS = new Set(["#n/a", "#ref!", "#value!", "#error!", "#name?", "#div/0!", "#num!", "#null!", "loading..."])
+
+/** Checkbox / yes-no cells: TRUE, yes, 1, a tick mark… */
+export function isTruthyCell(raw: string | undefined): boolean {
+  const s = (raw ?? "").trim()
+  return TICKS.test(s) || TRUTHY.has(squash(s))
+}
 
 const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
 const MONTH_LABEL = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const MS_PER_DAY = 86_400_000
 
-/** Trims, collapses whitespace, and blanks Sheets' error tokens. */
+/** Zero-width characters that ride along when text is pasted from chat apps. */
+const INVISIBLE = /[\u200b-\u200d\u2060\ufeff]/g
+
+/** Trims, collapses whitespace, drops invisible characters, and blanks Sheets' error tokens. */
 export function cleanCell(raw: string | undefined): string {
-  const s = (raw ?? "").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim()
+  const s = (raw ?? "").replace(INVISIBLE, "").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim()
   return SHEET_ERRORS.has(s.toLowerCase()) ? "" : s
 }
 
@@ -400,7 +411,7 @@ export type DateParse = {
  */
 export function parseSheetDate(raw: string): DateParse {
   let s = cleanCell(raw).toLowerCase()
-  if (ROLLING.has(squash(s)) || s === "-") return { rolling: true }
+  if (s === "" || s === "-" || s === "—" || ROLLING.has(squash(s))) return { rolling: true }
 
   // Drop a leading weekday ("Sun 5 Oct", "Sunday, 5 October 2026").
   s = s.replace(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*,?\s+/, "")
@@ -439,6 +450,8 @@ export function parseSheetDate(raw: string): DateParse {
   }
 
   if (m === undefined || d === undefined || !Number.isFinite(m) || m < 1 || m > 12 || d < 1 || d > 31) {
+    // Punctuation placeholders ("?", "…") land here too, on purpose: a
+    // deadline nobody knows yet deserves a nudge, not a silent "rolling".
     return { rolling: false, warning: `couldn't read the date "${raw.trim()}" — use YYYY-MM-DD` }
   }
   if (y === undefined) {
@@ -569,10 +582,24 @@ export function rowToRecord(fields: (SheetField | undefined)[], cells: string[])
   fields.forEach((field, i) => {
     if (!field) return
     // Descriptions keep their line breaks; everything else is single-line.
-    const value = field === "description" ? (cells[i] ?? "").replace(/\r\n?/g, "\n").trim() : cleanCell(cells[i])
+    const value =
+      field === "description"
+        ? (cells[i] ?? "").replace(INVISIBLE, "").replace(/\r\n?/g, "\n").trim()
+        : cleanCell(cells[i])
     if (value) row[field] = value
   })
   return row
+}
+
+/**
+ * A row that holds nothing but unticked checkboxes is an empty row: Sheets
+ * exports `FALSE` for every unticked box in the checkbox range, so a template
+ * with boxes on A2:A1000 produces hundreds of these.
+ */
+export function isBlankRecord(row: SheetRow): boolean {
+  return Object.entries(row).every(
+    ([field, value]) => (field === "published" || field === "featured") && !isTruthyCell(value),
+  )
 }
 
 export type ToJobContext = {
@@ -606,7 +633,7 @@ export function toJob(row: SheetRow, ctx: ToJobContext): ToJobResult {
 
   // Published column present → only ticked rows show, so a half-typed row
   // never leaks. Column absent → everything shows.
-  if (ctx.hasPublishedColumn && !TRUTHY.has(squash(row.published ?? ""))) {
+  if (ctx.hasPublishedColumn && !isTruthyCell(row.published)) {
     return {
       hidden: { row: ctx.rowNumber, reason: "unpublished", title: label, message: "Published is unticked" },
       warnings,
@@ -661,10 +688,18 @@ export function toJob(row: SheetRow, ctx: ToJobContext): ToJobResult {
     }
   }
 
+  if (daysLeft !== undefined && daysLeft > 730) warn(`Closes "${row.closes}" is more than two years away — check the year`)
+
   const addedParse = row.added ? parseSheetDate(row.added) : { rolling: true }
   if (addedParse.warning) warn(`Added: ${addedParse.warning}`)
-  const added = addedParse.date
-  const addedDaysAgo = added ? daysBetween(added, ctx.today) : undefined
+  let added = addedParse.date
+  let addedDaysAgo = added ? daysBetween(added, ctx.today) : undefined
+  if (addedDaysAgo !== undefined && addedDaysAgo < 0) {
+    // A future Added date would pin the row as "new" indefinitely.
+    warn(`Added "${row.added}" is in the future — check the date`)
+    added = undefined
+    addedDaysAgo = undefined
+  }
   if (closes === undefined && addedDaysAgo !== undefined && addedDaysAgo > MAX_AGE_DAYS_WITHOUT_CLOSE) {
     return {
       hidden: {
@@ -785,7 +820,7 @@ export function toJob(row: SheetRow, ctx: ToJobContext): ToJobResult {
     applyKind: apply.kind,
     description,
     tags,
-    featured: TRUTHY.has(squash(row.featured ?? "")),
+    featured: isTruthyCell(row.featured),
     isNew: addedDaysAgo !== undefined && addedDaysAgo <= NEW_DAYS,
     isClosingSoon: daysLeft !== undefined && daysLeft <= CLOSING_SOON_DAYS,
   }
@@ -800,6 +835,8 @@ export class CareerSheetShapeError extends Error {
   constructor(
     message: string,
     readonly headersFound: string[],
+    /** "shape": no usable header row; "size": more rows than a jobs list should have. */
+    readonly kind: "shape" | "size" = "shape",
   ) {
     super(message)
     this.name = "CareerSheetShapeError"
@@ -853,11 +890,17 @@ export function parseSheet(csv: string, today: string): ParsedSheet {
   if (!hasPublishedColumn) info.push("No Published column — every row is live")
   if (!known.has("closes")) info.push("No Closes column — roles never expire automatically")
 
-  const dataRows = rows.slice(headerIndex + 1)
-  if (dataRows.length > MAX_SHEET_ROWS) {
+  // Sheet row number: rows before the header, the header itself, then 1-based.
+  const firstDataRow = headerIndex + 2
+  const records = rows
+    .slice(headerIndex + 1)
+    .map((cells, index) => ({ rowNumber: firstDataRow + index, record: rowToRecord(fields, cells) }))
+    .filter(({ record }) => !isBlankRecord(record)) // blank rows, or only unticked boxes / ignored columns
+  if (records.length > MAX_SHEET_ROWS) {
     throw new CareerSheetShapeError(
-      `The tab has ${dataRows.length} rows — more than the ${MAX_SHEET_ROWS} the site will read. Has a dataset been pasted in?`,
+      `The tab has ${records.length} filled rows — more than the ${MAX_SHEET_ROWS} the site will read. Has a dataset been pasted in?`,
       headersFound,
+      "size",
     )
   }
 
@@ -865,12 +908,7 @@ export function parseSheet(csv: string, today: string): ParsedSheet {
   const hidden: HiddenRow[] = []
   const warnings: string[] = []
   const seenIds = new Map<string, number>()
-  // Sheet row number: rows before the header, the header itself, then 1-based.
-  const firstDataRow = headerIndex + 2
-  dataRows.forEach((cells, index) => {
-    const rowNumber = firstDataRow + index
-    const record = rowToRecord(fields, cells)
-    if (Object.keys(record).length === 0) return // blank row (or only ignored columns)
+  records.forEach(({ rowNumber, record }) => {
     let result: ToJobResult
     try {
       result = toJob(record, { today, rowNumber, hasPublishedColumn })
@@ -897,10 +935,28 @@ export function parseSheet(csv: string, today: string): ParsedSheet {
   })
 
   const undated = jobs.filter((j) => !j.added).length
-  if (undated > 0 && undated < jobs.length) {
+  if (undated > 0) {
     info.push(
-      `${undated} ${undated === 1 ? "role has" : "roles have"} no Added date — they sort as newest; fill Added so students can see how fresh they are`,
+      undated === jobs.length
+        ? `None of the ${jobs.length === 1 ? "role has" : `${jobs.length} roles have`} an Added date — fill Added so "Newest first" means something and students can see how fresh a role is`
+        : `${undated} ${undated === 1 ? "role has" : "roles have"} no Added date — they sort as newest; fill Added so students can see how fresh they are`,
     )
+  }
+  const featuredCount = jobs.filter((j) => j.featured).length
+  if (featuredCount > 3) {
+    info.push(`${featuredCount} roles are Featured — three at most keeps "Newest first" meaningful`)
+  }
+  // A sheet created under another locale exports WAHR/VERDADERO/VRAI instead
+  // of TRUE, which reads as "unticked" and hides everything.
+  if (hasPublishedColumn && jobs.length === 0) {
+    const odd = records
+      .map(({ record }) => record.published ?? "")
+      .find((v) => v && !isTruthyCell(v) && !FALSY.has(squash(v)))
+    if (odd) {
+      warnings.push(
+        `Published values look like "${odd}" — the site only understands TRUE/FALSE; set File › Settings › Locale to Australia`,
+      )
+    }
   }
 
   return { jobs: sortJobs(jobs, "newest"), hidden, warnings, info, headersFound }
@@ -927,7 +983,7 @@ export function sortJobs(jobs: Job[], sort: JobSort): Job[] {
   return [...jobs].sort((a, b) => {
     if (sort === "newest") {
       if (a.featured !== b.featured) return a.featured ? -1 : 1
-      return byAddedDesc(a, b) || byRowDesc(a, b) || byDaysLeftAsc(a, b)
+      return byAddedDesc(a, b) || byDaysLeftAsc(a, b) || byRowDesc(a, b)
     }
     return byDaysLeftAsc(a, b) || byAddedDesc(a, b) || byRowDesc(a, b)
   })

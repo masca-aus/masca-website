@@ -8,6 +8,9 @@
 import { formatClosesLabel } from "./careers"
 import { CAREERS_REVALIDATE_SECONDS, type CareerBoardReport } from "./careersSource"
 
+/** The route memoises the report for this long so a scraper can't hammer Google through it. */
+export const HEALTH_CACHE_SECONDS = 30
+
 const STATUS_LINE: Record<CareerBoardReport["status"], string> = {
   ok: "OK",
   unconfigured: "NOT CONNECTED",
@@ -53,7 +56,9 @@ export function formatHealthReport(report: CareerBoardReport, now: Date): string
 
     lines.push(`Hidden: ${report.hidden.length} ${report.hidden.length === 1 ? "row" : "rows"}`)
     for (const row of report.hidden) {
-      lines.push(`  ${pad(`Row ${row.row}`, 8)} ${pad(row.message, 60)} ${row.title ?? ""}`.trimEnd())
+      // Drafts stay private: an embargoed role must not be readable here.
+      const title = row.reason === "unpublished" ? "" : (row.title ?? "")
+      lines.push(`  ${pad(`Row ${row.row}`, 8)} ${pad(row.message, 60)} ${title}`.trimEnd())
     }
     lines.push("")
 
@@ -69,7 +74,7 @@ export function formatHealthReport(report: CareerBoardReport, now: Date): string
   }
 
   lines.push(
-    `The public page updates within ${Math.round(CAREERS_REVALIDATE_SECONDS / 60)} minutes of a sheet edit. This report is live.`,
+    `The public page updates within ${Math.round(CAREERS_REVALIDATE_SECONDS / 60)} minutes of a sheet edit. This report is at most ${HEALTH_CACHE_SECONDS} seconds old.`,
   )
   return lines.join("\n") + "\n"
 }

@@ -19,11 +19,13 @@
 
 import {
   CareerSheetShapeError,
+  looksLikeHeaderRow,
   melbourneToday,
   parseSheet,
   type HiddenRow,
   type Job,
 } from "./careers"
+import { parseCsv } from "./csv"
 
 /** Seconds between background refreshes of the sheet. */
 export const CAREERS_REVALIDATE_SECONDS = 300
@@ -72,6 +74,8 @@ export type CareerBoardReport = {
 export type CareerBoardData =
   | { status: "ok"; jobs: Job[] }
   | { status: "unconfigured" }
+  /** The sheet couldn't be read while `next build` was prerendering the page. */
+  | { status: "unavailable" }
 
 /**
  * CAREERS_SHEET_ID may be the bare spreadsheet ID or the whole pasted sheet
@@ -111,7 +115,10 @@ type FetchResult =
   | { ok: false; status: Exclude<CareerBoardStatus, "ok" | "unconfigured" | "wrong-tab">; error: CareerBoardError }
 
 const SHARE_FIX =
-  'Open the sheet → Share → General access → "Anyone with the link" → Viewer. The site updates within 5 minutes.'
+  'Open the sheet → Share → General access → "Anyone with the link" → Viewer. The site updates within 5 minutes. If it is already shared, the owning Google Workspace may block anonymous downloads — move the sheet to the careers@masca.org.au account.'
+
+/** Google's sign-in page, whichever host it lands on. */
+const SIGN_IN_MARKERS = /accounts\.google\.com|ServiceLogin|<title>Sign in/i
 
 /**
  * Fetches the CSV, classifying the ways Google says no. `fresh` bypasses the
@@ -141,6 +148,17 @@ export async function fetchSheetCsv(
     }
   }
 
+  if (res.status === 401 || res.status === 403) {
+    return {
+      ok: false,
+      status: "not-shared",
+      error: {
+        title: `Google refused the download (${res.status}) — the sheet isn't shared publicly.`,
+        detail: "Anonymous readers are not allowed to export this sheet.",
+        fix: SHARE_FIX,
+      },
+    }
+  }
   if (res.status === 404) {
     return {
       ok: false,
@@ -196,7 +214,8 @@ export async function fetchSheetCsv(
   } catch {
     // An unparsable final URL is not a sign-in page.
   }
-  if (landedOnSignIn || !contentType.includes("text/csv") || /^\s*<(!doctype|html)/i.test(csv)) {
+  const looksHtml = /^\s*<(!doctype|html)/i.test(csv)
+  if (landedOnSignIn || (looksHtml && SIGN_IN_MARKERS.test(csv.slice(0, 4000)))) {
     return {
       ok: false,
       status: "not-shared",
@@ -205,6 +224,23 @@ export async function fetchSheetCsv(
         detail: `Expected CSV, received ${contentType || "an unknown type"}.`,
         fix: SHARE_FIX,
       },
+    }
+  }
+  // Anything else that isn't CSV — Google's "unable to open the file" or
+  // unusual-traffic pages — is a Google-side problem, not a sharing one. The
+  // content-type is only a hint: a body that parses to a jobs header is fine.
+  if (looksHtml || !contentType.includes("text/csv")) {
+    const parses = !looksHtml && parseCsv(csv).slice(0, 5).some(looksLikeHeaderRow)
+    if (!parses) {
+      return {
+        ok: false,
+        status: "unreachable",
+        error: {
+          title: "Google sent a web page instead of the CSV (usually a temporary Google problem).",
+          detail: `Received ${contentType || "an unknown type"}.`,
+          fix: "Usually temporary — the last good version keeps showing. If this persists for an hour, tell the web team.",
+        },
+      }
     }
   }
   if (csv.length > MAX_CSV_BYTES) {
@@ -248,6 +284,17 @@ export async function loadCareerBoard(opts: LoadOptions = {}): Promise<CareerBoa
     const parsed = parseSheet(fetched.csv, today)
     return { ...base, status: "ok", ...parsed }
   } catch (error) {
+    if (error instanceof CareerSheetShapeError && error.kind === "size") {
+      return {
+        ...base,
+        status: "too-big",
+        error: {
+          title: "The Jobs tab has far more filled rows than a jobs list should.",
+          detail: error.message,
+          fix: "Has a dataset been pasted into the Jobs tab? Move it to another tab, or cut old rows into Archive.",
+        },
+      }
+    }
     if (error instanceof CareerSheetShapeError) {
       return {
         ...base,
@@ -263,16 +310,28 @@ export async function loadCareerBoard(opts: LoadOptions = {}): Promise<CareerBoa
   }
 }
 
+/** True while `next build` is prerendering pages. */
+const isBuildPhase = (env: EnvLike) => env.NEXT_PHASE === "phase-production-build"
+
 /**
- * For the page. Throws on anything that is not "ok" or "unconfigured" so ISR
- * keeps the last good page and the Vercel log carries the reason.
+ * For the page. A missing sheet id is a normal "unconfigured" result. Any
+ * other failure THROWS at request time so ISR keeps the last good page and
+ * the Vercel log carries the reason — but during `next build` it returns
+ * "unavailable" instead: a private sheet or a Google hiccup at build time
+ * must not block deploying the rest of the site. The next regeneration
+ * (five minutes after the first visit) picks the sheet back up.
  */
 export async function getCareerBoard(opts: LoadOptions = {}): Promise<CareerBoardData> {
   const report = await loadCareerBoard(opts)
   if (report.status === "unconfigured") return { status: "unconfigured" }
   if (report.status !== "ok") {
     const { title, detail, fix } = report.error ?? { title: report.status, detail: "", fix: "" }
-    throw new Error(`[careers] ${report.status}: ${title} ${detail} ${fix}`.trim())
+    const message = `[careers] ${report.status}: ${title} ${detail} ${fix}`.trim()
+    if (isBuildPhase(opts.env ?? process.env)) {
+      console.error(`${message} — building the page without the board`)
+      return { status: "unavailable" }
+    }
+    throw new Error(message)
   }
   for (const warning of report.warnings) console.warn(`[careers] ${warning}`)
   return { status: "ok", jobs: report.jobs }
