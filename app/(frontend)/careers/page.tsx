@@ -83,7 +83,7 @@ function CtaBand() {
         <span className="eyebrow text-yellow-500">hiring?</span>
         <h2 className="title max-w-2xl text-white">
           Hiring Malaysian students?{" "}
-          <span className="font-accent font-normal text-yellow-500">Post a role</span>
+          <span className="text-yellow-500">Post a role.</span>
         </h2>
         <p className="max-w-xl text-gray-300">
           Listings are free for employers, alumni and student societies. Send us the details
