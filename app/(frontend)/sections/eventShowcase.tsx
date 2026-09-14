@@ -1,10 +1,12 @@
 import Button from "@/components/Button"
-import { CHAPTERS, getUpcomingEvents } from "@/utils/events"
+import { CHAPTERS, tryGetUpcomingEvents } from "@/utils/events"
 
 import EventShowcaseGrid from "./eventShowcaseGrid"
 
 export default async function EventShowcaseSection() {
-  const events = (await getUpcomingEvents()).slice(0, 3)
+  // An unreachable calendar reads as "nothing right now" here; the /events
+  // page is where the distinction is worth spelling out.
+  const events = ((await tryGetUpcomingEvents()) ?? []).slice(0, 3)
 
   return (
     <section>

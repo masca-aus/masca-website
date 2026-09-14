@@ -44,7 +44,7 @@ export default async function Home() {
       <AboutSection />
       <YearbookSection />
       <StatesSection />
-      {/* <EventShowcaseSection /> */}
+      <EventShowcaseSection />
       <MascaVoiceSection />
       <MascaCareSection />
       <SponsorsSection sponsors={sponsors} />

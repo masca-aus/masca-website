@@ -56,3 +56,17 @@ export async function getUpcomingEvents(): Promise<Event[]> {
   const data = await res.json()
   return data.events ?? []
 }
+
+/**
+ * Non-throwing variant for pages that should still render when Eventbrite
+ * is down or unconfigured. Returns `null` (not `[]`) so callers can tell
+ * "couldn't reach the calendar" apart from "nothing scheduled".
+ */
+export async function tryGetUpcomingEvents(): Promise<Event[] | null> {
+  try {
+    return await getUpcomingEvents()
+  } catch (err) {
+    console.error("[events] upcoming events unavailable:", err)
+    return null
+  }
+}

@@ -12,11 +12,11 @@ import Button from "./Button";
 
 const navLinks = [
   // { name: "Home", href: "/"},
-  { name: "Events", href: "/events"},
-  { name: "Welfare", href: "/welfare"},
-  { name: "Careers", href: "/careers"},
-  { name: "Unite", href: "/unite"},
   { name: "About", href: "/about"},
+  { name: "Events", href: "/events"},
+  // { name: "Welfare", href: "/welfare"},
+  { name: "Careers", href: "/careers"},
+  // { name: "Unite", href: "/unite"},
   { name: "Committee", href: "/committee"},
 ]
 

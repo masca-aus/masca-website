@@ -24,9 +24,9 @@ export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNod
             <MainContent />
         </div>
 
-        {/* <div className="hidden lg:flex flex-1 justify-center">
+        <div className="hidden lg:flex flex-1 justify-center">
             {upcomingEvent}
-        </div> */}
+        </div>
       </div>
     </section>
   );

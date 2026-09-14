@@ -28,6 +28,7 @@ const PILLARS: Pillar[] = [
     sub: "Professional Development",
     mission:
       "To develop Malaysian students with the necessary skills, knowledge, and character to become the leaders of tomorrow.",
+    href: "/careers",
     bg: "#010066",
     fg: "#FFFFFF",
   },
@@ -37,7 +38,7 @@ const PILLARS: Pillar[] = [
     sub: "Welfare and Advocacy",
     mission:
       "To represent, champion, and advocate for our Malaysian students’ welfare and interests.",
-    href: "/care",
+    href: "/welfare",
     bg: "#CC0001",
     fg: "#FFFFFF",
   },
@@ -47,6 +48,7 @@ const PILLARS: Pillar[] = [
     sub: "Community and Nation-Building",
     mission:
       "To facilitate the interaction and unification of Malaysian students across different backgrounds, faiths, and beliefs.",
+    href: "/unite",
     bg: "#FFCC00",
     fg: "#00004D",
   },
