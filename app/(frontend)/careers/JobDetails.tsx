@@ -260,6 +260,9 @@ export function descriptionBlocks(text: string): Block[] {
 function Description({ text }: { text: string }) {
   return (
     <div className="flex flex-col gap-3 text-body leading-relaxed text-black/80">
+      <h3 className="text-h3 font-semibold leading-tight text-blue-600">
+        Description
+      </h3>
       {descriptionBlocks(text).map((block, i) =>
         block.kind === "list" ? (
           <ul key={i} className="list-disc space-y-1 pl-5">
