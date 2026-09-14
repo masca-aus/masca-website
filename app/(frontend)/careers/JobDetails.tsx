@@ -96,26 +96,25 @@ export default function JobDetails({
       <WorkingRightsCallout value={job.international} />
 
       <dl className="grid grid-cols-[auto_1fr] items-start gap-x-3 gap-y-3 text-body-sm text-gray-700">
-        <MetaRow icon={<MapPin className="size-4" aria-hidden />} label="Location">
-          {job.location || job.workMode || job.country ? (
-            <span className="flex flex-col gap-1">
-              {(job.location || job.workMode) && (
-                <span className="flex flex-wrap items-center gap-2">
-                  {job.location && <span>{job.location}</span>}
-                  {job.workMode && <WorkModePill mode={job.workMode} />}
-                </span>
-              )}
-              {job.country && (
-                <span className="flex items-center gap-1.5 text-caption text-gray-700/80">
-                  <Earth className="size-3.5 shrink-0" aria-hidden />
-                  {job.country.label}
-                </span>
-              )}
-            </span>
-          ) : (
-            "Location not listed"
-          )}
-        </MetaRow>
+        {/* City, State with the work mode; a country-only role shows just the Country row. */}
+        {(job.location || job.workMode || !job.country) && (
+          <MetaRow icon={<MapPin className="size-4" aria-hidden />} label="Location">
+            {job.location || job.workMode ? (
+              <span className="flex flex-wrap items-center gap-2">
+                {job.location && <span>{job.location}</span>}
+                {job.workMode && <WorkModePill mode={job.workMode} />}
+              </span>
+            ) : (
+              "Location not listed"
+            )}
+          </MetaRow>
+        )}
+
+        {job.country && (
+          <MetaRow icon={<Earth className="size-4" aria-hidden />} label="Country">
+            {job.country.label}
+          </MetaRow>
+        )}
 
         <MetaRow icon={<CalendarClock className="size-4" aria-hidden />} label="Closing date">
           <span className={job.isClosingSoon ? "font-bold text-red-600" : undefined}>{closes}</span>

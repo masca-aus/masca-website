@@ -79,8 +79,8 @@ function JobCard({
             </p>
 
             {job.country && (
-              <p className="flex items-center gap-1.5 text-caption text-gray-700/80">
-                <Earth className="size-3.5 shrink-0" aria-hidden />
+              <p className="flex items-center gap-1.5 text-body-sm text-gray-700/80">
+                <Earth className="size-4 shrink-0" aria-hidden />
                 {job.country.label}
               </p>
             )}
