@@ -103,7 +103,8 @@ describe("CareerBoard (static render)", () => {
     expect(html).toContain('aria-haspopup="dialog"');
     expect(html).toContain('aria-expanded="false"');
     expect(html).not.toContain('role="dialog"');
-    for (const legend of ["Where", "Study level", "Industry"]) expect(html).not.toContain(legend);
+    expect(html).not.toContain("<legend");
+    expect(html).not.toContain("Study level");
   });
 
   it("shows ten roles a page with a pager, and no pager when one page is enough", () => {
@@ -115,6 +116,23 @@ describe("CareerBoard (static render)", () => {
     expect(paged).toContain("of 2");
     expect(paged).toContain("of 12");
     expect(paged).toContain('aria-label="Previous page"');
+  });
+
+  it("shows the student-facing badges on cards", () => {
+    expect(html).toContain("Intl OK");
+    expect(html).toContain("Closes in 3 days");
+    expect(html).toContain("Featured");
+    expect(html).toContain("Penultimate");
+    expect(html).toContain("Rolling");
+    expect(html).toContain("Carlton");
+  });
+
+  it("never emits sheet text as HTML and only links to sanitised targets", () => {
+    expect(html).not.toContain("<script>alert");
+    expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(html).not.toContain("javascript:");
+    expect(html).toContain('href="https://acme.example/apply"');
+    expect(html).toContain('rel="noopener noreferrer"');
   });
 });
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, type ReactNode, type RefObject } from "react"
+import { createContext, useCallback, useContext, useEffect, useRef, type ReactNode, type RefObject } from "react"
 import { gsap } from "gsap"
 import { useGSAP } from "@gsap/react"
 import { X } from "lucide-react"
@@ -14,6 +14,13 @@ import { X } from "lucide-react"
 
 const FOCUSABLE =
   'a[href],button:not([disabled]),input,select,textarea,[tabindex]:not([tabindex="-1"])'
+
+const RequestCloseContext = createContext<() => void>(() => {})
+
+/** The animated close, for a Done button rendered inside the sheet. */
+export function useRequestClose(): () => void {
+  return useContext(RequestCloseContext)
+}
 
 export default function ModalShell({
   labelledBy,
@@ -29,8 +36,7 @@ export default function ModalShell({
   /** The control that opened the sheet, to hand focus back on close. */
   returnFocusRef: RefObject<HTMLElement | null>
   size?: "md" | "lg"
-  /** A function child receives `requestClose`, for a Done button inside the sheet. */
-  children: ReactNode | ((requestClose: () => void) => ReactNode)
+  children: ReactNode
 }) {
   const overlayRef = useRef<HTMLDivElement>(null)
   const boxRef = useRef<HTMLDivElement>(null)
@@ -117,7 +123,7 @@ export default function ModalShell({
           Close <X className="size-3.5" aria-hidden />
         </button>
 
-        {typeof children === "function" ? children(requestClose) : children}
+        <RequestCloseContext value={requestClose}>{children}</RequestCloseContext>
       </div>
     </div>
   )
