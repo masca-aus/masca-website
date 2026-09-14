@@ -139,9 +139,9 @@ describe("CareerBoard (static render)", () => {
     expect(html).toContain("Rolling");
     expect(html).toContain("Carlton");
     expect(html).toContain("ACT · Remote");
-    // The country sits under the City, State line with an earth icon.
+    // The country (earth icon) is a row in the details panel only, never on a card.
     expect(html).toContain("Australia");
-    expect(html).toContain("lucide-earth");
+    expect(html.match(/lucide-earth/g)).toHaveLength(1);
   });
 
   it("never emits sheet text as HTML and only links to sanitised targets", () => {

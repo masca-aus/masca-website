@@ -1,7 +1,6 @@
 'use client'
 
 import { memo, type KeyboardEvent, type MouseEvent } from "react"
-import { Earth } from "lucide-react"
 
 import type { Job } from "@/utils/careers"
 import CompanyMark from "./CompanyMark"
@@ -77,13 +76,6 @@ function JobCard({
               {job.company}
               {location && <span className="text-gray-700/80"> · {location}</span>}
             </p>
-
-            {job.country && (
-              <p className="flex items-center gap-1.5 text-body-sm text-gray-700/80">
-                <Earth className="size-4 shrink-0" aria-hidden />
-                {job.country.label}
-              </p>
-            )}
 
             <div className="flex flex-wrap gap-1.5">
               {job.featured && <FeaturedBadge />}
