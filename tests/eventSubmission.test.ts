@@ -40,8 +40,8 @@ describe("event submission validation", () => {
         title: "Malaysian Students Welcome Night",
         organisation: "MASCA Victoria",
         description: "An evening for Malaysian students to meet new friends and mentors.",
-        startDate: new Date(2026, 9, 1, 18).toISOString(),
-        endDate: new Date(2026, 9, 1, 21).toISOString(),
+        startDate: "2026-10-01T08:00:00.000Z",
+        endDate: "2026-10-01T11:00:00.000Z",
         venue: "Student Pavilion, Carlton",
         state: "VIC",
         ticketURL: "https://example.org/tickets",
@@ -67,7 +67,7 @@ describe("event submission validation", () => {
         title: "Malaysian Students Welcome Night",
         organisation: "MASCA Victoria",
         description: "An evening for Malaysian students to meet new friends and mentors.",
-        startDate: new Date(2026, 9, 1, 18).toISOString(),
+        startDate: "2026-10-01T08:00:00.000Z",
         venue: "Student Pavilion, Carlton",
         state: "VIC",
         contactName: "Aisha Rahman",
@@ -113,6 +113,53 @@ describe("event submission validation", () => {
     expect(result).toEqual({
       ok: false,
       fieldErrors: { endDate: ["End date must be after the start date."] },
+    });
+  });
+
+  it("converts event-local times using the selected Australian state timezone", () => {
+    const brisbane = parseEventSubmission(
+      validFormData({ state: "QLD", startDate: "2026-12-01T18:00", endDate: "" }),
+    );
+    const sydney = parseEventSubmission(
+      validFormData({ state: "NSW", startDate: "2026-12-01T18:00", endDate: "" }),
+    );
+    const adelaide = parseEventSubmission(
+      validFormData({ state: "SA", startDate: "2026-10-01T18:00", endDate: "" }),
+    );
+
+    expect(brisbane).toMatchObject({
+      ok: true,
+      data: { startDate: "2026-12-01T08:00:00.000Z" },
+    });
+    expect(sydney).toMatchObject({
+      ok: true,
+      data: { startDate: "2026-12-01T07:00:00.000Z" },
+    });
+    expect(adelaide).toMatchObject({
+      ok: true,
+      data: { startDate: "2026-10-01T08:30:00.000Z" },
+    });
+  });
+
+  it("rejects nonexistent Sydney daylight-saving wall times", () => {
+    const result = parseEventSubmission(
+      validFormData({ state: "NSW", startDate: "2026-10-04T02:30", endDate: "" }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      fieldErrors: { startDate: ["Enter a valid start date."] },
+    });
+  });
+
+  it("chooses the earlier instant for ambiguous Sydney daylight-saving wall times", () => {
+    const result = parseEventSubmission(
+      validFormData({ state: "NSW", startDate: "2026-04-05T02:30", endDate: "" }),
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      data: { startDate: "2026-04-04T15:30:00.000Z" },
     });
   });
 

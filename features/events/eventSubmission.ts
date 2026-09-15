@@ -33,6 +33,16 @@ export type EventSubmissionResult =
 const MAX_POSTER_SIZE = 5 * 1024 * 1024;
 const POSTER_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 const STATE_CODES = EVENT_STATES.map((state) => state.value);
+export const EVENT_TIME_ZONES: Record<EventState, string> = {
+  VIC: "Australia/Sydney",
+  NSW: "Australia/Sydney",
+  TAS: "Australia/Sydney",
+  ACT: "Australia/Sydney",
+  QLD: "Australia/Brisbane",
+  WA: "Australia/Perth",
+  SA: "Australia/Adelaide",
+  NT: "Australia/Darwin",
+};
 
 const submissionSchema = z.object({
   title: z
@@ -88,7 +98,13 @@ const submissionSchema = z.object({
 });
 
 type LocalDateTime = {
-  date: Date;
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+  millisecond: number;
 };
 
 function getString(formData: FormData, field: string) {
@@ -103,28 +119,100 @@ function parseLocalDateTime(value: string): LocalDateTime | undefined {
   if (!match) return undefined;
 
   const [, year, month, day, hour, minute, second = "0", milliseconds = "0"] = match;
+  const localDateTime = {
+    year: Number(year),
+    month: Number(month),
+    day: Number(day),
+    hour: Number(hour),
+    minute: Number(minute),
+    second: Number(second),
+    millisecond: Number(milliseconds.padEnd(3, "0")),
+  };
   const date = new Date(
-    Number(year),
-    Number(month) - 1,
-    Number(day),
-    Number(hour),
-    Number(minute),
-    Number(second),
-    Number(milliseconds.padEnd(3, "0")),
+    Date.UTC(
+      localDateTime.year,
+      localDateTime.month - 1,
+      localDateTime.day,
+      localDateTime.hour,
+      localDateTime.minute,
+      localDateTime.second,
+      localDateTime.millisecond,
+    ),
   );
 
   if (
-    date.getFullYear() !== Number(year) ||
-    date.getMonth() !== Number(month) - 1 ||
-    date.getDate() !== Number(day) ||
-    date.getHours() !== Number(hour) ||
-    date.getMinutes() !== Number(minute) ||
-    date.getSeconds() !== Number(second)
+    date.getUTCFullYear() !== localDateTime.year ||
+    date.getUTCMonth() !== localDateTime.month - 1 ||
+    date.getUTCDate() !== localDateTime.day ||
+    date.getUTCHours() !== localDateTime.hour ||
+    date.getUTCMinutes() !== localDateTime.minute ||
+    date.getUTCSeconds() !== localDateTime.second ||
+    date.getUTCMilliseconds() !== localDateTime.millisecond
   ) {
     return undefined;
   }
 
-  return { date };
+  return localDateTime;
+}
+
+function toUtcTimestamp(dateTime: LocalDateTime) {
+  return Date.UTC(
+    dateTime.year,
+    dateTime.month - 1,
+    dateTime.day,
+    dateTime.hour,
+    dateTime.minute,
+    dateTime.second,
+    dateTime.millisecond,
+  );
+}
+
+function getZonedDateTime(timestamp: number, timeZone: string): LocalDateTime {
+  const parts = new Intl.DateTimeFormat("en-AU", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date(timestamp));
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, Number(part.value)]),
+  ) as Record<"year" | "month" | "day" | "hour" | "minute" | "second", number>;
+
+  return { ...values, millisecond: new Date(timestamp).getUTCMilliseconds() };
+}
+
+function matchesLocalDateTime(left: LocalDateTime, right: LocalDateTime) {
+  return (
+    left.year === right.year &&
+    left.month === right.month &&
+    left.day === right.day &&
+    left.hour === right.hour &&
+    left.minute === right.minute &&
+    left.second === right.second &&
+    left.millisecond === right.millisecond
+  );
+}
+
+function convertLocalDateTimeToUtc(dateTime: LocalDateTime, timeZone: string) {
+  const localTimestamp = toUtcTimestamp(dateTime);
+  const offsets = new Set(
+    [-48, -24, 0, 24, 48].map((hours) => {
+      const timestamp = localTimestamp + hours * 60 * 60 * 1000;
+      return toUtcTimestamp(getZonedDateTime(timestamp, timeZone)) - timestamp;
+    }),
+  );
+  const matchingTimestamps = [...offsets]
+    .map((offset) => localTimestamp - offset)
+    .filter((timestamp) => matchesLocalDateTime(getZonedDateTime(timestamp, timeZone), dateTime));
+
+  if (matchingTimestamps.length === 0) return undefined;
+  return new Date(Math.min(...matchingTimestamps));
 }
 
 function addError(fieldErrors: Record<string, string[]>, field: string, message: string) {
@@ -167,7 +255,7 @@ export function parseEventSubmission(formData: FormData): EventSubmissionResult 
 
   const endDate = values.endDate ? parseLocalDateTime(values.endDate) : undefined;
   if (values.endDate && !endDate) addError(fieldErrors, "endDate", "Enter a valid end date.");
-  if (startDate && endDate && endDate.date < startDate.date) {
+  if (startDate && endDate && toUtcTimestamp(endDate) < toUtcTimestamp(startDate)) {
     addError(fieldErrors, "endDate", "End date must be after the start date.");
   }
 
@@ -187,18 +275,29 @@ export function parseEventSubmission(formData: FormData): EventSubmissionResult 
     return { ok: false, fieldErrors };
   }
 
+  const timeZone = EVENT_TIME_ZONES[schemaResult.data.state as EventState];
+  const startDateUtc = convertLocalDateTimeToUtc(startDate, timeZone);
+  if (!startDateUtc) addError(fieldErrors, "startDate", "Enter a valid start date.");
+
+  const endDateUtc = endDate ? convertLocalDateTimeToUtc(endDate, timeZone) : undefined;
+  if (endDate && !endDateUtc) addError(fieldErrors, "endDate", "Enter a valid end date.");
+
+  if (Object.keys(fieldErrors).length > 0 || !startDateUtc) {
+    return { ok: false, fieldErrors };
+  }
+
   const data: EventSubmissionInput = {
     title: schemaResult.data.title,
     organisation: schemaResult.data.organisation,
     description: schemaResult.data.description,
-    startDate: startDate.date.toISOString(),
+    startDate: startDateUtc.toISOString(),
     venue: schemaResult.data.venue,
     state: schemaResult.data.state as EventState,
     contactName: schemaResult.data.contactName,
     contactEmail: schemaResult.data.contactEmail,
   };
 
-  if (endDate) data.endDate = endDate.date.toISOString();
+  if (endDateUtc) data.endDate = endDateUtc.toISOString();
   if (schemaResult.data.ticketURL) data.ticketURL = schemaResult.data.ticketURL;
 
   return poster && !(poster.name === "" && poster.size === 0)
