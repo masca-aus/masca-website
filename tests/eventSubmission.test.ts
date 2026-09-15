@@ -53,7 +53,13 @@ describe("event submission validation", () => {
   });
 
   it("omits empty optional fields", () => {
-    const result = parseEventSubmission(validFormData({ endDate: "", ticketURL: "" }));
+    const result = parseEventSubmission(
+      validFormData({
+        endDate: "",
+        ticketURL: "",
+        poster: new File([], "", { type: "" }),
+      }),
+    );
 
     expect(result).toEqual({
       ok: true,
@@ -78,6 +84,15 @@ describe("event submission validation", () => {
       fieldErrors: {
         accuracyConfirmed: ["Please confirm the event details are accurate."],
       },
+    });
+  });
+
+  it("accepts true as an accuracy confirmation", () => {
+    const result = parseEventSubmission(validFormData({ accuracyConfirmed: "true" }));
+
+    expect(result).toMatchObject({
+      ok: true,
+      data: { title: "Malaysian Students Welcome Night" },
     });
   });
 
