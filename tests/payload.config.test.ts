@@ -44,13 +44,20 @@ describe("payload config", () => {
     expect(config.admin.components.views.dashboard.Component).toBeTruthy();
   });
 
-  it("defines exactly four collections: auth-enabled users, media, committee, sponsors", async () => {
+  it("defines exactly five collections: auth-enabled users, media, committee, sponsors, events", async () => {
     const config = await configPromise;
     // Sanitization adds Payload-internal collections (payload-preferences,
     // payload-migrations, ...); beyond those there must only be `users`,
-    // `media` (issue #4), `committee` (issue #5) and `sponsors` (issue #6).
+    // `media` (issue #4), `committee` (issue #5), `sponsors` (issue #6),
+    // and the moderated `events` submission collection.
     const ours = config.collections.filter((c) => !c.slug.startsWith("payload-"));
-    expect(ours.map((c) => c.slug).sort()).toEqual(["committee", "media", "sponsors", "users"]);
+    expect(ours.map((c) => c.slug).sort()).toEqual([
+      "committee",
+      "events",
+      "media",
+      "sponsors",
+      "users",
+    ]);
     const users = ours.find((c) => c.slug === "users");
     expect(users?.auth).toBeTruthy();
     expect(users?.auth.disableLocalStrategy).toBeFalsy();

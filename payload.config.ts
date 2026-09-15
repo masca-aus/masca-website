@@ -8,6 +8,7 @@ import { resendAdapter } from "@payloadcms/email-resend";
 import { s3Storage } from "@payloadcms/storage-s3";
 import { buildConfig } from "payload";
 
+import { Events } from "./collections/Events";
 import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
 
 export function createDatabasePoolConfig(
@@ -97,12 +98,14 @@ const revalidateSponsorPages = () => {
 };
 
 // Ruthlessly minimal Payload setup (issue #3): one shared admin account in a
-// single auth collection. No roles, drafts/versions, or extra collections.
+// single auth collection, with no roles. Events alone use drafts/versions for
+// the moderated public-submission workflow.
 // Supabase is a dumb Postgres host reached through the transaction-mode
 // pooler — no Supabase Auth/RLS/JS client anywhere. Media uploads (issue #4)
 // go to Supabase Storage via its S3-compatible API. The committee directory
 // (issue #5) and the sponsors marquee (issue #6) live in the `committee` and
 // `sponsors` collections and are read by the public site through the Local API.
+// Moderated event submissions live in the isolated `events` collection.
 export default buildConfig({
   admin: {
     user: "users",
@@ -316,6 +319,7 @@ export default buildConfig({
         afterDelete: [revalidateSponsorPages],
       },
     },
+    Events,
   ],
   db: postgresAdapter({
     // Transaction-mode pooler connection string — required on Vercel
