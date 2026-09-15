@@ -171,6 +171,37 @@ describe("preview submission rate limiter", () => {
     expect(consumeSubmissionAttempt("one", 3_600_100)).toBe(true);
   });
 
+  it("rejects unseen keys at 1,000 active keys while preserving existing attempt limits", () => {
+    for (let key = 0; key < 1000; key++) {
+      expect(consumeSubmissionAttempt(`key-${key}`, 1000)).toBe(true);
+    }
+    expect(consumeSubmissionAttempt("overflow", 1000)).toBe(false);
+    expect(consumeSubmissionAttempt("another-overflow", 1000)).toBe(false);
+
+    for (let attempt = 1; attempt < 5; attempt++) {
+      expect(consumeSubmissionAttempt("key-0", 1000)).toBe(true);
+    }
+    expect(consumeSubmissionAttempt("key-0", 1000)).toBe(false);
+    expect(consumeSubmissionAttempt("key-999", 1000)).toBe(true);
+    expect(consumeSubmissionAttempt("overflow", 1000)).toBe(false);
+  });
+
+  it("recovers capacity after expiry without charging attempts rejected at capacity", () => {
+    expect(consumeSubmissionAttempt("expires-first", 0)).toBe(true);
+    for (let key = 1; key < 1000; key++) {
+      expect(consumeSubmissionAttempt(`key-${key}`, 100)).toBe(true);
+    }
+    expect(consumeSubmissionAttempt("overflow", 3_599_999)).toBe(false);
+
+    // Exactly one bucket expires now, admitting one previously rejected key.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      expect(consumeSubmissionAttempt("overflow", 3_600_000)).toBe(true);
+    }
+    expect(consumeSubmissionAttempt("overflow", 3_600_000)).toBe(false);
+    expect(consumeSubmissionAttempt("still-overflow", 3_600_000)).toBe(false);
+    expect(consumeSubmissionAttempt("still-overflow", 3_600_100)).toBe(true);
+  });
+
   it("defaults to the current time while remaining deterministic under a controlled clock", () => {
     const now = vi.spyOn(Date, "now").mockReturnValue(1000);
     try {
