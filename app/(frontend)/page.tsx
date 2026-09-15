@@ -16,6 +16,9 @@ import FollowUsSection from "./sections/followUs";
 import JoinUsSection from "./sections/joinUs";
 import { getSponsors } from "@/utils/sponsors";
 
+// Refresh time-based event expiry between editor-triggered revalidations.
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: { absolute: SITE_NAME_FULL },
   description: SITE_DESCRIPTION,

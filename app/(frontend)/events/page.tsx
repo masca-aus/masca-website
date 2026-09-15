@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 
 import Button from "@/components/Button";
-import { CHAPTERS, tryGetUpcomingEvents } from "@/utils/events";
+import { CMS_EVENT_CHAPTERS, getApprovedUpcomingEvents } from "@/features/events/publicEvents";
 import { pageMetadata } from "@/utils/seo";
 import EventSection from "./EventSection";
+
+// Refresh time-based expiry even when no editor changes the calendar.
+export const revalidate = 60;
 
 export const metadata: Metadata = pageMetadata({
   title: "Events",
@@ -13,9 +16,9 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function EventPage() {
-  // `null` means Eventbrite couldn't be reached; the page still renders with
+  // `null` means the CMS couldn't be reached; the page still renders with
   // an "unavailable" band instead of taking the route down.
-  const events = await tryGetUpcomingEvents();
+  const events = await getApprovedUpcomingEvents().catch(() => null);
 
   return (
     <main id="main">
@@ -32,7 +35,7 @@ export default async function EventPage() {
           body="Chapters post their events through the semester. Check back soon — or follow us on Instagram to hear about the next one first."
         />
       ) : (
-        <EventSection events={events} chapters={CHAPTERS} />
+        <EventSection events={events} chapters={CMS_EVENT_CHAPTERS} />
       )}
 
       <CtaBand />
@@ -105,7 +108,7 @@ function CtaBand() {
           help you get the word out to Malaysians across Australia.
         </p>
         <div className="flex flex-wrap justify-center gap-4 mt-2">
-          <Button href="/contact" variant="accent">
+          <Button href="/submit/event" variant="accent">
             Tell us about it <span aria-hidden>&rarr;</span>
           </Button>
           <Button href="/committee" variant="outlineLight">
