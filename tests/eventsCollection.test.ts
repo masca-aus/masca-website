@@ -45,6 +45,15 @@ describe("events collection", () => {
     expect(Events.admin?.hideAPIURL).toBe(true);
   });
 
+  it("uses Change history in Payload's built-in history heading and breadcrumb", async () => {
+    const { default: configPromise } = await import("@payload-config");
+    const config = await configPromise;
+
+    expect(config.i18n?.translations?.en?.version?.versions).toBe(
+      "Change history",
+    );
+  });
+
   it("is registered with the moderation columns editors need", async () => {
     const events = await getEventsCollection();
 

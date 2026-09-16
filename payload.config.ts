@@ -107,6 +107,15 @@ const revalidateSponsorPages = () => {
 // `sponsors` collections and are read by the public site through the Local API.
 // Moderated event submissions live in the isolated `events` collection.
 export default buildConfig({
+  i18n: {
+    translations: {
+      en: {
+        version: {
+          versions: "Change history",
+        },
+      },
+    },
+  },
   admin: {
     user: "users",
     meta: {
