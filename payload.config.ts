@@ -125,6 +125,7 @@ export default buildConfig({
       ],
     },
     components: {
+      providers: ["/components/admin/AdminNavigationEnhancements#AdminNavigationEnhancements"],
       graphics: {
         Logo: "/components/admin/MascaBrand#MascaLogo",
         Icon: "/components/admin/MascaBrand#MascaIcon",
