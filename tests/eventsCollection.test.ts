@@ -34,6 +34,17 @@ describe("events collection", () => {
     expect(Events.lockDocuments).toBe(false);
   });
 
+  it("calls event versions Change history while keeping the history available", () => {
+    expect(Events.versions).toMatchObject({ drafts: true, maxPerDoc: 25 });
+    expect(Events.admin?.components?.views?.edit?.versions?.tab?.label).toBe(
+      "Change history",
+    );
+  });
+
+  it("hides the developer API view from event editors", () => {
+    expect(Events.admin?.hideAPIURL).toBe(true);
+  });
+
   it("is registered with the moderation columns editors need", async () => {
     const events = await getEventsCollection();
 

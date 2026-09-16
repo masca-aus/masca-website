@@ -38,6 +38,16 @@ export const Events: CollectionConfig = {
   slug: "events",
   admin: {
     useAsTitle: "title",
+    hideAPIURL: true,
+    components: {
+      views: {
+        edit: {
+          versions: {
+            tab: { label: "Change history" },
+          },
+        },
+      },
+    },
     defaultColumns: [
       "title",
       "organisation",
