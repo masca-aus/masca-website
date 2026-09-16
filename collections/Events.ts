@@ -1,8 +1,8 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from "next/cache.js";
 
 import type { Access, CollectionConfig, FieldAccess, Where } from "payload";
 
-import { EVENT_STATES } from "../features/events/eventSubmission";
+import { EVENT_STATES } from "../features/events/eventSubmission.ts";
 
 export const isPublicEventRead = ({
   req,

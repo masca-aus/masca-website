@@ -8,7 +8,7 @@ import { resendAdapter } from "@payloadcms/email-resend";
 import { s3Storage } from "@payloadcms/storage-s3";
 import { buildConfig } from "payload";
 
-import { Events } from "./collections/Events";
+import { Events } from "./collections/Events.ts";
 import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
 
 export function createDatabasePoolConfig(

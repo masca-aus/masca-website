@@ -66,3 +66,43 @@ Vercel. Leave them blank and the page shows a friendly "board's still being
 pinned up" state. The committee guide, column reference and template live in
 [docs/careers-board.md](./docs/careers-board.md); `/careers/health` reports
 what the site is (and isn't) reading.
+
+## Event submission preview
+
+The preview Event workflow uses Payload as its single source of truth. The
+public entry page is `/submit`; organisers submit an event at `/submit/event`.
+Submissions are saved as **pending drafts** and do not appear publicly.
+
+An authorised CMS editor reviews submissions at `/admin/collections/events`:
+
+1. Open the event and check its description, local date and time, venue, state,
+   poster, and ticket link. Contact details and internal notes are for editors
+   only.
+2. To publish, set **Review status** to **Approved** and publish the document.
+   Both actions are required. Approved events then appear on `/events` and the
+   homepage while they are upcoming.
+3. To withhold a pending event, leave it unpublished and set **Review status**
+   to **Rejected**. To remove an event that was already published, use Payload's
+   **Unpublish** action. A newly saved draft does not necessarily replace the
+   last published version, so do not rely on a draft-only status edit to take
+   an existing listing down.
+
+The Event migration is `20260916_010000_add_events_submission_workflow`. It
+adds only the `events` and `_events_v` tables and their Events-owned enums,
+indexes and foreign keys. Both tables enable row-level security and revoke
+direct access from the `anon` and `authenticated` database roles. Do not apply
+the migration or deploy this preview until the database owner approves the
+reviewed SQL. Once approved, use `npm run ci` for a migration-enabled build;
+it runs `PAYLOAD_MIGRATING=true payload migrate` before `next build`. Confirm
+the Vercel preview's build setting actually uses this command. Payload records
+applied migrations, but only point the command at the intended database
+environment. Confirm existing collections still respond before testing the
+public flow. Rolling the
+migration back removes all submitted Event data, so take a database backup
+first and prefer unpublishing the preview if a rollback is needed.
+
+This is a preview workflow, not a production-ready public intake. Before
+launching publicly, add a durable distributed rate limit, working Turnstile
+verification, notification delivery to reviewers, and stakeholder approval.
+The current submission limiter is process-local and the form does not send
+review notifications.
