@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isAdminNavigationTarget } from "@/components/admin/adminNavigation";
+import { adminNavigationPath, isAdminNavigationTarget } from "@/components/admin/adminNavigation";
 
 describe("CMS route preloading", () => {
   it("only warms internal CMS routes", () => {
@@ -9,5 +9,11 @@ describe("CMS route preloading", () => {
     expect(isAdminNavigationTarget("/committee")).toBe(false);
     expect(isAdminNavigationTarget("https://www.masca.org.au/admin")).toBe(false);
     expect(isAdminNavigationTarget("/admin#settings")).toBe(false);
+  });
+
+  it("uses the destination path, not the filter query, to finish route progress", () => {
+    expect(adminNavigationPath("/admin/collections/events?where[reviewStatus][equals]=pending&limit=10")).toBe(
+      "/admin/collections/events",
+    );
   });
 });

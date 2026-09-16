@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
-import { isAdminNavigationTarget } from "./adminNavigation";
+import { adminNavigationPath, isAdminNavigationTarget } from "./adminNavigation";
 
 type Props = {
   children?: ReactNode;
@@ -36,7 +36,7 @@ export function AdminNavigationEnhancements({ children }: Props) {
       if (
         !href ||
         !isAdminNavigationTarget(href) ||
-        href === pathname ||
+        adminNavigationPath(href) === pathname ||
         event.metaKey ||
         event.ctrlKey ||
         event.shiftKey ||
@@ -45,7 +45,7 @@ export function AdminNavigationEnhancements({ children }: Props) {
         return;
       }
 
-      setNavigationTarget(href);
+      setNavigationTarget(adminNavigationPath(href));
     };
 
     document.addEventListener("pointerover", prefetchRoute, true);
