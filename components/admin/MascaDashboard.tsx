@@ -1,4 +1,7 @@
 import Link from "next/link";
+import type { PayloadRequest } from "payload";
+
+import { loadEventDashboard, type EventDashboardOverview } from "@/features/events/eventDashboard";
 
 const contentAreas = [
   {
@@ -30,7 +33,13 @@ const contentAreas = [
   },
 ] as const;
 
-export function MascaDashboard() {
+export async function MascaDashboard({ initPageResult }: { initPageResult: { req: PayloadRequest } }) {
+  const { req } = initPageResult;
+  const overview = await loadEventDashboard(req.payload, req);
+  return <DashboardContent overview={overview} />;
+}
+
+export function DashboardContent({ overview }: { overview: EventDashboardOverview }) {
   return (
     <main className="masca-dashboard" style={{ marginInline: "auto" }}>
       <section className="masca-dashboard__hero">
@@ -46,6 +55,52 @@ export function MascaDashboard() {
         <Link className="masca-dashboard__site-link" href="/" target="_blank">
           View website <ArrowIcon />
         </Link>
+      </section>
+
+      <section className="masca-dashboard__section" aria-labelledby="events-overview">
+        <div className="masca-dashboard__section-heading">
+          <div>
+            <span className="masca-dashboard__eyebrow">Events</span>
+            <h2 id="events-overview">Review and publishing</h2>
+          </div>
+          <Link href="/admin/collections/events">Manage all events <ArrowIcon /></Link>
+        </div>
+
+        <div className="masca-dashboard__event-stats">
+          <Link href="/admin/collections/events?where[reviewStatus][equals]=pending" className="masca-dashboard__event-stat">
+            <span>Pending review</span><strong>{overview.pending}</strong>
+            <small>Needs a decision</small>
+          </Link>
+          <Link href="/admin/collections/events?where[reviewStatus][equals]=approved&where[_status][equals]=published" className="masca-dashboard__event-stat">
+            <span>Published</span><strong>{overview.published}</strong>
+            <small>Visible on the website</small>
+          </Link>
+          <Link href="/admin/collections/events?where[reviewStatus][equals]=approved&where[_status][equals]=draft" className="masca-dashboard__event-stat">
+            <span>Other drafts</span><strong>{overview.drafts}</strong>
+            <small>Approved, not yet published</small>
+          </Link>
+        </div>
+
+        <div className="masca-dashboard__queue">
+          <div className="masca-dashboard__queue-heading">
+            <h3>Newest submissions</h3>
+            <Link href="/admin/collections/events?where[reviewStatus][equals]=pending">View pending queue <ArrowIcon /></Link>
+          </div>
+          {overview.pendingEvents.length === 0 ? (
+            <p className="masca-dashboard__queue-empty">No events awaiting review.</p>
+          ) : (
+            <ul>
+              {overview.pendingEvents.map((event) => (
+                <li key={event.id}>
+                  <Link href={`/admin/collections/events/${event.id}`}>
+                    <span><strong>{event.title}</strong><small>{event.organisation}</small></span>
+                    <ArrowIcon />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </section>
 
       <section className="masca-dashboard__section" aria-labelledby="manage-content">
