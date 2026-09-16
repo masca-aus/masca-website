@@ -1,11 +1,12 @@
 import "server-only";
 
 import config from "@payload-config";
-import { getPayload, type Where } from "payload";
+import { getPayload } from "payload";
 
+import type { Event as PayloadEvent } from "@/payload-types";
 import type { Chapter, Event } from "@/utils/events";
 
-import { EVENT_STATES, EVENT_TIME_ZONES, type EventSubmissionInput } from "./eventSubmission";
+import { EVENT_STATES, EVENT_TIME_ZONES } from "./eventSubmission";
 
 export const CMS_EVENT_CHAPTERS: Chapter[] = EVENT_STATES.map(({ value }) => ({
   id: value,
@@ -24,31 +25,7 @@ const publicEventSelect = {
   poster: true,
 } as const;
 
-type PublicEventDoc = Pick<
-  EventSubmissionInput,
-  "title" | "organisation" | "description" | "startDate" | "venue" | "state"
-> & {
-  id: number | string;
-  endDate?: string | null;
-  ticketURL?: string | null;
-  poster?: number | string | { url?: string | null } | null;
-};
-
-interface PublicEventPayload {
-  find(options: {
-    collection: "events";
-    overrideAccess: false;
-    draft: false;
-    sort: "startDate";
-    pagination: false;
-    depth: 1;
-    where: Where;
-    select: typeof publicEventSelect;
-    populate: { media: { url: true } };
-  }): Promise<{ docs: PublicEventDoc[] }>;
-}
-
-function localDateTime(utc: string, state: EventSubmissionInput["state"]): string {
+function localDateTime(utc: string, state: PayloadEvent["state"]): string {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: EVENT_TIME_ZONES[state],
     year: "numeric",
@@ -64,8 +41,7 @@ function localDateTime(utc: string, state: EventSubmissionInput["state"]): strin
 
 /** Reads the public calendar and maps only the fields the existing cards render. */
 export async function getApprovedUpcomingEvents(now = new Date()): Promise<Event[]> {
-  // Temporary, narrow Local API boundary until Task 6 regenerates the Events types.
-  const payload = (await getPayload({ config })) as unknown as PublicEventPayload;
+  const payload = await getPayload({ config });
   const instant = now.toISOString();
   const { docs } = await payload.find({
     collection: "events",

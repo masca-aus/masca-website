@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     committee: Committee;
     sponsors: Sponsor;
+    events: Event;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,6 +83,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     committee: CommitteeSelect<false> | CommitteeSelect<true>;
     sponsors: SponsorsSelect<false> | SponsorsSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -217,6 +219,30 @@ export interface Sponsor {
   date: string;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  title: string;
+  organisation: string;
+  description: string;
+  startDate: string;
+  endDate?: string | null;
+  venue: string;
+  state: 'VIC' | 'NSW' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT';
+  ticketURL?: string | null;
+  poster?: (number | null) | Media;
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  contactName: string;
+  contactEmail: string;
+  internalNotes?: string | null;
+  reviewedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -366,6 +392,29 @@ export interface SponsorsSelect<T extends boolean = true> {
   date?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  organisation?: T;
+  description?: T;
+  startDate?: T;
+  endDate?: T;
+  venue?: T;
+  state?: T;
+  ticketURL?: T;
+  poster?: T;
+  reviewStatus?: T;
+  contactName?: T;
+  contactEmail?: T;
+  internalNotes?: T;
+  reviewedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

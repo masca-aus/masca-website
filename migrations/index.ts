@@ -1,5 +1,6 @@
 import * as migration_20260802_071222_restructure_committee from './20260802_071222_restructure_committee';
 import * as migration_20260907_142655_add_committee_departments from './20260907_142655_add_committee_departments';
+import * as migration_20260916_010000_add_events_submission_workflow from './20260916_010000_add_events_submission_workflow';
 
 export const migrations = [
   {
@@ -10,6 +11,11 @@ export const migrations = [
   {
     up: migration_20260907_142655_add_committee_departments.up,
     down: migration_20260907_142655_add_committee_departments.down,
-    name: '20260907_142655_add_committee_departments'
+    name: '20260907_142655_add_committee_departments',
+  },
+  {
+    up: migration_20260916_010000_add_events_submission_workflow.up,
+    down: migration_20260916_010000_add_events_submission_workflow.down,
+    name: '20260916_010000_add_events_submission_workflow'
   },
 ];
