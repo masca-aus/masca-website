@@ -16,9 +16,9 @@ describe("collection editor UX", () => {
       events:
         "Add events for MASCA students and review submissions before they appear on the website. An event appears publicly only after it is approved and published.",
       committee:
-        "Keep member roles, portraits and department details accurate on the public committee page.",
-      media: "Upload and organise images that can be reused across the MASCA website.",
-      sponsors: "Keep partner names and logos current in the homepage sponsor marquee.",
+        "Update committee profiles in one page. Changes appear on the website when you Save.",
+      media: "Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.",
+      sponsors: "Update sponsor details and logos in one page. Changes appear on the homepage when you Save.",
       users: "Manage the people who can sign in and update MASCA website content.",
     };
 
@@ -42,10 +42,12 @@ describe("collection editor UX", () => {
     );
 
     expect(sectionNames).toEqual([
+      "eventEditorHeader",
       "publicDetailsSection",
       "imagesAndLinksSection",
       "internalDetailsSection",
       "reviewAndPublishSection",
+      "eventEditorFooter",
     ]);
     expect(fieldNames.indexOf("reviewAndPublishSection")).toBeLessThan(fieldNames.indexOf("reviewStatus"));
   });
@@ -54,8 +56,8 @@ describe("collection editor UX", () => {
     const config = await configPromise;
 
     for (const [slug, expectedSections] of [
-      ["committee", ["publicDetailsSection", "imagesAndLinksSection"]],
-      ["sponsors", ["publicDetailsSection", "imagesAndLinksSection"]],
+      ["committee", ["identitySection", "roleAndTermSection", "portraitAndProfileSection"]],
+      ["sponsors", ["sponsorDetailsSection", "logoSection"]],
     ]) {
       const collection = config.collections.find((candidate) => candidate.slug === slug);
       const sectionNames = (collection?.fields ?? [])
@@ -63,6 +65,18 @@ describe("collection editor UX", () => {
         .map((field) => field.name);
 
       expect(sectionNames).toEqual(expectedSections);
+    }
+  });
+
+  it("retains committee ordering and shows native image previews", async () => {
+    const config = await configPromise;
+    const committee = config.collections.find((collection) => collection.slug === "committee");
+    expect(committee?.orderable).toBe(true);
+    expect(committee?.defaultSort).toBe("_order");
+    for (const [slug, imageField] of [["committee", "portrait"], ["sponsors", "logo"]]) {
+      const collection = config.collections.find((candidate) => candidate.slug === slug);
+      const field = collection?.fields.find((candidate) => "name" in candidate && candidate.name === imageField);
+      expect(field).toMatchObject({ displayPreview: true });
     }
   });
 

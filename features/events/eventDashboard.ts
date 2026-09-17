@@ -19,12 +19,7 @@ export async function loadEventDashboard(
       { _status: { equals: "published" } },
     ],
   };
-  const draftWhere: Where = {
-    and: [
-      { reviewStatus: { equals: "approved" } },
-      { _status: { equals: "draft" } },
-    ],
-  };
+  const draftWhere: Where = { _status: { equals: "draft" } };
   const shared = { collection: "events" as const, overrideAccess: false, req };
 
   const [pending, published, drafts, queue] = await Promise.all([

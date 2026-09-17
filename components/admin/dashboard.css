@@ -1,0 +1,49 @@
+/* Workspace additions stay scoped to the CMS dashboard. */
+.masca-dashboard--workspace .masca-dashboard__hero {
+  min-height: 12rem;
+  background: linear-gradient(120deg, #080c47, #171d67);
+  box-shadow: none;
+}
+.masca-dashboard--workspace .masca-dashboard__hero::after { display: none; }
+.masca-dashboard__workflows { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.masca-dashboard__workflow {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.75rem;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 1rem;
+  background: var(--dashboard-surface);
+  color: var(--dashboard-text);
+  text-decoration: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.masca-dashboard__workflow:hover { border-color: var(--dashboard-blue-accent); box-shadow: 0 4px 16px rgb(0 0 0 / 8%); }
+.masca-dashboard__workflow:focus-visible,
+.masca-dashboard__publication-summary a:focus-visible { outline: 3px solid var(--dashboard-blue-accent); outline-offset: 4px; }
+.masca-dashboard__workflow--primary { background: #10145b; border-color: #10145b; color: #fff; }
+.masca-dashboard__workflow h3 { margin: 0; font-size: 1.3rem; }
+.masca-dashboard__workflow p { margin: 0; line-height: 1.6; color: var(--dashboard-text-muted); }
+.masca-dashboard__workflow--primary p { color: #e0e2f3; }
+.masca-dashboard__workflow-count { font-size: 2rem; font-weight: 700; line-height: 1.2; }
+.masca-dashboard__workflow-count small { font-size: 0.85rem; font-weight: 500; color: var(--dashboard-text-muted); }
+.masca-dashboard__workflow-icon { height: 2.4rem; display: flex; align-items: center; }
+.masca-dashboard__workflow-icon svg { width: 2rem; height: 2rem; }
+.masca-dashboard__workflow-action { display: flex; align-items: center; gap: 0.5rem; margin-top: auto; padding-top: 0.5rem; font-weight: 600; }
+.masca-dashboard__workflow-action svg,
+.masca-dashboard__publication-summary svg { width: 1rem; height: 1rem; flex: none; }
+.masca-dashboard__publication-summary { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; color: var(--dashboard-text-muted); line-height: 1.5; }
+.masca-dashboard__publication-summary a { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--dashboard-blue-accent); }
+.masca-dashboard__queue li .masca-dashboard__pending-badge { display: inline-flex; flex: none; border-radius: 1rem; padding: 0.3rem 0.65rem; font-size: 0.75rem; background: var(--dashboard-surface-muted); color: var(--dashboard-text-muted); }
+.masca-dashboard__queue li strong,
+.masca-dashboard__queue li small { overflow-wrap: anywhere; }
+html[data-theme="dark"] .masca-dashboard__workflow--primary { background: #263b92; border-color: #5366b3; }
+@media (max-width: 1000px) {
+  .masca-dashboard__workflows { grid-template-columns: 1fr; }
+  .masca-dashboard__workflow { padding: 1.4rem; }
+}
+@media (max-width: 480px) {
+  .masca-dashboard__queue li a { flex-wrap: wrap; gap: 0.75rem; }
+}
+@media (prefers-reduced-motion: reduce) { .masca-dashboard__workflow { transition: none; } }

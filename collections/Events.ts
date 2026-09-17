@@ -1,8 +1,9 @@
 import { revalidatePath } from "next/cache.js";
 
-import type { Access, CollectionConfig, FieldAccess, Where } from "payload";
+import type { Access, CollectionAfterChangeHook, CollectionConfig, FieldAccess, Where } from "payload";
 
 import { EVENT_STATES } from "../features/events/eventSubmission.ts";
+import { EVENT_EDITOR_STEPS } from "../features/events/eventEditor.ts";
 import { editorSection } from "../utils/editorSection.ts";
 
 export const isPublicEventRead = ({
@@ -35,6 +36,16 @@ const revalidateEventPages = () => {
   safeRevalidatePath("/");
 };
 
+const revalidatePublishedEvent: CollectionAfterChangeHook = ({ doc, previousDoc, req }) => {
+  // Draft writes only create versions; the current published document stays live.
+  const draftWrite = req?.query?.draft === 'true' || req?.query?.draft === true;
+  const unpublish = req?.query?.unpublishAllLocales === 'true' || req?.query?.unpublishAllLocales === true;
+  if (!draftWrite && (unpublish || doc?._status === 'published' || previousDoc?._status === 'published')) {
+    revalidateEventPages();
+  }
+  return doc;
+};
+
 export const Events: CollectionConfig = {
   slug: "events",
   admin: {
@@ -45,9 +56,13 @@ export const Events: CollectionConfig = {
     components: {
       edit: {
         beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
+        SaveDraftButton: "/components/admin/EventSaveController#EventSaveController",
+        PublishButton: "/components/admin/EventEditorView#EventPublishControl",
+        UnpublishButton: "/components/admin/EventEditorView#EventUnpublishControl",
       },
       views: {
         edit: {
+          default: { Component: "/components/admin/EventEditorView#EventEditorView" },
           versions: {
             tab: { label: "Change history" },
           },
@@ -74,6 +89,10 @@ export const Events: CollectionConfig = {
   },
   lockDocuments: false,
   fields: [
+    {
+      name: 'eventEditorHeader', type: 'ui',
+      admin: { components: { Field: '/components/admin/EventEditorFields#EventEditorHeader' }, disableListColumn: true, disableBulkEdit: true },
+    },
     editorSection({
       title: "Public details",
       description: "Information that visitors can see once this event is approved and published.",
@@ -97,10 +116,12 @@ export const Events: CollectionConfig = {
       name: "startDate",
       type: "date",
       required: true,
+      admin: { date: { pickerAppearance: "dayAndTime" }, description: "Enter the date and time in your device timezone." },
     },
     {
       name: "endDate",
       type: "date",
+      admin: { date: { pickerAppearance: "dayAndTime" }, description: "Optional. Must be on or after the start time." },
     },
     {
       name: "venue",
@@ -119,11 +140,15 @@ export const Events: CollectionConfig = {
     }),
     {
       name: "ticketURL",
+      label: "Registration link",
       type: "text",
+      admin: { description: "Optional. Use a full https:// link for tickets or event details." },
     },
     {
       name: "poster",
       type: "upload",
+      displayPreview: true,
+      admin: { description: "Choose an existing poster or upload an image up to 5 MB. This is the image students will see." },
       relationTo: "media",
     },
     editorSection({
@@ -156,6 +181,7 @@ export const Events: CollectionConfig = {
     {
       name: "reviewedAt",
       type: "date",
+      admin: { hidden: true },
       access: {
         read: isAuthenticatedEventFieldRead,
       },
@@ -177,15 +203,29 @@ export const Events: CollectionConfig = {
       ],
       admin: {
         className: "masca-event-review-decision",
-        description: "Final workflow decision. Choose Approved or Rejected after reviewing the event.",
+        description: "Publishing automatically approves this event. Choose Rejected to keep a submission off the website.",
         components: {
           Cell: "/components/admin/EventStatusCell#EventReviewStatusCell",
         },
       },
     },
-  ],
+    {
+      name: 'eventEditorFooter', type: 'ui',
+      admin: { components: { Field: '/components/admin/EventEditorFields#EventEditorFooter' }, disableListColumn: true, disableBulkEdit: true },
+    },
+  ].map((field) => {
+    const step = EVENT_EDITOR_STEPS.findIndex(({ fields }) => fields.includes(field.name));
+    return {
+      ...field,
+      admin: {
+        ...field.admin,
+        ...(step >= 0 ? { className: `${field.admin && 'className' in field.admin ? field.admin.className : ''} masca-event-step masca-event-step-${step}` } : {}),
+        ...(field.type === 'ui' && field.name.endsWith('Section') ? { className: 'masca-event-section' } : {}),
+      },
+    };
+  }) as CollectionConfig['fields'],
   hooks: {
-    afterChange: [revalidateEventPages],
+    afterChange: [revalidatePublishedEvent],
     afterDelete: [revalidateEventPages],
   },
 };

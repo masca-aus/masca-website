@@ -170,7 +170,7 @@ export default buildConfig({
       slug: "media",
       admin: {
         useAsTitle: "filename",
-        description: "Upload and organise images that can be reused across the MASCA website.",
+        description: "Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.",
         components: {
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
@@ -185,8 +185,12 @@ export default buildConfig({
       fields: [
         {
           name: "alt",
+          label: "Alt text",
           type: "text",
           required: true,
+          admin: {
+            description: "Describe the image’s useful content in a short sentence. For a portrait, include the person’s name; for a logo, use the organisation’s name. Avoid filenames or ‘image of’.",
+          },
         },
       ],
       upload: {
@@ -194,7 +198,13 @@ export default buildConfig({
         mimeTypes: ["image/*"],
         // The CMS uses this compact derivative in list and relation previews
         // instead of fetching a full-size original image for every row.
-        adminThumbnail: "admin-preview",
+        // Payload resolves thumbnailURL before the storage plugin rewrites
+        // size URLs, so build it from the filename instead of a local URL.
+        adminThumbnail: ({ doc }) => {
+          const sizes = doc.sizes as { "admin-preview"?: { filename?: string } } | undefined;
+          const filename = sizes?.["admin-preview"]?.filename || doc.filename;
+          return typeof filename === 'string' && filename ? publicFileURL(filename) : null;
+        },
         imageSizes: [
           {
             name: "admin-preview",
@@ -220,7 +230,7 @@ export default buildConfig({
         useAsTitle: "name",
         defaultColumns: ["name", "role", "department", "year"],
         description:
-          "Keep member roles, portraits and department details accurate on the public committee page.",
+          "Update committee profiles in one page. Changes appear on the website when you Save.",
         components: {
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
@@ -242,14 +252,32 @@ export default buildConfig({
       // are validated here so bad entries are rejected at save time.
       fields: [
         editorSection({
-          title: "Public details",
-          description: "These details appear in the public MASCA committee directory.",
+          title: "Identity",
+          description: "Introduce the member as they should appear in the public directory.",
         }),
         {
           name: "name",
           type: "text",
           required: true,
         },
+        {
+          name: "university",
+          type: "text",
+          admin: {
+            description: 'Full name, e.g. "Monash University". Optional.',
+          },
+        },
+        {
+          name: "course",
+          type: "text",
+          admin: {
+            description: 'Degree or course name, e.g. "Bachelor of Commerce". Optional.',
+          },
+        },
+        editorSection({
+          title: "Role and term",
+          description: "Choose the position, department and committee year. List order is managed by dragging members in the committee list.",
+        }),
         {
           name: "role",
           type: "text",
@@ -270,20 +298,6 @@ export default buildConfig({
           },
         },
         {
-          name: "university",
-          type: "text",
-          admin: {
-            description: 'Full name, e.g. "Monash University". Optional.',
-          },
-        },
-        {
-          name: "course",
-          type: "text",
-          admin: {
-            description: 'Degree or course name, e.g. "Bachelor of Commerce". Optional.',
-          },
-        },
-        {
           name: "year",
           type: "text",
           required: true,
@@ -295,6 +309,20 @@ export default buildConfig({
               'Committee term, e.g. "2026/2027" — drives the year tabs on the page.',
           },
         },
+        editorSection({
+          title: "Portrait and profile",
+          description: "Choose the member portrait and add an optional LinkedIn profile.",
+        }),
+        {
+          name: "portrait",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+          displayPreview: true,
+          admin: {
+            description: "Choose an existing portrait or upload an image up to 5 MB. Include the member’s name in its alt text.",
+          },
+        },
         {
           name: "bio",
           type: "textarea",
@@ -303,18 +331,9 @@ export default buildConfig({
             "Shown in the expanded modal on the committee page. Optional — the modal simply omits it when empty.",
           },
         },
-        editorSection({
-          title: "Images and links",
-          description: "Choose the member portrait and add an optional LinkedIn profile.",
-        }),
-        {
-          name: "portrait",
-          type: "upload",
-          relationTo: "media",
-          required: true,
-        },
         {
           name: "linkedin_url",
+          label: "LinkedIn profile",
           type: "text",
           validate: (value: string | null | undefined) => {
             if (!value) return true;
@@ -339,7 +358,7 @@ export default buildConfig({
       admin: {
         useAsTitle: "name",
         defaultColumns: ["name", "date"],
-        description: "Keep partner names and logos current in the homepage sponsor marquee.",
+        description: "Update sponsor details and logos in one page. Changes appear on the homepage when you Save.",
         components: {
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
@@ -357,7 +376,7 @@ export default buildConfig({
       // is now an upload into Media instead of a hand-pasted URL.
       fields: [
         editorSection({
-          title: "Public details",
+          title: "Sponsor details",
           description: "The sponsor name and date shown with MASCA's partner recognition.",
         }),
         {
@@ -378,7 +397,7 @@ export default buildConfig({
           },
         },
         editorSection({
-          title: "Images and links",
+          title: "Logo",
           description: "Choose the sponsor logo that will appear on the MASCA homepage.",
         }),
         {
@@ -386,6 +405,10 @@ export default buildConfig({
           type: "upload",
           relationTo: "media",
           required: true,
+          displayPreview: true,
+          admin: {
+            description: "Choose an existing logo or upload an image up to 5 MB. A transparent background works best.",
+          },
         },
       ],
       hooks: {

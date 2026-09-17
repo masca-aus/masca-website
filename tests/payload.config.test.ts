@@ -75,9 +75,12 @@ describe("payload config", () => {
     const config = await configPromise;
     const media = config.collections.find((collection) => collection.slug === "media");
 
-    expect(media?.upload && typeof media.upload === "object" ? media.upload.adminThumbnail : undefined).toBe(
-      "admin-preview",
-    );
+    const thumbnail = media?.upload && typeof media.upload === "object" ? media.upload.adminThumbnail : undefined;
+    expect(thumbnail).toBeTypeOf('function');
+    if (typeof thumbnail === 'function') {
+      expect(thumbnail({ doc: { filename: 'poster.png', sizes: { 'admin-preview': { filename: 'poster-240x320.webp' } } } })).toMatch(/\/object\/public\/[^/]+\/poster-240x320\.webp$/);
+      expect(thumbnail({ doc: { filename: 'legacy.png' } })).toMatch(/\/object\/public\/[^/]+\/legacy\.png$/);
+    }
     expect(media?.upload && typeof media.upload === "object" ? media.upload.imageSizes : undefined).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

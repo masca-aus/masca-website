@@ -1,3 +1,4 @@
+@import "../../components/admin/contentForms.css";
 /* MASCA's public brand, adapted conservatively to Payload's admin tokens. */
 :root {
   --masca-blue: #010066;

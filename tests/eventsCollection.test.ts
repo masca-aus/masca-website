@@ -98,8 +98,8 @@ describe("events collection", () => {
 
     expect(fieldNames.indexOf("reviewStatus")).toBeGreaterThan(fieldNames.indexOf("reviewedAt"));
     expect("admin" in reviewStatus && reviewStatus.admin).toMatchObject({
-      className: "masca-event-review-decision",
-      description: "Final workflow decision. Choose Approved or Rejected after reviewing the event.",
+      className: expect.stringContaining("masca-event-review-decision"),
+      description: "Publishing automatically approves this event. Choose Rejected to keep a submission off the website.",
       components: {
         Cell: "/components/admin/EventStatusCell#EventReviewStatusCell",
       },
@@ -166,7 +166,7 @@ describe("events collection", () => {
     expect(afterDelete.length).toBeGreaterThan(0);
 
     vi.mocked(revalidatePath).mockClear();
-    for (const hook of afterChange) await hook({} as never);
+    for (const hook of afterChange) await hook({ doc: { _status: "published" }, req: { query: {} } } as never);
     expect(vi.mocked(revalidatePath).mock.calls.map(([path]) => path)).toEqual([
       "/events",
       "/",

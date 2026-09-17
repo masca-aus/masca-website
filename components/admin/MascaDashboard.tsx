@@ -1,4 +1,5 @@
 import Link from "next/link";
+import "./dashboard.css";
 import type { PayloadRequest } from "payload";
 
 import { loadEventDashboard, type EventDashboardOverview } from "@/features/events/eventDashboard";
@@ -41,11 +42,11 @@ export async function MascaDashboard({ initPageResult }: { initPageResult: { req
 
 export function DashboardContent({ overview }: { overview: EventDashboardOverview }) {
   return (
-    <main className="masca-dashboard" style={{ marginInline: "auto" }}>
+    <main className="masca-dashboard masca-dashboard--workspace" style={{ marginInline: "auto" }}>
       <section className="masca-dashboard__hero">
         <div className="masca-dashboard__hero-copy">
           <span className="masca-dashboard__eyebrow">MASCA Content Management</span>
-          <h1>Welcome back.</h1>
+          <h1>Your content workspace.</h1>
           <p>
             Keep the national website accurate, current and useful for Malaysian
             students across Australia.
@@ -61,24 +62,34 @@ export function DashboardContent({ overview }: { overview: EventDashboardOvervie
         <div className="masca-dashboard__section-heading">
           <div>
             <span className="masca-dashboard__eyebrow">Events</span>
-            <h2 id="events-overview">Review and publishing</h2>
+            <h2 id="events-overview">What would you like to do?</h2>
           </div>
           <Link href="/admin/collections/events">Manage all events <ArrowIcon /></Link>
         </div>
 
-        <div className="masca-dashboard__event-stats">
-          <Link href="/admin/collections/events?where[reviewStatus][equals]=pending" className="masca-dashboard__event-stat">
-            <span>Pending review</span><strong>{overview.pending}</strong>
-            <small>Needs a decision</small>
+        <div className="masca-dashboard__workflows">
+          <Link href="/admin/collections/events/create" className="masca-dashboard__workflow masca-dashboard__workflow--primary">
+            <span className="masca-dashboard__workflow-icon"><PlusIcon /></span>
+            <h3>Create event</h3>
+            <p>Start with the essentials. Save your progress and publish when ready.</p>
+            <span className="masca-dashboard__workflow-action">Start a new event <ArrowIcon /></span>
           </Link>
-          <Link href="/admin/collections/events?where[reviewStatus][equals]=approved&where[_status][equals]=published" className="masca-dashboard__event-stat">
-            <span>Published</span><strong>{overview.published}</strong>
-            <small>Visible on the website</small>
+          <Link href="/admin/collections/events?where[_status][equals]=draft" className="masca-dashboard__workflow">
+            <span className="masca-dashboard__workflow-count">{overview.drafts} <small>draft{overview.drafts === 1 ? "" : "s"}</small></span>
+            <h3>Resume drafts</h3>
+            <p>{overview.drafts === 0 ? "No drafts yet. Create an event to get started." : "Continue an unfinished event, including drafts awaiting review."}</p>
+            <span className="masca-dashboard__workflow-action">Open drafts <ArrowIcon /></span>
           </Link>
-          <Link href="/admin/collections/events?where[reviewStatus][equals]=approved&where[_status][equals]=draft" className="masca-dashboard__event-stat">
-            <span>Other drafts</span><strong>{overview.drafts}</strong>
-            <small>Approved, not yet published</small>
+          <Link href="/admin/collections/events?where[reviewStatus][equals]=pending" className="masca-dashboard__workflow">
+            <span className="masca-dashboard__workflow-count">{overview.pending} <small>pending</small></span>
+            <h3>Review submissions</h3>
+            <p>{overview.pending === 0 ? "All caught up. New submissions will appear here." : "Check submitted details and decide what is ready to publish."}</p>
+            <span className="masca-dashboard__workflow-action">Open review queue <ArrowIcon /></span>
           </Link>
+        </div>
+        <div className="masca-dashboard__publication-summary">
+          <span><strong>{overview.published}</strong> published event{overview.published === 1 ? "" : "s"} visible on the website</span>
+          <Link href="/admin/collections/events?where[reviewStatus][equals]=approved&where[_status][equals]=published">View published events <ArrowIcon /></Link>
         </div>
 
         <div className="masca-dashboard__queue">
@@ -94,7 +105,7 @@ export function DashboardContent({ overview }: { overview: EventDashboardOvervie
                 <li key={event.id}>
                   <Link href={`/admin/collections/events/${event.id}`}>
                     <span><strong>{event.title}</strong><small>{event.organisation}</small></span>
-                    <ArrowIcon />
+                    <span className="masca-dashboard__pending-badge">Pending review</span>
                   </Link>
                 </li>
               ))}
