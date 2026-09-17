@@ -9,7 +9,7 @@ import { s3Storage } from "@payloadcms/storage-s3";
 import { buildConfig, type Field } from "payload";
 import sharp from "sharp";
 
-import { COMMITTEE_STEPS } from "./features/committee/committeeEditor";
+import { COMMITTEE_STEPS } from "./features/committee/committeeEditor.ts";
 import { Events } from "./collections/Events.ts";
 import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
 import { editorSection } from "./utils/editorSection.ts";
