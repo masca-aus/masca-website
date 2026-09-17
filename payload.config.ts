@@ -7,6 +7,7 @@ import { postgresAdapter } from "@payloadcms/db-postgres";
 import { resendAdapter } from "@payloadcms/email-resend";
 import { s3Storage } from "@payloadcms/storage-s3";
 import { buildConfig } from "payload";
+import sharp from "sharp";
 
 import { Events } from "./collections/Events.ts";
 import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
@@ -174,7 +175,24 @@ export default buildConfig({
       upload: {
         // Images only — a committee member cannot upload PDFs, zips, etc.
         mimeTypes: ["image/*"],
-        // Crop/focal-point UIs need sharp, which we deliberately don't ship.
+        // The CMS uses this compact derivative in list and relation previews
+        // instead of fetching a full-size original image for every row.
+        adminThumbnail: "admin-preview",
+        imageSizes: [
+          {
+            name: "admin-preview",
+            width: 480,
+            height: 320,
+            fit: "inside",
+            withoutEnlargement: true,
+            formatOptions: {
+              format: "webp",
+              options: { quality: 75 },
+            },
+          },
+        ],
+        // This directory needs predictable portraits, so editors do not crop
+        // or choose focal points from the CMS.
         crop: false,
         focalPoint: false,
       },
@@ -378,6 +396,7 @@ export default buildConfig({
     }),
   ],
   secret: process.env.PAYLOAD_SECRET || "",
+  sharp,
   telemetry: false,
   upload: {
     // Hard 5 MB cap: oversized uploads get a 413 instead of a truncated file.

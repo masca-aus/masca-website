@@ -63,6 +63,23 @@ describe("payload config", () => {
     expect(users?.auth.disableLocalStrategy).toBeFalsy();
   });
 
+  it("generates compact WebP previews for newly uploaded media in the CMS", async () => {
+    const config = await configPromise;
+    const media = config.collections.find((collection) => collection.slug === "media");
+
+    expect(media?.upload && typeof media.upload === "object" ? media.upload.adminThumbnail : undefined).toBe(
+      "admin-preview",
+    );
+    expect(media?.upload && typeof media.upload === "object" ? media.upload.imageSizes : undefined).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "admin-preview",
+          width: 480,
+        }),
+      ]),
+    );
+  });
+
   it("only allows an authenticated user to unlock their own account", async () => {
     const config = await configPromise;
     const users = config.collections.find((collection) => collection.slug === "users");
