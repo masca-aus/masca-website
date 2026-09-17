@@ -38,7 +38,7 @@
 .masca-wizard-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-top: 1px solid var(--theme-elevation-150); padding: 1.5rem 0; margin-top: 1rem; }
 .masca-wizard-footer > div { display: flex; align-items: center; gap: .75rem; }
 .masca-wizard-save-actions { flex-wrap: wrap; }
-.masca-event-editor > :is(.collection-edit--events, .collection-edit--committee) > form > .doc-controls .doc-controls__content:has(> .doc-controls__meta:only-child) { display: none; }
+.masca-event-editor > :is(.collection-edit--events, .collection-edit--committee, .collection-edit--sponsors) > form > .doc-controls .doc-controls__content:has(> .doc-controls__meta:only-child) { display: none; }
 .masca-wizard-primary, .masca-wizard-secondary, .masca-wizard-error button { font: inherit; font-weight: 650; min-height: 44px; padding: .75rem 1.1rem; border-radius: 8px; cursor: pointer; border: 1px solid var(--theme-elevation-300); }
 .masca-wizard-primary { background: #010066; color: #fff; border-color: #010066; }
 .masca-wizard-secondary, .masca-wizard-error button { background: var(--theme-elevation-0); color: var(--theme-text); }
