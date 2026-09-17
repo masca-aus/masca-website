@@ -39,7 +39,7 @@ export function EventEditorView(props: DocumentViewClientProps) {
   const registerSave = useCallback((handler: ((intent: SaveIntent) => Promise<boolean>) | null) => { save.current = handler; }, []);
   return (
     <Context.Provider value={{ dateSelectionValidationRef, saveStatusTarget, setSaveStatusTarget, step, setStep, saveState, setSaveState, error, setError, save, registerSave }}>
-      <div className="masca-event-editor" data-step={step} onSubmitCapture={(event) => {
+      <div className="masca-event-editor masca-events-editor" data-step={step} onSubmitCapture={(event) => {
         if (!(event.target instanceof HTMLFormElement) || !event.target.matches('.collection-edit--events > form')) return;
         // Native Enter submission must use the same single writer as autosave.
         event.preventDefault();

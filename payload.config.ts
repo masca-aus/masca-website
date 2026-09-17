@@ -9,6 +9,7 @@ import { s3Storage } from "@payloadcms/storage-s3";
 import { buildConfig, type Field } from "payload";
 import sharp from "sharp";
 
+import { SPONSOR_STEPS } from './features/sponsors/sponsorEditor.ts';
 import { COMMITTEE_STEPS } from "./features/committee/committeeEditor.ts";
 import { Organisations } from "./collections/Organisations.ts";
 import { EventLifecycle } from "./collections/EventLifecycle.ts";
@@ -382,11 +383,14 @@ export default buildConfig({
       slug: "sponsors",
       admin: {
         useAsTitle: "name",
+        hideAPIURL: true,
         defaultColumns: ["name", "date"],
-        description: "Update sponsor details and logos in one page. Changes appear on the homepage when you Save.",
+        description: "Add sponsor details, choose a logo and review before saving. Changes appear on the homepage when saved.",
         components: {
           beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
+          views: { edit: { default: { Component: "/components/admin/SponsorEditor#SponsorEditorView" } } },
           edit: {
+            SaveButton: "/components/admin/SponsorEditor#SponsorSaveControl",
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
           },
         },
@@ -401,6 +405,7 @@ export default buildConfig({
       // Fields mirror the shape the marquee has always rendered, but the logo
       // is now an upload into Media instead of a hand-pasted URL.
       fields: [
+        { name: "sponsorEditorHeader", type: "ui", admin: { components: { Field: "/components/admin/SponsorEditor#SponsorEditorHeader" }, disableListColumn: true, disableBulkEdit: true } },
         editorSection({
           title: "Sponsor details",
           description: "The sponsor name and date shown with MASCA's partner recognition.",
@@ -436,7 +441,12 @@ export default buildConfig({
             description: "Choose an existing logo or upload an image up to 5 MB. A transparent background works best.",
           },
         },
-      ],
+        { name: "sponsorEditorFooter", type: "ui", admin: { components: { Field: "/components/admin/SponsorEditor#SponsorEditorFooter" }, disableListColumn: true, disableBulkEdit: true } },
+      ].map(field => {
+        const name = 'name' in field ? field.name : '';
+        const step = SPONSOR_STEPS.findIndex(section => (section.fields as readonly string[]).includes(name ?? ''));
+        return step < 0 ? field : { ...field, admin: { ...field.admin, className: `masca-sponsor-step masca-sponsor-step-${step}` } };
+      }) as Field[],
       hooks: {
         afterChange: [revalidateSponsorPages],
         afterDelete: [revalidateSponsorPages],

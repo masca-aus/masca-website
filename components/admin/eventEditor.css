@@ -99,3 +99,5 @@
 .masca-wizard-step-chevron { display: inline-block; transition: transform 220ms ease; }
 [aria-expanded="true"] > .masca-wizard-step-chevron { transform: rotate(180deg); }
 @media (prefers-reduced-motion: reduce) { .masca-wizard-step-disclosure, .masca-wizard-step-chevron { transition: none; } }
+
+.masca-events-editor .masca-wizard-progress > span { background: #ef476f; }

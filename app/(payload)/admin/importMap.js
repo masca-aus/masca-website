@@ -1,6 +1,7 @@
 import { CareerEditorHeader as CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
 import { CareerLifecycleCell as CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34 } from '../../../components/admin/CareerLifecycleCell'
 import { CareerEditorFooter as CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
+import { CareerPublicationStatusCell as CareerPublicationStatusCell_f07b37ac41f692f48fee9d222ed514bf } from '../../../components/admin/CareerStatusCell'
 import { CareerListTools as CareerListTools_425c2154b5081b2b75b2a41486007d14 } from '../../../components/admin/CareerListTools'
 import { DocumentBackLink as DocumentBackLink_b7eb021eac5b101e7ce71970147e89df } from '../../../components/admin/DocumentBackLink'
 import { CareerPublishControl as CareerPublishControl_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
@@ -12,6 +13,10 @@ import { EditorSection as EditorSection_671b0a745dc229cca2346e4a81fc980a } from 
 import { CommitteeEditorFooter as CommitteeEditorFooter_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
 import { CommitteeSaveControl as CommitteeSaveControl_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
 import { CommitteeEditorView as CommitteeEditorView_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
+import { SponsorEditorHeader as SponsorEditorHeader_ee68ebb54eea085f9d8083407db3bdb1 } from '../../../components/admin/SponsorEditor'
+import { SponsorEditorFooter as SponsorEditorFooter_ee68ebb54eea085f9d8083407db3bdb1 } from '../../../components/admin/SponsorEditor'
+import { SponsorSaveControl as SponsorSaveControl_ee68ebb54eea085f9d8083407db3bdb1 } from '../../../components/admin/SponsorEditor'
+import { SponsorEditorView as SponsorEditorView_ee68ebb54eea085f9d8083407db3bdb1 } from '../../../components/admin/SponsorEditor'
 import { EventLifecycleCell as EventLifecycleCell_b28290272084401b0c4a1bb58db7c1bc } from '../../../components/admin/EventLifecycleCell'
 import { EventEditorHeader as EventEditorHeader_cc3f89cc91de38306fe76806fb36c1a8 } from '../../../components/admin/EventEditorFields'
 import { OrganisationSearchField as OrganisationSearchField_af4e53f6f5550c1030d91670e14f5e57 } from '../../../components/admin/OrganisationSearchField'
@@ -37,6 +42,7 @@ export const importMap = {
   "/components/admin/CareerEditor#CareerEditorHeader": CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236,
   "/components/admin/CareerLifecycleCell#CareerLifecycleCell": CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34,
   "/components/admin/CareerEditor#CareerEditorFooter": CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236,
+  "/components/admin/CareerStatusCell#CareerPublicationStatusCell": CareerPublicationStatusCell_f07b37ac41f692f48fee9d222ed514bf,
   "/components/admin/CareerListTools#CareerListTools": CareerListTools_425c2154b5081b2b75b2a41486007d14,
   "/components/admin/DocumentBackLink#DocumentBackLink": DocumentBackLink_b7eb021eac5b101e7ce71970147e89df,
   "/components/admin/CareerEditor#CareerPublishControl": CareerPublishControl_57c74453f1f49818c0cb8c1e92524236,
@@ -48,6 +54,10 @@ export const importMap = {
   "/components/admin/CommitteeEditor#CommitteeEditorFooter": CommitteeEditorFooter_134396005f96c581663d9f2ff7dee8de,
   "/components/admin/CommitteeEditor#CommitteeSaveControl": CommitteeSaveControl_134396005f96c581663d9f2ff7dee8de,
   "/components/admin/CommitteeEditor#CommitteeEditorView": CommitteeEditorView_134396005f96c581663d9f2ff7dee8de,
+  "/components/admin/SponsorEditor#SponsorEditorHeader": SponsorEditorHeader_ee68ebb54eea085f9d8083407db3bdb1,
+  "/components/admin/SponsorEditor#SponsorEditorFooter": SponsorEditorFooter_ee68ebb54eea085f9d8083407db3bdb1,
+  "/components/admin/SponsorEditor#SponsorSaveControl": SponsorSaveControl_ee68ebb54eea085f9d8083407db3bdb1,
+  "/components/admin/SponsorEditor#SponsorEditorView": SponsorEditorView_ee68ebb54eea085f9d8083407db3bdb1,
   "/components/admin/EventLifecycleCell#EventLifecycleCell": EventLifecycleCell_b28290272084401b0c4a1bb58db7c1bc,
   "/components/admin/EventEditorFields#EventEditorHeader": EventEditorHeader_cc3f89cc91de38306fe76806fb36c1a8,
   "/components/admin/OrganisationSearchField#OrganisationSearchField": OrganisationSearchField_af4e53f6f5550c1030d91670e14f5e57,

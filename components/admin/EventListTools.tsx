@@ -28,7 +28,7 @@ export function EventListTools() {
     <SectionToolbar actions={<button className="masca-action masca-action--secondary" aria-expanded={reports} onClick={() => setReports(!reports)}>Reports</button>}><nav aria-label="Event lists">
       {[['current','Events'], ['completed','Completed'], ['archived','Archived']].map(([key, label]) => <Link key={key} href={`/admin/collections/events?eventView=${key}`} aria-current={view === key ? 'page' : undefined}>{label}</Link>)}
     </nav></SectionToolbar>
-    {view === 'archived' && <p>Archived events are kept for your records and reports. Restore an event to return it to the other lists.</p>}
+    {view === 'archived' && <p>Archived events are kept for your records and reports. Restore an event to return it to the other lists, or select archived events and choose Delete to permanently remove them, their history and their entries in reports.</p>}
     {reports && <section className="masca-event-report" aria-label="Event reports">
       <h2>Event reports</h2><p>Includes archived records, grouped by the event’s local start date. Uses the latest saved details. Events without a start date are excluded.</p>
       <form onSubmit={generate}><label>Report period<select disabled={busy} value={frequency} onChange={event => { setFrequency(event.target.value); setPeriod(event.target.value === 'year' ? period.slice(0,4) : `${period.slice(0,4)}-01`); setReport(null); }}><option value="month">Monthly</option><option value="year">Yearly</option></select></label>

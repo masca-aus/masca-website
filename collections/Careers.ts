@@ -8,6 +8,8 @@ import { careerDateWhere, careerLifecycleAction, careerLifecycleIDs, careerListF
 
 import { archivedCareerDeleteAccess, deleteArchivedCareer } from '../features/careers/careerDeletion.ts';
 
+import { careerQuickAction } from '../features/careers/careerQuickActions.ts';
+
 const authenticated: Access = ({ req }) => Boolean(req.user);
 export const publicCareerAccess: Access = async ({ req }): Promise<true | Where> => req.user ? true : { and: [
   { _status: { equals: 'published' } },
@@ -32,8 +34,9 @@ export const Careers: CollectionConfig = {
   access: { read: publicCareerAccess, readVersions: authenticated, create: authenticated, update: authenticated, delete: archivedCareerDeleteAccess },
   versions: { drafts: true, maxPerDoc: 0 },
   lockDocuments: { duration: 300 }, defaultSort: '-added',
-  endpoints: [{ path: '/:id/lifecycle', method: 'post', handler: careerLifecycleAction }],
+  endpoints: [{ path: '/:id/lifecycle', method: 'post', handler: careerLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: careerQuickAction }],
   fields: ([
+    { name: '_status', label: 'Status', type: 'select', options: [], admin: { components: { Field: false, Cell: '/components/admin/CareerStatusCell#CareerPublicationStatusCell' }, disableBulkEdit: true } },
     { name: 'careerWizardHeader', type: 'ui', admin: { components: { Field: '/components/admin/CareerEditor#CareerEditorHeader' }, disableListColumn: true, disableBulkEdit: true } },
     { name: 'title', type: 'text', required: true, maxLength: 120 },
     { name: 'company', type: 'text', required: true, maxLength: 80 },

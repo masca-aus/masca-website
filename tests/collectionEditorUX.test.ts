@@ -18,7 +18,7 @@ describe("collection editor UX", () => {
       committee:
         "Create and update committee profiles step by step. Changes appear on the website when you Save.",
       media: "Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.",
-      sponsors: "Update sponsor details and logos in one page. Changes appear on the homepage when you Save.",
+      sponsors: "Add sponsor details, choose a logo and review before saving. Changes appear on the homepage when saved.",
       users: "Manage the people who can sign in and update MASCA website content.",
     };
 
@@ -57,7 +57,7 @@ describe("collection editor UX", () => {
 
     for (const [slug, expectedSections] of [
       ["committee", ["committeeWizardHeader", "identitySection", "roleAndTermSection", "portraitAndProfileSection", "committeeWizardFooter"]],
-      ["sponsors", ["sponsorDetailsSection", "logoSection"]],
+      ["sponsors", ["sponsorEditorHeader", "sponsorDetailsSection", "logoSection", "sponsorEditorFooter"]],
     ]) {
       const collection = config.collections.find((candidate) => candidate.slug === slug);
       const sectionNames = (collection?.fields ?? [])

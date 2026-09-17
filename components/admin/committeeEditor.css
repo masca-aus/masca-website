@@ -19,3 +19,5 @@
 
 html[data-theme="dark"] .masca-committee-editor .masca-wizard-footer .btn--style-primary { background: #292780; border: 1px solid #6563bd; color: #fff; }
 html[data-theme="dark"] .masca-committee-editor .masca-wizard-footer .btn--style-primary:hover { background: #383694; }
+
+.masca-committee-editor .masca-wizard-progress > span { background: #9bdd9b; }

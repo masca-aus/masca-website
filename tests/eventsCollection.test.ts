@@ -109,12 +109,12 @@ describe("events collection", () => {
 
   it("allows authenticated CMS users to fully manage events", async () => {
     const events = await getEventsCollection();
-    const authenticated = { req: { user: { id: 1 } } } as never;
+    const authenticated = { req: { user: { id: 1 }, payload: { find: async () => ({ docs: [{ id: 2, event: 7, status: 'archived' }] }) } } } as never;
 
     expect(await events.access.read(authenticated)).toBe(true);
     expect(events.access.create?.(authenticated)).toBe(true);
     expect(events.access.update?.(authenticated)).toBe(true);
-    expect(events.access.delete?.(authenticated)).toBe(false);
+    expect(await events.access.delete?.(authenticated)).toEqual({ id: { in: [7] } });
   });
 
   it("limits anonymous reads to events that are both approved and published", async () => {
@@ -129,7 +129,7 @@ describe("events collection", () => {
     });
     expect(events.access.create?.({ req: { user: null } } as never)).toBe(false);
     expect(events.access.update?.({ req: { user: null } } as never)).toBe(false);
-    expect(events.access.delete?.({ req: { user: null } } as never)).toBe(false);
+    expect(await events.access.delete?.({ req: { user: null } } as never)).toBe(false);
   });
 
   it("denies anonymous reads of submitter and review-only fields", async () => {
