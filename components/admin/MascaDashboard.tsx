@@ -8,6 +8,7 @@ import { loadEventDashboard, type EventDashboardOverview } from "@/features/even
 const contentAreas = [
   {
     name: "Careers",
+    group: "content",
     Icon: Briefcase,
     description: "Publish opportunities, continue drafts and manage applications.",
     href: "/admin/collections/careers",
@@ -16,6 +17,7 @@ const contentAreas = [
   },
   {
     name: "Events",
+    group: "content",
     Icon: CalendarDays,
     description: "Create events, continue drafts and review submissions.",
     href: "/admin/collections/events",
@@ -24,6 +26,7 @@ const contentAreas = [
   },
   {
     name: "Organisations",
+    group: "resources",
     Icon: Building2,
     description: "Keep the student organisation directory and search results up to date.",
     href: "/admin/collections/organisations",
@@ -32,6 +35,7 @@ const contentAreas = [
   },
   {
     name: "Committee",
+    group: "content",
     Icon: Users,
     description: "Manage committee members, portraits, roles and departments.",
     href: "/admin/collections/committee",
@@ -40,6 +44,7 @@ const contentAreas = [
   },
   {
     name: "Media",
+    group: "resources",
     Icon: ImageIcon,
     description: "Upload and organise the images used throughout the website.",
     href: "/admin/collections/media",
@@ -48,6 +53,7 @@ const contentAreas = [
   },
   {
     name: "Sponsors",
+    group: "content",
     Icon: Handshake,
     description: "Keep partner names, logos and sponsorship dates up to date.",
     href: "/admin/collections/sponsors",
@@ -77,15 +83,15 @@ export function DashboardContent({ overview }: { overview: EventDashboardOvervie
           <Link href="/admin/collections/events?where[reviewStatus][equals]=approved&where[_status][equals]=published"><strong>{overview.published}</strong><span>Published events</span><span aria-hidden="true">→</span></Link>
         </div>
       </section>
-      <section aria-labelledby="manage-content">
-        <div className="masca-dashboard__section-heading"><div><h2 id="manage-content">Manage</h2></div></div>
+      {([{ id: 'content', title: 'Content' }, { id: 'resources', title: 'Resources' }] as const).map(group => <section key={group.id} aria-labelledby={`manage-${group.id}`}>
+        <div className="masca-dashboard__section-heading"><h2 id={`manage-${group.id}`}>{group.title}</h2></div>
         <div className="masca-dashboard__content">
-          {contentAreas.map(area => <article className="masca-dashboard__content-row" data-area={area.name.toLowerCase()} key={area.name}>
+          {contentAreas.filter(area => area.group === group.id).map(area => <article className="masca-dashboard__content-row" data-area={area.name.toLowerCase()} key={area.name}>
             <div className="masca-dashboard__content-label"><area.Icon size={21} strokeWidth={1.5} aria-hidden="true" /><div><h3>{area.name}</h3><p>{area.description}</p></div></div>
             <div className="masca-dashboard__actions"><Link className="masca-action masca-action--quiet" href={area.href} aria-label={`Manage ${area.name.toLowerCase()}`}>Manage</Link><Link className="masca-action masca-action--secondary" href={area.createHref}>{area.action}</Link></div>
           </article>)}
         </div>
-      </section>
+      </section>)}
       <footer className="masca-dashboard__content-row"><div><h3>CMS access</h3><p>Manage who can sign in.</p></div><Link className="masca-action masca-action--quiet" href="/admin/collections/users">Manage users →</Link></footer>
     </main>
   );
