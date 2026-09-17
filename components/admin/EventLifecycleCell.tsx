@@ -2,6 +2,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import './eventStatusCell.css';
+import { EventActionMenu } from './EventActionMenu';
 export function EventLifecycleCell({ cellData, rowData }: { cellData?: unknown; rowData?: { id?: number | string; title?: string } }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -20,13 +21,13 @@ export function EventLifecycleCell({ cellData, rowData }: { cellData?: unknown; 
     } catch (cause) { setError((cause as Error).message); } finally { setBusy(false); }
   }
   return <div className="masca-status-action">
-    <div className="masca-status-action__control"><select aria-label={`Lifecycle for ${rowData?.title || 'event'}`} value="" disabled={busy || refreshing} onChange={event => void run(event.target.value)}>
-      <option value="" disabled>{status === 'completed' ? 'Completed' : status === 'archived' ? 'Archived' : 'Active'}</option>
-      {status === 'active' && <option value="complete">End event</option>}
-      {status !== 'archived' && <option value="archive">Archive event</option>}
-      {status === 'archived' && <option value="restore">Restore event</option>}
-      <option value="history">Lifecycle history</option>
-    </select><span className="masca-status-action__chevron" aria-hidden="true">⌄</span></div>
+    <EventActionMenu label={`Lifecycle for ${rowData?.title || 'event'}`} text={status === 'completed' ? 'Completed' : status === 'archived' ? 'Archived' : 'Active'}
+      tone={status === 'completed' ? 'approved' : status} disabled={busy || refreshing || rowData?.id == null} busy={busy || refreshing} onChoose={action => void run(action)}
+      options={[
+        ...(status === 'active' ? [{ value: 'complete', label: 'End event' }] : []),
+        status === 'archived' ? { value: 'restore', label: 'Restore event' } : { value: 'archive', label: 'Archive event' },
+        { value: 'history', label: 'Lifecycle history' },
+      ]} />
     {(busy || refreshing) && <small role="status">Saving…</small>}
     {error && <small role="alert">{error}</small>}
   </div>;

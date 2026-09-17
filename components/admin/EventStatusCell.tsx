@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore, useTransition } from 'react';
 import { useConfig } from '@payloadcms/ui';
 import { useRouter } from 'next/navigation';
 import './eventStatusCell.css';
+import { EventActionMenu } from './EventActionMenu';
 
 type CellProps = { cellData?: unknown; rowData?: { id?: number | string; title?: string } };
 type StatusField = 'reviewStatus' | '_status';
@@ -49,13 +50,8 @@ function EventStatusSelect({ cellData, rowData, field }: CellProps & { field: St
     } finally { pending.delete(key); notify(); }
   };
   return <div className="masca-status-action" onClick={event => event.stopPropagation()}>
-    <div className="masca-status-action__control" data-tone={current}>
-      <span className="masca-status-action__dot" aria-hidden="true" />
-      <select aria-label={label} value={current} disabled={busy || id == null} onChange={event => void change(event.target.value)}>
-        {options[field].map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-      </select>
-      <span aria-hidden="true" className={busy ? 'masca-status-action__spinner' : 'masca-status-action__chevron'}>{busy ? '' : '⌄'}</span>
-    </div>
+    <EventActionMenu label={label} text={options[field].find(([value]) => value === current)?.[1] || (current === 'changed' ? 'Draft changes' : current)} tone={current}
+      options={options[field].map(([value, label]) => ({ value, label }))} current={current} disabled={busy || id == null} busy={busy} onChoose={value => void change(value)} />
     {busy && <span className="masca-status-action__feedback" role="status">Saving…</span>}
     {error && <div className="masca-status-action__error" role="alert">{error} <a href={`${config.routes.admin}/collections/events/${key}`}>Edit event</a></div>}
   </div>;
