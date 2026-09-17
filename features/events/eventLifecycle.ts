@@ -8,6 +8,7 @@ export function nextLifecycle(previous: Lifecycle | null, action: string, now: s
   const current = previous ?? { status: 'active' };
   if (action === 'archive' && current.status !== 'archived') return { ...current, status: 'archived', archivedAt: now };
   if (action === 'complete' && current.status === 'active') return { ...current, status: 'completed', completedAt: now };
+  if (action === 'reopen' && current.status === 'completed') return { ...current, status: 'active', completedAt: null };
   if (action === 'restore' && current.status === 'archived') return { ...current, status: current.completedAt ? 'completed' : 'active', archivedAt: null };
   throw new Error('This action is not available for the current event status. Refresh and try again.');
 }
@@ -21,7 +22,9 @@ export async function lifecycleIDs(payload: Pick<Payload, 'find'>, status: strin
 export async function eventListFilter({ req }: { req: PayloadRequest }): Promise<Where> {
   const archived = req.query?.eventView === 'archived';
   const completed = req.query?.eventView === 'completed';
-  const ids = await lifecycleIDs(req.payload, completed ? 'completed' : 'archived', req);
+  const records = await lifecycleRecords(req.payload, req);
+  const statuses = archived ? ['archived'] : completed ? ['completed'] : ['completed', 'archived'];
+  const ids = records.filter(row => statuses.includes(row.status)).map(row => typeof row.event === 'object' ? row.event.id : row.event);
   return { id: { [archived || completed ? 'in' : 'not_in']: ids.length ? ids : [-1] } };
 }
 export const eventLifecycleAction: PayloadHandler = async req => {

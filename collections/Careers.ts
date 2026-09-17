@@ -36,7 +36,7 @@ export const Careers: CollectionConfig = {
   lockDocuments: { duration: 300 }, defaultSort: '-added',
   endpoints: [{ path: '/:id/lifecycle', method: 'post', handler: careerLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: careerQuickAction }],
   fields: ([
-    { name: '_status', label: 'Status', type: 'select', options: [], admin: { components: { Field: false, Cell: '/components/admin/CareerStatusCell#CareerPublicationStatusCell' }, disableBulkEdit: true } },
+    { name: '_status', label: 'Publication', type: 'select', options: [], admin: { components: { Field: false, Cell: '/components/admin/CareerStatusCell#CareerPublicationStatusCell' }, disableBulkEdit: true } },
     { name: 'careerWizardHeader', type: 'ui', admin: { components: { Field: '/components/admin/CareerEditor#CareerEditorHeader' }, disableListColumn: true, disableBulkEdit: true } },
     { name: 'title', type: 'text', required: true, maxLength: 120 },
     { name: 'company', type: 'text', required: true, maxLength: 80 },
@@ -61,7 +61,7 @@ export const Careers: CollectionConfig = {
     { name: 'slug', type: 'text', unique: true, index: true, admin: { readOnly: true, description: 'Stable public link ID, generated automatically.' } },
     { name: 'internalNotes', type: 'textarea', label: 'Internal notes', access: { read: ({ req }) => Boolean(req.user) }, admin: { description: 'Private to signed-in CMS users. Never shown on the website.' } },
     { name: 'sourceKey', type: 'text', unique: true, access: { read: ({ req }) => Boolean(req.user), update: () => false }, admin: { hidden: true } },
-    { name: 'lifecycle', type: 'text', virtual: true, admin: { components: { Field: false, Cell: '/components/admin/CareerLifecycleCell#CareerLifecycleCell' }, disableBulkEdit: true }, hooks: { afterRead: [async ({ data, req }: Parameters<FieldHook>[0]) => {
+    { name: 'lifecycle', type: 'text', virtual: true, label: 'Listing state', admin: { components: { Field: false, Cell: '/components/admin/CareerLifecycleCell#CareerLifecycleCell' }, disableBulkEdit: true }, hooks: { afterRead: [async ({ data, req }: Parameters<FieldHook>[0]) => {
       if (!req.user || !data?.id) return undefined;
       const record = (await req.payload.find({ collection: 'career-lifecycle', where: { career: { equals: data.id } }, limit: 1, depth: 0, req, overrideAccess: true })).docs[0];
       return record?.status ?? 'active';

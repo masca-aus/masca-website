@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { nextLifecycle, reportPeriodKey, csvCell } from '@/features/events/eventLifecycle';
+import { nextLifecycle, eventListFilter, reportPeriodKey, csvCell } from '@/features/events/eventLifecycle';
 
 describe('event lifecycle', () => {
  it('retains completion when archiving and restoring', () => {
@@ -21,4 +21,18 @@ describe('event lifecycle', () => {
   expect(csvCell('=SUM(A1)')).toBe('"\'=SUM(A1)"');
   expect(csvCell('Dinner, "hello"')).toBe('"Dinner, ""hello"""');
  });
+});
+
+it('reopens completed events and clears completion before a later archive/restore', () => {
+ const active = nextLifecycle({ status: 'completed', completedAt: 'yesterday' }, 'reopen', 'today');
+ expect(active).toMatchObject({ status: 'active', completedAt: null });
+ expect(nextLifecycle(nextLifecycle(active, 'archive', 'today'), 'restore', 'tomorrow').status).toBe('active');
+ expect(() => nextLifecycle({ status: 'archived' }, 'reopen', 'today')).toThrow();
+});
+it('keeps active, completed and archived event lists separate', async () => {
+ const payload = { find: async () => ({ docs: [{ event: 1, status: 'completed' }, { event: 2, status: 'archived' }, { event: 3, status: 'active' }] }) };
+ const filter = (eventView: string) => eventListFilter({ req: { payload, query: { eventView } } as never });
+ expect(await filter('current')).toEqual({ id: { not_in: [1, 2] } });
+ expect(await filter('completed')).toEqual({ id: { in: [1] } });
+ expect(await filter('archived')).toEqual({ id: { in: [2] } });
 });

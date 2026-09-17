@@ -3,7 +3,7 @@
 .masca-status-action__control[data-tone="approved"], .masca-status-action__control[data-tone="published"] { --status-ink: #176842; --status-fill: #eaf7ee; }
 .masca-status-action__control[data-tone="pending"] { --status-ink: #78520b; --status-fill: #fff5d8; }
 .masca-status-action__control[data-tone="rejected"] { --status-ink: #a33232; --status-fill: #fff0f0; }
-.masca-status-action__trigger { appearance: none; color: inherit; background: transparent; border: 0; border-radius: inherit; font: inherit; font-size: .8rem; font-weight: 650; height: 28px; min-height: 28px; line-height: 1.2; padding: .2rem 1.65rem .2rem 1.4rem; cursor: pointer; }
+.masca-status-action__trigger { white-space: nowrap; appearance: none; color: inherit; background: transparent; border: 0; border-radius: inherit; font: inherit; font-size: .8rem; font-weight: 650; height: 28px; min-height: 28px; line-height: 1.2; padding: .2rem 1.65rem .2rem 1.4rem; cursor: pointer; }
 .masca-status-action__trigger:focus-visible { outline: 3px solid #ffcc00; outline-offset: 3px; }
 .masca-status-action__trigger:disabled { cursor: wait; opacity: .7; }
 .masca-status-action__dot { position: absolute; left: .55rem; width: .3rem; height: .3rem; border-radius: 50%; background: currentColor; pointer-events: none; }

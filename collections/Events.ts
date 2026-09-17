@@ -98,7 +98,7 @@ export const Events: CollectionConfig = {
   lockDocuments: false,
   endpoints: [{ path: '/report', method: 'get', handler: eventReport }, { path: '/:id/lifecycle', method: 'post', handler: eventLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: eventQuickAction }],
   fields: [
-    { name: 'lifecycle', type: 'text', virtual: true, label: 'Lifecycle',
+    { name: 'lifecycle', type: 'text', virtual: true, label: 'Event stage',
       admin: { components: { Field: false, Cell: '/components/admin/EventLifecycleCell#EventLifecycleCell' }, disableBulkEdit: true },
       hooks: { afterRead: [async ({ data, req }: Parameters<FieldHook>[0]) => {
         if (!req.user || !data?.id) return undefined;
@@ -107,7 +107,7 @@ export const Events: CollectionConfig = {
       }] },
     },
     {
-      name: '_status', label: 'Status', type: 'select', options: [], // Payload supplies the built-in publication options during sanitization.
+      name: '_status', label: 'Publication', type: 'select', options: [], // Payload supplies the built-in publication options during sanitization.
       admin: { components: { Field: false, Cell: '/components/admin/EventStatusCell#EventPublicationStatusCell' }, disableBulkEdit: true },
     },
     {
@@ -229,6 +229,7 @@ export const Events: CollectionConfig = {
     }),
     {
       name: "reviewStatus",
+      label: "Review",
       type: "select",
       required: true,
       defaultValue: "pending",

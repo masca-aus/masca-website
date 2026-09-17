@@ -5,8 +5,9 @@ import { useConfig } from '@payloadcms/ui';
 import { useRouter } from 'next/navigation';
 import './eventStatusCell.css';
 import { EventActionMenu } from './EventActionMenu';
+import { publicationActions } from './publicationActions';
 
-type CellProps = { cellData?: unknown; rowData?: { id?: number | string; title?: string } };
+type CellProps = { cellData?: unknown; rowData?: { id?: number | string; title?: string; reviewStatus?: string; _status?: string } };
 type StatusField = 'reviewStatus' | '_status';
 const options = {
   reviewStatus: [['pending', 'Pending'], ['approved', 'Approved'], ['rejected', 'Rejected']],
@@ -50,8 +51,8 @@ function EventStatusSelect({ cellData, rowData, field }: CellProps & { field: St
     } finally { pending.delete(key); notify(); }
   };
   return <div className="masca-status-action" onClick={event => event.stopPropagation()}>
-    <EventActionMenu label={label} text={options[field].find(([value]) => value === current)?.[1] || (current === 'changed' ? 'Draft changes' : current)} tone={current}
-      options={options[field].map(([value, label]) => ({ value, label }))} current={current} disabled={busy || id == null} busy={busy} onChoose={value => void change(value)} />
+    <EventActionMenu label={label} text={options[field].find(([value]) => value === current)?.[1] || (current === 'changed' ? 'Unpublished edits' : current)} tone={current}
+      options={field === '_status' ? publicationActions(current).map(action => action.value === 'published' && rowData?.reviewStatus && rowData.reviewStatus !== 'approved' ? { ...action, label: 'Approve & publish' } : action) : options[field].map(([value, label]) => ({ value, label: value !== 'approved' ? `${label} (unpublish)` : label }))} current={field === '_status' ? undefined : current} disabled={busy || id == null} busy={busy} onChoose={value => void change(value)} />
     {busy && <span className="masca-status-action__feedback" role="status">Saving…</span>}
     {error && <div className="masca-status-action__error" role="alert">{error} <a href={`${config.routes.admin}/collections/events/${key}`}>Edit event</a></div>}
   </div>;

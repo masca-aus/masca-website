@@ -5,6 +5,7 @@ import { useConfig } from '@payloadcms/ui';
 import { useRouter } from 'next/navigation';
 import './eventStatusCell.css';
 import { EventActionMenu } from './EventActionMenu';
+import { publicationActions } from './publicationActions';
 
 type CellProps = { cellData?: unknown; rowData?: { id?: number | string; title?: string } };
 type StatusField = '_status';
@@ -49,8 +50,8 @@ function CareerStatusSelect({ cellData, rowData, field }: CellProps & { field: S
     } finally { pending.delete(key); notify(); }
   };
   return <div className="masca-status-action" onClick={event => event.stopPropagation()}>
-    <EventActionMenu label={label} text={options[field].find(([value]) => value === current)?.[1] || (current === 'changed' ? 'Draft changes' : current)} tone={current}
-      options={options[field].map(([value, label]) => ({ value, label }))} current={current} disabled={busy || id == null} busy={busy} onChoose={value => void change(value)} />
+    <EventActionMenu label={label} text={options[field].find(([value]) => value === current)?.[1] || (current === 'changed' ? 'Unpublished edits' : current)} tone={current}
+      options={publicationActions(current)} disabled={busy || id == null} busy={busy} onChoose={value => void change(value)} />
     {busy && <span className="masca-status-action__feedback" role="status">Saving…</span>}
     {error && <div className="masca-status-action__error" role="alert">{error} <a href={`${config.routes.admin}/collections/careers/${key}`}>Edit opportunity</a></div>}
   </div>;

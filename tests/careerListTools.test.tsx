@@ -14,7 +14,7 @@ it('selects the requested career list with accessible tabs', () => {
 it('sends lifecycle changes separately from draft content', async () => {
   const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) }); vi.stubGlobal('fetch', fetcher);
   render(<CareerLifecycleCell rowData={{ id: 12, title: 'Engineer' }} cellData="closed" />);
-  fireEvent.click(screen.getByRole('button', { name: 'Lifecycle for Engineer: Closed' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Listing state for Engineer: Closed' }));
   fireEvent.click(screen.getByRole('menuitem', { name: 'Reopen opportunity' }));
   await waitFor(() => expect(h.refresh).toHaveBeenCalledOnce());
   expect(fetcher).toHaveBeenCalledWith('/api/careers/12/lifecycle', expect.objectContaining({ method: 'POST', body: JSON.stringify({ action: 'reopen' }) }));

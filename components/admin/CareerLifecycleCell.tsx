@@ -20,7 +20,7 @@ export function CareerLifecycleCell({ cellData, rowData }: { cellData?: unknown;
     } catch (cause) { setError((cause as Error).message); } finally { setBusy(false); }
   }
   return <div className="masca-status-action">
-    <EventActionMenu label={`Lifecycle for ${rowData?.title || 'opportunity'}`} text={status === 'closed' ? 'Closed' : status === 'archived' ? 'Archived' : 'Active'}
+    <EventActionMenu label={`Listing state for ${rowData?.title || 'opportunity'}`} text={status === 'closed' ? 'Closed' : status === 'archived' ? 'Archived' : 'Active'}
       tone={status === 'closed' ? 'approved' : status} disabled={busy || refreshing || rowData?.id == null} busy={busy || refreshing} onChoose={action => void run(action)}
       options={[
         ...(status === 'active' ? [{ value: 'close', label: 'Close opportunity' }] : []),
