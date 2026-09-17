@@ -147,6 +147,9 @@ export default buildConfig({
       slug: "users",
       admin: {
         useAsTitle: "email",
+        components: {
+          beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
+        },
       },
       access: {
         // Payload <=3.88 permits any authenticated user to unlock another
@@ -161,6 +164,12 @@ export default buildConfig({
     },
     {
       slug: "media",
+      admin: {
+        useAsTitle: "filename",
+        components: {
+          beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
+        },
+      },
       // Anyone may read media metadata (the files themselves are public-bucket
       // objects anyway); only the logged-in admin can create/update/delete.
       access: {
@@ -203,6 +212,9 @@ export default buildConfig({
       admin: {
         useAsTitle: "name",
         defaultColumns: ["name", "role", "department", "year"],
+        components: {
+          beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
+        },
       },
       // Anyone may read (the public site renders from this collection); only
       // the logged-in admin can create/update/delete.
@@ -308,6 +320,9 @@ export default buildConfig({
       admin: {
         useAsTitle: "name",
         defaultColumns: ["name", "date"],
+        components: {
+          beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
+        },
       },
       // Anyone may read (the public site renders the marquee from this
       // collection); only the logged-in admin can create/update/delete.

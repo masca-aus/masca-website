@@ -40,6 +40,7 @@ export const Events: CollectionConfig = {
     useAsTitle: "title",
     hideAPIURL: true,
     components: {
+      beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
       views: {
         edit: {
           versions: {
