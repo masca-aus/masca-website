@@ -59,7 +59,7 @@ export const Events: CollectionConfig = {
       "Add events for MASCA students and review submissions before they appear on the website. An event appears publicly only after it is approved and published.",
     hideAPIURL: true,
     components: {
-      beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink", "/components/admin/EventListTools#EventListTools"],
+      beforeList: ["/components/admin/EventListTools#EventListTools"],
       edit: {
         beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
         SaveDraftButton: "/components/admin/EventSaveController#EventSaveController",

@@ -24,9 +24,9 @@ export function EventListTools() {
     } catch (cause) { setError((cause as Error).message); } finally { setBusy(false); }
   }
   return <div className="masca-event-tools">
-    <div className="masca-event-tools__bar"><nav aria-label="Event lists">
+    <div className="masca-event-tools__bar"><div className="masca-event-tools__navigation"><Link className="masca-event-tools__back" href="/admin">← Dashboard</Link><nav aria-label="Event lists">
       {[['current','Events'], ['completed','Completed'], ['archived','Archived']].map(([key, label]) => <Link key={key} href={`/admin/collections/events?eventView=${key}`} aria-current={view === key ? 'page' : undefined}>{label}</Link>)}
-    </nav><button className="masca-action masca-action--secondary" aria-expanded={reports} onClick={() => setReports(!reports)}>Reports</button></div>
+    </nav></div><button className="masca-action masca-action--secondary" aria-expanded={reports} onClick={() => setReports(!reports)}>Reports</button></div>
     {view === 'archived' && <p>Archived events are kept for your records and reports. Restore an event to return it to the other lists.</p>}
     {reports && <section className="masca-event-report" aria-label="Event reports">
       <h2>Event reports</h2><p>Includes archived records, grouped by the event’s local start date. Uses the latest saved details. Events without a start date are excluded.</p>
