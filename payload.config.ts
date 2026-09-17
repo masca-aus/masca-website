@@ -236,6 +236,7 @@ export default buildConfig({
     },
     {
       slug: "committee",
+      versions: { maxPerDoc: 0 },
       admin: {
         useAsTitle: "name",
         hideAPIURL: true,
@@ -248,13 +249,14 @@ export default buildConfig({
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
             SaveButton: "/components/admin/CommitteeEditor#CommitteeSaveControl",
           },
-          views: { edit: { default: { Component: "/components/admin/CommitteeEditor#CommitteeEditorView" } } },
+          views: { edit: { default: { Component: "/components/admin/CommitteeEditor#CommitteeEditorView" }, versions: { tab: { label: "Change history" } } } },
         },
       },
       // Anyone may read (the public site renders from this collection); only
       // the logged-in admin can create/update/delete.
       access: {
         read: () => true,
+        readVersions: ({ req }) => Boolean(req.user),
       },
       // Drag-and-drop ordering in the admin list view via Payload's hidden
       // `_order` key. The sequence is global across all years — filter the

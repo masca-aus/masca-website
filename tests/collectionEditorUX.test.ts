@@ -92,3 +92,13 @@ describe("collection editor UX", () => {
     }
   });
 });
+
+ it("retains private committee change history without introducing drafts", async () => {
+   const config = await configPromise;
+   const committee = config.collections.find(c => c.slug === 'committee')!;
+   expect(committee.versions).toMatchObject({ maxPerDoc: 0 });
+   expect(committee.versions && committee.versions.drafts).toBeFalsy();
+   expect(committee.admin.components?.views?.edit?.versions?.tab?.label).toBe('Change history');
+   expect(await committee.access.readVersions!({ req: { user: null } } as never)).toBe(false);
+   expect(await committee.access.readVersions!({ req: { user: { id: 1 } } } as never)).toBe(true);
+ });
