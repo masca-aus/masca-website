@@ -17,6 +17,14 @@ html[data-theme="light"] {
   --theme-bg: #ffffff;
 }
 
+/* Wide forms are easier to scan when they share the dashboard's centred rhythm. */
+@media (min-width: 64rem) {
+  .collection-edit:not(.collection-edit--is-live-previewing) .document-fields {
+    max-width: 76rem;
+    margin-inline: auto;
+  }
+}
+
 .masca-admin-theme-toggle {
   display: inline-flex;
   align-items: center;
