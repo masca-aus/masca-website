@@ -4,13 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
-const collectionLabels: Record<string, string> = {
-  committee: "Committee",
-  events: "Events",
-  media: "Media",
-  sponsors: "Sponsors",
-  users: "Users",
-};
+import { adminBackTarget } from './adminBackTarget';
 
 export function DocumentBackLink() {
   const pathname = usePathname();
@@ -30,15 +24,19 @@ export function DocumentBackLink() {
     observer.observe(controls, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, [pathname]);
-  const collectionSlug = pathname.split("/").at(3);
-  const collectionLabel = collectionSlug ? collectionLabels[collectionSlug] : undefined;
-
-  if (!collectionSlug || !collectionLabel) return null;
+  const target = adminBackTarget(pathname);
+  if (!target) return null;
 
   return (
-    <Link ref={linkRef} className="masca-document-back-link" href={`/admin/collections/${collectionSlug}`}>
+    <Link ref={linkRef} className="masca-document-back-link" href={target.href}>
       <span aria-hidden="true">←</span>
-      Back to {collectionLabel}
+      {target.label}
     </Link>
   );
+}
+
+export function CollectionBackLink() {
+  const pathname = usePathname();
+  if (adminBackTarget(pathname)?.href !== "/admin") return null;
+  return <div className="masca-collection-back"><DocumentBackLink /></div>;
 }

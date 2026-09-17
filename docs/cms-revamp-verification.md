@@ -86,3 +86,13 @@ The dashboard replaces the banner and card grid with a compact heading, one Crea
 Local browser inspection used isolated services and verified both screens in light and dark themes, loaded event poster and accessible link/button names. Fifteen focused dashboard/editor tests passed, typecheck passed, lint passed with eight existing warnings, and the production build passed. Responsive layouts are implemented; physical-phone verification remains outstanding.
 
 The full suite with two workers remains at 327 passing tests and the five known Careers failures. No Careers or publication logic was changed.
+
+## Standard return navigation and committee wizard
+
+All five collection lists now provide Back to dashboard; document screens retain Back to their collection, and Account also has a dashboard return link. Links share styling and content gutters. Return links are suppressed inside dialogs so the native Close control remains the way back from media selection/editing.
+
+Committee creation now uses Identity, Role and term, Portrait and profile, and Review and save steps. It shares the event progress bar, expanding step navigation, entrance animation, focus treatment, button placement and responsive styles. Existing records open the review with section Edit actions and a compact portrait. Payload fields stay mounted, database paths and ordering are unchanged, and saving remains explicit through Payload's native SaveButton and form handling. Required fields and term/profile formats are checked before advancing; server field errors return to their relevant step. The manual admin import map includes the new components.
+
+Browser checks against isolated local services verified required-field blocking, all four steps, native media selection, successful creation and reopening of a disposable committee record, portrait rendering, light/dark themes, committee ordering controls, and Events/Committee return links. The optimized production build displayed Payload's Leave without saving warning when Cancel was selected after editing; the temporary unsaved edit was discarded. No production content was written. Physical-phone testing remains outstanding.
+
+Twenty focused committee/event/navigation tests passed. Typecheck and production build passed; lint completed with eight existing warnings. The full suite has 335 passing tests and the same five known Careers failures. Updated the two older collection-layout expectations to account for the new navigation and visual-only wizard fields.

@@ -16,7 +16,7 @@ describe("collection editor UX", () => {
       events:
         "Add events for MASCA students and review submissions before they appear on the website. An event appears publicly only after it is approved and published.",
       committee:
-        "Update committee profiles in one page. Changes appear on the website when you Save.",
+        "Create and update committee profiles step by step. Changes appear on the website when you Save.",
       media: "Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.",
       sponsors: "Update sponsor details and logos in one page. Changes appear on the homepage when you Save.",
       users: "Manage the people who can sign in and update MASCA website content.",
@@ -26,7 +26,7 @@ describe("collection editor UX", () => {
       const collection = config.collections.find((candidate) => candidate.slug === slug);
 
       expect(collection?.admin?.description).toBe(description);
-      expect(collection?.admin?.components?.beforeList).toBeUndefined();
+      expect(collection?.admin?.components?.beforeList).toContain("/components/admin/DocumentBackLink#CollectionBackLink");
     }
   });
 
@@ -56,7 +56,7 @@ describe("collection editor UX", () => {
     const config = await configPromise;
 
     for (const [slug, expectedSections] of [
-      ["committee", ["identitySection", "roleAndTermSection", "portraitAndProfileSection"]],
+      ["committee", ["committeeWizardHeader", "identitySection", "roleAndTermSection", "portraitAndProfileSection", "committeeWizardFooter"]],
       ["sponsors", ["sponsorDetailsSection", "logoSection"]],
     ]) {
       const collection = config.collections.find((candidate) => candidate.slug === slug);

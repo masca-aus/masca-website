@@ -6,9 +6,10 @@ import { revalidatePath } from "next/cache";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { resendAdapter } from "@payloadcms/email-resend";
 import { s3Storage } from "@payloadcms/storage-s3";
-import { buildConfig } from "payload";
+import { buildConfig, type Field } from "payload";
 import sharp from "sharp";
 
+import { COMMITTEE_STEPS } from "./features/committee/committeeEditor";
 import { Events } from "./collections/Events.ts";
 import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
 import { editorSection } from "./utils/editorSection.ts";
@@ -153,6 +154,7 @@ export default buildConfig({
         useAsTitle: "email",
         description: "Manage the people who can sign in and update MASCA website content.",
         components: {
+          beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
           },
@@ -175,6 +177,7 @@ export default buildConfig({
         useAsTitle: "filename",
         description: "Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.",
         components: {
+          beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
           },
@@ -231,13 +234,17 @@ export default buildConfig({
       slug: "committee",
       admin: {
         useAsTitle: "name",
+        hideAPIURL: true,
         defaultColumns: ["name", "role", "department", "year"],
         description:
-          "Update committee profiles in one page. Changes appear on the website when you Save.",
+          "Create and update committee profiles step by step. Changes appear on the website when you Save.",
         components: {
+          beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
+            SaveButton: "/components/admin/CommitteeEditor#CommitteeSaveControl",
           },
+          views: { edit: { default: { Component: "/components/admin/CommitteeEditor#CommitteeEditorView" } } },
         },
       },
       // Anyone may read (the public site renders from this collection); only
@@ -254,6 +261,7 @@ export default buildConfig({
       // Fields mirror the shape the committee page has always rendered, and
       // are validated here so bad entries are rejected at save time.
       fields: [
+        { name: "committeeWizardHeader", type: "ui", admin: { components: { Field: "/components/admin/CommitteeEditor#CommitteeEditorHeader" }, disableListColumn: true, disableBulkEdit: true } },
         editorSection({
           title: "Identity",
           description: "Introduce the member as they should appear in the public directory.",
@@ -350,7 +358,11 @@ export default buildConfig({
             }
           },
         },
-      ],
+        { name: "committeeWizardFooter", type: "ui", admin: { components: { Field: "/components/admin/CommitteeEditor#CommitteeEditorFooter" }, disableListColumn: true, disableBulkEdit: true } },
+      ].map((field) => {
+        const step = COMMITTEE_STEPS.findIndex(section => (section.fields as readonly string[]).includes(field.name ?? ""));
+        return step < 0 ? field : { ...field, admin: { ...field.admin, className: `masca-committee-step masca-committee-step-${step}` } };
+      }) as Field[],
       hooks: {
         afterChange: [revalidateCommitteePages],
         afterDelete: [revalidateCommitteePages],
@@ -363,6 +375,7 @@ export default buildConfig({
         defaultColumns: ["name", "date"],
         description: "Update sponsor details and logos in one page. Changes appear on the homepage when you Save.",
         components: {
+          beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
           },

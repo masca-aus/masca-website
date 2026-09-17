@@ -1,3 +1,5 @@
+import { CommitteeEditorView, CommitteeEditorHeader, CommitteeEditorFooter, CommitteeSaveControl } from '../../../components/admin/CommitteeEditor'
+import { CollectionBackLink } from '../../../components/admin/DocumentBackLink'
 import { EventDateRangeField } from '../../../components/admin/EventDateRangeField'
 import { EventPublicationStatusCell } from '../../../components/admin/EventStatusCell'
 import { EventEditorView, EventPublishControl, EventUnpublishControl } from '../../../components/admin/EventEditorView'
@@ -16,6 +18,11 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/components/admin/DocumentBackLink#CollectionBackLink": CollectionBackLink,
+  "/components/admin/CommitteeEditor#CommitteeEditorView": CommitteeEditorView,
+  "/components/admin/CommitteeEditor#CommitteeEditorHeader": CommitteeEditorHeader,
+  "/components/admin/CommitteeEditor#CommitteeEditorFooter": CommitteeEditorFooter,
+  "/components/admin/CommitteeEditor#CommitteeSaveControl": CommitteeSaveControl,
   "/components/admin/EventDateRangeField#EventDateRangeField": EventDateRangeField,
   "/components/admin/EventStatusCell#EventPublicationStatusCell": EventPublicationStatusCell,
   "/components/admin/EventEditorView#EventEditorView": EventEditorView,

@@ -341,3 +341,9 @@ html[data-theme="dark"] .masca-event-status-badge--rejected {
 
 html[data-theme="dark"] .masca-action--primary, html[data-theme="dark"] .masca-wizard-primary { background: #292780; border-color: #6563bd; }
 html[data-theme="dark"] .masca-action--primary:hover, html[data-theme="dark"] .masca-wizard-primary:hover:not(:disabled) { background: #383694; }
+
+.masca-collection-back { width: 100%; max-width: 96rem; margin: 1rem auto 1.25rem; padding-inline: var(--gutter-h); }
+
+.masca-account-back { width: 100%; }
+
+[role="dialog"] .masca-collection-back, [role="dialog"] .masca-document-back-link { display: none; }

@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
+import { CollectionBackLink } from "./DocumentBackLink";
 import { adminNavigationPath, isAdminNavigationTarget } from "./adminNavigation";
 
 type Props = {
@@ -62,6 +63,7 @@ export function AdminNavigationEnhancements({ children }: Props) {
   return (
     <>
       {isNavigating ? <span aria-hidden="true" className="masca-admin-route-progress" /> : null}
+      {pathname === "/admin/account" && <div className="masca-account-back"><CollectionBackLink /></div>}
       {children}
     </>
   );

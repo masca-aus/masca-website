@@ -7,8 +7,12 @@ export type EventPoster = { id?: number | string; url?: string; alt?: string; fi
 
 /** Keep a short-lived preview per editor; revisiting the media step always refreshes it. */
 export function useEventPoster(step: number): EventPoster | null {
+  return useMediaPreview(step, 'poster', 4);
+}
+
+export function useMediaPreview(step: number, field: string, previewStep: number): EventPoster | null {
   const { config } = useConfig();
-  const value = useFormFields(([fields]) => fields.poster?.value);
+  const value = useFormFields(([fields]) => fields[field]?.value);
   const id = value && typeof value === 'object' && 'id' in value ? value.id : value;
   const key = id ? `${config.routes.api}/media/${encodeURIComponent(String(id))}` : '';
   const cacheRef = useRef<{ key: string; expires: number } | null>(null);
@@ -16,7 +20,7 @@ export function useEventPoster(step: number): EventPoster | null {
 
   useEffect(() => {
     if (step === 2) cacheRef.current = null;
-    if (step !== 4 || !key || (cacheRef.current?.key === key && cacheRef.current.expires > Date.now())) return;
+    if (step !== previewStep || !key || (cacheRef.current?.key === key && cacheRef.current.expires > Date.now())) return;
     const controller = new AbortController();
     // Filename is required by the storage plugin when it generates media URLs.
     const select = 'depth=0&select[filename]=true&select[url]=true&select[alt]=true&select[sizes]=true';
@@ -29,7 +33,7 @@ export function useEventPoster(step: number): EventPoster | null {
       })
       .catch(() => { if (!controller.signal.aborted) setPoster({ key, value: null }); });
     return () => controller.abort();
-  }, [key, step]);
+  }, [key, step, previewStep]);
 
   return poster?.key === key ? poster.value : null;
 }
