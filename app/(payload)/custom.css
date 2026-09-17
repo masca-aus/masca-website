@@ -17,6 +17,48 @@ html[data-theme="light"] {
   --theme-bg: #ffffff;
 }
 
+.masca-admin-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: 999px;
+  color: var(--theme-text);
+  background: var(--theme-elevation-0);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.masca-admin-theme-toggle:hover {
+  border-color: var(--masca-blue);
+  color: var(--masca-blue);
+  background: var(--masca-blue-soft);
+}
+
+.masca-admin-theme-toggle:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--masca-yellow) 75%, transparent);
+  outline-offset: 2px;
+}
+
+.masca-admin-theme-toggle__icon {
+  display: grid;
+  width: 1rem;
+  height: 1rem;
+  place-items: center;
+  font-size: 1rem;
+}
+
+html[data-theme="dark"] .masca-admin-theme-toggle:hover {
+  border-color: #aeb8ff;
+  color: #eef0ff;
+  background: #272a47;
+}
+
 .masca-admin-logo {
   display: flex;
   flex-direction: column;
@@ -68,6 +110,91 @@ html[data-theme="light"] {
 ::selection {
   color: #fff;
   background: var(--masca-red);
+}
+
+.masca-event-review-decision {
+  margin-top: 2rem;
+  padding: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--masca-blue) 32%, var(--theme-elevation-200));
+  border-left: 5px solid var(--masca-blue);
+  border-radius: var(--style-radius-m);
+  background: linear-gradient(135deg, var(--masca-blue-soft), var(--theme-elevation-0) 62%);
+  box-shadow: 0 8px 22px rgb(1 0 102 / 7%);
+}
+
+.masca-event-review-decision .field-label {
+  color: var(--masca-blue);
+  font-weight: 750;
+}
+
+.masca-event-review-decision .description {
+  max-width: 42rem;
+  color: var(--theme-elevation-700);
+}
+
+.masca-event-review-decision .rs__control {
+  border-color: color-mix(in srgb, var(--masca-blue) 45%, var(--theme-elevation-200));
+  background: var(--theme-elevation-0);
+}
+
+html[data-theme="dark"] .masca-event-review-decision {
+  border-color: #4752a3;
+  border-left-color: #aeb8ff;
+  background: linear-gradient(135deg, #202348, var(--theme-elevation-0) 62%);
+  box-shadow: none;
+}
+
+html[data-theme="dark"] .masca-event-review-decision .field-label {
+  color: #e7e9ff;
+}
+
+.masca-event-status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.masca-event-status-badge--approved {
+  border-color: #9edbb5;
+  color: #126a3a;
+  background: #e5f7ec;
+}
+
+.masca-event-status-badge--pending {
+  border-color: #ead28c;
+  color: #795600;
+  background: #fff7da;
+}
+
+.masca-event-status-badge--rejected {
+  border-color: #f0b4b4;
+  color: #a51d1d;
+  background: #fff0f0;
+}
+
+html[data-theme="dark"] .masca-event-status-badge--approved {
+  border-color: #337852;
+  color: #b7f4ca;
+  background: #173d29;
+}
+
+html[data-theme="dark"] .masca-event-status-badge--pending {
+  border-color: #80652b;
+  color: #ffe6a2;
+  background: #423516;
+}
+
+html[data-theme="dark"] .masca-event-status-badge--rejected {
+  border-color: #854343;
+  color: #ffc2c2;
+  background: #4c2020;
 }
 
 .masca-admin-loading {

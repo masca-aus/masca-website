@@ -127,6 +127,7 @@ export default buildConfig({
     },
     components: {
       providers: ["/components/admin/AdminNavigationEnhancements#AdminNavigationEnhancements"],
+      actions: ["/components/admin/ThemeToggle#ThemeToggle"],
       graphics: {
         Logo: "/components/admin/MascaBrand#MascaLogo",
         Icon: "/components/admin/MascaBrand#MascaIcon",

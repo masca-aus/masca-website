@@ -113,17 +113,6 @@ export const Events: CollectionConfig = {
       relationTo: "media",
     },
     {
-      name: "reviewStatus",
-      type: "select",
-      required: true,
-      defaultValue: "pending",
-      options: [
-        { label: "Pending", value: "pending" },
-        { label: "Approved", value: "approved" },
-        { label: "Rejected", value: "rejected" },
-      ],
-    },
-    {
       name: "contactName",
       type: "text",
       required: true,
@@ -151,6 +140,24 @@ export const Events: CollectionConfig = {
       type: "date",
       access: {
         read: isAuthenticatedEventFieldRead,
+      },
+    },
+    {
+      name: "reviewStatus",
+      type: "select",
+      required: true,
+      defaultValue: "pending",
+      options: [
+        { label: "Pending", value: "pending" },
+        { label: "Approved", value: "approved" },
+        { label: "Rejected", value: "rejected" },
+      ],
+      admin: {
+        className: "masca-event-review-decision",
+        description: "Final workflow decision. Choose Approved or Rejected after reviewing the event.",
+        components: {
+          Cell: "/components/admin/EventStatusCell#EventReviewStatusCell",
+        },
       },
     },
   ],

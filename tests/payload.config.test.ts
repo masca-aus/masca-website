@@ -27,6 +27,14 @@ vi.mock("@payloadcms/db-postgres", async () => {
 import configPromise from "@payload-config";
 
 describe("payload config", () => {
+  it("adds a persistent light and dark mode toggle to the admin top bar", async () => {
+    const config = await configPromise;
+
+    expect(config.admin.components?.actions).toContain(
+      "/components/admin/ThemeToggle#ThemeToggle",
+    );
+  });
+
   it("mounts the admin panel at /admin backed by the users auth collection", async () => {
     const config = await configPromise;
     expect(config.routes.admin).toBe("/admin");

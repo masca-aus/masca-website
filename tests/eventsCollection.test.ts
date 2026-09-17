@@ -89,6 +89,23 @@ describe("events collection", () => {
     ]);
   });
 
+  it("puts the final review decision last and gives it an editor-facing treatment", async () => {
+    const events = await getEventsCollection();
+    const reviewStatus = await getField("reviewStatus");
+    const fieldNames = events.fields.flatMap((field) =>
+      "name" in field && typeof field.name === "string" ? [field.name] : [],
+    );
+
+    expect(fieldNames.indexOf("reviewStatus")).toBeGreaterThan(fieldNames.indexOf("reviewedAt"));
+    expect("admin" in reviewStatus && reviewStatus.admin).toMatchObject({
+      className: "masca-event-review-decision",
+      description: "Final workflow decision. Choose Approved or Rejected after reviewing the event.",
+      components: {
+        Cell: "/components/admin/EventStatusCell#EventReviewStatusCell",
+      },
+    });
+  });
+
   it("allows authenticated CMS users to fully manage events", async () => {
     const events = await getEventsCollection();
     const authenticated = { req: { user: { id: 1 } } } as never;
