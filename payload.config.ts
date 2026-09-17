@@ -11,6 +11,7 @@ import sharp from "sharp";
 
 import { Events } from "./collections/Events.ts";
 import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
+import { editorSection } from "./utils/editorSection.ts";
 
 export function createDatabasePoolConfig(
   connectionString: string | undefined,
@@ -230,6 +231,10 @@ export default buildConfig({
       // Fields mirror the shape the committee page has always rendered, and
       // are validated here so bad entries are rejected at save time.
       fields: [
+        editorSection({
+          title: "Public details",
+          description: "These details appear in the public MASCA committee directory.",
+        }),
         {
           name: "name",
           type: "text",
@@ -269,12 +274,6 @@ export default buildConfig({
           },
         },
         {
-          name: "portrait",
-          type: "upload",
-          relationTo: "media",
-          required: true,
-        },
-        {
           name: "year",
           type: "text",
           required: true,
@@ -285,6 +284,24 @@ export default buildConfig({
             description:
               'Committee term, e.g. "2026/2027" — drives the year tabs on the page.',
           },
+        },
+        {
+          name: "bio",
+          type: "textarea",
+          admin: {
+            description:
+            "Shown in the expanded modal on the committee page. Optional — the modal simply omits it when empty.",
+          },
+        },
+        editorSection({
+          title: "Images and links",
+          description: "Choose the member portrait and add an optional LinkedIn profile.",
+        }),
+        {
+          name: "portrait",
+          type: "upload",
+          relationTo: "media",
+          required: true,
         },
         {
           name: "linkedin_url",
@@ -299,14 +316,6 @@ export default buildConfig({
             } catch {
               return "Must be a full URL, e.g. https://www.linkedin.com/in/…";
             }
-          },
-        },
-        {
-          name: "bio",
-          type: "textarea",
-          admin: {
-            description:
-              "Shown in the expanded modal on the committee page. Optional — the modal simply omits it when empty.",
           },
         },
       ],
@@ -334,6 +343,10 @@ export default buildConfig({
       // Fields mirror the shape the marquee has always rendered, but the logo
       // is now an upload into Media instead of a hand-pasted URL.
       fields: [
+        editorSection({
+          title: "Public details",
+          description: "The sponsor name and date shown with MASCA's partner recognition.",
+        }),
         {
           name: "name",
           type: "text",
@@ -343,19 +356,23 @@ export default buildConfig({
           },
         },
         {
-          name: "logo",
-          type: "upload",
-          relationTo: "media",
-          required: true,
-        },
-        {
           name: "date",
           type: "date",
           required: true,
           admin: {
             description:
-              "When they came on board — newest sponsors lead the marquee.",
+            "When they came on board — newest sponsors lead the marquee.",
           },
+        },
+        editorSection({
+          title: "Images and links",
+          description: "Choose the sponsor logo that will appear on the MASCA homepage.",
+        }),
+        {
+          name: "logo",
+          type: "upload",
+          relationTo: "media",
+          required: true,
         },
       ],
       hooks: {

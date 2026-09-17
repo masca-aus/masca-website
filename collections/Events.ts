@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache.js";
 import type { Access, CollectionConfig, FieldAccess, Where } from "payload";
 
 import { EVENT_STATES } from "../features/events/eventSubmission.ts";
+import { editorSection } from "../utils/editorSection.ts";
 
 export const isPublicEventRead = ({
   req,
@@ -69,6 +70,10 @@ export const Events: CollectionConfig = {
   },
   lockDocuments: false,
   fields: [
+    editorSection({
+      title: "Public details",
+      description: "Information that visitors can see once this event is approved and published.",
+    }),
     {
       name: "title",
       type: "text",
@@ -104,6 +109,10 @@ export const Events: CollectionConfig = {
       required: true,
       options: EVENT_STATES.map(({ label, value }) => ({ label, value })),
     },
+    editorSection({
+      title: "Images and links",
+      description: "Add the event poster and the website where students can find tickets or more details.",
+    }),
     {
       name: "ticketURL",
       type: "text",
@@ -113,6 +122,10 @@ export const Events: CollectionConfig = {
       type: "upload",
       relationTo: "media",
     },
+    editorSection({
+      title: "Internal details",
+      description: "These details help the MASCA team follow up and are never shown on the public website.",
+    }),
     {
       name: "contactName",
       type: "text",
@@ -143,6 +156,11 @@ export const Events: CollectionConfig = {
         read: isAuthenticatedEventFieldRead,
       },
     },
+    editorSection({
+      title: "Review and publish",
+      description: "Final workflow decision. Approve or reject after review; approved events still need to be published before they appear on the website.",
+      tone: "decision",
+    }),
     {
       name: "reviewStatus",
       type: "select",

@@ -30,7 +30,7 @@ Every collection document screen will have consistent, labelled sections:
 3. **Internal details**: private notes, contact details, or administration-only fields.
 4. **Review and publish**: the final decision or save step, only where the workflow warrants it.
 
-Payload groups will provide the visual hierarchy and preserve all current fields and values. Relevant descriptions will explain the outcome of the section in plain language. Empty or optional sections will not be added merely for uniformity.
+Payload UI fields will provide the visual hierarchy while keeping every stored field flat and unchanged. Relevant descriptions will explain the outcome of the section in plain language. Empty or optional sections will not be added merely for uniformity.
 
 ## Event moderation
 
@@ -41,7 +41,7 @@ The review section will state this distinction plainly, so editors understand th
 ## Reusable implementation pieces
 
 - Collection intro/header component, configured with collection-specific copy and primary action.
-- Reusable section group styling for Payload field groups.
+- Reusable section-header styling for Payload UI fields.
 - Existing `EventReviewStatusCell` for event list badges, extended only if other genuine statuses need similar treatment.
 - Shared CSS tokens for light and dark modes, reduced-motion safe and keyboard-accessible.
 

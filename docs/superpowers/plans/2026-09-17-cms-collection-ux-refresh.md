@@ -4,7 +4,7 @@
 
 **Goal:** Make each existing Payload collection list and document form intuitive for non-technical MASCA committee editors without changing data, workflow rules, or permissions.
 
-**Architecture:** Add reusable collection guidance and safe back-navigation components, then organize existing fields with Payload groups. Shared CSS will make the list and document layouts clear in light and dark themes; no database or public-site logic changes.
+**Architecture:** Add reusable collection guidance and safe back-navigation components, then place non-persistent Payload UI field headers between existing flat fields. Shared CSS will make the list and document layouts clear in light and dark themes; no database or public-site logic changes.
 
 **Tech Stack:** Next.js App Router, Payload CMS 3, React, TypeScript, Vitest, CSS.
 
@@ -87,32 +87,33 @@ Run `git add components/admin/CollectionIntro.tsx app/'(payload)'/admin/importMa
 - Modify: `collections/Events.ts`, `payload.config.ts`
 - Modify: `tests/collectionEditorUX.test.ts`, `tests/eventsCollection.test.ts`
 
-**Interfaces:** Payload groups named `publicDetails`, `imagesAndLinks`, `internalDetails`, and `reviewAndPublish` organize existing nested fields. Their visible labels are Public details, Images and links, Internal details, and Review and publish.
+**Interfaces:** Non-persistent Payload UI fields named `publicDetailsSection`, `imagesAndLinksSection`, `internalDetailsSection`, and `reviewAndPublishSection` add visual hierarchy without nesting existing fields. Their visible labels are Public details, Images and links, Internal details, and Review and publish.
 
 - [ ] **Step 1: Write failing tests**
 
 ```ts
-it("groups Events into editor-friendly sections", async () => {
+it("adds visual-only editor-friendly sections to Events", async () => {
   const events = await getCollection("events");
-  expect(events.fields.map((field) => field.name)).toEqual([
-    "publicDetails", "imagesAndLinks", "internalDetails", "reviewAndPublish",
+  expect(events.fields.filter((field) => field.type === "ui").map((field) => field.name)).toEqual([
+    "publicDetailsSection", "imagesAndLinksSection", "internalDetailsSection", "reviewAndPublishSection",
   ]);
 });
 
 it("keeps the review decision in the final event section", async () => {
   const events = await getCollection("events");
-  const group = events.fields.find((field) => field.name === "reviewAndPublish");
-  expect(group?.fields.map((field) => field.name)).toContain("reviewStatus");
+  expect(events.fields.map((field) => field.name).indexOf("reviewAndPublishSection")).toBeLessThan(
+    events.fields.map((field) => field.name).indexOf("reviewStatus"),
+  );
 });
 ```
 
 - [ ] **Step 2: Verify RED**
 
-Run `npm test -- --run tests/collectionEditorUX.test.ts tests/eventsCollection.test.ts`. Expect failure because fields are currently flat.
+Run `npm test -- --run tests/collectionEditorUX.test.ts tests/eventsCollection.test.ts`. Expect failure because no visual-only section fields exist.
 
 - [ ] **Step 3: Implement minimum grouping**
 
-Use Payload `group` fields and preserve every existing nested field's validation, access, relationship, default, and wording. Events: public details contains title through state; images and links contains ticket URL and poster; internal details contains contacts, notes and reviewed date; review and publish contains review status. Committee groups public information and images/links. Sponsors groups public information and logo. Keep Media's upload UI and Users' generated auth fields flat if groups would reduce clarity; their collection guidance is still added. Use `masca-editor-section` and `masca-editor-section--decision` classes.
+Use Payload `ui` fields with a `Field` component and section copy stored in `admin.custom`. Do not wrap, rename, move into nested objects, or otherwise alter any existing field. Events: add headers before title, ticket URL, contact name, and review status. Committee: add headers before name and portrait. Sponsors: add headers before name and logo. Keep Media's upload UI and Users' generated auth fields flat if headers would reduce clarity; their collection guidance is still added. Use `masca-editor-section` and `masca-editor-section--decision` classes.
 
 - [ ] **Step 4: Verify GREEN**
 
