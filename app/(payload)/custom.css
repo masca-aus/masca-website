@@ -259,12 +259,7 @@ html[data-theme="dark"] .masca-event-status-badge--rejected {
   background: #4c2020;
 }
 
-.masca-admin-loading {
-  position: relative;
-  width: min(100%, 96rem);
-  margin-inline: auto;
-  padding: 2.5rem var(--gutter-h) 4rem;
-}
+.masca-admin-loading { min-height: 2rem; }
 
 .masca-admin-loading__bar,
 .masca-admin-route-progress {
@@ -273,46 +268,11 @@ html[data-theme="dark"] .masca-event-status-badge--rejected {
   top: 0;
   left: 0;
   width: 34%;
-  height: 3px;
+  height: 2px;
   border-radius: 0 999px 999px 0;
-  background: linear-gradient(90deg, var(--masca-blue), #5564d8, var(--masca-yellow));
-  box-shadow: 0 1px 8px rgb(1 0 102 / 35%);
+  background: var(--theme-elevation-500);
   animation: masca-admin-progress 950ms ease-in-out infinite;
 }
-
-.masca-admin-loading__title,
-.masca-admin-loading__form {
-  display: grid;
-  gap: 1rem;
-  padding: 1.5rem;
-  border: 1px solid var(--theme-elevation-150);
-  border-radius: var(--style-radius-l);
-  background: var(--theme-elevation-0);
-}
-
-.masca-admin-loading__title {
-  max-width: 58rem;
-  min-height: 8rem;
-}
-
-.masca-admin-loading__form {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  max-width: 58rem;
-  margin-top: 1.5rem;
-}
-
-.masca-admin-loading__eyebrow,
-.masca-admin-loading__headline,
-.masca-admin-loading__field {
-  display: block;
-  border-radius: 0.45rem;
-  background: var(--theme-elevation-100);
-}
-
-.masca-admin-loading__eyebrow { width: 8rem; height: 0.75rem; }
-.masca-admin-loading__headline { width: min(75%, 30rem); height: 2.2rem; }
-.masca-admin-loading__field { min-height: 4.4rem; }
-.masca-admin-loading__field--wide { grid-column: 1 / -1; }
 
 @keyframes masca-admin-progress {
   from { transform: translateX(-110%); }
@@ -324,10 +284,6 @@ html[data-theme="dark"] .masca-event-status-badge--rejected {
   .masca-admin-route-progress { animation: none; }
 }
 
-@media (max-width: 640px) {
-  .masca-admin-loading__form { grid-template-columns: 1fr; }
-  .masca-admin-loading__field--wide { grid-column: auto; }
-}
 
 /* Actions share one shape; pills are reserved for status indicators. */
 .btn { border-radius: 8px; }
