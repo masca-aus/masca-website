@@ -37,9 +37,12 @@ export function createDatabasePoolConfig(
 
   return {
     connectionString: selectedConnectionString,
-    // Payload reserves one client for its reconnect listener, so two is the
-    // smallest pool that still leaves a client available for real queries.
-    max: 2,
+    // Payload holds a reconnect client and a transaction client while media
+    // saves run a separate document-lock query. A two-client pool deadlocks
+    // that save. Leave bounded headroom for these queries and concurrent edits.
+    max: 5,
+    // Exhaustion must fail visibly instead of leaving the CMS submitting forever.
+    connectionTimeoutMillis: 10_000,
   };
 }
 

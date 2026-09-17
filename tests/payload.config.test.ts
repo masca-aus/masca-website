@@ -108,9 +108,9 @@ describe("payload config", () => {
     expect(config.db.name).toBe("postgres");
   });
 
-  it("limits each serverless instance to two database connections", async () => {
+  it("reserves bounded capacity for saves and their document-lock queries", async () => {
     await configPromise;
-    expect(capturedDatabasePool.max).toBe(2);
+    expect(capturedDatabasePool.max).toBe(5);
   });
 
   it("uses Supabase transaction mode for website and CMS traffic", async () => {

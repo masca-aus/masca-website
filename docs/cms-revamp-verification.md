@@ -42,3 +42,9 @@ These small differences are within local-run variability; they do not establish 
 - Save failures and concurrent requests were exercised with controlled component tests. A full network-disconnection browser test was not performed.
 - Upload persistence and generated images were checked in isolated storage; native file-picker interaction was not automated end to end.
 - Review the deployed CMS and MNight poster before release. No merge or production release is authorized by this change.
+
+## Photo submission follow-up
+
+Reproduced a media drawer save stuck on “Submitting…” inside an event. Database inspection showed the only query client idle inside the media transaction: Payload's separate document-lock lookup could not obtain another client because the two-client pool also held its reconnect listener. Increasing the bounded pool to five clients resolved the same browser save without disabling locking; a ten-second connection-acquisition timeout prevents indefinite pool waits.
+
+Verified the drawer displayed “Updated successfully” and refreshed the attached image. A new image upload returned 201 in 59 ms, a subsequent media update returned 200 in 39 ms, and both image and thumbnail returned 200 using isolated local storage. Connection/configuration and save-controller tests: 27 passed. No production media was changed.
