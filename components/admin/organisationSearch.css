@@ -1,0 +1,25 @@
+.masca-organisation { position: relative; }
+.masca-organisation > input { width: 100%; min-height: 3rem; border: 1px solid var(--theme-elevation-200); background: var(--theme-input-bg); color: var(--theme-text); border-radius: 8px; padding: .8rem 1rem; font: inherit; }
+.masca-organisation > input:focus-visible, .masca-organisation button:focus-visible { outline: 3px solid #ffcc00; outline-offset: 2px; }
+.masca-organisation__results { border: 1px solid var(--theme-elevation-200); border-radius: 8px; margin-top: .5rem; background: var(--theme-elevation-0); overflow: hidden; }
+.masca-organisation__results ul { list-style: none; margin: 0; padding: 0; max-height: 18rem; overflow-y: auto; }
+.masca-organisation__results li { padding: .8rem 1rem; cursor: pointer; }
+.masca-organisation__results li + li { border-top: 1px solid var(--theme-elevation-100); }
+.masca-organisation__results li:hover, .masca-organisation__results li[aria-selected=true] { background: var(--theme-elevation-100); }
+.masca-organisation__results strong, .masca-organisation__results small { display: block; }
+.masca-organisation__results small { color: var(--theme-elevation-650); margin-top: .25rem; }
+.masca-organisation__results p { margin: 0; padding: .8rem 1rem; font-size: .85rem; color: var(--theme-elevation-650); }
+.masca-organisation__results button { display: block; width: 100%; padding: .8rem 1rem; border: 0; border-top: 1px solid var(--theme-elevation-150); background: var(--theme-elevation-50); color: var(--theme-text); text-align: left; font: inherit; cursor: pointer; overflow-wrap: anywhere; }
+.masca-organisation__error { color: var(--theme-error-500); }
+
+.masca-organisation__loading { display: inline-block; width: .85rem; height: .85rem; margin-right: .5rem; vertical-align: -.1rem; border: 2px solid var(--theme-elevation-200); border-top-color: var(--theme-text); border-radius: 50%; animation: masca-organisation-search 900ms linear infinite; }
+@keyframes masca-organisation-search { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .masca-organisation__loading { animation: none; } }
+
+.masca-organisation__results { animation: masca-organisation-open 180ms ease-out; }
+.masca-organisation__reveal { display: grid; grid-template-rows: 1fr; }
+.masca-organisation__reveal > ul { min-height: 0; }
+.masca-organisation__reveal[data-has-results="true"] { animation: masca-organisation-reveal 240ms ease-out; }
+@keyframes masca-organisation-open { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes masca-organisation-reveal { from { grid-template-rows: 0fr; opacity: 0; } to { grid-template-rows: 1fr; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .masca-organisation__results, .masca-organisation__reveal[data-has-results="true"] { animation: none; } }

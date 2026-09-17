@@ -1,21 +1,9 @@
-// Careers board — domain model and sheet normalisation (pure).
-//
-// Source of truth is a Google Sheet kept by the MASCA Careers team: no Payload
-// collection, no Google API key. `utils/careersSource.ts` fetches it as CSV;
-// everything in this file is a pure function of the CSV text plus an explicit
-// `today`, so vitest exercises it in node with no network and no clock, and
-// client components can import the types and label maps safely.
-//
-// Design rules the committee relies on:
-// - Never throw on cell content. A typo degrades one value (with a warning
-//   naming the spreadsheet row), it never takes the page down.
-// - Every "days left" style value is computed here, server-side, against the
-//   Melbourne calendar day, so the client never touches the clock and the
-//   page hydrates identically.
-// - Warnings are phrased for the Careers officer, who reads them at
-//   /careers/health, not for a developer.
+// Shared public careers model and pure legacy sheet normalisation.
+// The public board reads Payload through features/careers/publicCareers.ts.
+// The CSV parser remains for the one-time import and backward-compatible IDs.
+// Date labels use the Melbourne calendar day to keep server/client rendering consistent.
 
-import { parseCsv } from "./csv"
+import { parseCsv } from "./csv.ts"
 
 // ---------------------------------------------------------------------------
 // Vocabulary
@@ -23,6 +11,7 @@ import { parseCsv } from "./csv"
 
 export const JOB_TYPES = [
   "internship",
+  "cadet",
   "graduate",
   "vacation",
   "part-time",
@@ -35,6 +24,7 @@ export type JobType = (typeof JOB_TYPES)[number]
 
 export const JOB_TYPE_LABEL: Record<JobType, string> = {
   internship: "Internship",
+  cadet: "Cadet",
   graduate: "Graduate",
   vacation: "Vacation program",
   "part-time": "Part-time",
@@ -290,6 +280,8 @@ export function looksLikeHeaderRow(cells: string[]): boolean {
 // ---------------------------------------------------------------------------
 
 const TYPE_ALIASES: Record<string, JobType> = {
+  cadet: "cadet",
+  cadetship: "cadet",
   intern: "internship", interns: "internship", internship: "internship", internships: "internship",
   summerintern: "internship", summerinternship: "internship", winterintern: "internship",
   winterinternship: "internship", placement: "internship", industryplacement: "internship", wil: "internship",
@@ -304,7 +296,7 @@ const TYPE_ALIASES: Record<string, JobType> = {
   casual: "casual", casualrole: "casual",
   fulltime: "full-time", ft: "full-time", permanent: "full-time", junior: "full-time",
   volunteer: "volunteer", volunteering: "volunteer", unpaid: "volunteer", probono: "volunteer",
-  other: "other", misc: "other", cadetship: "other", apprenticeship: "other", traineeship: "other",
+  other: "other", misc: "other", apprenticeship: "other", traineeship: "other",
   scholarship: "other", competition: "other", hackathon: "other",
 }
 
@@ -816,14 +808,18 @@ export function toJob(row: SheetRow, ctx: ToJobContext): ToJobResult {
 // ---------------------------------------------------------------------------
 
 export class CareerSheetShapeError extends Error {
+  readonly headersFound: string[]
+  readonly kind: "shape" | "size"
   constructor(
     message: string,
-    readonly headersFound: string[],
+    headersFound: string[],
     /** "shape": no usable header row; "size": more rows than a jobs list should have. */
-    readonly kind: "shape" | "size" = "shape",
+    kind: "shape" | "size" = "shape",
   ) {
     super(message)
     this.name = "CareerSheetShapeError"
+    this.headersFound = headersFound
+    this.kind = kind
   }
 }
 

@@ -50,7 +50,8 @@ describe("formatHealthReport", () => {
     expect(text).toContain("Live on the site: 1 role");
     expect(text).toMatch(/Row 4\s+Weekend Barista — Kopi Corner\s+featured, Rolling applications/);
     expect(text).toContain("Hidden: 1 row");
-    expect(text).toMatch(/Row 9\s+Published is unticked\s+Draft — Somewhere/);
+    expect(text).toMatch(/Row 9\s+Published is unticked/);
+    expect(text).not.toContain("Draft — Somewhere");
     expect(text).toContain("Warnings: 1");
     expect(text).toContain('Row 4: Location "Melb CBD"');
     expect(text).toContain("Notes\n  Ignored columns");
@@ -81,15 +82,12 @@ describe("formatHealthReport", () => {
 });
 
 describe("GET /careers/health", () => {
-  it("answers 200 text/plain, uncached and noindex, even when unconfigured", async () => {
-    vi.stubEnv("CAREERS_SHEET_ID", "");
-    const res = await GET();
-    expect(res.status).toBe(200);
-    expect(res.headers.get("content-type")).toBe("text/plain; charset=utf-8");
+  it("redirects to the authenticated CMS without exposing sheet diagnostics", async () => {
+    const res = GET();
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("/admin/collections/careers");
     expect(res.headers.get("cache-control")).toBe("no-store");
     expect(res.headers.get("x-robots-tag")).toBe("noindex");
-    const text = await res.text();
-    expect(text).toContain("Status:  NOT CONNECTED");
-    expect(text).toContain("CAREERS_SHEET_ID");
+    expect(await res.text()).toBe("");
   });
 });

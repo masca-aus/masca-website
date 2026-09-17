@@ -67,10 +67,15 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    careers: Career;
+    'career-lifecycle': CareerLifecycle;
+    organisations: Organisation;
+    'event-lifecycle': EventLifecycle;
     users: User;
     media: Media;
     committee: Committee;
     sponsors: Sponsor;
+    events: Event;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,10 +83,15 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    careers: CareersSelect<false> | CareersSelect<true>;
+    'career-lifecycle': CareerLifecycleSelect<false> | CareerLifecycleSelect<true>;
+    organisations: OrganisationsSelect<false> | OrganisationsSelect<true>;
+    'event-lifecycle': EventLifecycleSelect<false> | EventLifecycleSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     committee: CommitteeSelect<false> | CommitteeSelect<true>;
     sponsors: SponsorsSelect<false> | SponsorsSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -122,6 +132,87 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Manage opportunities for students. Save private drafts, review details and publish when ready. Rolling roles expire after 60 days; update the listed date after reconfirming availability.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "careers".
+ */
+export interface Career {
+  id: number;
+  title: string;
+  company: string;
+  type?:
+    | ('internship' | 'cadet' | 'graduate' | 'vacation' | 'part-time' | 'casual' | 'full-time' | 'volunteer' | 'other')
+    | null;
+  industry?: string | null;
+  companyWebsite?: string | null;
+  /**
+   * Optional https:// image URL.
+   */
+  logoUrl?: string | null;
+  /**
+   * Australia, Malaysia, or both.
+   */
+  country?: string | null;
+  /**
+   * Use the state name or describe multiple locations.
+   */
+  state?: string | null;
+  city?: string | null;
+  workMode?: ('onsite' | 'hybrid' | 'remote') | null;
+  international?: ('yes' | 'no' | 'unsure') | null;
+  studyLevels?: ('any' | 'pre-penultimate' | 'penultimate' | 'final' | 'graduate' | 'postgraduate')[] | null;
+  eligibility?: string | null;
+  applyUrl: string;
+  /**
+   * YYYY-MM-DD. Leave empty for rolling applications.
+   */
+  closes?: string | null;
+  /**
+   * YYYY-MM-DD. Only update after reconfirming that a role is still available.
+   */
+  added?: string | null;
+  /**
+   * For example $35/hour, RM 4,800/month, or Not disclosed.
+   */
+  pay?: string | null;
+  description?: string | null;
+  /**
+   * Optional tags separated by commas.
+   */
+  tags?: string | null;
+  featured?: boolean | null;
+  /**
+   * Stable public link ID, generated automatically.
+   */
+  slug?: string | null;
+  /**
+   * Private to signed-in CMS users. Never shown on the website.
+   */
+  internalNotes?: string | null;
+  sourceKey?: string | null;
+  lifecycle?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "career-lifecycle".
+ */
+export interface CareerLifecycle {
+  id: number;
+  career: number | Career;
+  status: string;
+  closedAt?: string | null;
+  archivedAt?: string | null;
+  changedBy: number | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage the people who can sign in and update MASCA website content.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
@@ -147,11 +238,107 @@ export interface User {
   collection: 'users';
 }
 /**
+ * Malaysian student organisations. Source listings are a starting point, not confirmation of current activity. Check and update names before use.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "organisations".
+ */
+export interface Organisation {
+  id: number;
+  name: string;
+  abbreviation?: string | null;
+  university?: string | null;
+  /**
+   * State or territory abbreviation, or National.
+   */
+  state?: string | null;
+  /**
+   * Other names or abbreviations that should match a search.
+   */
+  aliases?: string | null;
+  /**
+   * Show in event organisation search. Turn off outdated entries.
+   */
+  listed?: boolean | null;
+  sourceURL?: string | null;
+  sourceCheckedAt?: string | null;
+  verificationNotes?: string | null;
+  directoryKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-lifecycle".
+ */
+export interface EventLifecycle {
+  id: number;
+  event: number | Event;
+  status: string;
+  completedAt?: string | null;
+  archivedAt?: string | null;
+  changedBy: number | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Add events for MASCA students and review submissions before they appear on the website. An event appears publicly only after it is approved and published.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  lifecycle?: string | null;
+  title: string;
+  organisation: string;
+  description: string;
+  startDate: string;
+  endDate?: string | null;
+  /**
+   * The name of the place, such as Great Court, University of Queensland. For an online event, enter Online.
+   */
+  venue: string;
+  /**
+   * Street number and name, suburb and postcode. Leave blank for online events.
+   */
+  streetAddress?: string | null;
+  /**
+   * Optional details for attendees: room, floor, entrance, meeting point or accessibility instructions.
+   */
+  venueDetails?: string | null;
+  state: 'VIC' | 'NSW' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT';
+  /**
+   * Optional. Use a full https:// link for tickets or event details.
+   */
+  ticketURL?: string | null;
+  /**
+   * Choose an existing poster or upload an image up to 5 MB. This is the image students will see.
+   */
+  poster?: (number | null) | Media;
+  contactName: string;
+  contactEmail: string;
+  internalNotes?: string | null;
+  reviewedAt?: string | null;
+  /**
+   * Publishing automatically approves this event. Choose Rejected to keep a submission off the website.
+   */
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
+  /**
+   * Describe the image’s useful content in a short sentence. For a portrait, include the person’s name; for a logo, use the organisation’s name. Avoid filenames or ‘image of’.
+   */
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -162,8 +349,22 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    'admin-preview'?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
+ * Create and update committee profiles step by step. Changes appear on the website when you Save.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "committee".
  */
@@ -171,6 +372,14 @@ export interface Committee {
   id: number;
   _order?: string | null;
   name: string;
+  /**
+   * Full name, e.g. "Monash University". Optional.
+   */
+  university?: string | null;
+  /**
+   * Degree or course name, e.g. "Bachelor of Commerce". Optional.
+   */
+  course?: string | null;
   /**
    * Committee position, e.g. "President".
    */
@@ -180,27 +389,24 @@ export interface Committee {
    */
   department: 'chairs' | 'secretariat' | 'treasury' | 'amplifies' | 'careers' | 'cares' | 'unites' | 'unassigned';
   /**
-   * Full name, e.g. "Monash University". Optional.
-   */
-  university?: string | null;
-  /**
-   * Degree or course name, e.g. "Bachelor of Commerce". Optional.
-   */
-  course?: string | null;
-  portrait: number | Media;
-  /**
    * Committee term, e.g. "2026/2027" — drives the year tabs on the page.
    */
   year: string;
-  linkedin_url?: string | null;
+  /**
+   * Choose an existing portrait or upload an image up to 5 MB. Include the member’s name in its alt text.
+   */
+  portrait: number | Media;
   /**
    * Shown in the expanded modal on the committee page. Optional — the modal simply omits it when empty.
    */
   bio?: string | null;
+  linkedin_url?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
+ * Update sponsor details and logos in one page. Changes appear on the homepage when you Save.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sponsors".
  */
@@ -210,11 +416,14 @@ export interface Sponsor {
    * Sponsor name — doubles as the logo's alt text.
    */
   name: string;
-  logo: number | Media;
   /**
    * When they came on board — newest sponsors lead the marquee.
    */
   date: string;
+  /**
+   * Choose an existing logo or upload an image up to 5 MB. A transparent background works best.
+   */
+  logo: number | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -242,6 +451,10 @@ export interface PayloadKv {
 export interface PayloadLockedDocument {
   id: number;
   document?:
+    | ({
+        relationTo: 'careers';
+        value: number | Career;
+      } | null)
     | ({
         relationTo: 'users';
         value: number | User;
@@ -302,6 +515,83 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "careers_select".
+ */
+export interface CareersSelect<T extends boolean = true> {
+  title?: T;
+  company?: T;
+  type?: T;
+  industry?: T;
+  companyWebsite?: T;
+  logoUrl?: T;
+  country?: T;
+  state?: T;
+  city?: T;
+  workMode?: T;
+  international?: T;
+  studyLevels?: T;
+  eligibility?: T;
+  applyUrl?: T;
+  closes?: T;
+  added?: T;
+  pay?: T;
+  description?: T;
+  tags?: T;
+  featured?: T;
+  slug?: T;
+  internalNotes?: T;
+  sourceKey?: T;
+  lifecycle?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "career-lifecycle_select".
+ */
+export interface CareerLifecycleSelect<T extends boolean = true> {
+  career?: T;
+  status?: T;
+  closedAt?: T;
+  archivedAt?: T;
+  changedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "organisations_select".
+ */
+export interface OrganisationsSelect<T extends boolean = true> {
+  name?: T;
+  abbreviation?: T;
+  university?: T;
+  state?: T;
+  aliases?: T;
+  listed?: T;
+  sourceURL?: T;
+  sourceCheckedAt?: T;
+  verificationNotes?: T;
+  directoryKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-lifecycle_select".
+ */
+export interface EventLifecycleSelect<T extends boolean = true> {
+  event?: T;
+  status?: T;
+  completedAt?: T;
+  archivedAt?: T;
+  changedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -337,6 +627,22 @@ export interface MediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        'admin-preview'?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -345,14 +651,14 @@ export interface MediaSelect<T extends boolean = true> {
 export interface CommitteeSelect<T extends boolean = true> {
   _order?: T;
   name?: T;
-  role?: T;
-  department?: T;
   university?: T;
   course?: T;
-  portrait?: T;
+  role?: T;
+  department?: T;
   year?: T;
-  linkedin_url?: T;
+  portrait?: T;
   bio?: T;
+  linkedin_url?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -362,10 +668,36 @@ export interface CommitteeSelect<T extends boolean = true> {
  */
 export interface SponsorsSelect<T extends boolean = true> {
   name?: T;
-  logo?: T;
   date?: T;
+  logo?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  lifecycle?: T;
+  title?: T;
+  organisation?: T;
+  description?: T;
+  startDate?: T;
+  endDate?: T;
+  venue?: T;
+  streetAddress?: T;
+  venueDetails?: T;
+  state?: T;
+  ticketURL?: T;
+  poster?: T;
+  contactName?: T;
+  contactEmail?: T;
+  internalNotes?: T;
+  reviewedAt?: T;
+  reviewStatus?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
