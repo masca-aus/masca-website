@@ -121,6 +121,7 @@ export default buildConfig({
   i18n: {
     translations: {
       en: {
+        general: { payloadSettings: "Preferences" },
         version: {
           versions: "Change history",
         },
