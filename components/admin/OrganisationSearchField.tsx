@@ -71,7 +71,7 @@ export const OrganisationSearchField: TextFieldClientComponent = ({ field, path,
           <small>{[option.university, option.state].filter(Boolean).join(' · ')}</small>
         </li>)}
       </ul>
-      <p role="status">{status === 'loading' ? 'Searching organisations…' : status === 'error' ? 'Directory unavailable. You can still enter the organisation name manually.' : options.length ? 'Choose a match, or keep the name you entered.' : 'No matches. You can keep the name you entered.'}</p>
+      <p role="status">{status === 'loading' && <span className="masca-organisation__loading" aria-hidden="true" />}{status === 'loading' ? 'Searching organisations…' : status === 'error' ? 'Directory unavailable. You can still enter the organisation name manually.' : options.length ? 'Choose a match, or keep the name you entered.' : 'No matches. You can keep the name you entered.'}</p>
       {value?.trim() && <button type="button" onClick={() => { input.current?.focus(); setOpen(false); }}>Use “{value.trim()}”</button>}
     </div>}
     <p id={`${id}-hint`} className="field-description">Search Malaysian student organisations across Australia, or enter another organiser’s name.</p>
