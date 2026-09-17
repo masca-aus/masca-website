@@ -64,7 +64,8 @@ export async function getApprovedUpcomingEvents(now = new Date()): Promise<Event
       ],
     },
     select: publicEventSelect,
-    populate: { media: { url: true } },
+    // The storage plugin builds `url` from `filename` during afterRead.
+    populate: { media: { filename: true, url: true } },
   });
 
   return docs.map((doc): Event => {

@@ -56,7 +56,7 @@ describe("approved upcoming Payload events", () => {
     );
   });
 
-  it("selects only the public display fields and the populated poster URL", async () => {
+  it("includes the media filename needed to generate the populated poster URL", async () => {
     await getApprovedUpcomingEvents(now);
 
     expect(find.mock.calls[0][0].select).toEqual({
@@ -70,7 +70,7 @@ describe("approved upcoming Payload events", () => {
       ticketURL: true,
       poster: true,
     });
-    expect(find.mock.calls[0][0].populate).toEqual({ media: { url: true } });
+    expect(find.mock.calls[0][0].populate).toEqual({ media: { filename: true, url: true } });
   });
 
   it("keeps events with an end date until they end, including those already started", async () => {
