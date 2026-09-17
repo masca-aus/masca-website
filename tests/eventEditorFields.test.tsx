@@ -44,6 +44,30 @@ async function renderOverview() {
 }
 
 describe('event editor navigation and preview', () => {
+  it('keeps step navigation tucked away and closes it after choosing a section', () => {
+    render(<Editor initialStep={1} />);
+    const toggle = screen.getByRole('button', { name: 'View steps' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByRole('navigation', { name: 'Event steps' })).toBeNull();
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    fireEvent.click(screen.getByRole('button', { name: 'Basics' }));
+    expect(screen.queryByRole('navigation', { name: 'Event steps' })).toBeNull();
+    expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Basics', level: 2 }));
+    expect(h.save).not.toHaveBeenCalled();
+  });
+
+  it('closes the step list with Escape and returns focus to its trigger', () => {
+    render(<Editor />);
+    const toggle = screen.getByRole('button', { name: 'View steps' });
+    fireEvent.click(toggle);
+    const basics = screen.getByRole('button', { name: 'Basics' });
+    basics.focus();
+    fireEvent.keyDown(basics, { key: 'Escape' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(toggle);
+  });
+
   it('keeps incomplete basics visible and exposes field errors on Continue', () => {
     h.data = { ...h.data, title: ' ', description: '' };
     render(<Editor />);
@@ -57,6 +81,7 @@ describe('event editor navigation and preview', () => {
   it('validates intermediate sections before jumping forward', () => {
     h.data = { ...h.data, startDate: '', venue: '' };
     render(<Editor />);
+    fireEvent.click(screen.getByRole('button', { name: 'View steps' }));
     fireEvent.click(screen.getByRole('button', { name: /Preview and publish/ }));
     expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Date and location');
     expect(h.setSubmitted).toHaveBeenCalledWith(true);

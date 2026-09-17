@@ -16,19 +16,28 @@
 .masca-wizard-header { margin-bottom: 2rem; }
 .masca-wizard-heading-row { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
 .masca-wizard-eyebrow { font-size: .75rem; font-weight: 700; letter-spacing: .04em; }
-.masca-wizard-count { white-space: nowrap; color: var(--theme-elevation-650); font-size: .8rem; }
-.masca-wizard-steps { display: grid; grid-template-columns: repeat(5, 1fr); list-style: none; padding: 0; margin: 1.25rem 0 2rem; gap: .5rem; }
-.masca-wizard-steps button { display: flex; align-items: center; gap: .65rem; width: 100%; height: 100%; padding: .85rem; border: 1px solid var(--theme-elevation-200); background: var(--theme-elevation-0); color: var(--theme-text); border-radius: 10px; font: inherit; font-size: .85rem; text-align: left; cursor: pointer; }
-.masca-wizard-steps button .masca-wizard-step-number { display: grid; place-items: center; flex-shrink: 0; border-radius: 50%; width: 1.8rem; height: 1.8rem; background: var(--theme-elevation-100); }
-.masca-wizard-steps button[aria-current="step"] { background: #010066; color: white; border-color: #010066; }
-.masca-wizard-steps button[aria-current="step"] .masca-wizard-step-number { background: #ffcc00; color: #010066; }
+.masca-wizard-count { color: var(--theme-elevation-650); font-size: .8rem; }
+.masca-wizard-progress-label { display: flex; align-items: center; gap: .75rem; }
+.masca-wizard-badge { font-size: .75rem; font-weight: 650; padding: .25rem .6rem; border-radius: 999px; background: var(--theme-elevation-100); }
+.masca-wizard-badge[data-live="true"] { color: #176842; background: #eaf7ee; }
+.masca-wizard-text-button { font: inherit; font-size: .85rem; font-weight: 550; min-height: 44px; padding: .5rem; border: 0; border-radius: 4px; color: var(--theme-text); background: transparent; cursor: pointer; white-space: nowrap; }
+.masca-wizard-text-button:hover:not(:disabled) { text-decoration: underline; text-underline-offset: .25rem; }
+.masca-wizard-steps { list-style: none; padding: .5rem 0; margin: .75rem 0 0; border-bottom: 1px solid var(--theme-elevation-150); }
+.masca-wizard-steps button { display: flex; align-items: center; gap: .75rem; width: 100%; min-height: 44px; padding: .6rem .75rem; border: 0; background: transparent; color: var(--theme-text); border-radius: 4px; font: inherit; font-size: .85rem; text-align: left; cursor: pointer; }
+.masca-wizard-step-number { width: 1.5rem; text-align: center; color: var(--theme-elevation-650); }
+.masca-wizard-steps button[aria-current="step"] { background: var(--theme-elevation-100); font-weight: 650; }
+.masca-wizard-steps button[aria-current="step"] .masca-wizard-step-number { color: var(--theme-text); }
+.masca-wizard-intro { margin-top: 2rem; }
+.doc-header:has(~ .masca-event-editor) .doc-header__after-header { display: none; }
 .masca-wizard-header h2 { font-size: 1.65rem; margin: 0 0 .5rem; }
 .masca-wizard-header > p, .masca-wizard-intro p { color: var(--theme-elevation-700); line-height: 1.6; }
 .masca-wizard-note { padding: 1rem; border-left: 3px solid #ffcc00; background: var(--theme-elevation-50); border-radius: 4px; }
 .masca-wizard-error { padding: 1rem; margin: 1rem 0; border: 1px solid var(--theme-error-500); border-radius: 8px; color: var(--theme-error-700); }
 .masca-wizard-error button { margin-left: 1rem; }
 .masca-wizard-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-top: 1px solid var(--theme-elevation-150); padding: 1.5rem 0; margin-top: 1rem; }
-.masca-wizard-footer > div { display: flex; gap: .75rem; }
+.masca-wizard-footer > div { display: flex; align-items: center; gap: .75rem; }
+.masca-wizard-save-actions { flex-wrap: wrap; }
+.masca-event-editor > .collection-edit--events > form > .doc-controls .doc-controls__content:has(> .doc-controls__meta:only-child) { display: none; }
 .masca-wizard-primary, .masca-wizard-secondary, .masca-overview-section button, .masca-wizard-error button { font: inherit; font-weight: 650; min-height: 44px; padding: .75rem 1.1rem; border-radius: 8px; cursor: pointer; border: 1px solid var(--theme-elevation-300); }
 .masca-wizard-primary { background: #010066; color: #fff; border-color: #010066; }
 .masca-wizard-secondary, .masca-overview-section button, .masca-wizard-error button { background: var(--theme-elevation-0); color: var(--theme-text); }
@@ -46,25 +55,25 @@
 .masca-overview-section p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; }
 .masca-overview-section--private { padding: 1rem; background: var(--theme-elevation-50); border-radius: 8px; margin-top: 1rem; }
 .masca-save-indicator { font-size: .85rem; color: var(--theme-elevation-700); }
-@media (max-width: 900px) { .masca-wizard-steps { display: flex; overflow-x: auto; padding-bottom: .5rem; } .masca-wizard-steps li { flex: 0 0 10rem; } .masca-event-overview { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .masca-event-overview { grid-template-columns: 1fr; } }
 @media (max-width: 480px) { .masca-wizard-heading-row { align-items: start; } .masca-wizard-footer { flex-direction: column-reverse; align-items: stretch; } .masca-wizard-footer > div { justify-content: space-between; } .masca-wizard-footer > button { width: 100%; } }
 
 /* Keep fields mounted for Payload form state; animate their visibility only. */
-.masca-wizard-progress { height: 4px; border-radius: 999px; background: var(--theme-elevation-100); margin-top: 1.25rem; overflow: hidden; }
+.masca-wizard-progress { height: 3px; border-radius: 999px; background: var(--theme-elevation-100); margin-top: .5rem; overflow: hidden; }
 .masca-wizard-progress > span { display: block; height: 100%; background: #ffcc00; border-radius: inherit; transition: width 220ms ease-out; }
 .masca-wizard-step-label { display: block; font-weight: 650; line-height: 1.35; }
-.masca-wizard-step-label small { display: block; margin-top: .3rem; font-weight: 400; font-size: .7rem; opacity: .8; }
 .masca-wizard-steps button { transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
-.masca-wizard-steps button:hover { border-color: var(--theme-elevation-500); box-shadow: 0 2px 8px #0100660d; }
-.masca-wizard-steps button[data-complete="true"] .masca-wizard-step-number { background: #eaf7ee; color: #176842; }
+.masca-wizard-steps button:hover { background: var(--theme-elevation-100); }
+.masca-wizard-steps button[data-complete="true"] .masca-wizard-step-number { color: #176842; }
 .masca-wizard-intro, .masca-event-editor .masca-event-step, .masca-event-overview { animation: masca-step-enter 180ms ease-out both; }
 .masca-wizard-intro p { margin-bottom: 0; }
 .masca-wizard-primary, .masca-wizard-secondary, .masca-overview-section button { transition: box-shadow 160ms ease, background-color 160ms ease; }
 .masca-wizard-primary:hover:not(:disabled) { background: #151582; box-shadow: 0 3px 10px #01006620; }
 .masca-wizard-secondary:hover:not(:disabled), .masca-overview-section button:hover { background: var(--theme-elevation-100); }
-[data-theme="dark"] .masca-wizard-steps button[data-complete="true"] .masca-wizard-step-number { background: #153c2d; color: #9be2b4; }
+[data-theme="dark"] .masca-wizard-badge[data-live="true"] { background: #153c2d; color: #9be2b4; }
+[data-theme="dark"] .masca-wizard-steps button[data-complete="true"] .masca-wizard-step-number { color: #9be2b4; }
 @keyframes masca-step-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-@media (max-width: 600px) { .masca-wizard-count { font-size: .7rem; } .masca-wizard-eyebrow { line-height: 1.5; } }
+@media (max-width: 600px) { .masca-wizard-count { font-size: .8rem; } .masca-wizard-eyebrow { line-height: 1.5; } }
 @media (prefers-reduced-motion: reduce) {
   .masca-wizard-intro, .masca-event-editor .masca-event-step, .masca-event-overview { animation: none; }
   .masca-wizard-progress > span, .masca-wizard-steps button, .masca-wizard-primary, .masca-wizard-secondary, .masca-overview-section button { transition: none; }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useConfig, useDocumentInfo, useForm, useFormFields, useFormModified } from '@payloadcms/ui';
 import { createEventSaveQueue } from '@/features/events/eventSaveQueue';
@@ -150,7 +151,8 @@ export function EventSaveController() {
     return () => clearTimeout(timeout);
   }, [fingerprint, modified, editor.save, editor.saveState]);
 
-  return <span className="masca-save-indicator" role="status" aria-live="polite">
+  const indicator = <span className="masca-save-indicator" role="status" aria-live="polite">
     {editor.saveState === 'saving' ? 'Saving…' : editor.saveState === 'error' ? 'Save failed' : modified && fingerprint !== savedFingerprint ? 'Unsaved changes' : editor.saveState === 'saved' ? 'Saved' : 'Your draft saves automatically'}
   </span>;
+  return editor.saveStatusTarget ? createPortal(indicator, editor.saveStatusTarget) : indicator;
 }

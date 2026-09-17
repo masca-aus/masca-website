@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { useConfig, useDocumentInfo, useForm, useFormFields } from '@payloadcms/ui';
 import { EVENT_EDITOR_STEPS, eventFieldStep, validateEventStep } from '@/features/events/eventEditor';
 import { EVENT_TIME_ZONES } from '@/features/events/eventSubmission';
@@ -17,7 +17,6 @@ const hints = [
   'These contact details and notes are for the MASCA committee only.',
   'Check how your event will appear. Publish only when everything is ready.',
 ];
-const stepDetails = ['Name and description', 'When and where', 'Images and registration', 'Committee information', 'Ready for the website'];
 
 export function EventEditorHeader() {
   const { step, setStep, error, setError, save, saveState } = useEventEditor();
@@ -25,16 +24,19 @@ export function EventEditorHeader() {
   const { dispatchFields, setSubmitted } = useForm();
   const { hasPublishedDoc } = useDocumentInfo();
   const heading = useRef<HTMLHeadingElement>(null);
-  const stepList = useRef<HTMLOListElement>(null);
+  const [stepsOpen, setStepsOpen] = useState(false);
+  const stepToggle = useRef<HTMLButtonElement>(null);
+  const stepListID = useId();
   const mounted = useRef(false);
   useEffect(() => {
     if (mounted.current) {
       heading.current?.focus();
-      stepList.current?.querySelector<HTMLElement>('[aria-current="step"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
     }
     mounted.current = true;
   }, [step]);
   const moveTo = (next: number) => {
+    setStepsOpen(false);
+    heading.current?.focus();
     if (next > step) {
       const errors: Record<string, string> = Object.assign({}, ...Array.from({ length: next }, (_, index) => validateEventStep(data, index)));
       if (Object.keys(errors).length) {
@@ -50,17 +52,19 @@ export function EventEditorHeader() {
   };
   return <section className="masca-wizard-header" aria-label="Event editor">
     <div className="masca-wizard-heading-row">
-      <span className="masca-wizard-eyebrow">{hasPublishedDoc ? 'Live event · changes save as a draft' : 'Event draft · not visible on the website'}</span>
-      <span className="masca-wizard-count">Step {step + 1} of 5</span>
+      <div className="masca-wizard-progress-label"><span className="masca-wizard-badge" data-live={Boolean(hasPublishedDoc)} title={hasPublishedDoc ? 'Changes save as a draft until you publish again.' : 'Not visible on the website.'}>{hasPublishedDoc ? 'Live' : 'Draft'}</span><span className="masca-wizard-count">Step {step + 1} of 5 · {EVENT_EDITOR_STEPS[step].title}</span></div>
+      <button ref={stepToggle} type="button" className="masca-wizard-text-button" aria-expanded={stepsOpen} aria-controls={stepListID} onClick={() => setStepsOpen(open => !open)}>View steps <span aria-hidden="true">{stepsOpen ? '⌃' : '⌄'}</span></button>
     </div>
     <div className="masca-wizard-progress" role="progressbar" aria-label="Event setup progress" aria-valuemin={1} aria-valuemax={5} aria-valuenow={step + 1} aria-valuetext={`Step ${step + 1} of 5: ${EVENT_EDITOR_STEPS[step].title}`}>
       <span style={{ width: `${(step + 1) * 20}%` }} />
     </div>
-    <nav aria-label="Event steps"><ol ref={stepList} className="masca-wizard-steps">
+    <nav id={stepListID} aria-label="Event steps" hidden={!stepsOpen} onKeyDown={event => {
+      if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); setStepsOpen(false); stepToggle.current?.focus(); }
+    }}><ol className="masca-wizard-steps">
       {EVENT_EDITOR_STEPS.map(({ title }, index) => <li key={title}>
         <button type="button" onClick={() => moveTo(index)} aria-label={title} aria-current={step === index ? 'step' : undefined} data-complete={index < step && !Object.keys(validateEventStep(data, index)).length}>
           <span className="masca-wizard-step-number" aria-hidden="true">{index < step && !Object.keys(validateEventStep(data, index)).length ? '✓' : index + 1}</span>
-          <span className="masca-wizard-step-label">{title}<small>{stepDetails[index]}</small></span>
+          <span className="masca-wizard-step-label">{title}</span>
         </button>
       </li>)}
     </ol></nav>
@@ -114,7 +118,7 @@ function EventOverview({ data }: { data: Record<string, unknown> }) {
 }
 
 export function EventEditorFooter() {
-  const { step, setStep, save, saveState, setError } = useEventEditor();
+  const { step, setStep, save, saveState, setError, setSaveStatusTarget } = useEventEditor();
   const { getData, dispatchFields, setSubmitted, disabled } = useForm();
   const { hasPublishedDoc, uploadStatus } = useDocumentInfo();
   const next = () => {
@@ -130,8 +134,8 @@ export function EventEditorFooter() {
   };
   const busy = disabled || saveState === 'saving' || uploadStatus === 'uploading';
   return <div className="masca-wizard-footer">
-    <button type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => void save.current?.('exit')}>Save and exit</button>
-    <div>{step > 0 && <button type="button" className="masca-wizard-secondary" onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}
+    <div className="masca-wizard-save-actions"><button type="button" className="masca-wizard-text-button" disabled={busy} onClick={() => void save.current?.('exit')}>Save and exit</button><span ref={setSaveStatusTarget} /></div>
+    <div>{step > 0 && <button type="button" className="masca-wizard-text-button" onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}
       {step < 4 ? <button type="button" className="masca-wizard-primary" onClick={next} disabled={disabled}>Continue</button> : <button type="button" className="masca-wizard-primary" disabled={busy} onClick={() => void save.current?.('publish')}>{hasPublishedDoc ? 'Publish changes' : 'Publish event'}</button>}
     </div>
   </div>;
