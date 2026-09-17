@@ -112,6 +112,31 @@ describe('event editor navigation and preview', () => {
     expect(document.activeElement).toBe(screen.getByRole('heading', { level: 2, name: 'Date and location' }));
   });
 
+  it('reuses the poster after text edits and refreshes it after visiting Poster and links', async () => {
+    await renderOverview();
+    expect(fetch).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit basics' }));
+    fireEvent.click(screen.getByRole('button', { name: 'View steps' }));
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Preview and publish' })));
+    expect(fetch).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit poster and links' }));
+    fireEvent.click(screen.getByRole('button', { name: 'View steps' }));
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Preview and publish' })));
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not replace a new poster with an older request that finishes late', async () => {
+    let finishOld!: (response: Response) => void;
+    const oldRequest = new Promise<Response>(resolve => { finishOld = resolve; });
+    vi.mocked(fetch).mockImplementationOnce(() => oldRequest).mockResolvedValueOnce({ ok: true, json: async () => ({ id: 8, url: '/new-poster.png', alt: 'New poster' }) } as Response);
+    const view = render(<Editor initialStep={4} />);
+    h.data = { ...h.data, poster: 8 };
+    await act(async () => view.rerender(<Editor initialStep={4} />));
+    expect(screen.getByRole('img', { name: 'New poster' }).getAttribute('src')).toBe('/new-poster.png');
+    await act(async () => finishOld({ ok: true, json: async () => ({ id: 7, url: '/old-poster.png', alt: 'Old poster' }) } as Response));
+    expect(screen.getByRole('img', { name: 'New poster' }).getAttribute('src')).toBe('/new-poster.png');
+  });
+
   it('shows private contact information separately from the public preview', async () => {
     await renderOverview();
     const card = screen.getByRole('article', { name: 'Public event preview' });

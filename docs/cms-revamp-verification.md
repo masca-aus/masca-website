@@ -66,3 +66,13 @@ The calendar overlap was traced to the wizard animation retaining a transform af
 Verified the optimized local build against isolated storage/database: calendar loads on demand; its static layout ends above the Venue field; no horizontal overflow at the inspected narrow/wide layouts; both themes, range and single-day modes, optional end time, keyboard controls, save feedback and reload were checked. The public test event retained its original 1 December date while the saved draft held 16 December; anonymous output contained no internal contact details. No production content was changed.
 
 47 focused tests passed, typecheck passed, lint completed with the eight existing warnings, and the production build passed. The full suite with two workers has 325 passing tests and the five known Careers failures. Default concurrency additionally hit the existing REST-route import test's five-second timeout; that test passed with reduced concurrency. No timeout threshold or Careers code was changed.
+
+## Final-step cleanup and preview efficiency
+
+Step five now shows one compact public preview with a bounded poster, event details and section edit links, followed by a separate committee-only contact section. Internal notes expand on demand. Review status uses the standard field styling without the accent box or redundant clear action. Back to Events and the native More actions menu share 44 px height, borders, corners and focus styling; native menu actions remain available.
+
+View steps uses a 220 ms height/opacity disclosure with reduced-motion support, Escape-to-close and hidden-step focus exclusion. Browser checks inspected light/dark themes, loaded poster, closed disclosure, matching toolbar dimensions and absence of horizontal overflow at the available viewport.
+
+Poster metadata is fetched only for the final step, reused for two minutes within the editor, and refreshed after visiting Poster and links. Aborted responses cannot overwrite a newer selection. The matching local media response decreased from 603 to 347 bytes while retaining generated image and thumbnail URLs. This is a payload/request reduction, not a measured production page-load speedup. The header no longer subscribes to every form value; closed step navigation skips completion validation.
+
+Two added tests verify metadata reuse/refresh and stale-response protection. 42 focused tests passed, typecheck passed, lint passed with eight existing warnings, and the production build passed against isolated services. The full suite with two workers recorded 327 passing tests and the same five known Careers failures; Careers code remains unchanged. No production content was written.

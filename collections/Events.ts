@@ -209,6 +209,7 @@ export const Events: CollectionConfig = {
       ],
       admin: {
         className: "masca-event-review-decision",
+        isClearable: false,
         description: "Publishing automatically approves this event. Choose Rejected to keep a submission off the website.",
         components: {
           Cell: "/components/admin/EventStatusCell#EventReviewStatusCell",
