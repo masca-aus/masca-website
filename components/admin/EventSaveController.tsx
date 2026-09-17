@@ -66,7 +66,7 @@ export function EventSaveController() {
           const data = form.getData();
           const snapshot = eventDraftFingerprint(data);
           if (intent === 'publish') {
-            const errors = validateEventStep(data, 4);
+            const errors = { ...validateEventStep(data, 4), ...editor.dateSelectionValidationRef?.current?.() };
             if (Object.keys(errors).length) {
               form.dispatchFields({ type: 'ADD_SERVER_ERRORS', errors: Object.entries(errors).map(([path, message]) => ({ path, message })) });
               form.setSubmitted(true);

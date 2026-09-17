@@ -19,7 +19,7 @@ const hints = [
 ];
 
 export function EventEditorHeader() {
-  const { step, setStep, error, setError, save, saveState } = useEventEditor();
+  const { step, setStep, error, setError, save, saveState, dateSelectionValidationRef } = useEventEditor();
   const data = useEventData();
   const { dispatchFields, setSubmitted } = useForm();
   const { hasPublishedDoc } = useDocumentInfo();
@@ -38,7 +38,7 @@ export function EventEditorHeader() {
     setStepsOpen(false);
     heading.current?.focus();
     if (next > step) {
-      const errors: Record<string, string> = Object.assign({}, ...Array.from({ length: next }, (_, index) => validateEventStep(data, index)));
+      const errors: Record<string, string> = Object.assign({}, ...Array.from({ length: next }, (_, index) => validateEventStep(data, index)), next > 1 ? dateSelectionValidationRef?.current?.() : {});
       if (Object.keys(errors).length) {
         dispatchFields({ type: 'ADD_SERVER_ERRORS', errors: Object.entries(errors).map(([path, message]) => ({ path, message })) });
         setSubmitted(true);
@@ -73,7 +73,7 @@ export function EventEditorHeader() {
       <p>{hints[step]}</p>
     </div>
     {error && <div className="masca-wizard-error" role="alert">{error}{saveState === 'error' && <button type="button" onClick={() => void save.current?.('draft')}>Retry save</button>}</div>}
-    {step === 1 && <p className="masca-wizard-note">Date inputs use your device timezone ({Intl.DateTimeFormat().resolvedOptions().timeZone}). The public event displays in {EVENT_TIME_ZONES[data.state as keyof typeof EVENT_TIME_ZONES] ?? 'the selected state’s timezone'}.</p>}
+    {step === 1 && <p className="masca-wizard-note">The public event displays in {EVENT_TIME_ZONES[data.state as keyof typeof EVENT_TIME_ZONES] ?? 'the selected state’s timezone'}.</p>}
     {step === 4 && <EventOverview data={data} />}
   </section>;
 }
@@ -118,11 +118,11 @@ function EventOverview({ data }: { data: Record<string, unknown> }) {
 }
 
 export function EventEditorFooter() {
-  const { step, setStep, save, saveState, setError, setSaveStatusTarget } = useEventEditor();
+  const { step, setStep, save, saveState, setError, setSaveStatusTarget, dateSelectionValidationRef } = useEventEditor();
   const { getData, dispatchFields, setSubmitted, disabled } = useForm();
   const { hasPublishedDoc, uploadStatus } = useDocumentInfo();
   const next = () => {
-    const errors = validateEventStep(getData(), step);
+    const errors = { ...validateEventStep(getData(), step), ...(step === 1 ? dateSelectionValidationRef?.current?.() : {}) };
     if (Object.keys(errors).length) {
       dispatchFields({ type: 'ADD_SERVER_ERRORS', errors: Object.entries(errors).map(([path, message]) => ({ path, message })) });
       setSubmitted(true);

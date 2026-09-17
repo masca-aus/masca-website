@@ -36,6 +36,7 @@
     "next": "16.3.4",
     "payload": "3.86.0",
     "react": "19.2.4",
+    "react-datepicker": "7.6.0",
     "react-dom": "19.2.4",
     "resend": "^6.12.4",
     "sharp": "0.35.4",

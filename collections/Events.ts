@@ -122,12 +122,12 @@ export const Events: CollectionConfig = {
       name: "startDate",
       type: "date",
       required: true,
-      admin: { date: { pickerAppearance: "dayAndTime" }, description: "Enter the date and time in your device timezone." },
+      admin: { components: { Field: "/components/admin/EventDateRangeField#EventDateRangeField" }, date: { pickerAppearance: "dayAndTime" } },
     },
     {
       name: "endDate",
       type: "date",
-      admin: { date: { pickerAppearance: "dayAndTime" }, description: "Optional. Must be on or after the start time." },
+      admin: { components: { Field: false }, date: { pickerAppearance: "dayAndTime" } },
     },
     {
       name: "venue",

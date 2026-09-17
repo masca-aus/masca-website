@@ -8,8 +8,9 @@ import { firstIncompleteEventStep } from '@/features/events/eventEditor';
 const h = vi.hoisted(() => ({
   data: {} as Record<string, unknown>,
   published: false,
+  dateValidation: {} as Record<string, string>,
   save: vi.fn(), setSubmitted: vi.fn(), dispatchFields: vi.fn(),
-  context: null as null | Context<{ step: number; setStep: Dispatch<SetStateAction<number>>; error: string; setError: Dispatch<SetStateAction<string>>; saveState: string; save: { current: (intent: string) => Promise<boolean> } } | null>,
+  context: null as null | Context<{ step: number; setStep: Dispatch<SetStateAction<number>>; error: string; setError: Dispatch<SetStateAction<string>>; saveState: string; dateSelectionValidationRef: { current: () => Record<string, string> }; save: { current: (intent: string) => Promise<boolean> } } | null>,
 }));
 vi.mock('@payloadcms/ui', () => ({
   useConfig: () => ({ config: { routes: { api: '/api' } } }),
@@ -27,12 +28,13 @@ function Editor({ initialStep = 0 }: { initialStep?: number }) {
   const [step, setStep] = useState(initialStep);
   const [error, setError] = useState('');
   const Provider = h.context!.Provider;
-  return <Provider value={{ step, setStep, error, setError, saveState: 'idle', save: { current: h.save } }}><EventEditorHeader /><EventEditorFooter /></Provider>;
+  return <Provider value={{ step, setStep, error, setError, saveState: 'idle', save: { current: h.save }, dateSelectionValidationRef: { current: () => h.dateValidation } }}><EventEditorHeader /><EventEditorFooter /></Provider>;
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
   h.published = false;
+  h.dateValidation = {};
   h.data = { title: 'Student dinner', organisation: 'MASCA QLD', description: 'A welcome dinner', startDate: '2026-10-01T10:00:00Z', venue: 'Community Hall', state: 'QLD', contactName: 'Private Person', contactEmail: 'private@example.com', internalNotes: 'Private committee note', poster: 7 };
   h.save.mockResolvedValue(true);
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 7, url: '/test-poster.png', alt: 'Dinner poster', filename: 'dinner.png' }) }));
@@ -44,6 +46,17 @@ async function renderOverview() {
 }
 
 describe('event editor navigation and preview', () => {
+  it('does not advance or jump past a date range missing its end', () => {
+    h.dateValidation = { endDate: 'Choose an end date, or select One day.' };
+    render(<Editor initialStep={1} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Date and location');
+    expect(h.dispatchFields).toHaveBeenCalledWith(expect.objectContaining({ errors: expect.arrayContaining([expect.objectContaining({ path: 'endDate' })]) }));
+    fireEvent.click(screen.getByRole('button', { name: 'View steps' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Preview and publish' }));
+    expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Date and location');
+  });
+
   it('keeps step navigation tucked away and closes it after choosing a section', () => {
     render(<Editor initialStep={1} />);
     const toggle = screen.getByRole('button', { name: 'View steps' });

@@ -9,6 +9,7 @@ import './eventEditor.css';
 export type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 export type SaveIntent = 'draft' | 'publish' | 'exit' | 'unpublish';
 type EditorContext = {
+  dateSelectionValidationRef: React.RefObject<(() => Record<string, string>) | null>;
   saveStatusTarget: HTMLSpanElement | null;
   setSaveStatusTarget: Dispatch<SetStateAction<HTMLSpanElement | null>>;
   step: number;
@@ -29,6 +30,7 @@ export function useEventEditor() {
 
 export function EventEditorView(props: DocumentViewClientProps) {
   const { data, id } = useDocumentInfo();
+  const dateSelectionValidationRef = useRef<(() => Record<string, string>) | null>(null);
   const [step, setStep] = useState(() => id ? firstIncompleteEventStep(data ?? {}) : 0);
   const [saveState, setSaveState] = useState<SaveState>(id ? 'saved' : 'idle');
   const [error, setError] = useState('');
@@ -36,7 +38,7 @@ export function EventEditorView(props: DocumentViewClientProps) {
   const save = useRef<((intent: SaveIntent) => Promise<boolean>) | null>(null);
   const registerSave = useCallback((handler: ((intent: SaveIntent) => Promise<boolean>) | null) => { save.current = handler; }, []);
   return (
-    <Context.Provider value={{ saveStatusTarget, setSaveStatusTarget, step, setStep, saveState, setSaveState, error, setError, save, registerSave }}>
+    <Context.Provider value={{ dateSelectionValidationRef, saveStatusTarget, setSaveStatusTarget, step, setStep, saveState, setSaveState, error, setError, save, registerSave }}>
       <div className="masca-event-editor" data-step={step} onSubmitCapture={(event) => {
         if (!(event.target instanceof HTMLFormElement) || !event.target.matches('.collection-edit--events > form')) return;
         // Native Enter submission must use the same single writer as autosave.

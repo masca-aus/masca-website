@@ -65,7 +65,7 @@
 .masca-wizard-steps button { transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
 .masca-wizard-steps button:hover { background: var(--theme-elevation-100); }
 .masca-wizard-steps button[data-complete="true"] .masca-wizard-step-number { color: #176842; }
-.masca-wizard-intro, .masca-event-editor .masca-event-step, .masca-event-overview { animation: masca-step-enter 180ms ease-out both; }
+.masca-wizard-intro, .masca-event-editor .masca-event-step, .masca-event-overview { animation: masca-step-enter 180ms ease-out backwards; }
 .masca-wizard-intro p { margin-bottom: 0; }
 .masca-wizard-primary, .masca-wizard-secondary, .masca-overview-section button { transition: box-shadow 160ms ease, background-color 160ms ease; }
 .masca-wizard-primary:hover:not(:disabled) { background: #151582; box-shadow: 0 3px 10px #01006620; }

@@ -7,6 +7,7 @@ type Intent = 'draft' | 'publish' | 'exit' | 'unpublish';
 const h = vi.hoisted(() => ({
   data: {} as Record<string, unknown>,
   modified: false,
+  dateValidation: {} as Record<string, string>,
   document: {} as Record<string, unknown>,
   save: { current: null as null | ((intent: Intent) => Promise<boolean>) },
   fetch: vi.fn(), setSubmitted: vi.fn(), submit: vi.fn(), setModified: vi.fn(), setBackgroundProcessing: vi.fn(), dispatchFields: vi.fn(),
@@ -25,7 +26,7 @@ vi.mock('@/components/admin/EventEditorView', async () => {
   const { useState } = await import('react');
   return { useEventEditor: () => {
     const [saveState, setSaveState] = useState('idle');
-    return { save: h.save, registerSave: h.registerSave, saveState, setSaveState, setError: h.setError, setStep: h.setStep };
+    return { dateSelectionValidationRef: { current: () => h.dateValidation }, save: h.save, registerSave: h.registerSave, saveState, setSaveState, setError: h.setError, setStep: h.setStep };
   } };
 });
 
@@ -34,6 +35,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   h.data = { title: 'Dinner', organisation: 'MASCA', description: 'Student dinner', startDate: '2026-10-01T10:00:00Z', venue: 'Hall', state: 'QLD', contactName: 'Alex', contactEmail: 'alex@example.com', reviewStatus: 'pending', _status: 'draft' };
   h.modified = false;
+  h.dateValidation = {};
   h.save.current = null;
   h.document = { id: 7, data: { id: 7 }, isInitializing: false, hasSavePermission: true, uploadStatus: undefined, setHasPublishedDoc: vi.fn(), setMostRecentVersionIsAutosaved: vi.fn(), setUnpublishedVersionCount: vi.fn() };
   h.submit.mockResolvedValue({ res: { ok: true } });
@@ -53,6 +55,14 @@ async function save(intent: Intent) {
 }
 
 describe('event save controller', () => {
+  it('blocks publishing when the date control has an unfinished range', async () => {
+    h.dateValidation = { endDate: 'Choose an end date, or select One day.' };
+    render(<EventSaveController />);
+    expect(await save('publish')).toBe(false);
+    expect(h.submit).not.toHaveBeenCalled();
+    expect(h.setStep).toHaveBeenCalledWith(1);
+  });
+
   it('does not save initial data and waits two seconds after the latest edit', async () => {
     const view = render(<EventSaveController />);
     await advance(5000);
@@ -98,6 +108,7 @@ describe('event save controller', () => {
     view.rerender(<EventSaveController />);
     // Model an adapter clearing its dirty flag while returning the old snapshot.
     h.modified = false;
+  h.dateValidation = {};
     await act(async () => { finishDraft({ res: { ok: true } }); await Promise.resolve(); });
     expect(h.setBackgroundProcessing).toHaveBeenLastCalledWith(false);
     expect(h.modified).toBe(true);
