@@ -16,7 +16,7 @@
 .masca-event-dates .react-datepicker__month-container { flex: 1; min-width: 0; }
 .masca-event-dates__month-heading { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-bottom: .5rem; }
 .masca-event-dates__month-heading strong { font-size: 1rem; font-weight: 600; }
-.masca-event-dates__month-heading button { width: 44px; height: 44px; border: 0; border-radius: 50%; font-size: 1.5rem; background: transparent; color: var(--theme-text); cursor: pointer; }
+.masca-event-dates__month-heading button { width: 44px; height: 44px; border: 0; border-radius: 8px; font-size: 1.5rem; background: transparent; color: var(--theme-text); cursor: pointer; }
 .masca-event-dates__month-heading button:hover { background: var(--theme-elevation-100); }
 .masca-event-dates .react-datepicker__day-names, .masca-event-dates .react-datepicker__week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .masca-event-dates .react-datepicker__day-name, .masca-event-dates .react-datepicker__day { display: grid; place-items: center; min-height: 44px; font-size: .9rem; margin: 2px 0; }

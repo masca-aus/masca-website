@@ -76,3 +76,13 @@ View steps uses a 220 ms height/opacity disclosure with reduced-motion support, 
 Poster metadata is fetched only for the final step, reused for two minutes within the editor, and refreshed after visiting Poster and links. Aborted responses cannot overwrite a newer selection. The matching local media response decreased from 603 to 347 bytes while retaining generated image and thumbnail URLs. This is a payload/request reduction, not a measured production page-load speedup. The header no longer subscribes to every form value; closed step navigation skips completion validation.
 
 Two added tests verify metadata reuse/refresh and stale-response protection. 42 focused tests passed, typecheck passed, lint passed with eight existing warnings, and the production build passed against isolated services. The full suite with two workers recorded 327 passing tests and the same five known Careers failures; Careers code remains unchanged. No production content was written.
+
+## Shared hierarchy and dashboard design
+
+The event preview gives the event title stronger typographic emphasis and separates the committee-only contact and review fields with a Before publishing heading. Save and exit and Back now use neutral outlined buttons. Actions use 8 px rounded rectangles across the dashboard, wizard, native Payload buttons, theme toggle and calendar navigation; status pills remain distinct. Dark-theme primary buttons have a brighter fill and border.
+
+The dashboard replaces the banner and card grid with a compact heading, one Create event action, three count shortcuts, a bounded submission list and simple content-management rows. Existing create/manage/filter links and empty states remain available. Obsolete decorative markup and roughly 400 lines of superseded dashboard CSS were removed. It remains a server component with the same bounded queries and no additional requests or client dependencies; no new timing improvement is claimed.
+
+Local browser inspection used isolated services and verified both screens in light and dark themes, loaded event poster and accessible link/button names. Fifteen focused dashboard/editor tests passed, typecheck passed, lint passed with eight existing warnings, and the production build passed. Responsive layouts are implemented; physical-phone verification remains outstanding.
+
+The full suite with two workers remains at 327 passing tests and the five known Careers failures. No Careers or publication logic was changed.

@@ -112,6 +112,7 @@ function EventOverview({ poster }: { poster: EventPoster | null }) {
         </div>
       </div>
     </article>
+    <h3 className="masca-overview-review-heading">Before publishing</h3>
     <section className="masca-overview-section masca-overview-section--private">
       <div><h3>Contact details · committee only</h3><p>{text('contactName')} · {text('contactEmail')}</p>
         {data.internalNotes ? <details><summary>Internal notes</summary><p>{text('internalNotes')}</p></details> : null}
@@ -138,8 +139,8 @@ export function EventEditorFooter() {
   };
   const busy = disabled || saveState === 'saving' || uploadStatus === 'uploading';
   return <div className="masca-wizard-footer">
-    <div className="masca-wizard-save-actions"><button type="button" className="masca-wizard-text-button" disabled={busy} onClick={() => void save.current?.('exit')}>Save and exit</button><span ref={setSaveStatusTarget} /></div>
-    <div>{step > 0 && <button type="button" className="masca-wizard-text-button" onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}
+    <div className="masca-wizard-save-actions"><button type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => void save.current?.('exit')}>Save and exit</button><span ref={setSaveStatusTarget} /></div>
+    <div>{step > 0 && <button type="button" className="masca-wizard-secondary" onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}
       {step < 4 ? <button type="button" className="masca-wizard-primary" onClick={next} disabled={disabled}>Continue</button> : <button type="button" className="masca-wizard-primary" disabled={busy} onClick={() => void save.current?.('publish')}>{hasPublishedDoc ? 'Publish changes' : 'Publish event'}</button>}
     </div>
   </div>;
