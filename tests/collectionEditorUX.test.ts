@@ -56,4 +56,16 @@ describe("collection editor UX", () => {
       expect(sectionNames).toEqual(expectedSections);
     }
   });
+
+  it("adds a back-to-list action to every collection document screen", async () => {
+    const config = await configPromise;
+
+    for (const slug of editorCollections) {
+      const collection = config.collections.find((candidate) => candidate.slug === slug);
+
+      expect(collection?.admin?.components?.edit?.beforeDocumentControls).toContain(
+        "/components/admin/DocumentBackLink#DocumentBackLink",
+      );
+    }
+  });
 });

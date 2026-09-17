@@ -42,6 +42,9 @@ export const Events: CollectionConfig = {
     hideAPIURL: true,
     components: {
       beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
+      edit: {
+        beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
+      },
       views: {
         edit: {
           versions: {

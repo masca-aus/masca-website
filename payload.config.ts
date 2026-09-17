@@ -150,6 +150,9 @@ export default buildConfig({
         useAsTitle: "email",
         components: {
           beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
+          edit: {
+            beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
+          },
         },
       },
       access: {
@@ -169,6 +172,9 @@ export default buildConfig({
         useAsTitle: "filename",
         components: {
           beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
+          edit: {
+            beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
+          },
         },
       },
       // Anyone may read media metadata (the files themselves are public-bucket
@@ -215,6 +221,9 @@ export default buildConfig({
         defaultColumns: ["name", "role", "department", "year"],
         components: {
           beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
+          edit: {
+            beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
+          },
         },
       },
       // Anyone may read (the public site renders from this collection); only
@@ -331,6 +340,9 @@ export default buildConfig({
         defaultColumns: ["name", "date"],
         components: {
           beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
+          edit: {
+            beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
+          },
         },
       },
       // Anyone may read (the public site renders the marquee from this
