@@ -1,4 +1,4 @@
-import { EVENT_STATES } from './eventSubmission';
+import { EVENT_STATES } from './eventSubmission.ts';
 
 export const EVENT_EDITOR_STEPS: { title: string; fields: string[] }[] = [
   { title: 'Basics', fields: ['title', 'organisation', 'description'] },
