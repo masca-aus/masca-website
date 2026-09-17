@@ -6,7 +6,7 @@ import { CAREER_STEPS } from '../features/careers/careerEditor.ts';
 import { careerPublicationErrors } from '../features/careers/careerModel.ts';
 import { careerDateWhere, careerLifecycleAction, careerLifecycleIDs, careerListFilter } from '../features/careers/careerLifecycle.ts';
 
-import { archivedCareerDeleteAccess, deleteArchivedCareer } from '../features/careers/careerDeletion.ts';
+import { careerDeleteAccess, deleteCareerLifecycle } from '../features/careers/careerDeletion.ts';
 
 import { careerQuickAction } from '../features/careers/careerQuickActions.ts';
 
@@ -31,7 +31,7 @@ export const Careers: CollectionConfig = {
       views: { edit: { default: { Component: '/components/admin/CareerEditor#CareerEditorView' }, versions: { tab: { label: 'Change history' } } } },
     },
   },
-  access: { read: publicCareerAccess, readVersions: authenticated, create: authenticated, update: authenticated, delete: archivedCareerDeleteAccess },
+  access: { read: publicCareerAccess, readVersions: authenticated, create: authenticated, update: authenticated, delete: careerDeleteAccess },
   versions: { drafts: true, maxPerDoc: 0 },
   lockDocuments: { duration: 300 }, defaultSort: '-added',
   endpoints: [{ path: '/:id/lifecycle', method: 'post', handler: careerLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: careerQuickAction }],
@@ -73,7 +73,7 @@ export const Careers: CollectionConfig = {
     return step < 0 ? field : { ...field, admin: { ...field.admin, className: `masca-career-step masca-career-step-${step}` } } as Field;
   }),
   hooks: {
-    beforeDelete: [deleteArchivedCareer],
+    beforeDelete: [deleteCareerLifecycle],
     afterDelete: [({ doc }) => { try { revalidatePath('/careers'); } catch { /* Local API has no Next cache. */ } return doc; }],
     beforeValidate: [({ data, originalDoc }) => {
       if (!data) return data;

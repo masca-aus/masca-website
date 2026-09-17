@@ -7,7 +7,7 @@ import { eventReport } from "../features/events/eventReports.ts";
 import { EVENT_STATES } from "../features/events/eventSubmission.ts";
 import { EVENT_EDITOR_STEPS } from "../features/events/eventEditor.ts";
 import { eventQuickAction, validateQuickPublish } from "../features/events/eventQuickActions.ts";
-import { archivedEventDeleteAccess, deleteArchivedEvent } from '../features/events/eventDeletion.ts';
+import { eventDeleteAccess, deleteEventLifecycle } from '../features/events/eventDeletion.ts';
 import { editorSection } from "../utils/editorSection.ts";
 
 export const isPublicEventRead = async ({
@@ -89,7 +89,7 @@ export const Events: CollectionConfig = {
     read: isPublicEventRead,
     create: isAuthenticatedEventAccess,
     update: isAuthenticatedEventAccess,
-    delete: archivedEventDeleteAccess,
+    delete: eventDeleteAccess,
   },
   versions: {
     drafts: true,
@@ -262,7 +262,7 @@ export const Events: CollectionConfig = {
     };
   }) as CollectionConfig['fields'],
   hooks: {
-    beforeDelete: [deleteArchivedEvent],
+    beforeDelete: [deleteEventLifecycle],
     beforeChange: [validateQuickPublish],
     afterChange: [revalidatePublishedEvent],
     afterDelete: [revalidateEventPages],

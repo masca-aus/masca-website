@@ -114,7 +114,7 @@ describe("events collection", () => {
     expect(await events.access.read(authenticated)).toBe(true);
     expect(events.access.create?.(authenticated)).toBe(true);
     expect(events.access.update?.(authenticated)).toBe(true);
-    expect(await events.access.delete?.(authenticated)).toEqual({ id: { in: [7] } });
+    expect(await events.access.delete?.(authenticated)).toBe(true);
   });
 
   it("limits anonymous reads to events that are both approved and published", async () => {
