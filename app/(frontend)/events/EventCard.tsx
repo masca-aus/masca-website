@@ -105,6 +105,8 @@ export default function EventCard({ event, chapter }: { event: Event; chapter?: 
           <span className="text-sm text-gray-500">
             {location} · {time}
           </span>
+          {event.venue?.address.localized_address_display && event.venue.address.localized_address_display !== location && <span className="text-sm text-gray-500">{event.venue.address.localized_address_display}</span>}
+          {event.venue?.details && <p className="text-sm text-gray-500 whitespace-pre-line">{event.venue.details}</p>}
         </div>
 
         <div className="border-b border-gray-200" />

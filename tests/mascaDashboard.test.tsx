@@ -23,3 +23,17 @@ describe("CMS dashboard actions", () => {
     expect(html).not.toContain("No events awaiting review.");
   });
 });
+
+it("gives untitled drafts a usable label and renders upcoming dates and venue", () => {
+ const html = renderToStaticMarkup(<DashboardContent overview={{ pending: 1, drafts: 1, published: 1,
+   pendingEvents: [{ id: 8, title: '', organisation: 'MASCA', createdAt: '2026-09-17T00:00:00Z' }],
+   recentDrafts: [{ id: 8, title: '', organisation: 'MASCA', updatedAt: '2026-09-17T00:00:00Z' }],
+   upcomingEvents: [{ id: 9, title: 'Spring gathering', organisation: 'UQMSA', startDate: '2026-09-20T08:00:00Z', venue: 'Great Court', state: 'QLD' }],
+ }} />);
+ expect(html).toContain('Untitled event');
+ expect(html).toContain('Continue editing');
+ expect(html).toContain('Upcoming events');
+ expect(html).toContain('Great Court');
+ expect(html).toContain('Spring gathering');
+ expect(html).toMatch(/datetime="2026-09-20T08:00:00Z"/i);
+});

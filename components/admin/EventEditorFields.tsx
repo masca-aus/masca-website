@@ -105,7 +105,7 @@ function EventOverview({ poster }: { poster: EventPoster | null }) {
           <div className="masca-overview-heading"><div><h3>{text('title')}</h3><p>{text('organisation')}</p></div><button type="button" className="masca-wizard-text-button" onClick={() => setStep(0)} aria-label="Edit basics">Edit details</button></div>
           <p className="masca-event-preview__description">{text('description')}</p>
           <section className="masca-overview-section">
-            <div><h4>Date and location</h4><p>{date('startDate')}{data.endDate ? ` – ${date('endDate')}` : ''}</p><p>{text('venue')} · {text('state')}</p><small>{EVENT_TIME_ZONES[data.state as keyof typeof EVENT_TIME_ZONES]}</small></div>
+            <div><h4>Date and location</h4><p>{date('startDate')}{data.endDate ? ` – ${date('endDate')}` : ''}</p><p>{text('venue')} · {text('state')}</p>{data.streetAddress ? <p>{text('streetAddress')}</p> : null}{data.venueDetails ? <p className="masca-event-preview__description">{text('venueDetails')}</p> : null}<small>{EVENT_TIME_ZONES[data.state as keyof typeof EVENT_TIME_ZONES]}</small></div>
             <button type="button" className="masca-wizard-text-button" onClick={() => setStep(1)} aria-label="Edit date and location">Edit</button>
           </section>
           <p className="masca-event-preview__registration">{registration ? <a href={registration} target="_blank" rel="noopener noreferrer">Registration link ↗</a> : 'No registration link'}</p>

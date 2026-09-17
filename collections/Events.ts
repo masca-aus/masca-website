@@ -93,7 +93,7 @@ export const Events: CollectionConfig = {
   endpoints: [{ path: '/:id/quick-status', method: 'post', handler: eventQuickAction }],
   fields: [
     {
-      name: '_status', label: 'Status', type: 'select', options: [{ label: 'Draft', value: 'draft' }, { label: 'Published', value: 'published' }],
+      name: '_status', label: 'Status', type: 'select', options: [], // Payload supplies the built-in publication options during sanitization.
       admin: { components: { Field: false, Cell: '/components/admin/EventStatusCell#EventPublicationStatusCell' }, disableBulkEdit: true },
     },
     {
@@ -113,6 +113,7 @@ export const Events: CollectionConfig = {
       name: "organisation",
       type: "text",
       required: true,
+      admin: { components: { Field: "/components/admin/OrganisationSearchField#OrganisationSearchField" } },
     },
     {
       name: "description",
@@ -132,8 +133,22 @@ export const Events: CollectionConfig = {
     },
     {
       name: "venue",
+      label: "Venue name",
       type: "text",
       required: true,
+      admin: { description: "The name of the place, such as Great Court, University of Queensland. For an online event, enter Online." },
+    },
+    {
+      name: "streetAddress",
+      label: "Street address",
+      type: "text",
+      admin: { description: "Street number and name, suburb and postcode. Leave blank for online events." },
+    },
+    {
+      name: "venueDetails",
+      label: "Venue details",
+      type: "textarea",
+      admin: { description: "Optional details for attendees: room, floor, entrance, meeting point or accessibility instructions." },
     },
     {
       name: "state",

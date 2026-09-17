@@ -69,3 +69,11 @@ describe('event draft fingerprint', () => {
     expect(eventDraftFingerprint({ ...complete, poster: null, endDate: '', internalNotes: null })).toBe(eventDraftFingerprint(Object.fromEntries(Object.entries(complete).reverse())));
   });
 });
+
+it('autosaves address and venue details and routes their errors to the location step', () => {
+ const before = eventDraftFingerprint({ venue: 'Great Court' });
+ expect(eventDraftFingerprint({ venue: 'Great Court', streetAddress: 'University Drive, St Lucia QLD 4067' })).not.toBe(before);
+ expect(eventDraftFingerprint({ venue: 'Great Court', venueDetails: 'Meet near the main entrance' })).not.toBe(before);
+ expect(eventFieldStep('streetAddress')).toBe(1);
+ expect(eventFieldStep('venueDetails')).toBe(1);
+});

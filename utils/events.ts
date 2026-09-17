@@ -22,7 +22,7 @@ export type Event = {
   url: string;
   summary?: string;
   logo?: { url: string } | null;
-  venue?: { name: string; address: { localized_address_display: string } } | null;
+  venue?: { name: string; details?: string; address: { localized_address_display: string } } | null;
   organizer?: { id: string; name: string } | null;
   ticket_availability?: {
     is_free?: boolean;

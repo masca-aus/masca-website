@@ -20,6 +20,8 @@ const publicEventSelect = {
   startDate: true,
   endDate: true,
   venue: true,
+  streetAddress: true,
+  venueDetails: true,
   state: true,
   ticketURL: true,
   poster: true,
@@ -83,7 +85,8 @@ export async function getApprovedUpcomingEvents(now = new Date()): Promise<Event
       logo: poster?.url ? { url: poster.url } : null,
       venue: {
         name: doc.venue,
-        address: { localized_address_display: doc.venue },
+        address: { localized_address_display: doc.streetAddress || doc.venue },
+        ...(doc.venueDetails ? { details: doc.venueDetails } : {}),
       },
       organizer: { id: doc.state, name: doc.organisation },
     };

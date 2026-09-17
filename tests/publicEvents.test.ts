@@ -66,6 +66,8 @@ describe("approved upcoming Payload events", () => {
       startDate: true,
       endDate: true,
       venue: true,
+      streetAddress: true,
+      venueDetails: true,
       state: true,
       ticketURL: true,
       poster: true,
@@ -202,4 +204,10 @@ describe("approved upcoming Payload events", () => {
 
     await expect(getApprovedUpcomingEvents(now)).rejects.toThrow("Calendar unavailable");
   });
+});
+
+it('passes manual address and arrival details to the public event without altering the venue name', async () => {
+ find.mockResolvedValue({ docs: [{ ...eventDoc, streetAddress: '90 Swanston Street, Melbourne VIC 3000', venueDetails: 'Enter via Collins Street; level 1' }] });
+ const [event] = await getApprovedUpcomingEvents(now);
+ expect(event.venue).toEqual({ name: 'Melbourne Town Hall', address: { localized_address_display: '90 Swanston Street, Melbourne VIC 3000' }, details: 'Enter via Collins Street; level 1' });
 });

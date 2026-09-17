@@ -1,4 +1,4 @@
-const labels: Record<string, string> = { committee: 'Committee', events: 'Events', media: 'Media', sponsors: 'Sponsors', users: 'Users' };
+const labels: Record<string, string> = { organisations: 'Organisations', committee: 'Committee', events: 'Events', media: 'Media', sponsors: 'Sponsors', users: 'Users' };
 export function adminBackTarget(pathname: string): { href: string; label: string } | null {
   const parts = pathname.replace(/\/$/, '').split('/');
   if (parts[1] !== 'admin') return null;

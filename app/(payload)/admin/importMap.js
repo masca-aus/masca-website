@@ -1,3 +1,4 @@
+import { OrganisationSearchField } from '../../../components/admin/OrganisationSearchField'
 import { CommitteeEditorView, CommitteeEditorHeader, CommitteeEditorFooter, CommitteeSaveControl } from '../../../components/admin/CommitteeEditor'
 import { CollectionBackLink } from '../../../components/admin/DocumentBackLink'
 import { EventDateRangeField } from '../../../components/admin/EventDateRangeField'
@@ -18,6 +19,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/components/admin/OrganisationSearchField#OrganisationSearchField": OrganisationSearchField,
   "/components/admin/DocumentBackLink#CollectionBackLink": CollectionBackLink,
   "/components/admin/CommitteeEditor#CommitteeEditorView": CommitteeEditorView,
   "/components/admin/CommitteeEditor#CommitteeEditorHeader": CommitteeEditorHeader,

@@ -1,0 +1,13 @@
+.masca-organisation { position: relative; }
+.masca-organisation > input { width: 100%; min-height: 3rem; border: 1px solid var(--theme-elevation-200); background: var(--theme-input-bg); color: var(--theme-text); border-radius: 8px; padding: .8rem 1rem; font: inherit; }
+.masca-organisation > input:focus-visible, .masca-organisation button:focus-visible { outline: 3px solid #ffcc00; outline-offset: 2px; }
+.masca-organisation__results { border: 1px solid var(--theme-elevation-200); border-radius: 8px; margin-top: .5rem; background: var(--theme-elevation-0); overflow: hidden; }
+.masca-organisation__results ul { list-style: none; margin: 0; padding: 0; max-height: 18rem; overflow-y: auto; }
+.masca-organisation__results li { padding: .8rem 1rem; cursor: pointer; }
+.masca-organisation__results li + li { border-top: 1px solid var(--theme-elevation-100); }
+.masca-organisation__results li:hover, .masca-organisation__results li[aria-selected=true] { background: var(--theme-elevation-100); }
+.masca-organisation__results strong, .masca-organisation__results small { display: block; }
+.masca-organisation__results small { color: var(--theme-elevation-650); margin-top: .25rem; }
+.masca-organisation__results p { margin: 0; padding: .8rem 1rem; font-size: .85rem; color: var(--theme-elevation-650); }
+.masca-organisation__results button { display: block; width: 100%; padding: .8rem 1rem; border: 0; border-top: 1px solid var(--theme-elevation-150); background: var(--theme-elevation-50); color: var(--theme-text); text-align: left; font: inherit; cursor: pointer; overflow-wrap: anywhere; }
+.masca-organisation__error { color: var(--theme-error-500); }

@@ -9,9 +9,10 @@ describe("event dashboard summary", () => {
       if (where.and?.[1]?._status?.equals === "published") return { totalDocs: 4 };
       return { totalDocs: 1 };
     });
-    const find = vi.fn().mockResolvedValue({
+    const find = vi.fn().mockImplementation(async ({ where }) => ({
+      totalDocs: where._status?.equals === 'draft' ? 3 : 2,
       docs: [{ id: 7, title: "Community dinner", organisation: "MASCA QLD" }],
-    });
+    }));
 
     const req = { user: { id: 42 } };
     const result = await loadEventDashboard({ count, find } as never, req as never);
@@ -20,17 +21,15 @@ describe("event dashboard summary", () => {
       expect(options.req).toBe(req);
     }
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       pending: 2,
       published: 4,
-      drafts: 1,
+      drafts: 3,
       pendingEvents: [{ id: 7, title: "Community dinner", organisation: "MASCA QLD" }],
     });
-    expect(count).toHaveBeenCalledTimes(3);
+    expect(count).toHaveBeenCalledTimes(1);
     expect(count.mock.calls.map(([options]) => options.where)).toEqual([
-      { reviewStatus: { equals: "pending" } },
       { and: [{ reviewStatus: { equals: "approved" } }, { _status: { equals: "published" } }] },
-      { _status: { equals: "draft" } },
     ]);
     expect(find).toHaveBeenCalledWith(expect.objectContaining({
       collection: "events",
@@ -42,3 +41,21 @@ describe("event dashboard summary", () => {
     }));
   });
 });
+
+ it("loads upcoming public events and recent drafts without exposing another request's data", async () => {
+   const req = { user: { id: 42 } };
+   const find = vi.fn().mockResolvedValue({ docs: [] });
+   const count = vi.fn().mockResolvedValue({ totalDocs: 0 });
+   const now = new Date('2026-09-17T12:00:00Z');
+   const result = await loadEventDashboard({ count, find } as never, req as never, now);
+   expect(result.upcomingEvents).toEqual([]);
+   expect(result.recentDrafts).toEqual([]);
+   expect(find).toHaveBeenCalledWith(expect.objectContaining({
+     draft: false, overrideAccess: false, req, limit: 3, sort: 'startDate',
+     where: { and: [
+       { reviewStatus: { equals: 'approved' } }, { _status: { equals: 'published' } },
+       { or: [{ startDate: { greater_than_equal: now.toISOString() } }, { endDate: { greater_than_equal: now.toISOString() } }] },
+     ] },
+   }));
+   expect(find).toHaveBeenCalledWith(expect.objectContaining({ draft: true, req, overrideAccess: false, limit: 3, sort: '-updatedAt', where: { _status: { equals: 'draft' } } }));
+ });

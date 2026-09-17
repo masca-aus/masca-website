@@ -10,6 +10,7 @@ import { buildConfig, type Field } from "payload";
 import sharp from "sharp";
 
 import { COMMITTEE_STEPS } from "./features/committee/committeeEditor.ts";
+import { Organisations } from "./collections/Organisations.ts";
 import { Events } from "./collections/Events.ts";
 import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
 import { editorSection } from "./utils/editorSection.ts";
@@ -148,6 +149,7 @@ export default buildConfig({
     },
   },
   collections: [
+    Organisations,
     {
       slug: "users",
       admin: {

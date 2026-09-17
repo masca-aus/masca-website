@@ -347,3 +347,11 @@ html[data-theme="dark"] .masca-action--primary:hover, html[data-theme="dark"] .m
 .masca-account-back { width: 100%; }
 
 [role="dialog"] .masca-collection-back, [role="dialog"] .masca-document-back-link { display: none; }
+
+/* Leave room for theme/account controls when a record has a long title. */
+@media (max-width: 600px) {
+  .app-header__step-nav-wrapper { min-width: 0; flex: 1; overflow: hidden; }
+  .app-header__step-nav { max-width: 100%; }
+  .app-header__step-nav .step-nav__last { min-width: 0; }
+  .app-header__actions-wrapper { flex-shrink: 0; }
+}

@@ -2,7 +2,7 @@ import { EVENT_STATES } from './eventSubmission.ts';
 
 export const EVENT_EDITOR_STEPS: { title: string; fields: string[] }[] = [
   { title: 'Basics', fields: ['title', 'organisation', 'description'] },
-  { title: 'Date and location', fields: ['startDate', 'endDate', 'venue', 'state'] },
+  { title: 'Date and location', fields: ['startDate', 'endDate', 'venue', 'streetAddress', 'venueDetails', 'state'] },
   { title: 'Poster and links', fields: ['poster', 'ticketURL'] },
   { title: 'Contact details', fields: ['contactName', 'contactEmail', 'internalNotes'] },
   { title: 'Preview and publish', fields: ['reviewStatus', 'reviewedAt'] },
