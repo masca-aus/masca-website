@@ -1,5 +1,12 @@
 .masca-event-editor { --wizard-accent: var(--theme-text); }
 .masca-event-editor .document-fields { max-width: 76rem; }
+/* Share the form's width and native gutters, leaving the app navigation full-width. */
+.doc-header:has(~ .masca-event-editor),
+.masca-event-editor > .collection-edit--events > form > .doc-controls {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+}
 .masca-event-editor .masca-event-section, .masca-event-editor .masca-editor-section { display: none; }
 .masca-event-editor[data-step="0"] .masca-event-step:not(.masca-event-step-0),
 .masca-event-editor[data-step="1"] .masca-event-step:not(.masca-event-step-1),
@@ -43,7 +50,6 @@
 @media (max-width: 480px) { .masca-wizard-heading-row { align-items: start; } .masca-wizard-footer { flex-direction: column-reverse; align-items: stretch; } .masca-wizard-footer > div { justify-content: space-between; } .masca-wizard-footer > button { width: 100%; } }
 
 /* Keep fields mounted for Payload form state; animate their visibility only. */
-.masca-wizard-header { padding: 1.5rem; border: 1px solid var(--theme-elevation-150); border-top: 3px solid #010066; border-radius: 16px; background: var(--theme-elevation-0); box-shadow: 0 6px 24px #01006606; }
 .masca-wizard-progress { height: 4px; border-radius: 999px; background: var(--theme-elevation-100); margin-top: 1.25rem; overflow: hidden; }
 .masca-wizard-progress > span { display: block; height: 100%; background: #ffcc00; border-radius: inherit; transition: width 220ms ease-out; }
 .masca-wizard-step-label { display: block; font-weight: 650; line-height: 1.35; }
@@ -53,14 +59,12 @@
 .masca-wizard-steps button[data-complete="true"] .masca-wizard-step-number { background: #eaf7ee; color: #176842; }
 .masca-wizard-intro, .masca-event-editor .masca-event-step, .masca-event-overview { animation: masca-step-enter 180ms ease-out both; }
 .masca-wizard-intro p { margin-bottom: 0; }
-.masca-wizard-footer { padding: 1.25rem; border: 1px solid var(--theme-elevation-150); border-radius: 12px; background: var(--theme-elevation-50); }
 .masca-wizard-primary, .masca-wizard-secondary, .masca-overview-section button { transition: box-shadow 160ms ease, background-color 160ms ease; }
 .masca-wizard-primary:hover:not(:disabled) { background: #151582; box-shadow: 0 3px 10px #01006620; }
 .masca-wizard-secondary:hover:not(:disabled), .masca-overview-section button:hover { background: var(--theme-elevation-100); }
-[data-theme="dark"] .masca-wizard-header { border-top-color: #ffcc00; }
 [data-theme="dark"] .masca-wizard-steps button[data-complete="true"] .masca-wizard-step-number { background: #153c2d; color: #9be2b4; }
 @keyframes masca-step-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-@media (max-width: 600px) { .masca-wizard-header { padding: 1rem; } .masca-wizard-count { font-size: .7rem; } .masca-wizard-eyebrow { line-height: 1.5; } }
+@media (max-width: 600px) { .masca-wizard-count { font-size: .7rem; } .masca-wizard-eyebrow { line-height: 1.5; } }
 @media (prefers-reduced-motion: reduce) {
   .masca-wizard-intro, .masca-event-editor .masca-event-step, .masca-event-overview { animation: none; }
   .masca-wizard-progress > span, .masca-wizard-steps button, .masca-wizard-primary, .masca-wizard-secondary, .masca-overview-section button { transition: none; }
