@@ -17,6 +17,7 @@ const hints = [
   'These contact details and notes are for the MASCA committee only.',
   'Check how your event will appear. Publish only when everything is ready.',
 ];
+const stepDetails = ['Name and description', 'When and where', 'Images and registration', 'Committee information', 'Ready for the website'];
 
 export function EventEditorHeader() {
   const { step, setStep, error, setError, save, saveState } = useEventEditor();
@@ -24,9 +25,13 @@ export function EventEditorHeader() {
   const { dispatchFields, setSubmitted } = useForm();
   const { hasPublishedDoc } = useDocumentInfo();
   const heading = useRef<HTMLHeadingElement>(null);
+  const stepList = useRef<HTMLOListElement>(null);
   const mounted = useRef(false);
   useEffect(() => {
-    if (mounted.current) heading.current?.focus();
+    if (mounted.current) {
+      heading.current?.focus();
+      stepList.current?.querySelector<HTMLElement>('[aria-current="step"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    }
     mounted.current = true;
   }, [step]);
   const moveTo = (next: number) => {
@@ -48,15 +53,21 @@ export function EventEditorHeader() {
       <span className="masca-wizard-eyebrow">{hasPublishedDoc ? 'Live event · changes save as a draft' : 'Event draft · not visible on the website'}</span>
       <span className="masca-wizard-count">Step {step + 1} of 5</span>
     </div>
-    <nav aria-label="Event steps"><ol className="masca-wizard-steps">
+    <div className="masca-wizard-progress" role="progressbar" aria-label="Event setup progress" aria-valuemin={1} aria-valuemax={5} aria-valuenow={step + 1} aria-valuetext={`Step ${step + 1} of 5: ${EVENT_EDITOR_STEPS[step].title}`}>
+      <span style={{ width: `${(step + 1) * 20}%` }} />
+    </div>
+    <nav aria-label="Event steps"><ol ref={stepList} className="masca-wizard-steps">
       {EVENT_EDITOR_STEPS.map(({ title }, index) => <li key={title}>
-        <button type="button" onClick={() => moveTo(index)} aria-current={step === index ? 'step' : undefined}>
-          <span aria-hidden="true">{index + 1}</span>{title}
+        <button type="button" onClick={() => moveTo(index)} aria-label={title} aria-current={step === index ? 'step' : undefined} data-complete={index < step && !Object.keys(validateEventStep(data, index)).length}>
+          <span className="masca-wizard-step-number" aria-hidden="true">{index < step && !Object.keys(validateEventStep(data, index)).length ? '✓' : index + 1}</span>
+          <span className="masca-wizard-step-label">{title}<small>{stepDetails[index]}</small></span>
         </button>
       </li>)}
     </ol></nav>
-    <h2 ref={heading} tabIndex={-1}>{step === 4 && hasPublishedDoc ? 'Event overview' : EVENT_EDITOR_STEPS[step].title}</h2>
-    <p>{hints[step]}</p>
+    <div key={step} className="masca-wizard-intro">
+      <h2 ref={heading} tabIndex={-1}>{step === 4 && hasPublishedDoc ? 'Event overview' : EVENT_EDITOR_STEPS[step].title}</h2>
+      <p>{hints[step]}</p>
+    </div>
     {error && <div className="masca-wizard-error" role="alert">{error}{saveState === 'error' && <button type="button" onClick={() => void save.current?.('draft')}>Retry save</button>}</div>}
     {step === 1 && <p className="masca-wizard-note">Date inputs use your device timezone ({Intl.DateTimeFormat().resolvedOptions().timeZone}). The public event displays in {EVENT_TIME_ZONES[data.state as keyof typeof EVENT_TIME_ZONES] ?? 'the selected state’s timezone'}.</p>}
     {step === 4 && <EventOverview data={data} />}

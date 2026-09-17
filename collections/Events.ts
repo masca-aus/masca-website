@@ -4,6 +4,7 @@ import type { Access, CollectionAfterChangeHook, CollectionConfig, FieldAccess, 
 
 import { EVENT_STATES } from "../features/events/eventSubmission.ts";
 import { EVENT_EDITOR_STEPS } from "../features/events/eventEditor.ts";
+import { eventQuickAction, validateQuickPublish } from "../features/events/eventQuickActions.ts";
 import { editorSection } from "../utils/editorSection.ts";
 
 export const isPublicEventRead = ({
@@ -88,7 +89,12 @@ export const Events: CollectionConfig = {
     maxPerDoc: 25,
   },
   lockDocuments: false,
+  endpoints: [{ path: '/:id/quick-status', method: 'post', handler: eventQuickAction }],
   fields: [
+    {
+      name: '_status', label: 'Status', type: 'select', options: [{ label: 'Draft', value: 'draft' }, { label: 'Published', value: 'published' }],
+      admin: { components: { Field: false, Cell: '/components/admin/EventStatusCell#EventPublicationStatusCell' }, disableBulkEdit: true },
+    },
     {
       name: 'eventEditorHeader', type: 'ui',
       admin: { components: { Field: '/components/admin/EventEditorFields#EventEditorHeader' }, disableListColumn: true, disableBulkEdit: true },
@@ -225,6 +231,7 @@ export const Events: CollectionConfig = {
     };
   }) as CollectionConfig['fields'],
   hooks: {
+    beforeChange: [validateQuickPublish],
     afterChange: [revalidatePublishedEvent],
     afterDelete: [revalidateEventPages],
   },

@@ -1,3 +1,4 @@
+import { EventPublicationStatusCell } from '../../../components/admin/EventStatusCell'
 import { EventEditorView, EventPublishControl, EventUnpublishControl } from '../../../components/admin/EventEditorView'
 import { EventEditorHeader, EventEditorFooter } from '../../../components/admin/EventEditorFields'
 import { EventSaveController } from '../../../components/admin/EventSaveController'
@@ -14,6 +15,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/components/admin/EventStatusCell#EventPublicationStatusCell": EventPublicationStatusCell,
   "/components/admin/EventEditorView#EventEditorView": EventEditorView,
   "/components/admin/EventEditorView#EventPublishControl": EventPublishControl,
   "/components/admin/EventEditorView#EventUnpublishControl": EventUnpublishControl,

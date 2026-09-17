@@ -48,3 +48,11 @@ These small differences are within local-run variability; they do not establish 
 Reproduced a media drawer save stuck on “Submitting…” inside an event. Database inspection showed the only query client idle inside the media transaction: Payload's separate document-lock lookup could not obtain another client because the two-client pool also held its reconnect listener. Increasing the bounded pool to five clients resolved the same browser save without disabling locking; a ten-second connection-acquisition timeout prevents indefinite pool waits.
 
 Verified the drawer displayed “Updated successfully” and refreshed the attached image. A new image upload returned 201 in 59 ms, a subsequent media update returned 200 in 39 ms, and both image and thumbnail returned 200 using isolated local storage. Connection/configuration and save-controller tests: 27 passed. No production media was changed.
+
+## Events list actions and wizard polish
+
+The Review Status and Status cells are now keyboard-accessible dropdowns that save on selection. Both controls disable during a row's request. Approving saves a draft; publishing approves and validates the latest saved record inside the write; Pending and Rejected explicitly unpublish. Errors retain the old status and link to the editor. The list refreshes its current route, preserving filters and pagination and reflecting both saved statuses.
+
+Browser/API checks on isolated records verified approval stays private, publishing exposes the event without internal contact details, incomplete publishing returns a field error, rejection removes the public event, and anonymous actions return 401. Rejecting and republishing updates both columns correctly. The focused action/editor/publication tests pass (37 tests).
+
+The wizard uses a progress bar, completed-step checkmarks, descriptive step labels and 180 ms entrance animations. Fields remain mounted; entered values survive navigation. Reduced-motion CSS disables the transitions and animations. Light and dark themes were inspected at a narrow 536 px viewport without page overflow; this is not a physical-phone verification.

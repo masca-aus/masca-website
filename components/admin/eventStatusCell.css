@@ -1,0 +1,20 @@
+.masca-status-action { min-width: 9.25rem; padding-block: .15rem; }
+.masca-status-action__control { --status-ink: var(--theme-elevation-700); --status-fill: var(--theme-elevation-100); position: relative; display: inline-flex; align-items: center; border: 1px solid var(--theme-elevation-200); border-radius: 999px; background: var(--status-fill); color: var(--status-ink); }
+.masca-status-action__control[data-tone="approved"], .masca-status-action__control[data-tone="published"] { --status-ink: #176842; --status-fill: #eaf7ee; }
+.masca-status-action__control[data-tone="pending"] { --status-ink: #78520b; --status-fill: #fff5d8; }
+.masca-status-action__control[data-tone="rejected"] { --status-ink: #a33232; --status-fill: #fff0f0; }
+.masca-status-action select { appearance: none; color: inherit; background: transparent; border: 0; border-radius: inherit; font: inherit; font-size: .8rem; font-weight: 650; min-height: 40px; padding: .55rem 2rem .55rem 1.75rem; cursor: pointer; }
+.masca-status-action select option { background: var(--theme-elevation-0); color: var(--theme-text); }
+.masca-status-action select:focus-visible { outline: 3px solid #ffcc00; outline-offset: 3px; }
+.masca-status-action select:disabled { cursor: wait; opacity: .7; }
+.masca-status-action__dot { position: absolute; left: .75rem; width: .4rem; height: .4rem; border-radius: 50%; background: currentColor; pointer-events: none; }
+.masca-status-action__chevron, .masca-status-action__spinner { position: absolute; right: .65rem; pointer-events: none; }
+.masca-status-action__spinner { width: .8rem; height: .8rem; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: masca-status-spin .7s linear infinite; }
+.masca-status-action__feedback { display: block; font-size: .7rem; margin-top: .25rem; color: var(--theme-elevation-650); }
+.masca-status-action__error { max-width: 18rem; white-space: normal; font-size: .8rem; line-height: 1.5; margin-top: .5rem; color: var(--theme-error-700); }
+.masca-status-action__error a { text-decoration: underline; }
+[data-theme="dark"] .masca-status-action__control[data-tone="approved"], [data-theme="dark"] .masca-status-action__control[data-tone="published"] { --status-ink: #9be2b4; --status-fill: #153c2d; }
+[data-theme="dark"] .masca-status-action__control[data-tone="pending"] { --status-ink: #f4d484; --status-fill: #40351c; }
+[data-theme="dark"] .masca-status-action__control[data-tone="rejected"] { --status-ink: #f2aaaa; --status-fill: #482626; }
+@keyframes masca-status-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .masca-status-action__spinner { animation: none; } }
