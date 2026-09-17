@@ -80,7 +80,7 @@ export function DashboardContent({ overview }: { overview: EventDashboardOvervie
       <section aria-labelledby="manage-content">
         <div className="masca-dashboard__section-heading"><div><h2 id="manage-content">Manage</h2></div></div>
         <div className="masca-dashboard__content">
-          {contentAreas.map(area => <article className="masca-dashboard__content-row" key={area.name}>
+          {contentAreas.map(area => <article className="masca-dashboard__content-row" data-area={area.name.toLowerCase()} key={area.name}>
             <div className="masca-dashboard__content-label"><area.Icon size={21} strokeWidth={1.5} aria-hidden="true" /><div><h3>{area.name}</h3><p>{area.description}</p></div></div>
             <div className="masca-dashboard__actions"><Link className="masca-action masca-action--quiet" href={area.href} aria-label={`Manage ${area.name.toLowerCase()}`}>Manage</Link><Link className="masca-action masca-action--secondary" href={area.createHref}>{area.action}</Link></div>
           </article>)}

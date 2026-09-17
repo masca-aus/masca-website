@@ -28,3 +28,12 @@
 .masca-dashboard__shortcuts a:hover { background: var(--theme-elevation-50); }
 .masca-dashboard__shortcuts a:focus-visible { outline: 3px solid #ffcc00; outline-offset: 3px; }
 @media (max-width: 600px) { .masca-dashboard { gap: 2rem; padding-top: 1.5rem; } .masca-dashboard__heading, .masca-dashboard__section-heading, .masca-dashboard__content-row { flex-direction: column; align-items: stretch; gap: 1rem; } .masca-dashboard__heading > a { align-self: start; } .masca-dashboard__actions { flex-wrap: wrap; } }
+
+/* Match the section colours used by each editor's progress bar. */
+.masca-dashboard__content-row[data-area="events"] { --section-accent: #ef476f; }
+.masca-dashboard__content-row[data-area="committee"] { --section-accent: #9bdd9b; }
+.masca-dashboard__content-row[data-area="careers"] { --section-accent: #ffcc00; }
+.masca-dashboard__content-row[data-area="sponsors"] { --section-accent: #86b8ef; }
+.masca-dashboard__content-row[data-area] { border-inline-start: 3px solid var(--section-accent, transparent); padding-inline: 1rem; }
+.masca-dashboard__content-row[data-area] .masca-dashboard__content-label > svg { box-sizing: content-box; padding: .65rem; border-radius: 10px; background: var(--section-accent, var(--theme-elevation-100)); }
+.masca-dashboard__content-row:is([data-area="events"], [data-area="committee"], [data-area="careers"], [data-area="sponsors"]) .masca-dashboard__content-label > svg { color: #202038; }
