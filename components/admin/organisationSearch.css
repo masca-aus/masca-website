@@ -15,3 +15,11 @@
 .masca-organisation__loading { display: inline-block; width: .85rem; height: .85rem; margin-right: .5rem; vertical-align: -.1rem; border: 2px solid var(--theme-elevation-200); border-top-color: var(--theme-text); border-radius: 50%; animation: masca-organisation-search 900ms linear infinite; }
 @keyframes masca-organisation-search { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .masca-organisation__loading { animation: none; } }
+
+.masca-organisation__results { animation: masca-organisation-open 180ms ease-out; }
+.masca-organisation__reveal { display: grid; grid-template-rows: 1fr; }
+.masca-organisation__reveal > ul { min-height: 0; }
+.masca-organisation__reveal[data-has-results="true"] { animation: masca-organisation-reveal 240ms ease-out; }
+@keyframes masca-organisation-open { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes masca-organisation-reveal { from { grid-template-rows: 0fr; opacity: 0; } to { grid-template-rows: 1fr; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .masca-organisation__results, .masca-organisation__reveal[data-has-results="true"] { animation: none; } }

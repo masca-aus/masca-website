@@ -64,6 +64,7 @@ export const OrganisationSearchField: TextFieldClientComponent = ({ field, path,
         }
       }} />
     {open && <div className="masca-organisation__results">
+      <div className="masca-organisation__reveal" data-has-results={options.length > 0}>
       <ul id={`${id}-options`} role="listbox" aria-label="Matching organisations">
         {options.map((option, index) => <li id={`${id}-option-${index}`} key={option.id} role="option" aria-selected={index === active}
           onMouseDown={event => event.preventDefault()} onClick={() => choose(option)}>
@@ -71,6 +72,7 @@ export const OrganisationSearchField: TextFieldClientComponent = ({ field, path,
           <small>{[option.university, option.state].filter(Boolean).join(' · ')}</small>
         </li>)}
       </ul>
+      </div>
       <p role="status">{status === 'loading' && <span className="masca-organisation__loading" aria-hidden="true" />}{status === 'loading' ? 'Searching organisations…' : status === 'error' ? 'Directory unavailable. You can still enter the organisation name manually.' : options.length ? 'Choose a match, or keep the name you entered.' : 'No matches. You can keep the name you entered.'}</p>
       {value?.trim() && <button type="button" onClick={() => { input.current?.focus(); setOpen(false); }}>Use “{value.trim()}”</button>}
     </div>}
