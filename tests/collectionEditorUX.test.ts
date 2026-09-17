@@ -9,15 +9,24 @@ import configPromise from "@payload-config";
 const editorCollections = ["events", "committee", "media", "sponsors", "users"];
 
 describe("collection editor UX", () => {
-  it("registers plain-language collection introductions for every editor-facing collection", async () => {
+  it("shows plain-language guidance beneath every collection heading", async () => {
     const config = await configPromise;
 
-    for (const slug of editorCollections) {
+    const expectedDescriptions = {
+      events:
+        "Add events for MASCA students and review submissions before they appear on the website. An event appears publicly only after it is approved and published.",
+      committee:
+        "Keep member roles, portraits and department details accurate on the public committee page.",
+      media: "Upload and organise images that can be reused across the MASCA website.",
+      sponsors: "Keep partner names and logos current in the homepage sponsor marquee.",
+      users: "Manage the people who can sign in and update MASCA website content.",
+    };
+
+    for (const [slug, description] of Object.entries(expectedDescriptions)) {
       const collection = config.collections.find((candidate) => candidate.slug === slug);
 
-      expect(collection?.admin?.components?.beforeList).toContain(
-        "/components/admin/CollectionIntro#CollectionIntro",
-      );
+      expect(collection?.admin?.description).toBe(description);
+      expect(collection?.admin?.components?.beforeList).toBeUndefined();
     }
   });
 

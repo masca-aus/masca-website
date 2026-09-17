@@ -39,9 +39,10 @@ export const Events: CollectionConfig = {
   slug: "events",
   admin: {
     useAsTitle: "title",
+    description:
+      "Add events for MASCA students and review submissions before they appear on the website. An event appears publicly only after it is approved and published.",
     hideAPIURL: true,
     components: {
-      beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
       edit: {
         beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
       },

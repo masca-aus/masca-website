@@ -148,8 +148,8 @@ export default buildConfig({
       slug: "users",
       admin: {
         useAsTitle: "email",
+        description: "Manage the people who can sign in and update MASCA website content.",
         components: {
-          beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
           },
@@ -170,8 +170,8 @@ export default buildConfig({
       slug: "media",
       admin: {
         useAsTitle: "filename",
+        description: "Upload and organise images that can be reused across the MASCA website.",
         components: {
-          beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
           },
@@ -219,8 +219,9 @@ export default buildConfig({
       admin: {
         useAsTitle: "name",
         defaultColumns: ["name", "role", "department", "year"],
+        description:
+          "Keep member roles, portraits and department details accurate on the public committee page.",
         components: {
-          beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
           },
@@ -338,8 +339,8 @@ export default buildConfig({
       admin: {
         useAsTitle: "name",
         defaultColumns: ["name", "date"],
+        description: "Keep partner names and logos current in the homepage sponsor marquee.",
         components: {
-          beforeList: ["/components/admin/CollectionIntro#CollectionIntro"],
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
           },

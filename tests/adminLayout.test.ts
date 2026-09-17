@@ -13,4 +13,9 @@ describe("CMS document layout", () => {
     expect(stylesheet).toContain("max-width: 76rem;");
     expect(stylesheet).toContain("margin-inline: auto;");
   });
+
+  it("keeps collection tables in a wider centred workspace", () => {
+    expect(stylesheet).toContain(".collection-list__wrap {");
+    expect(stylesheet).toContain("max-width: 96rem;");
+  });
 });
