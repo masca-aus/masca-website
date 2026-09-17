@@ -15,6 +15,7 @@ export const CHAPTERS: Chapter[] = [
 ]
 
 export type Event = {
+  isPast?: boolean;
   id: string;
   name: { text: string };
   start: { local: string; utc: string };

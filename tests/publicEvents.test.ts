@@ -4,6 +4,7 @@ import { CMS_EVENT_CHAPTERS, getApprovedUpcomingEvents } from "@/features/events
 
 const { find } = vi.hoisted(() => ({ find: vi.fn() }));
 
+vi.mock("@/features/events/eventLifecycle", () => ({ lifecycleIDs: vi.fn(async () => []) }));
 vi.mock("server-only", () => ({}));
 vi.mock("payload", () => ({ getPayload: vi.fn(async () => ({ find })) }));
 vi.mock("@payload-config", () => ({ default: {} }));

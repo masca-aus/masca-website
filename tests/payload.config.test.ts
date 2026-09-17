@@ -61,6 +61,7 @@ describe("payload config", () => {
     const ours = config.collections.filter((c) => !c.slug.startsWith("payload-"));
     expect(ours.map((c) => c.slug).sort()).toEqual([
       "committee",
+      "event-lifecycle",
       "events",
       "media",
       "organisations",

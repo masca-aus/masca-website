@@ -11,6 +11,7 @@ import sharp from "sharp";
 
 import { COMMITTEE_STEPS } from "./features/committee/committeeEditor.ts";
 import { Organisations } from "./collections/Organisations.ts";
+import { EventLifecycle } from "./collections/EventLifecycle.ts";
 import { Events } from "./collections/Events.ts";
 import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
 import { editorSection } from "./utils/editorSection.ts";
@@ -150,6 +151,7 @@ export default buildConfig({
   },
   collections: [
     Organisations,
+    EventLifecycle,
     {
       slug: "users",
       admin: {

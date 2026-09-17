@@ -112,8 +112,8 @@ export default function EventCard({ event, chapter }: { event: Event; chapter?: 
         <div className="border-b border-gray-200" />
 
         <div className="flex items-center justify-between">
-          <span className="text-md font-bold text-red-700">{price}</span>
-          {soldOut ? (
+          <span className="text-md font-bold text-red-700">{event.isPast ? 'Past event' : price}</span>
+          {event.isPast ? <span className="text-sm text-gray-500">Completed</span> : soldOut ? (
             <span className="text-sm font-bold tracking-wider text-gray-400">Sold out</span>
           ) : (
             <a href={event.url} target="_blank" rel="noopener noreferrer">

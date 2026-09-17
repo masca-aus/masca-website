@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import Button from "@/components/Button";
-import { CMS_EVENT_CHAPTERS, getApprovedUpcomingEvents } from "@/features/events/publicEvents";
+import { CMS_EVENT_CHAPTERS, getApprovedUpcomingEvents, getApprovedPastEvents } from "@/features/events/publicEvents";
 import { pageMetadata } from "@/utils/seo";
 import EventSection from "./EventSection";
 
@@ -18,7 +18,7 @@ export const metadata: Metadata = pageMetadata({
 export default async function EventPage() {
   // `null` means the CMS couldn't be reached; the page still renders with
   // an "unavailable" band instead of taking the route down.
-  const events = await getApprovedUpcomingEvents().catch(() => null);
+  const [events, pastEvents] = await Promise.all([getApprovedUpcomingEvents().catch(() => null), getApprovedPastEvents().catch(() => null)]);
 
   return (
     <main id="main">
@@ -38,6 +38,7 @@ export default async function EventPage() {
         <EventSection events={events} chapters={CMS_EVENT_CHAPTERS} />
       )}
 
+      {pastEvents === null ? <p className="container py-8">Past events are temporarily unavailable.</p> : pastEvents.length > 0 && <section aria-labelledby="past-events"><h2 id="past-events" className="container text-3xl text-blue-600">Past events</h2><EventSection events={pastEvents} chapters={CMS_EVENT_CHAPTERS} /></section>}
       <CtaBand />
     </main>
   );

@@ -1,3 +1,4 @@
+import { lifecycleIDs } from "./eventLifecycle.ts";
 import type { Payload, PayloadRequest, Where } from "payload";
 
 export type DashboardEvent = {
@@ -26,14 +27,18 @@ export async function loadEventDashboard(
   req: PayloadRequest,
   now = new Date(),
 ): Promise<EventDashboardOverview> {
-  const pendingWhere: Where = { reviewStatus: { equals: "pending" } };
+  const ids = (await lifecycleIDs(payload, "archived", req)).concat(-1);
+  const completedIDs = await lifecycleIDs(payload, "completed", req);
+  const visible: Where = { id: { not_in: ids } };
+  const pendingWhere: Where = { ...visible, reviewStatus: { equals: "pending" } };
   const publishedWhere: Where = {
+    ...visible,
     and: [
       { reviewStatus: { equals: "approved" } },
       { _status: { equals: "published" } },
     ],
   };
-  const draftWhere: Where = { _status: { equals: "draft" } };
+  const draftWhere: Where = { ...visible, _status: { equals: "draft" } };
   const shared = { collection: "events" as const, overrideAccess: false, req };
 
   const [published, queue, recent, upcoming] = await Promise.all([
@@ -50,7 +55,7 @@ export async function loadEventDashboard(
     payload.find({ ...shared, draft: true, where: draftWhere, sort: "-updatedAt", limit: 3, depth: 0,
       select: { title: true, organisation: true, updatedAt: true } }),
     payload.find({ ...shared, draft: false,
-      where: { and: [...publishedWhere.and!, { or: [
+      where: { id: { not_in: [...ids, ...completedIDs] }, and: [...publishedWhere.and!, { or: [
         { startDate: { greater_than_equal: now.toISOString() } },
         { endDate: { greater_than_equal: now.toISOString() } },
       ] }] }, sort: "startDate", limit: 3, depth: 0,

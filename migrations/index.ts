@@ -3,6 +3,7 @@ import * as migration_20260907_142655_add_committee_departments from './20260907
 import * as migration_20260916_010000_add_events_submission_workflow from './20260916_010000_add_events_submission_workflow';
 import * as migration_20260917_010000_add_media_admin_previews from './20260917_010000_add_media_admin_previews';
 import * as migration_20260917_104410_organisations_event_locations from './20260917_104410_organisations_event_locations';
+import * as migration_20260917_114229_event_lifecycle from './20260917_114229_event_lifecycle';
 
 export const migrations = [
   {
@@ -28,6 +29,11 @@ export const migrations = [
   {
     up: migration_20260917_104410_organisations_event_locations.up,
     down: migration_20260917_104410_organisations_event_locations.down,
-    name: '20260917_104410_organisations_event_locations'
+    name: '20260917_104410_organisations_event_locations',
+  },
+  {
+    up: migration_20260917_114229_event_lifecycle.up,
+    down: migration_20260917_114229_event_lifecycle.down,
+    name: '20260917_114229_event_lifecycle'
   },
 ];

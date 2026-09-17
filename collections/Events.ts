@@ -1,19 +1,22 @@
 import { revalidatePath } from "next/cache.js";
 
-import type { Access, CollectionAfterChangeHook, CollectionConfig, FieldAccess, Where } from "payload";
+import type { Access, CollectionAfterChangeHook, CollectionConfig, FieldAccess, FieldHook, Where } from "payload";
 
+import { eventListFilter, eventLifecycleAction, lifecycleIDs } from "../features/events/eventLifecycle.ts";
+import { eventReport } from "../features/events/eventReports.ts";
 import { EVENT_STATES } from "../features/events/eventSubmission.ts";
 import { EVENT_EDITOR_STEPS } from "../features/events/eventEditor.ts";
 import { eventQuickAction, validateQuickPublish } from "../features/events/eventQuickActions.ts";
 import { editorSection } from "../utils/editorSection.ts";
 
-export const isPublicEventRead = ({
+export const isPublicEventRead = async ({
   req,
-}: Parameters<Access>[0]): true | Where =>
+}: Parameters<Access>[0]): Promise<true | Where> =>
   req.user
     ? true
     : {
         and: [
+          { id: { not_in: (await lifecycleIDs(req.payload, "archived", req)).concat(-1) } },
           { reviewStatus: { equals: "approved" } },
           { _status: { equals: "published" } },
         ],
@@ -51,11 +54,12 @@ export const Events: CollectionConfig = {
   slug: "events",
   admin: {
     useAsTitle: "title",
+    baseFilter: eventListFilter,
     description:
       "Add events for MASCA students and review submissions before they appear on the website. An event appears publicly only after it is approved and published.",
     hideAPIURL: true,
     components: {
-      beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
+      beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink", "/components/admin/EventListTools#EventListTools"],
       edit: {
         beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
         SaveDraftButton: "/components/admin/EventSaveController#EventSaveController",
@@ -77,21 +81,30 @@ export const Events: CollectionConfig = {
       "startDate",
       "reviewStatus",
       "_status",
+      "lifecycle",
     ],
   },
   access: {
     read: isPublicEventRead,
     create: isAuthenticatedEventAccess,
     update: isAuthenticatedEventAccess,
-    delete: isAuthenticatedEventAccess,
+    delete: () => false,
   },
   versions: {
     drafts: true,
-    maxPerDoc: 25,
+    maxPerDoc: 0,
   },
   lockDocuments: false,
-  endpoints: [{ path: '/:id/quick-status', method: 'post', handler: eventQuickAction }],
+  endpoints: [{ path: '/report', method: 'get', handler: eventReport }, { path: '/:id/lifecycle', method: 'post', handler: eventLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: eventQuickAction }],
   fields: [
+    { name: 'lifecycle', type: 'text', virtual: true, label: 'Lifecycle',
+      admin: { components: { Field: false, Cell: '/components/admin/EventLifecycleCell#EventLifecycleCell' }, disableBulkEdit: true },
+      hooks: { afterRead: [async ({ data, req }: Parameters<FieldHook>[0]) => {
+        if (!req.user || !data?.id) return undefined;
+        const rows = await req.payload.find({ collection: 'event-lifecycle', where: { event: { equals: data.id } }, limit: 1, depth: 0, req, overrideAccess: true });
+        return rows.docs[0]?.status ?? 'active';
+      }] },
+    },
     {
       name: '_status', label: 'Status', type: 'select', options: [], // Payload supplies the built-in publication options during sanitization.
       admin: { components: { Field: false, Cell: '/components/admin/EventStatusCell#EventPublicationStatusCell' }, disableBulkEdit: true },

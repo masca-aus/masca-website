@@ -29,13 +29,13 @@ const getField = async (name: string) => {
 };
 
 describe("events collection", () => {
-  it("keeps drafts without autosave and caps version history", () => {
-    expect(Events.versions).toMatchObject({ drafts: true, maxPerDoc: 25 });
+  it("keeps drafts without autosave and retains version history", () => {
+    expect(Events.versions).toMatchObject({ drafts: true, maxPerDoc: 0 });
     expect(Events.lockDocuments).toBe(false);
   });
 
   it("calls event versions Change history while keeping the history available", () => {
-    expect(Events.versions).toMatchObject({ drafts: true, maxPerDoc: 25 });
+    expect(Events.versions).toMatchObject({ drafts: true, maxPerDoc: 0 });
     expect(Events.admin?.components?.views?.edit?.versions?.tab?.label).toBe(
       "Change history",
     );
@@ -64,6 +64,7 @@ describe("events collection", () => {
       "startDate",
       "reviewStatus",
       "_status",
+      "lifecycle",
     ]);
   });
 
@@ -72,7 +73,7 @@ describe("events collection", () => {
 
     expect(events.versions).toMatchObject({
       drafts: { autosave: false },
-      maxPerDoc: 25,
+      maxPerDoc: 0,
     });
     expect(events.lockDocuments).toBe(false);
   });
@@ -110,17 +111,18 @@ describe("events collection", () => {
     const events = await getEventsCollection();
     const authenticated = { req: { user: { id: 1 } } } as never;
 
-    expect(events.access.read(authenticated)).toBe(true);
+    expect(await events.access.read(authenticated)).toBe(true);
     expect(events.access.create?.(authenticated)).toBe(true);
     expect(events.access.update?.(authenticated)).toBe(true);
-    expect(events.access.delete?.(authenticated)).toBe(true);
+    expect(events.access.delete?.(authenticated)).toBe(false);
   });
 
   it("limits anonymous reads to events that are both approved and published", async () => {
     const events = await getEventsCollection();
 
-    expect(events.access.read({ req: { user: null } } as never)).toEqual({
+    expect(await events.access.read({ req: { user: null, payload: { find: async () => ({ docs: [] }) } } } as never)).toEqual({
       and: [
+        { id: { not_in: [-1] } },
         { reviewStatus: { equals: "approved" } },
         { _status: { equals: "published" } },
       ],

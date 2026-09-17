@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     organisations: Organisation;
+    'event-lifecycle': EventLifecycle;
     users: User;
     media: Media;
     committee: Committee;
@@ -81,6 +82,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     organisations: OrganisationsSelect<false> | OrganisationsSelect<true>;
+    'event-lifecycle': EventLifecycleSelect<false> | EventLifecycleSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     committee: CommitteeSelect<false> | CommitteeSelect<true>;
@@ -156,31 +158,65 @@ export interface Organisation {
   createdAt: string;
 }
 /**
- * Manage the people who can sign in and update MASCA website content.
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
+ * via the `definition` "event-lifecycle".
  */
-export interface User {
+export interface EventLifecycle {
   id: number;
+  event: number | Event;
+  status: string;
+  completedAt?: string | null;
+  archivedAt?: string | null;
+  changedBy: number | User;
   updatedAt: string;
   createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
+}
+/**
+ * Add events for MASCA students and review submissions before they appear on the website. An event appears publicly only after it is approved and published.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  lifecycle?: string | null;
+  title: string;
+  organisation: string;
+  description: string;
+  startDate: string;
+  endDate?: string | null;
+  /**
+   * The name of the place, such as Great Court, University of Queensland. For an online event, enter Online.
+   */
+  venue: string;
+  /**
+   * Street number and name, suburb and postcode. Leave blank for online events.
+   */
+  streetAddress?: string | null;
+  /**
+   * Optional details for attendees: room, floor, entrance, meeting point or accessibility instructions.
+   */
+  venueDetails?: string | null;
+  state: 'VIC' | 'NSW' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT';
+  /**
+   * Optional. Use a full https:// link for tickets or event details.
+   */
+  ticketURL?: string | null;
+  /**
+   * Choose an existing poster or upload an image up to 5 MB. This is the image students will see.
+   */
+  poster?: (number | null) | Media;
+  contactName: string;
+  contactEmail: string;
+  internalNotes?: string | null;
+  reviewedAt?: string | null;
+  /**
+   * Publishing automatically approves this event. Choose Rejected to keep a submission off the website.
+   */
+  reviewStatus: 'pending' | 'approved' | 'rejected';
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.
@@ -215,6 +251,33 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * Manage the people who can sign in and update MASCA website content.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * Create and update committee profiles step by step. Changes appear on the website when you Save.
@@ -280,52 +343,6 @@ export interface Sponsor {
   logo: number | Media;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * Add events for MASCA students and review submissions before they appear on the website. An event appears publicly only after it is approved and published.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "events".
- */
-export interface Event {
-  id: number;
-  title: string;
-  organisation: string;
-  description: string;
-  startDate: string;
-  endDate?: string | null;
-  /**
-   * The name of the place, such as Great Court, University of Queensland. For an online event, enter Online.
-   */
-  venue: string;
-  /**
-   * Street number and name, suburb and postcode. Leave blank for online events.
-   */
-  streetAddress?: string | null;
-  /**
-   * Optional details for attendees: room, floor, entrance, meeting point or accessibility instructions.
-   */
-  venueDetails?: string | null;
-  state: 'VIC' | 'NSW' | 'QLD' | 'WA' | 'SA' | 'TAS' | 'ACT' | 'NT';
-  /**
-   * Optional. Use a full https:// link for tickets or event details.
-   */
-  ticketURL?: string | null;
-  /**
-   * Choose an existing poster or upload an image up to 5 MB. This is the image students will see.
-   */
-  poster?: (number | null) | Media;
-  contactName: string;
-  contactEmail: string;
-  internalNotes?: string | null;
-  reviewedAt?: string | null;
-  /**
-   * Publishing automatically approves this event. Choose Rejected to keep a submission off the website.
-   */
-  reviewStatus: 'pending' | 'approved' | 'rejected';
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -429,6 +446,19 @@ export interface OrganisationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "event-lifecycle_select".
+ */
+export interface EventLifecycleSelect<T extends boolean = true> {
+  event?: T;
+  status?: T;
+  completedAt?: T;
+  archivedAt?: T;
+  changedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -515,6 +545,7 @@ export interface SponsorsSelect<T extends boolean = true> {
  * via the `definition` "events_select".
  */
 export interface EventsSelect<T extends boolean = true> {
+  lifecycle?: T;
   title?: T;
   organisation?: T;
   description?: T;

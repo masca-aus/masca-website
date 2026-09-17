@@ -6,6 +6,7 @@ import { getPayload } from "payload";
 import type { Event as PayloadEvent } from "@/payload-types";
 import type { Chapter, Event } from "@/utils/events";
 
+import { lifecycleIDs } from "./eventLifecycle";
 import { EVENT_STATES, EVENT_TIME_ZONES } from "./eventSubmission";
 
 export const CMS_EVENT_CHAPTERS: Chapter[] = EVENT_STATES.map(({ value }) => ({
@@ -42,20 +43,27 @@ function localDateTime(utc: string, state: PayloadEvent["state"]): string {
 }
 
 /** Reads the public calendar and maps only the fields the existing cards render. */
-export async function getApprovedUpcomingEvents(now = new Date()): Promise<Event[]> {
+export async function getApprovedUpcomingEvents(now = new Date()): Promise<Event[]> { return getPublicEvents(now, false); }
+export async function getApprovedPastEvents(now = new Date()): Promise<Event[]> { return getPublicEvents(now, true); }
+async function getPublicEvents(now: Date, past: boolean): Promise<Event[]> {
   const payload = await getPayload({ config });
   const instant = now.toISOString();
+  const completed = await lifecycleIDs(payload, "completed");
   const { docs } = await payload.find({
     collection: "events",
     overrideAccess: false,
     draft: false,
-    sort: "startDate",
+    sort: past ? "-startDate" : "startDate",
     pagination: false,
     depth: 1,
     where: {
       reviewStatus: { equals: "approved" },
       _status: { equals: "published" },
-      or: [
+      ...(past ? { or: [
+        { id: { in: completed.length ? completed : [-1] } },
+        { endDate: { less_than: instant } },
+        { and: [{ endDate: { exists: false } }, { startDate: { less_than: instant } }] },
+      ] } : { id: { not_in: completed.length ? completed : [-1] }, or: [
         { endDate: { greater_than_equal: instant } },
         {
           and: [
@@ -63,7 +71,7 @@ export async function getApprovedUpcomingEvents(now = new Date()): Promise<Event
             { startDate: { greater_than_equal: instant } },
           ],
         },
-      ],
+      ] }),
     },
     select: publicEventSelect,
     // The storage plugin builds `url` from `filename` during afterRead.
@@ -76,6 +84,7 @@ export async function getApprovedUpcomingEvents(now = new Date()): Promise<Event
 
     return {
       id: String(doc.id),
+      ...(past ? { isPast: true } : {}),
       name: { text: doc.title },
       start: { local: startLocal, utc: doc.startDate },
       end: { local: doc.endDate ? localDateTime(doc.endDate, doc.state) : startLocal },

@@ -1,0 +1,17 @@
+.masca-event-tools { padding: 0 var(--gutter-h); margin-bottom: 1.5rem; }
+.masca-event-tools__bar, .masca-event-tools nav, .masca-event-report form, .masca-event-report__actions { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.masca-event-tools__bar { justify-content: space-between; border-bottom: 1px solid var(--theme-elevation-200); padding-bottom: .7rem; }
+.masca-event-tools nav a { padding: .5rem .75rem; text-decoration: none; border-bottom: 2px solid transparent; }
+.masca-event-tools nav a[aria-current] { border-color: #ffcc00; font-weight: 650; }
+.masca-event-report { margin-top: 1rem; padding: 1.5rem; border: 1px solid var(--theme-elevation-200); border-radius: 8px; }
+.masca-event-report form { align-items: end; margin: 1.5rem 0; }
+.masca-event-report label { display: grid; gap: .5rem; }
+.masca-event-report input, .masca-event-report select { padding: .65rem; background: var(--theme-input-bg); color: var(--theme-text); border: 1px solid var(--theme-elevation-250); border-radius: 6px; }
+.masca-event-report__breakdown { display: flex; gap: 3rem; flex-wrap: wrap; }
+.masca-event-report__table { overflow-x: auto; }
+.masca-event-report table { width: 100%; border-collapse: collapse; }
+.masca-event-report th, .masca-event-report td { padding: .75rem; border-bottom: 1px solid var(--theme-elevation-200); text-align: left; }
+@media print { body * { visibility: hidden; } .masca-event-report__output, .masca-event-report__output * { visibility: visible; } .masca-event-report__output { position: absolute; inset: 0; color: #111; background: white; padding: 1rem; } .masca-event-report__actions { display: none; } .masca-event-report__table { overflow: visible; } }
+
+.masca-event-report__actions { margin-block: 1rem; }
+.masca-event-report__breakdown { margin-block: 1rem; }

@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("@/features/events/eventLifecycle", () => ({ lifecycleIDs: vi.fn(async () => []) }));
+
 import { loadEventDashboard } from "@/features/events/eventDashboard";
 
 describe("event dashboard summary", () => {
@@ -29,7 +31,7 @@ describe("event dashboard summary", () => {
     });
     expect(count).toHaveBeenCalledTimes(1);
     expect(count.mock.calls.map(([options]) => options.where)).toEqual([
-      { and: [{ reviewStatus: { equals: "approved" } }, { _status: { equals: "published" } }] },
+      { id: { not_in: [-1] }, and: [{ reviewStatus: { equals: "approved" } }, { _status: { equals: "published" } }] },
     ]);
     expect(find).toHaveBeenCalledWith(expect.objectContaining({
       collection: "events",
@@ -37,7 +39,7 @@ describe("event dashboard summary", () => {
       sort: "-createdAt",
       depth: 0,
       draft: true,
-      where: { reviewStatus: { equals: "pending" } },
+      where: { id: { not_in: [-1] }, reviewStatus: { equals: "pending" } },
     }));
   });
 });
@@ -52,10 +54,10 @@ describe("event dashboard summary", () => {
    expect(result.recentDrafts).toEqual([]);
    expect(find).toHaveBeenCalledWith(expect.objectContaining({
      draft: false, overrideAccess: false, req, limit: 3, sort: 'startDate',
-     where: { and: [
+     where: { id: { not_in: [-1] }, and: [
        { reviewStatus: { equals: 'approved' } }, { _status: { equals: 'published' } },
        { or: [{ startDate: { greater_than_equal: now.toISOString() } }, { endDate: { greater_than_equal: now.toISOString() } }] },
      ] },
    }));
-   expect(find).toHaveBeenCalledWith(expect.objectContaining({ draft: true, req, overrideAccess: false, limit: 3, sort: '-updatedAt', where: { _status: { equals: 'draft' } } }));
+   expect(find).toHaveBeenCalledWith(expect.objectContaining({ draft: true, req, overrideAccess: false, limit: 3, sort: '-updatedAt', where: { id: { not_in: [-1] }, _status: { equals: 'draft' } } }));
  });
