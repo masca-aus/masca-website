@@ -355,3 +355,7 @@ html[data-theme="dark"] .masca-action--primary:hover, html[data-theme="dark"] .m
   .app-header__step-nav .step-nav__last { min-width: 0; }
   .app-header__actions-wrapper { flex-shrink: 0; }
 }
+
+/* Quiet return navigation across document editors and account settings. */
+.masca-document-back-link { border-color: transparent; background: transparent; color: var(--theme-elevation-650); padding-inline: .25rem; }
+.masca-document-back-link:hover { background: transparent; border-color: transparent; color: var(--theme-text); text-decoration: underline; }

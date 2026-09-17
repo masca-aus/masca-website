@@ -26,7 +26,7 @@ describe("collection editor UX", () => {
       const collection = config.collections.find((candidate) => candidate.slug === slug);
 
       expect(collection?.admin?.description).toBe(description);
-      expect(collection?.admin?.components?.beforeList).toContain("/components/admin/DocumentBackLink#CollectionBackLink");
+      expect(collection?.admin?.components?.beforeList).toContain(slug === "events" ? "/components/admin/EventListTools#EventListTools" : "/components/admin/DocumentBackLink#CollectionBackLink");
     }
   });
 

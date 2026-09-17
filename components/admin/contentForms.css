@@ -1,5 +1,5 @@
 /* Keep these short native forms readable without changing Payload controls. */
-:is(.collection-edit--committee, .collection-edit--sponsors, .collection-edit--media) .document-fields {
+:is(.collection-edit--committee, .collection-edit--sponsors, .collection-edit--media, .collection-edit--organisations, .collection-edit--users) .document-fields {
   max-width: 64rem;
 }
 :is(.collection-edit--committee, .collection-edit--sponsors) .masca-editor-section {
@@ -10,7 +10,7 @@
 :is(.collection-edit--committee, .collection-edit--sponsors) .masca-editor-section h2 {
   font-size: 1.25rem;
 }
-:is(.collection-edit--committee, .collection-edit--sponsors, .collection-edit--media) .field-description {
+:is(.collection-edit--committee, .collection-edit--sponsors, .collection-edit--media, .collection-edit--organisations, .collection-edit--users) .field-description {
   line-height: 1.6;
   max-width: 70ch;
 }

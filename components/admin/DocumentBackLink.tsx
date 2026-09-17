@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
+import { SectionToolbar } from './SectionToolbar';
 import { adminBackTarget } from './adminBackTarget';
 
 export function DocumentBackLink() {
@@ -38,5 +39,7 @@ export function DocumentBackLink() {
 export function CollectionBackLink() {
   const pathname = usePathname();
   if (adminBackTarget(pathname)?.href !== "/admin") return null;
-  return <div className="masca-collection-back"><DocumentBackLink /></div>;
+  const slug = pathname.split('/')[3];
+  const label = { organisations: 'Organisations', committee: 'Committee', media: 'Media', sponsors: 'Sponsors', users: 'CMS access', events: 'Events' }[slug] || 'Manage';
+  return <div className="masca-section-shell"><SectionToolbar><span className="masca-section-toolbar__current">{label}</span></SectionToolbar></div>;
 }
