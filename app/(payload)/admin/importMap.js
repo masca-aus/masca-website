@@ -1,5 +1,12 @@
-import { CollectionBackLink as CollectionBackLink_b7eb021eac5b101e7ce71970147e89df } from '../../../components/admin/DocumentBackLink'
+import { CareerEditorHeader as CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
+import { CareerLifecycleCell as CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34 } from '../../../components/admin/CareerLifecycleCell'
+import { CareerEditorFooter as CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
+import { CareerListTools as CareerListTools_425c2154b5081b2b75b2a41486007d14 } from '../../../components/admin/CareerListTools'
 import { DocumentBackLink as DocumentBackLink_b7eb021eac5b101e7ce71970147e89df } from '../../../components/admin/DocumentBackLink'
+import { CareerPublishControl as CareerPublishControl_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
+import { CareerSaveControl as CareerSaveControl_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
+import { CareerEditorView as CareerEditorView_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
+import { CollectionBackLink as CollectionBackLink_b7eb021eac5b101e7ce71970147e89df } from '../../../components/admin/DocumentBackLink'
 import { CommitteeEditorHeader as CommitteeEditorHeader_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
 import { EditorSection as EditorSection_671b0a745dc229cca2346e4a81fc980a } from '../../../components/admin/EditorSection'
 import { CommitteeEditorFooter as CommitteeEditorFooter_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
@@ -27,8 +34,15 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
-  "/components/admin/DocumentBackLink#CollectionBackLink": CollectionBackLink_b7eb021eac5b101e7ce71970147e89df,
+  "/components/admin/CareerEditor#CareerEditorHeader": CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236,
+  "/components/admin/CareerLifecycleCell#CareerLifecycleCell": CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34,
+  "/components/admin/CareerEditor#CareerEditorFooter": CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236,
+  "/components/admin/CareerListTools#CareerListTools": CareerListTools_425c2154b5081b2b75b2a41486007d14,
   "/components/admin/DocumentBackLink#DocumentBackLink": DocumentBackLink_b7eb021eac5b101e7ce71970147e89df,
+  "/components/admin/CareerEditor#CareerPublishControl": CareerPublishControl_57c74453f1f49818c0cb8c1e92524236,
+  "/components/admin/CareerEditor#CareerSaveControl": CareerSaveControl_57c74453f1f49818c0cb8c1e92524236,
+  "/components/admin/CareerEditor#CareerEditorView": CareerEditorView_57c74453f1f49818c0cb8c1e92524236,
+  "/components/admin/DocumentBackLink#CollectionBackLink": CollectionBackLink_b7eb021eac5b101e7ce71970147e89df,
   "/components/admin/CommitteeEditor#CommitteeEditorHeader": CommitteeEditorHeader_134396005f96c581663d9f2ff7dee8de,
   "/components/admin/EditorSection#EditorSection": EditorSection_671b0a745dc229cca2346e4a81fc980a,
   "/components/admin/CommitteeEditor#CommitteeEditorFooter": CommitteeEditorFooter_134396005f96c581663d9f2ff7dee8de,

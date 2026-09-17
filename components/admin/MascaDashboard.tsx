@@ -1,11 +1,19 @@
 import Link from "next/link";
-import { Users, ImageIcon, Handshake, Building2, CalendarDays } from "lucide-react";
+import { Users, ImageIcon, Handshake, Building2, CalendarDays, Briefcase } from "lucide-react";
 import "./dashboard.css";
 import type { PayloadRequest } from "payload";
 
 import { loadEventDashboard, type EventDashboardOverview } from "@/features/events/eventDashboard";
 
 const contentAreas = [
+  {
+    name: "Careers",
+    Icon: Briefcase,
+    description: "Publish opportunities, continue drafts and manage applications.",
+    href: "/admin/collections/careers",
+    createHref: "/admin/collections/careers/create",
+    action: "Add opportunity",
+  },
   {
     name: "Events",
     Icon: CalendarDays,

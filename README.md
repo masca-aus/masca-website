@@ -56,16 +56,23 @@ Start the application locally on [http://localhost:3000](http://localhost:3000):
 npm run dev
 ```
 
-## Careers board (Google Sheet)
+## Careers board (CMS preview)
 
-`/careers` is driven by a Google Sheet kept by the Careers team — no CMS, no
-API key. The sheet is shared "Anyone with the link → Viewer" and read as CSV
-every five minutes. To connect one, set `CAREERS_SHEET_ID` (and
-`CAREERS_SHEET_GID` if the `Jobs` tab isn't the first tab) in `.env.local` or
-Vercel. Leave them blank and the page shows a friendly "board's still being
-pinned up" state. The committee guide, column reference and template live in
-[docs/careers-board.md](./docs/careers-board.md); `/careers/health` reports
-what the site is (and isn't) reading.
+`/careers` reads published opportunities from Payload. Manage roles at
+`/admin/collections/careers` using the four-step editor: role and company,
+location and eligibility, application details, then review and publish.
+Drafts, internal notes and change history are private. Close or archive a role
+to hide it without losing its content or pending edits. Rolling listings keep
+the existing 60-day expiry rule; dated roles remain visible through their closing day.
+
+Publishing invalidates the careers page; a five-minute refresh also updates
+calendar-based expiry. Search, filters, job details and stable shared links
+retain the existing public interface. `/careers/health` now redirects to the CMS.
+
+Google Sheets is used only by the one-time import utility. See
+[the import runbook](./docs/careers-cms.md). Keep the original sheet as a backup;
+CMS edits do not sync back. The preview shares the production database, but the
+production frontend remains on its deployed code until this branch is merged.
 
 ## Event submission preview
 

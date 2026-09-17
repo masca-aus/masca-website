@@ -60,6 +60,8 @@ describe("payload config", () => {
     // the moderated `events` collection, and the organisation directory.
     const ours = config.collections.filter((c) => !c.slug.startsWith("payload-"));
     expect(ours.map((c) => c.slug).sort()).toEqual([
+      "career-lifecycle",
+      "careers",
       "committee",
       "event-lifecycle",
       "events",

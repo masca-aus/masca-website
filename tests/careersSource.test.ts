@@ -91,13 +91,16 @@ describe("fetchSheetCsv", () => {
   });
 
   it("recognises Google's sign-in page as an unshared sheet", async () => {
-    const html = respond("<!DOCTYPE html><html><body>Sign in</body></html>", { type: "text/html; charset=utf-8" });
+    const html = respond("<!DOCTYPE html><html><head><title>Sign in - Google Accounts</title></head><body>Sign in</body></html>", { type: "text/html; charset=utf-8" });
     const result = await fetchSheetCsv(config, { fetchImpl: html });
     expect(result).toMatchObject({ ok: false, status: "not-shared" });
     if (!result.ok) expect(result.error.fix).toContain("Anyone with the link");
 
-    const sneaky = respond("<html>not csv</html>");
-    expect(await fetchSheetCsv(config, { fetchImpl: sneaky })).toMatchObject({ ok: false, status: "not-shared" });
+  });
+
+  it("classifies unrelated HTML as unreachable, even with a CSV content type", async () => {
+    const unexpectedHtml = respond("<html>Temporary service issue</html>");
+    expect(await fetchSheetCsv(config, { fetchImpl: unexpectedHtml })).toMatchObject({ ok: false, status: "unreachable" });
   });
 
   it("maps 404 and 400 to not-found, other failures to unreachable", async () => {
@@ -165,7 +168,7 @@ describe("loadCareerBoard (never throws)", () => {
       fetchImpl: respond("<!doctype html>", { type: "text/html" }),
       now: NOW,
     });
-    expect(report.status).toBe("not-shared");
+    expect(report.status).toBe("unreachable");
   });
 });
 
@@ -187,6 +190,6 @@ describe("getCareerBoard (for the page)", () => {
   it("throws on a broken sheet so ISR keeps the last good page", async () => {
     vi.stubEnv("CAREERS_SHEET_ID", ID);
     vi.stubGlobal("fetch", respond("<!doctype html>", { type: "text/html" }));
-    await expect(getCareerBoard()).rejects.toThrow(/not-shared/);
+    await expect(getCareerBoard()).rejects.toThrow(/unreachable/);
   });
 });

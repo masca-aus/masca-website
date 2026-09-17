@@ -67,6 +67,8 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    careers: Career;
+    'career-lifecycle': CareerLifecycle;
     organisations: Organisation;
     'event-lifecycle': EventLifecycle;
     users: User;
@@ -81,6 +83,8 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    careers: CareersSelect<false> | CareersSelect<true>;
+    'career-lifecycle': CareerLifecycleSelect<false> | CareerLifecycleSelect<true>;
     organisations: OrganisationsSelect<false> | OrganisationsSelect<true>;
     'event-lifecycle': EventLifecycleSelect<false> | EventLifecycleSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -126,6 +130,112 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * Manage opportunities for students. Save private drafts, review details and publish when ready. Rolling roles expire after 60 days; update the listed date after reconfirming availability.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "careers".
+ */
+export interface Career {
+  id: number;
+  title: string;
+  company: string;
+  type?:
+    | ('internship' | 'cadet' | 'graduate' | 'vacation' | 'part-time' | 'casual' | 'full-time' | 'volunteer' | 'other')
+    | null;
+  industry?: string | null;
+  companyWebsite?: string | null;
+  /**
+   * Optional https:// image URL.
+   */
+  logoUrl?: string | null;
+  /**
+   * Australia, Malaysia, or both.
+   */
+  country?: string | null;
+  /**
+   * Use the state name or describe multiple locations.
+   */
+  state?: string | null;
+  city?: string | null;
+  workMode?: ('onsite' | 'hybrid' | 'remote') | null;
+  international?: ('yes' | 'no' | 'unsure') | null;
+  studyLevels?: ('any' | 'pre-penultimate' | 'penultimate' | 'final' | 'graduate' | 'postgraduate')[] | null;
+  eligibility?: string | null;
+  applyUrl: string;
+  /**
+   * YYYY-MM-DD. Leave empty for rolling applications.
+   */
+  closes?: string | null;
+  /**
+   * YYYY-MM-DD. Only update after reconfirming that a role is still available.
+   */
+  added?: string | null;
+  /**
+   * For example $35/hour, RM 4,800/month, or Not disclosed.
+   */
+  pay?: string | null;
+  description?: string | null;
+  /**
+   * Optional tags separated by commas.
+   */
+  tags?: string | null;
+  featured?: boolean | null;
+  /**
+   * Stable public link ID, generated automatically.
+   */
+  slug?: string | null;
+  /**
+   * Private to signed-in CMS users. Never shown on the website.
+   */
+  internalNotes?: string | null;
+  sourceKey?: string | null;
+  lifecycle?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "career-lifecycle".
+ */
+export interface CareerLifecycle {
+  id: number;
+  career: number | Career;
+  status: string;
+  closedAt?: string | null;
+  archivedAt?: string | null;
+  changedBy: number | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage the people who can sign in and update MASCA website content.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'users';
 }
 /**
  * Malaysian student organisations. Source listings are a starting point, not confirmation of current activity. Check and update names before use.
@@ -253,33 +363,6 @@ export interface Media {
   };
 }
 /**
- * Manage the people who can sign in and update MASCA website content.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-  collection: 'users';
-}
-/**
  * Create and update committee profiles step by step. Changes appear on the website when you Save.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -369,6 +452,10 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'careers';
+        value: number | Career;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null)
@@ -425,6 +512,52 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "careers_select".
+ */
+export interface CareersSelect<T extends boolean = true> {
+  title?: T;
+  company?: T;
+  type?: T;
+  industry?: T;
+  companyWebsite?: T;
+  logoUrl?: T;
+  country?: T;
+  state?: T;
+  city?: T;
+  workMode?: T;
+  international?: T;
+  studyLevels?: T;
+  eligibility?: T;
+  applyUrl?: T;
+  closes?: T;
+  added?: T;
+  pay?: T;
+  description?: T;
+  tags?: T;
+  featured?: T;
+  slug?: T;
+  internalNotes?: T;
+  sourceKey?: T;
+  lifecycle?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "career-lifecycle_select".
+ */
+export interface CareerLifecycleSelect<T extends boolean = true> {
+  career?: T;
+  status?: T;
+  closedAt?: T;
+  archivedAt?: T;
+  changedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

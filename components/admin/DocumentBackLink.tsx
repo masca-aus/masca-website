@@ -40,6 +40,6 @@ export function CollectionBackLink() {
   const pathname = usePathname();
   if (adminBackTarget(pathname)?.href !== "/admin") return null;
   const slug = pathname.split('/')[3];
-  const label = { organisations: 'Organisations', committee: 'Committee', media: 'Media', sponsors: 'Sponsors', users: 'CMS access', events: 'Events' }[slug] || 'Manage';
+  const label = { careers: 'Careers', organisations: 'Organisations', committee: 'Committee', media: 'Media', sponsors: 'Sponsors', users: 'CMS access', events: 'Events' }[slug] || 'Manage';
   return <div className="masca-section-shell"><SectionToolbar><span className="masca-section-toolbar__current">{label}</span></SectionToolbar></div>;
 }

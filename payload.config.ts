@@ -1,7 +1,7 @@
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from "next/cache.js";
 
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { resendAdapter } from "@payloadcms/email-resend";
@@ -12,8 +12,10 @@ import sharp from "sharp";
 import { COMMITTEE_STEPS } from "./features/committee/committeeEditor.ts";
 import { Organisations } from "./collections/Organisations.ts";
 import { EventLifecycle } from "./collections/EventLifecycle.ts";
+import { Careers } from "./collections/Careers.ts";
+import { CareerLifecycle } from "./collections/CareerLifecycle.ts";
 import { Events } from "./collections/Events.ts";
-import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
+import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments.js";
 import { editorSection } from "./utils/editorSection.ts";
 
 export function createDatabasePoolConfig(
@@ -150,6 +152,8 @@ export default buildConfig({
     },
   },
   collections: [
+    Careers,
+    CareerLifecycle,
     Organisations,
     EventLifecycle,
     {
