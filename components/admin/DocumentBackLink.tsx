@@ -41,5 +41,5 @@ export function CollectionBackLink() {
   if (adminBackTarget(pathname)?.href !== "/admin") return null;
   const slug = pathname.split('/')[3];
   const label = { careers: 'Careers', organisations: 'Organisations', committee: 'Committee', media: 'Media', sponsors: 'Sponsors', users: 'CMS access', events: 'Events' }[slug] || 'Manage';
-  return <div className="masca-section-shell"><SectionToolbar><span className="masca-section-toolbar__current">{label}</span></SectionToolbar></div>;
+  return <div className="masca-section-shell"><SectionToolbar collection={slug}><span className="masca-section-toolbar__current">{label}</span></SectionToolbar></div>;
 }

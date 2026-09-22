@@ -28,7 +28,7 @@ export function EventListTools() {
     } catch (cause) { setError((cause as Error).message); } finally { setBusy(false); }
   }
   return <div className="masca-event-tools masca-section-shell"><EnsureStatusColumn /><AdminSearchHelp />
-    <SectionToolbar actions={<button className="masca-action masca-action--secondary" aria-expanded={reports} onClick={() => setReports(!reports)}>Reports</button>}><nav aria-label="Event lists">
+    <SectionToolbar collection="events" actions={<button className="masca-action masca-action--secondary" aria-expanded={reports} onClick={() => setReports(!reports)}>Reports</button>}><nav aria-label="Event lists">
       {[['current','Current'], ['completed','Completed'], ['archived','Archived']].map(([key, label]) => <Link key={key} href={`/admin/collections/events?eventView=${key}`} aria-current={view === key ? 'page' : undefined}>{label}</Link>)}
     </nav></SectionToolbar>
 

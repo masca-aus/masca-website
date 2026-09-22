@@ -3,9 +3,14 @@
 .masca-section-toolbar__navigation { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
 .masca-section-toolbar__back { color: var(--theme-elevation-650); text-decoration: none; padding: .5rem 0; font-size: .9rem; }
 .masca-section-toolbar__back:hover { color: var(--theme-text); text-decoration: underline; }
-.masca-section-toolbar a:focus-visible { outline: 2px solid #ffcc00; outline-offset: 4px; border-radius: 3px; }
+.masca-section-toolbar a:focus-visible { outline: 2px solid var(--section-accent, #ffcc00); outline-offset: 4px; border-radius: 3px; }
 .masca-section-toolbar nav { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .masca-section-toolbar nav a, .masca-section-toolbar__current { padding: .5rem .75rem; text-decoration: none; border-bottom: 2px solid transparent; }
-.masca-section-toolbar nav a[aria-current], .masca-section-toolbar__current { border-color: #ffcc00; font-weight: 650; }
+.masca-section-toolbar nav a[aria-current], .masca-section-toolbar__current { border-color: var(--section-accent, #ffcc00); font-weight: 650; }
 @media (max-width: 600px) { .masca-section-toolbar__navigation { gap: .5rem 1rem; } .masca-section-toolbar { align-items: flex-start; } }
 [role="dialog"] .masca-section-shell { display: none; }
+
+.masca-section-toolbar[data-collection="events"] { --section-accent: #ef476f; }
+.masca-section-toolbar[data-collection="careers"] { --section-accent: #ffcc00; }
+.masca-section-toolbar[data-collection="committee"] { --section-accent: #9bdd9b; }
+.masca-section-toolbar[data-collection="sponsors"] { --section-accent: #86b8ef; }
