@@ -26,11 +26,32 @@ export function careerDateWhere(today = melbourneToday()): Where {
     { or: [{ added: { exists: false } }, { added: { equals: '' } }, { added: { greater_than_equal: cutoff.toISOString().slice(0, 10) } }] },
   ] } ] };
 }
+export function careerExpiredWhere(today = melbourneToday()): Where {
+  const cutoff = new Date(`${today}T00:00:00Z`); cutoff.setUTCDate(cutoff.getUTCDate() - MAX_AGE_DAYS_WITHOUT_CLOSE);
+  return { or: [
+    { and: [{ closes: { exists: true } }, { closes: { not_equals: '' } }, { closes: { less_than: today } }] },
+    { and: [
+      { or: [{ closes: { exists: false } }, { closes: { equals: '' } }] },
+      { added: { exists: true } }, { added: { not_equals: '' } }, { added: { less_than: cutoff.toISOString().slice(0, 10) } },
+    ] },
+  ] };
+}
 export async function careerListFilter({ req }: { req: PayloadRequest }): Promise<Where> {
   const view = req.query?.careerView;
-  const states = view === 'archived' ? ['archived'] : view === 'closed' ? ['closed'] : ['closed', 'archived'];
-  const ids = await careerLifecycleIDs(req.payload, states, req);
-  return { id: { [view === 'closed' || view === 'archived' ? 'in' : 'not_in']: ids.length ? ids : [-1] } };
+  const records = await careerLifecycleRecords(req.payload, req);
+  const idsFor = (status: string) => records.filter(row => row.status === status).map(row => typeof row.career === 'object' ? row.career.id : row.career);
+  const archived = idsFor('archived');
+  if (view === 'archived') return { id: { in: archived.length ? archived : [-1] } };
+  // Use published dates: an unpublished extension must not reopen the live listing.
+  const context = { ...req.context, cmsStatusRead: true };
+  const expired = await req.payload.find({ collection: 'careers', draft: false, pagination: false, depth: 0,
+    req: { ...req, context }, context, overrideAccess: false, select: { _status: true },
+    where: { and: [{ _status: { equals: 'published' } }, careerExpiredWhere()] },
+  });
+  const closed = [...new Set([...idsFor('closed'), ...expired.docs.map(row => row.id)])];
+  if (view === 'closed') return { and: [{ id: { in: closed.length ? closed : [-1] } }, { id: { not_in: archived.length ? archived : [-1] } }] };
+  const hidden = [...new Set([...closed, ...archived])];
+  return { id: { not_in: hidden.length ? hidden : [-1] } };
 }
 export const careerLifecycleAction: PayloadHandler = async req => {
   if (!req.user) return Response.json({ message: 'Sign in to manage careers.' }, { status: 401 });

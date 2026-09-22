@@ -139,6 +139,15 @@ export interface UserAuthOperations {
  */
 export interface Career {
   id: number;
+  cmsStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   title: string;
   company: string;
   type?:
@@ -289,6 +298,15 @@ export interface EventLifecycle {
  */
 export interface Event {
   id: number;
+  cmsStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   lifecycle?: string | null;
   title: string;
   organisation: string;
@@ -405,7 +423,7 @@ export interface Committee {
   createdAt: string;
 }
 /**
- * Update sponsor details and logos in one page. Changes appear on the homepage when you Save.
+ * Add sponsor details, choose a logo and review before saving. Changes appear on the homepage when saved.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "sponsors".
@@ -518,6 +536,7 @@ export interface PayloadMigration {
  * via the `definition` "careers_select".
  */
 export interface CareersSelect<T extends boolean = true> {
+  cmsStatus?: T;
   title?: T;
   company?: T;
   type?: T;
@@ -678,6 +697,7 @@ export interface SponsorsSelect<T extends boolean = true> {
  * via the `definition` "events_select".
  */
 export interface EventsSelect<T extends boolean = true> {
+  cmsStatus?: T;
   lifecycle?: T;
   title?: T;
   organisation?: T;

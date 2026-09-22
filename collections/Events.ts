@@ -1,3 +1,4 @@
+import { cmsStatusField } from '../features/admin/cmsStatusField.ts';
 import { revalidatePath } from "next/cache.js";
 
 import type { Access, CollectionAfterChangeHook, CollectionConfig, FieldAccess, FieldHook, Where } from "payload";
@@ -57,7 +58,7 @@ export const Events: CollectionConfig = {
     useAsTitle: "title",
     baseFilter: eventListFilter,
     description:
-      "Add events for MASCA students and review submissions before they appear on the website. An event appears publicly only after it is approved and published.",
+      "Manage events for MASCA students. Save a private draft or publish when ready.",
     hideAPIURL: true,
     components: {
       beforeList: ["/components/admin/EventListTools#EventListTools"],
@@ -80,9 +81,7 @@ export const Events: CollectionConfig = {
       "title",
       "organisation",
       "startDate",
-      "reviewStatus",
-      "_status",
-      "lifecycle",
+      "cmsStatus",
     ],
   },
   access: {
@@ -98,8 +97,9 @@ export const Events: CollectionConfig = {
   lockDocuments: false,
   endpoints: [{ path: '/report', method: 'get', handler: eventReport }, { path: '/:id/lifecycle', method: 'post', handler: eventLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: eventQuickAction }],
   fields: [
+    cmsStatusField('events'),
     { name: 'lifecycle', type: 'text', virtual: true, label: 'Event stage',
-      admin: { components: { Field: false, Cell: '/components/admin/EventLifecycleCell#EventLifecycleCell' }, disableBulkEdit: true },
+      admin: { disableListColumn: true, components: { Field: false, Cell: '/components/admin/EventLifecycleCell#EventLifecycleCell' }, disableBulkEdit: true },
       hooks: { afterRead: [async ({ data, req }: Parameters<FieldHook>[0]) => {
         if (!req.user || !data?.id) return undefined;
         const rows = await req.payload.find({ collection: 'event-lifecycle', where: { event: { equals: data.id } }, limit: 1, depth: 0, req, overrideAccess: true });
@@ -108,7 +108,7 @@ export const Events: CollectionConfig = {
     },
     {
       name: '_status', label: 'Publication', type: 'select', options: [], // Payload supplies the built-in publication options during sanitization.
-      admin: { components: { Field: false, Cell: '/components/admin/EventStatusCell#EventPublicationStatusCell' }, disableBulkEdit: true },
+      admin: { disableListColumn: true, components: { Field: false, Cell: '/components/admin/EventStatusCell#EventPublicationStatusCell' }, disableBulkEdit: true },
     },
     {
       name: 'eventEditorHeader', type: 'ui',
@@ -240,10 +240,12 @@ export const Events: CollectionConfig = {
       ],
       admin: {
         className: "masca-event-review-decision",
+        disableListColumn: true,
         isClearable: false,
         description: "Publishing automatically approves this event. Choose Rejected to keep a submission off the website.",
         components: {
           Cell: "/components/admin/EventStatusCell#EventReviewStatusCell",
+          Field: "/components/admin/EventReviewField#EventReviewField",
         },
       },
     },
@@ -252,7 +254,7 @@ export const Events: CollectionConfig = {
       admin: { components: { Field: '/components/admin/EventEditorFields#EventEditorFooter' }, disableListColumn: true, disableBulkEdit: true },
     },
   ].map((field) => {
-    const step = EVENT_EDITOR_STEPS.findIndex(({ fields }) => fields.includes(field.name));
+    const step = EVENT_EDITOR_STEPS.findIndex(({ fields }) => fields.includes('name' in field ? field.name : ''));
     return {
       ...field,
       admin: {

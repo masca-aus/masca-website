@@ -37,9 +37,9 @@ beforeEach(() => {
   h.modified = false;
   h.dateValidation = {};
   h.save.current = null;
-  h.document = { id: 7, data: { id: 7 }, isInitializing: false, hasSavePermission: true, uploadStatus: undefined, setHasPublishedDoc: vi.fn(), setMostRecentVersionIsAutosaved: vi.fn(), setUnpublishedVersionCount: vi.fn() };
+  h.document = { id: 7, data: { id: 7 }, isInitializing: false, hasSavePermission: true, uploadStatus: undefined, setData: vi.fn(), setHasPublishedDoc: vi.fn(), setMostRecentVersionIsAutosaved: vi.fn(), setUnpublishedVersionCount: vi.fn() };
   h.submit.mockResolvedValue({ res: { ok: true } });
-  h.fetch.mockResolvedValue({ ok: true });
+  h.fetch.mockResolvedValue({ ok: true, json: async () => ({ doc: { cmsStatus: { status: 'draft', hasChanges: false } } }) });
   vi.stubGlobal('fetch', h.fetch);
 });
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); });
@@ -183,6 +183,7 @@ describe('event save controller', () => {
     expect(h.submit).toHaveBeenCalledOnce();
     expect(h.fetch).toHaveBeenCalledWith('/api/events/7?depth=0&unpublishAllLocales=true', { method: 'PATCH', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ _status: 'draft' }) });
     expect(h.document.setHasPublishedDoc).toHaveBeenCalledWith(false);
+    expect(h.document.setData).toHaveBeenCalledWith(expect.objectContaining({ cmsStatus: { status: 'draft', hasChanges: false } }));
   });
 
   it('unpublishes with incomplete local edits without sending or clearing those edits', async () => {
@@ -196,6 +197,7 @@ describe('event save controller', () => {
     expect(h.data.title).toBe('');
     expect(h.modified).toBe(true);
     expect(h.document.setHasPublishedDoc).toHaveBeenCalledWith(false);
+    expect(h.document.setData).toHaveBeenCalledWith(expect.objectContaining({ cmsStatus: { status: 'draft', hasChanges: false } }));
   });
 
   it('exposes native field validation and blocks publication when required details are missing', async () => {

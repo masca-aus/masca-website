@@ -62,9 +62,7 @@ describe("events collection", () => {
       "title",
       "organisation",
       "startDate",
-      "reviewStatus",
-      "_status",
-      "lifecycle",
+      "cmsStatus",
     ]);
   });
 

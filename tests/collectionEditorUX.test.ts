@@ -14,7 +14,7 @@ describe("collection editor UX", () => {
 
     const expectedDescriptions = {
       events:
-        "Add events for MASCA students and review submissions before they appear on the website. An event appears publicly only after it is approved and published.",
+        "Manage events for MASCA students. Save a private draft or publish when ready.",
       committee:
         "Create and update committee profiles step by step. Changes appear on the website when you Save.",
       media: "Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.",

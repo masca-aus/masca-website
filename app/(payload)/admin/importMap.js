@@ -1,3 +1,4 @@
+import { CareerCMSStatusCell as CareerCMSStatusCell_7b142bce0343383e5a0dfdc8f07ad33f } from '../../../components/admin/CMSStatusCell'
 import { CareerEditorHeader as CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
 import { CareerLifecycleCell as CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34 } from '../../../components/admin/CareerLifecycleCell'
 import { CareerEditorFooter as CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
@@ -17,11 +18,13 @@ import { SponsorEditorHeader as SponsorEditorHeader_ee68ebb54eea085f9d8083407db3
 import { SponsorEditorFooter as SponsorEditorFooter_ee68ebb54eea085f9d8083407db3bdb1 } from '../../../components/admin/SponsorEditor'
 import { SponsorSaveControl as SponsorSaveControl_ee68ebb54eea085f9d8083407db3bdb1 } from '../../../components/admin/SponsorEditor'
 import { SponsorEditorView as SponsorEditorView_ee68ebb54eea085f9d8083407db3bdb1 } from '../../../components/admin/SponsorEditor'
+import { EventCMSStatusCell as EventCMSStatusCell_7b142bce0343383e5a0dfdc8f07ad33f } from '../../../components/admin/CMSStatusCell'
 import { EventLifecycleCell as EventLifecycleCell_b28290272084401b0c4a1bb58db7c1bc } from '../../../components/admin/EventLifecycleCell'
 import { EventEditorHeader as EventEditorHeader_cc3f89cc91de38306fe76806fb36c1a8 } from '../../../components/admin/EventEditorFields'
 import { OrganisationSearchField as OrganisationSearchField_af4e53f6f5550c1030d91670e14f5e57 } from '../../../components/admin/OrganisationSearchField'
 import { EventDateRangeField as EventDateRangeField_569debf66701d7a979275558e0d1a058 } from '../../../components/admin/EventDateRangeField'
 import { EventReviewStatusCell as EventReviewStatusCell_332664cf88e7bd66848f8853819758ec } from '../../../components/admin/EventStatusCell'
+import { EventReviewField as EventReviewField_5a421c0e67930f3c32456aa664ce8801 } from '../../../components/admin/EventReviewField'
 import { EventEditorFooter as EventEditorFooter_cc3f89cc91de38306fe76806fb36c1a8 } from '../../../components/admin/EventEditorFields'
 import { EventPublicationStatusCell as EventPublicationStatusCell_332664cf88e7bd66848f8853819758ec } from '../../../components/admin/EventStatusCell'
 import { EventListTools as EventListTools_4ba022488e422c6519ecbc907b2586d7 } from '../../../components/admin/EventListTools'
@@ -39,6 +42,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/components/admin/CMSStatusCell#CareerCMSStatusCell": CareerCMSStatusCell_7b142bce0343383e5a0dfdc8f07ad33f,
   "/components/admin/CareerEditor#CareerEditorHeader": CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236,
   "/components/admin/CareerLifecycleCell#CareerLifecycleCell": CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34,
   "/components/admin/CareerEditor#CareerEditorFooter": CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236,
@@ -58,11 +62,13 @@ export const importMap = {
   "/components/admin/SponsorEditor#SponsorEditorFooter": SponsorEditorFooter_ee68ebb54eea085f9d8083407db3bdb1,
   "/components/admin/SponsorEditor#SponsorSaveControl": SponsorSaveControl_ee68ebb54eea085f9d8083407db3bdb1,
   "/components/admin/SponsorEditor#SponsorEditorView": SponsorEditorView_ee68ebb54eea085f9d8083407db3bdb1,
+  "/components/admin/CMSStatusCell#EventCMSStatusCell": EventCMSStatusCell_7b142bce0343383e5a0dfdc8f07ad33f,
   "/components/admin/EventLifecycleCell#EventLifecycleCell": EventLifecycleCell_b28290272084401b0c4a1bb58db7c1bc,
   "/components/admin/EventEditorFields#EventEditorHeader": EventEditorHeader_cc3f89cc91de38306fe76806fb36c1a8,
   "/components/admin/OrganisationSearchField#OrganisationSearchField": OrganisationSearchField_af4e53f6f5550c1030d91670e14f5e57,
   "/components/admin/EventDateRangeField#EventDateRangeField": EventDateRangeField_569debf66701d7a979275558e0d1a058,
   "/components/admin/EventStatusCell#EventReviewStatusCell": EventReviewStatusCell_332664cf88e7bd66848f8853819758ec,
+  "/components/admin/EventReviewField#EventReviewField": EventReviewField_5a421c0e67930f3c32456aa664ce8801,
   "/components/admin/EventEditorFields#EventEditorFooter": EventEditorFooter_cc3f89cc91de38306fe76806fb36c1a8,
   "/components/admin/EventStatusCell#EventPublicationStatusCell": EventPublicationStatusCell_332664cf88e7bd66848f8853819758ec,
   "/components/admin/EventListTools#EventListTools": EventListTools_4ba022488e422c6519ecbc907b2586d7,

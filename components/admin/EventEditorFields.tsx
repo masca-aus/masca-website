@@ -1,4 +1,5 @@
 'use client';
+import { CMSStatusBadge } from './CMSStatusBadge';
 
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { useDocumentInfo, useForm, useFormFields } from '@payloadcms/ui';
@@ -54,7 +55,7 @@ export function EventEditorHeader() {
   };
   return <section className="masca-wizard-header" aria-label="Event editor">
     <div className="masca-wizard-heading-row">
-      <div className="masca-wizard-progress-label"><span className="masca-wizard-badge" data-live={Boolean(hasPublishedDoc)} title={hasPublishedDoc ? 'Changes save as a draft until you publish again.' : 'Not visible on the website.'}>{hasPublishedDoc ? 'Live' : 'Draft'}</span><span className="masca-wizard-count">Step {step + 1} of 5 · {EVENT_EDITOR_STEPS[step].title}</span></div>
+      <div className="masca-wizard-progress-label"><CMSStatusBadge /><span className="masca-wizard-count">Step {step + 1} of 5 · {EVENT_EDITOR_STEPS[step].title}</span></div>
       <button ref={stepToggle} type="button" className="masca-wizard-text-button" aria-expanded={stepsOpen} aria-controls={stepListID} onClick={() => setStepsOpen(open => !open)}>View steps <span className="masca-wizard-step-chevron" aria-hidden="true">⌄</span></button>
     </div>
     <div className="masca-wizard-progress" role="progressbar" aria-label="Event setup progress" aria-valuemin={1} aria-valuemax={5} aria-valuenow={step + 1} aria-valuetext={`Step ${step + 1} of 5: ${EVENT_EDITOR_STEPS[step].title}`}>

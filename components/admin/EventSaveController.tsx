@@ -53,6 +53,8 @@ export function EventSaveController() {
                 body: JSON.stringify({ _status: 'draft' }),
               });
               if (!response.ok) throw new Error('Unpublish failed');
+              const result = await response.json();
+              if (result.doc) document.setData({ ...document.data, cmsStatus: result.doc.cmsStatus });
               document.setHasPublishedDoc(false);
               form.dispatchFields({ type: 'UPDATE', path: '_status', value: 'draft' });
               editor.setSaveState('saved');

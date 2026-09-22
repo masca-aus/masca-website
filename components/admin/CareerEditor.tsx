@@ -1,4 +1,5 @@
 'use client';
+import { CMSStatusBadge } from './CMSStatusBadge';
 
 import React, { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -55,7 +56,7 @@ export function CareerEditorHeader() {
     return () => { nextRef.current = null; };
   });
   return <section className="masca-wizard-header" aria-label="Career editor">
-    <div className="masca-wizard-heading-row"><div className="masca-wizard-progress-label"><span className="masca-wizard-badge">Career</span><span className="masca-wizard-count">Step {step + 1} of 4 · {CAREER_STEPS[step].title}</span></div><button ref={toggle} type="button" className="masca-wizard-text-button" aria-expanded={open} aria-controls={listID} onClick={() => setOpen(value => !value)}>View steps <span className="masca-wizard-step-chevron" aria-hidden="true">⌄</span></button></div>
+    <div className="masca-wizard-heading-row"><div className="masca-wizard-progress-label"><CMSStatusBadge /><span className="masca-wizard-count">Step {step + 1} of 4 · {CAREER_STEPS[step].title}</span></div><button ref={toggle} type="button" className="masca-wizard-text-button" aria-expanded={open} aria-controls={listID} onClick={() => setOpen(value => !value)}>View steps <span className="masca-wizard-step-chevron" aria-hidden="true">⌄</span></button></div>
     <div className="masca-wizard-progress" role="progressbar" aria-label="Career setup progress" aria-valuemin={1} aria-valuemax={4} aria-valuenow={step + 1}><span style={{ width: `${(step + 1) * 25}%` }} /></div>
     <nav id={listID} className="masca-wizard-step-disclosure" data-open={open} aria-label="Career steps" aria-hidden={!open} inert={!open} onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); setOpen(false); toggle.current?.focus(); } }}><div className="masca-wizard-step-disclosure__inner"><ol className="masca-wizard-steps">{CAREER_STEPS.map(({ title }, index) => <li key={title}><button type="button" disabled={busy} tabIndex={open ? 0 : -1} aria-current={index === step ? 'step' : undefined} onClick={() => moveTo(index)}><span className="masca-wizard-step-number" aria-hidden="true">{index < step ? '✓' : index + 1}</span>{title}</button></li>)}</ol></div></nav>
     <div key={step} className="masca-wizard-intro"><h2 ref={heading} tabIndex={-1}>{CAREER_STEPS[step].title}</h2><p>{CAREER_STEPS[step].description}</p></div>
