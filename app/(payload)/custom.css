@@ -317,7 +317,8 @@ html[data-theme="dark"] .masca-action--primary:hover, html[data-theme="dark"] .m
 
 /* The dashboard has its own navigation cards and stays full width. */
 .template-default:has(.masca-dashboard-nav-hidden) { grid-template-columns: minmax(0, 1fr); }
-body:has(.masca-dashboard-nav-hidden) .template-default__nav-toggler-wrapper { display: none; }
+body:has(.masca-dashboard-nav-hidden) .template-default__nav-toggler-wrapper,
+body:has(.masca-dashboard-nav-hidden) .app-header__mobile-nav-toggler { display: none; }
 .masca-nav { border-right: 1px solid var(--theme-elevation-150); background: var(--theme-bg); }
 .masca-nav .nav__scroll { padding: 1.25rem 1rem; }
 .masca-nav__heading { display: flex; align-items: center; justify-content: space-between; min-height: 3rem; margin-bottom: 1.25rem; padding-inline: .75rem; font-weight: 750; letter-spacing: .04em; }
