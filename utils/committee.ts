@@ -35,7 +35,7 @@ export type CommitteeMember = {
 }
 
 /**
- * Returns committee members in admin drag order (`_order` ascending),
+ * Returns committee members in the previously saved display order (`_order` ascending),
  * optionally filtered to a single `year`.
  */
 export async function getCommittee(year?: string): Promise<CommitteeMember[]> {

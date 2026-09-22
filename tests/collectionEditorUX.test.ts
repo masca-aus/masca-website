@@ -68,11 +68,11 @@ describe("collection editor UX", () => {
     }
   });
 
-  it("retains committee ordering and shows native image previews", async () => {
+  it("removes committee reordering and shows native image previews", async () => {
     const config = await configPromise;
     const committee = config.collections.find((collection) => collection.slug === "committee");
-    expect(committee?.orderable).toBe(true);
-    expect(committee?.defaultSort).toBe("_order");
+    expect(committee?.orderable).not.toBe(true);
+    expect(committee?.defaultSort).toBe("name");
     for (const [slug, imageField] of [["committee", "portrait"], ["sponsors", "logo"]]) {
       const collection = config.collections.find((candidate) => candidate.slug === slug);
       const field = collection?.fields.find((candidate) => "name" in candidate && candidate.name === imageField);

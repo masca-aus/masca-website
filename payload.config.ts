@@ -267,15 +267,12 @@ export default buildConfig({
         read: () => true,
         readVersions: ({ req }) => Boolean(req.user),
       },
-      // Drag-and-drop ordering in the admin list view via Payload's hidden
-      // `_order` key. The sequence is global across all years — filter the
-      // list to one year before dragging; the public page filters per year,
-      // so per-year relative order is all that matters.
-      orderable: true,
-      defaultSort: "_order",
+      defaultSort: "name",
       // Fields mirror the shape the committee page has always rendered, and
       // are validated here so bad entries are rejected at save time.
       fields: [
+        // Retain stored ordering for existing public pages without exposing reordering.
+        { name: "_order", type: "text", index: true, admin: { hidden: true, readOnly: true, disableListColumn: true, disableListFilter: true, disableBulkEdit: true } },
         { name: "committeeWizardHeader", type: "ui", admin: { components: { Field: "/components/admin/CommitteeEditor#CommitteeEditorHeader" }, disableListColumn: true, disableBulkEdit: true } },
         editorSection({
           title: "Identity",
