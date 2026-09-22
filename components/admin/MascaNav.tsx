@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, type CSSProperties } from "react";
 import { BriefcaseBusiness, CalendarDays, Handshake, House, Images, Building2, Users, UserRound, PanelLeftClose, ShieldCheck, LogOut } from "lucide-react";
 
+import { MascaMark } from "./MascaBrand";
 import { ThemeToggle } from "./ThemeToggle";
 
 const groups = [
@@ -35,7 +36,7 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
   return (
     <aside className={["nav", "masca-nav", navOpen && "nav--nav-open", hydrated && "nav--nav-hydrated", shouldAnimate && "nav--nav-animate"].filter(Boolean).join(" ")} inert={!navOpen}>
       <div className="nav__scroll" ref={navRef}>
-        <div className="masca-nav__heading"><span>MASCA <small>CMS</small></span><NavToggler><PanelLeftClose size={19} /></NavToggler></div>
+        <div className="masca-nav__heading"><span className="masca-nav__brand"><MascaMark /><span>MASCA <small>CMS</small></span></span><NavToggler><PanelLeftClose size={19} /></NavToggler></div>
         <nav aria-label="CMS navigation" className="masca-nav__links">
           <Link href="/admin" className="masca-nav__link"><House size={19} />Dashboard</Link>
           {groups.map(group => {

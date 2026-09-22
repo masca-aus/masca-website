@@ -346,3 +346,10 @@ body:has(.masca-nav.nav--nav-open) .app-header__account { display: none; }
 .masca-empty-state { padding: 3rem 1rem; text-align: center; }
 .masca-empty-state h3 { margin: 0 0 .75rem; font-size: 1.25rem; }
 .masca-empty-state p { color: var(--theme-elevation-650); margin-bottom: 1.5rem; }
+.masca-nav__brand { display: inline-flex; align-items: center; gap: .65rem; white-space: nowrap; }
+.masca-nav__brand .masca-admin-icon { width: 1.9rem; height: 1.9rem; }
+.masca-admin-home { display: inline-flex; align-items: center; }
+.masca-admin-home__label { display: none; font-size: 1rem; font-weight: 500; color: var(--theme-text); }
+body:has(.masca-nav.nav--nav-open) .masca-admin-home__mark { display: none; }
+body:has(.masca-nav.nav--nav-open) .masca-admin-home__label { display: inline; }
+body:has(.masca-nav.nav--nav-open) .step-nav__home:has(.masca-admin-home) { width: auto; height: auto; flex-shrink: 0; }
