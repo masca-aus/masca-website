@@ -20,7 +20,7 @@
 
 .masca-event-menu { position: fixed; z-index: 10000; width: min(208px, calc(100vw - 16px)); overflow-y: auto; padding: 6px; border: 1px solid var(--theme-elevation-200); border-radius: 10px; background: var(--theme-elevation-0); color: var(--theme-text); box-shadow: 0 8px 28px #0002; animation: masca-menu-open 140ms ease-out; }
 .masca-event-menu button { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 40px; padding: 8px 10px; border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: .85rem; text-align: left; cursor: pointer; }
-.masca-event-menu button:hover, .masca-event-menu button:focus { background: var(--theme-elevation-100); outline: none; }
+.masca-event-menu button:hover, .masca-event-menu button:focus-visible { background: var(--theme-elevation-100); outline: none; }
 .masca-event-menu button:focus-visible { box-shadow: inset 0 0 0 2px #ffcc00; }
 @keyframes masca-menu-open { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .masca-event-menu { animation: none; } }
