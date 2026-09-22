@@ -56,3 +56,10 @@ it('removes only the appended native phrase and preserves existing filters', asy
  expect(removeNativePhrase({and:[filter,native]},'careers','engineer melb')).toEqual({and:[filter]});
  expect(removeNativePhrase({and:[filter]},'careers','engineer melb')).toEqual({and:[filter]});
 });
+
+it('sorts displayed statuses in both directions with deterministic ties', async () => {
+ const {sortByCMSStatus}=await import('../features/admin/adminSearch');
+ const docs=[{id:3,title:'Z',cmsStatus:{status:'draft'}},{id:2,title:'A',cmsStatus:{status:'published'}},{id:1,title:'A',cmsStatus:{status:'draft'}}];
+ expect(sortByCMSStatus(docs).map(d=>d.id)).toEqual([1,3,2]);
+ expect(sortByCMSStatus(docs,true).map(d=>d.id)).toEqual([2,1,3]);
+});

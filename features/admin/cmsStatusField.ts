@@ -5,7 +5,7 @@ export function cmsStatusField(collection: CMSCollection): Field {
   return {
     name: 'cmsStatus', label: 'Status', type: 'json', virtual: true,
     access: { read: ({ req }) => Boolean(req.user) },
-    admin: { disableBulkEdit: true, disableListFilter: true, components: { Field: false, Cell: `/components/admin/CMSStatusCell#${collection === 'events' ? 'Event' : 'Career'}CMSStatusCell` } },
+    admin: { disableBulkEdit: true, disableListFilter: true, components: { Label: "/components/admin/CMSStatusHeading#CMSStatusHeading", Field: false, Cell: `/components/admin/CMSStatusCell#${collection === 'events' ? 'Event' : 'Career'}CMSStatusCell` } },
     hooks: { afterRead: [async ({ data, req, context }: Parameters<FieldHook>[0]) => {
       if (!req.user || !data?.id || context.cmsStatusRead) return undefined;
       const readContext = { ...context, cmsStatusRead: true };

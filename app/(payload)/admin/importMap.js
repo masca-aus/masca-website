@@ -1,3 +1,4 @@
+import { CMSStatusHeading as CMSStatusHeading_f45eec8b84c53ac532890f2ee67945df } from '../../../components/admin/CMSStatusHeading'
 import { CareerCMSStatusCell as CareerCMSStatusCell_7b142bce0343383e5a0dfdc8f07ad33f } from '../../../components/admin/CMSStatusCell'
 import { CareerEditorHeader as CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
 import { CareerLifecycleCell as CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34 } from '../../../components/admin/CareerLifecycleCell'
@@ -44,6 +45,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/components/admin/CMSStatusHeading#CMSStatusHeading": CMSStatusHeading_f45eec8b84c53ac532890f2ee67945df,
   "/components/admin/CMSStatusCell#CareerCMSStatusCell": CareerCMSStatusCell_7b142bce0343383e5a0dfdc8f07ad33f,
   "/components/admin/CareerEditor#CareerEditorHeader": CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236,
   "/components/admin/CareerLifecycleCell#CareerLifecycleCell": CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34,
