@@ -27,6 +27,7 @@ export const Careers: CollectionConfig = {
     description: 'Manage opportunities for students. Save private drafts, review details and publish when ready. Rolling roles expire after 60 days; update the listed date after reconfirming availability.',
     hideAPIURL: true, listSearchableFields: adminSearchFields.careers, baseFilter: withAdminSearch('careers', careerListFilter),
     components: {
+      afterListTable: ["/components/admin/LifecycleEmptyState#LifecycleEmptyState"],
       beforeList: ['/components/admin/CareerListTools#CareerListTools'],
       edit: { beforeDocumentControls: ['/components/admin/DocumentBackLink#DocumentBackLink'],
         SaveDraftButton: '/components/admin/CareerEditor#CareerSaveControl', PublishButton: '/components/admin/CareerEditor#CareerPublishControl' },

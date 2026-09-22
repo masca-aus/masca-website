@@ -4,6 +4,7 @@ import { CareerEditorHeader as CareerEditorHeader_57c74453f1f49818c0cb8c1e925242
 import { CareerLifecycleCell as CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34 } from '../../../components/admin/CareerLifecycleCell'
 import { CareerEditorFooter as CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
 import { CareerPublicationStatusCell as CareerPublicationStatusCell_f07b37ac41f692f48fee9d222ed514bf } from '../../../components/admin/CareerStatusCell'
+import { LifecycleEmptyState as LifecycleEmptyState_42d71d9f34a8cf4069fbd1a94b7c2615 } from '../../../components/admin/LifecycleEmptyState'
 import { CareerListTools as CareerListTools_425c2154b5081b2b75b2a41486007d14 } from '../../../components/admin/CareerListTools'
 import { DocumentBackLink as DocumentBackLink_b7eb021eac5b101e7ce71970147e89df } from '../../../components/admin/DocumentBackLink'
 import { CareerPublishControl as CareerPublishControl_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
@@ -51,6 +52,7 @@ export const importMap = {
   "/components/admin/CareerLifecycleCell#CareerLifecycleCell": CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34,
   "/components/admin/CareerEditor#CareerEditorFooter": CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236,
   "/components/admin/CareerStatusCell#CareerPublicationStatusCell": CareerPublicationStatusCell_f07b37ac41f692f48fee9d222ed514bf,
+  "/components/admin/LifecycleEmptyState#LifecycleEmptyState": LifecycleEmptyState_42d71d9f34a8cf4069fbd1a94b7c2615,
   "/components/admin/CareerListTools#CareerListTools": CareerListTools_425c2154b5081b2b75b2a41486007d14,
   "/components/admin/DocumentBackLink#DocumentBackLink": DocumentBackLink_b7eb021eac5b101e7ce71970147e89df,
   "/components/admin/CareerEditor#CareerPublishControl": CareerPublishControl_57c74453f1f49818c0cb8c1e92524236,

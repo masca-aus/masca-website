@@ -62,6 +62,7 @@ export const Events: CollectionConfig = {
       "Manage events for MASCA students. Save a private draft or publish when ready.",
     hideAPIURL: true,
     components: {
+      afterListTable: ["/components/admin/LifecycleEmptyState#LifecycleEmptyState"],
       beforeList: ["/components/admin/EventListTools#EventListTools"],
       edit: {
         beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],

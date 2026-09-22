@@ -27,7 +27,7 @@ export function EventLifecycleCell({ cellData, rowData }: { cellData?: unknown; 
         status === 'archived' ? { value: 'restore', label: 'Restore event' } : { value: 'archive', label: 'Archive event' },
         ...(status === 'completed' ? [{ value: 'reopen', label: 'Reopen event' }] : []),
       ]} />
-    {(busy || refreshing) && <small role="status">Saving…</small>}
+    {(busy || refreshing) && <small className="masca-status-action__announcement" role="status">Saving…</small>}
     {error && <small role="alert">{error}</small>}
   </div>;
 }

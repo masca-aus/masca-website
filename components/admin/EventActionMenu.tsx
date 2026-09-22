@@ -40,7 +40,7 @@ export function EventActionMenu({ label, text, tone, options, current, disabled,
       <span className="masca-status-action__dot" aria-hidden="true" />
       <button ref={trigger} className="masca-status-action__trigger" type="button" aria-label={`${label}: ${text}`} aria-haspopup="menu" aria-expanded={open} aria-controls={open ? id : undefined} disabled={disabled}
         onClick={event => { event.stopPropagation(); if (open) close(); else show(); }}
-        onKeyDown={event => { if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); show(event.key === 'ArrowUp'); } }}>{text}</button>
+        onKeyDown={event => { if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); show(event.key === 'ArrowUp'); } }}>{busy ? 'Saving…' : text}</button>
       <span aria-hidden="true" className={busy ? 'masca-status-action__spinner' : 'masca-status-action__chevron'}>{busy ? '' : '⌄'}</span>
     </div>
     {open && createPortal(<div ref={menu} id={id} role="menu" aria-label={label} className="masca-event-menu" style={position!} onClick={event => event.stopPropagation()}

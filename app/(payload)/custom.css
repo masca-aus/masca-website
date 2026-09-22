@@ -336,3 +336,12 @@ body:has(.masca-dashboard-nav-hidden) .app-header__mobile-nav-toggler { display:
 .masca-nav :is(a, button):focus-visible { outline: 2px solid var(--masca-yellow); outline-offset: 3px; }
 /* The sidebar supplies its own close control while open. */
 body:has(.masca-nav.nav--nav-open) .template-default__nav-toggler-wrapper { display: none; }
+/* Account controls have one visible home, including on the dashboard. */
+body:has(.masca-nav.nav--nav-open) .app-header .masca-admin-theme-toggle,
+body:has(.masca-nav.nav--nav-open) .app-header__account { display: none; }
+.masca-nav__theme { padding: .5rem .8rem; }
+.masca-nav__theme .masca-admin-theme-toggle { width: 100%; justify-content: flex-start; min-height: 40px; }
+.collection-list:has(.masca-empty-state) .no-results { display: none; }
+.masca-empty-state { padding: 3rem 1rem; text-align: center; }
+.masca-empty-state h3 { margin: 0 0 .75rem; font-size: 1.25rem; }
+.masca-empty-state p { color: var(--theme-elevation-650); margin-bottom: 1.5rem; }

@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, type CSSProperties } from "react";
 import { BriefcaseBusiness, CalendarDays, Handshake, House, Images, Building2, Users, UserRound, PanelLeftClose, ShieldCheck, LogOut } from "lucide-react";
 
+import { ThemeToggle } from "./ThemeToggle";
+
 const groups = [
   { label: "Content", items: [
     { slug: "events", label: "Events", icon: CalendarDays, color: "#ef476f" },
@@ -48,6 +50,7 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
             </section> : null;
           })}
           <div className="masca-nav__account">
+            <div className="masca-nav__theme"><ThemeToggle /></div>
             {visibleEntities.collections.includes("users") && <Link href="/admin/collections/users" className="masca-nav__link" aria-current={pathname.startsWith("/admin/collections/users") ? "page" : undefined}><ShieldCheck size={19} />CMS access</Link>}
             <Link href="/admin/account" className="masca-nav__link" aria-current={pathname === "/admin/account" ? "page" : undefined}><UserRound size={19} />My account</Link>
             <Link href="/admin/logout" prefetch={false} className="masca-nav__link"><LogOut size={19} />Log out</Link>

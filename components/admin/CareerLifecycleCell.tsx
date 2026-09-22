@@ -27,7 +27,7 @@ export function CareerLifecycleCell({ cellData, rowData }: { cellData?: unknown;
         status === 'archived' ? { value: 'restore', label: 'Restore opportunity' } : { value: 'archive', label: 'Archive opportunity' },
         ...(status === 'closed' ? [{ value: 'reopen', label: 'Reopen opportunity' }] : []),
       ]} />
-    {(busy || refreshing) && <small role="status">Saving…</small>}
+    {(busy || refreshing) && <small className="masca-status-action__announcement" role="status">Saving…</small>}
     {error && <small role="alert">{error}</small>}
   </div>;
 }

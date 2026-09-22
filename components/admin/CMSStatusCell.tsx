@@ -39,7 +39,7 @@ function CMSStatusCell({ collection, cellData, rowData }: Props & { collection: 
       options={statusActions(collection, state)} disabled={busy || refreshing || rowData?.id == null} busy={busy || refreshing} onChoose={action => void choose(action)} />
     {state.status === 'published' && state.hasChanges && <small className="masca-status-action__feedback">Unpublished changes</small>}
     {state.expired && <small className="masca-status-action__feedback">Listing expired</small>}
-    {(busy || refreshing) && <small role="status">Saving…</small>}
+    {(busy || refreshing) && <small className="masca-status-action__announcement" role="status">Saving…</small>}
     {error && <div className="masca-status-action__error" role="alert">{error} <a href={`${config.routes.admin}/collections/${collection}/${rowData?.id}`}>Edit details</a></div>}
   </div>;
 }
