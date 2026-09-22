@@ -1,3 +1,4 @@
+import { adminSearchFields, adminSearchHooks, withAdminSearch } from './features/admin/adminSearch.ts';
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -245,12 +246,13 @@ export default buildConfig({
       versions: { maxPerDoc: 0 },
       admin: {
         useAsTitle: "name",
+        listSearchableFields: adminSearchFields.committee, baseFilter: withAdminSearch("committee"),
         hideAPIURL: true,
         defaultColumns: ["name", "role", "department", "year"],
         description:
           "Create and update committee profiles step by step. Changes appear on the website when you Save.",
         components: {
-          beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
+          beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink", "/components/admin/AdminSearchHelp#AdminSearchHelp"],
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
             SaveButton: "/components/admin/CommitteeEditor#CommitteeSaveControl",
@@ -376,6 +378,7 @@ export default buildConfig({
         return step < 0 ? field : { ...field, admin: { ...field.admin, className: `masca-committee-step masca-committee-step-${step}` } };
       }) as Field[],
       hooks: {
+        ...adminSearchHooks,
         afterChange: [revalidateCommitteePages],
         afterDelete: [revalidateCommitteePages],
       },
@@ -384,11 +387,12 @@ export default buildConfig({
       slug: "sponsors",
       admin: {
         useAsTitle: "name",
+        listSearchableFields: adminSearchFields.sponsors, baseFilter: withAdminSearch("sponsors"),
         hideAPIURL: true,
         defaultColumns: ["name", "date"],
         description: "Add sponsor details, choose a logo and review before saving. Changes appear on the homepage when saved.",
         components: {
-          beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
+          beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink", "/components/admin/AdminSearchHelp#AdminSearchHelp"],
           views: { edit: { default: { Component: "/components/admin/SponsorEditor#SponsorEditorView" } } },
           edit: {
             SaveButton: "/components/admin/SponsorEditor#SponsorSaveControl",
@@ -449,6 +453,7 @@ export default buildConfig({
         return step < 0 ? field : { ...field, admin: { ...field.admin, className: `masca-sponsor-step masca-sponsor-step-${step}` } };
       }) as Field[],
       hooks: {
+        ...adminSearchHooks,
         afterChange: [revalidateSponsorPages],
         afterDelete: [revalidateSponsorPages],
       },

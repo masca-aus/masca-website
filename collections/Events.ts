@@ -1,3 +1,4 @@
+import { adminSearchFields, adminSearchHooks, withAdminSearch } from '../features/admin/adminSearch.ts';
 import { cmsStatusField } from '../features/admin/cmsStatusField.ts';
 import { revalidatePath } from "next/cache.js";
 
@@ -56,7 +57,7 @@ export const Events: CollectionConfig = {
   slug: "events",
   admin: {
     useAsTitle: "title",
-    baseFilter: eventListFilter,
+    listSearchableFields: adminSearchFields.events, baseFilter: withAdminSearch('events', eventListFilter),
     description:
       "Manage events for MASCA students. Save a private draft or publish when ready.",
     hideAPIURL: true,
@@ -265,6 +266,7 @@ export const Events: CollectionConfig = {
     };
   }) as CollectionConfig['fields'],
   hooks: {
+    ...adminSearchHooks,
     beforeDelete: [deleteEventLifecycle],
     beforeChange: [validateQuickPublish],
     afterChange: [revalidatePublishedEvent],

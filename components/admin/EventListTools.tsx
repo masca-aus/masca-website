@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { AdminSearchHelp } from './AdminSearchHelp';
 import { EnsureStatusColumn } from './EnsureStatusColumn';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
@@ -26,7 +27,7 @@ export function EventListTools() {
       setReport(data);
     } catch (cause) { setError((cause as Error).message); } finally { setBusy(false); }
   }
-  return <div className="masca-event-tools masca-section-shell"><EnsureStatusColumn />
+  return <div className="masca-event-tools masca-section-shell"><EnsureStatusColumn /><AdminSearchHelp />
     <SectionToolbar actions={<button className="masca-action masca-action--secondary" aria-expanded={reports} onClick={() => setReports(!reports)}>Reports</button>}><nav aria-label="Event lists">
       {[['current','Current'], ['completed','Completed'], ['archived','Archived']].map(([key, label]) => <Link key={key} href={`/admin/collections/events?eventView=${key}`} aria-current={view === key ? 'page' : undefined}>{label}</Link>)}
     </nav></SectionToolbar>

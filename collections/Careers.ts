@@ -1,3 +1,4 @@
+import { adminSearchFields, adminSearchHooks, withAdminSearch } from '../features/admin/adminSearch.ts';
 import { cmsStatusField } from '../features/admin/cmsStatusField.ts';
 import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache.js';
@@ -24,7 +25,7 @@ export const Careers: CollectionConfig = {
   admin: {
     useAsTitle: 'title', defaultColumns: ['title', 'company', 'type', 'cmsStatus', 'closes'],
     description: 'Manage opportunities for students. Save private drafts, review details and publish when ready. Rolling roles expire after 60 days; update the listed date after reconfirming availability.',
-    hideAPIURL: true, baseFilter: careerListFilter,
+    hideAPIURL: true, listSearchableFields: adminSearchFields.careers, baseFilter: withAdminSearch('careers', careerListFilter),
     components: {
       beforeList: ['/components/admin/CareerListTools#CareerListTools'],
       edit: { beforeDocumentControls: ['/components/admin/DocumentBackLink#DocumentBackLink'],
@@ -75,6 +76,7 @@ export const Careers: CollectionConfig = {
     return step < 0 ? field : { ...field, admin: { ...field.admin, className: `masca-career-step masca-career-step-${step}` } } as Field;
   }),
   hooks: {
+    ...adminSearchHooks,
     beforeDelete: [deleteCareerLifecycle],
     afterDelete: [({ doc }) => { try { revalidatePath('/careers'); } catch { /* Local API has no Next cache. */ } return doc; }],
     beforeValidate: [({ data, originalDoc }) => {
