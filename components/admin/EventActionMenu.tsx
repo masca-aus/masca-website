@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { ChevronDown } from 'lucide-react';
 import './eventStatusCell.css';
 
 type Option = { value: string; label: string };
@@ -41,7 +42,7 @@ export function EventActionMenu({ label, text, tone, options, current, disabled,
       <button ref={trigger} className="masca-status-action__trigger" type="button" aria-label={`${label}: ${text}`} aria-haspopup="menu" aria-expanded={open} aria-controls={open ? id : undefined} disabled={disabled}
         onClick={event => { event.stopPropagation(); if (open) close(); else show(); }}
         onKeyDown={event => { if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); show(event.key === 'ArrowUp'); } }}><span key={busy ? 'saving' : text} className="masca-status-action__label">{busy ? 'Saving…' : text}</span></button>
-      <span aria-hidden="true" className={busy ? 'masca-status-action__spinner' : 'masca-status-action__chevron'}>{busy ? '' : '⌄'}</span>
+      <span aria-hidden="true" className={busy ? 'masca-status-action__spinner' : 'masca-status-action__chevron'}>{busy ? null : <ChevronDown size={14} strokeWidth={2} />}</span>
     </div>
     {open && createPortal(<div ref={menu} id={id} role="menu" aria-label={label} className="masca-event-menu" style={position!} onClick={event => event.stopPropagation()}
       onKeyDown={event => {

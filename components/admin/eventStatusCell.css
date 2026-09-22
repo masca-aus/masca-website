@@ -7,7 +7,7 @@
 .masca-status-action__trigger:focus-visible { outline: 3px solid #ffcc00; outline-offset: 3px; }
 .masca-status-action__trigger:disabled { cursor: wait; opacity: .7; }
 .masca-status-action__dot { position: absolute; left: .55rem; width: .3rem; height: .3rem; border-radius: 50%; background: currentColor; pointer-events: none; }
-.masca-status-action__chevron, .masca-status-action__spinner { position: absolute; right: .5rem; pointer-events: none; }
+.masca-status-action__chevron, .masca-status-action__spinner { position: absolute; right: .5rem; top: 0; bottom: 0; margin-block: auto; width: 14px; height: 14px; display: grid; place-items: center; pointer-events: none; }
 .masca-status-action__spinner { width: .8rem; height: .8rem; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: masca-status-spin .7s linear infinite; }
 .masca-status-action__feedback { display: block; font-size: .7rem; margin-top: .25rem; color: var(--theme-elevation-650); }
 .masca-status-action__error { max-width: 18rem; white-space: normal; font-size: .8rem; line-height: 1.5; margin-top: .5rem; color: var(--theme-error-700); }
