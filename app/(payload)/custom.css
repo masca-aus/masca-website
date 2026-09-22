@@ -314,3 +314,24 @@ html[data-theme="dark"] .masca-action--primary:hover, html[data-theme="dark"] .m
 /* Quiet return navigation across document editors and account settings. */
 .masca-document-back-link { border-color: transparent; background: transparent; color: var(--theme-elevation-650); padding-inline: .25rem; }
 .masca-document-back-link:hover { background: transparent; border-color: transparent; color: var(--theme-text); text-decoration: underline; }
+
+/* The dashboard has its own navigation cards and stays full width. */
+.template-default:has(.masca-dashboard-nav-hidden) { grid-template-columns: minmax(0, 1fr); }
+body:has(.masca-dashboard-nav-hidden) .template-default__nav-toggler-wrapper { display: none; }
+.masca-nav { border-right: 1px solid var(--theme-elevation-150); background: var(--theme-bg); }
+.masca-nav .nav__scroll { padding: 1.25rem 1rem; }
+.masca-nav__heading { display: flex; align-items: center; justify-content: space-between; min-height: 3rem; margin-bottom: 1.25rem; padding-inline: .75rem; font-weight: 750; letter-spacing: .04em; }
+.masca-nav__heading small { color: var(--theme-elevation-550); font-size: .7rem; font-weight: 500; }
+.masca-nav__heading button { display: grid; place-items: center; min-width: 36px; min-height: 36px; border: 0; border-radius: 8px; background: transparent; color: var(--theme-elevation-650); cursor: pointer; }
+.masca-nav__heading button:hover { background: var(--theme-elevation-100); }
+.masca-nav__links { display: flex; flex-direction: column; flex: 1; gap: 1.75rem; }
+.masca-nav__links h2 { margin: 0 0 .6rem; padding-inline: .85rem; font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--theme-elevation-550); }
+.masca-nav__link { --section-accent: var(--theme-elevation-400); display: flex; align-items: center; gap: .8rem; min-height: 44px; margin-block: .2rem; padding: .55rem .8rem; border: 1px solid transparent; border-radius: 8px; color: var(--theme-text); text-decoration: none; font-size: .9rem; }
+.masca-nav__link:hover { background: var(--theme-elevation-100); }
+.masca-nav__link[aria-current] { font-weight: 650; background: color-mix(in srgb, var(--section-accent) 14%, var(--theme-bg)); border-color: color-mix(in srgb, var(--section-accent) 35%, var(--theme-elevation-100)); }
+.masca-nav__icon { display: grid; place-items: center; width: 29px; height: 29px; border-radius: 7px; background: color-mix(in srgb, var(--section-accent) 25%, var(--theme-bg)); }
+.masca-nav__link > svg { margin-inline: 5px; }
+.masca-nav__account { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--theme-elevation-150); }
+.masca-nav :is(a, button):focus-visible { outline: 2px solid var(--masca-yellow); outline-offset: 3px; }
+/* The sidebar supplies its own close control while open. */
+body:has(.masca-nav.nav--nav-open) .template-default__nav-toggler-wrapper { display: none; }

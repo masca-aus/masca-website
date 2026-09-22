@@ -138,6 +138,7 @@ export default buildConfig({
       ],
     },
     components: {
+      Nav: "/components/admin/MascaNav#MascaNav",
       providers: ["/components/admin/AdminNavigationEnhancements#AdminNavigationEnhancements"],
       actions: ["/components/admin/ThemeToggle#ThemeToggle"],
       graphics: {

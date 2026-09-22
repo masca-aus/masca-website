@@ -33,6 +33,7 @@ import { EventPublishControl as EventPublishControl_29871d852b17835450d67512a997
 import { EventSaveController as EventSaveController_7d433fad30eaf863695897f10da698e4 } from '../../../components/admin/EventSaveController'
 import { EventUnpublishControl as EventUnpublishControl_29871d852b17835450d67512a99716cc } from '../../../components/admin/EventEditorView'
 import { EventEditorView as EventEditorView_29871d852b17835450d67512a99716cc } from '../../../components/admin/EventEditorView'
+import { MascaNav as MascaNav_3dd9ae22e1955521a65af331e534a684 } from '../../../components/admin/MascaNav'
 import { MascaIcon as MascaIcon_ca074f1e859f5791d4c63048dc4f7c84 } from '../../../components/admin/MascaBrand'
 import { MascaLogo as MascaLogo_ca074f1e859f5791d4c63048dc4f7c84 } from '../../../components/admin/MascaBrand'
 import { ThemeToggle as ThemeToggle_fc85bd5ac375c29cf24795ab8778bf43 } from '../../../components/admin/ThemeToggle'
@@ -78,6 +79,7 @@ export const importMap = {
   "/components/admin/EventSaveController#EventSaveController": EventSaveController_7d433fad30eaf863695897f10da698e4,
   "/components/admin/EventEditorView#EventUnpublishControl": EventUnpublishControl_29871d852b17835450d67512a99716cc,
   "/components/admin/EventEditorView#EventEditorView": EventEditorView_29871d852b17835450d67512a99716cc,
+  "/components/admin/MascaNav#MascaNav": MascaNav_3dd9ae22e1955521a65af331e534a684,
   "/components/admin/MascaBrand#MascaIcon": MascaIcon_ca074f1e859f5791d4c63048dc4f7c84,
   "/components/admin/MascaBrand#MascaLogo": MascaLogo_ca074f1e859f5791d4c63048dc4f7c84,
   "/components/admin/ThemeToggle#ThemeToggle": ThemeToggle_fc85bd5ac375c29cf24795ab8778bf43,
