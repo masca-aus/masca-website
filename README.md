@@ -56,13 +56,60 @@ Start the application locally on [http://localhost:3000](http://localhost:3000):
 npm run dev
 ```
 
-## Careers board (Google Sheet)
+## Careers board (CMS preview)
 
-`/careers` is driven by a Google Sheet kept by the Careers team — no CMS, no
-API key. The sheet is shared "Anyone with the link → Viewer" and read as CSV
-every five minutes. To connect one, set `CAREERS_SHEET_ID` (and
-`CAREERS_SHEET_GID` if the `Jobs` tab isn't the first tab) in `.env.local` or
-Vercel. Leave them blank and the page shows a friendly "board's still being
-pinned up" state. The committee guide, column reference and template live in
-[docs/careers-board.md](./docs/careers-board.md); `/careers/health` reports
-what the site is (and isn't) reading.
+`/careers` reads published opportunities from Payload. Manage roles at
+`/admin/collections/careers` using the four-step editor: role and company,
+location and eligibility, application details, then review and publish.
+Drafts, internal notes and change history are private. Close or archive a role
+to hide it without losing its content or pending edits. Rolling listings keep
+the existing 60-day expiry rule; dated roles remain visible through their closing day.
+
+Publishing invalidates the careers page; a five-minute refresh also updates
+calendar-based expiry. Search, filters, job details and stable shared links
+retain the existing public interface. `/careers/health` now redirects to the CMS.
+
+Google Sheets is used only by the one-time import utility. See
+[the import runbook](./docs/careers-cms.md). Keep the original sheet as a backup;
+CMS edits do not sync back. The preview shares the production database, but the
+production frontend remains on its deployed code until this branch is merged.
+
+## Event submission preview
+
+The preview Event workflow uses Payload as its single source of truth. The
+public entry page is `/submit`; organisers submit an event at `/submit/event`.
+Submissions are saved as **pending drafts** and do not appear publicly.
+
+An authorised CMS editor reviews submissions at `/admin/collections/events`:
+
+1. Open the event and check its description, local date and time, venue, state,
+   poster, and ticket link. Contact details and internal notes are for editors
+   only.
+2. To publish, set **Review status** to **Approved** and publish the document.
+   Both actions are required. Approved events then appear on `/events` and the
+   homepage while they are upcoming.
+3. To withhold a pending event, leave it unpublished and set **Review status**
+   to **Rejected**. To remove an event that was already published, use Payload's
+   **Unpublish** action. A newly saved draft does not necessarily replace the
+   last published version, so do not rely on a draft-only status edit to take
+   an existing listing down.
+
+The Event migration is `20260916_010000_add_events_submission_workflow`. It
+adds only the `events` and `_events_v` tables and their Events-owned enums,
+indexes and foreign keys. Both tables enable row-level security and revoke
+direct access from the `anon` and `authenticated` database roles. Do not apply
+the migration or deploy this preview until the database owner approves the
+reviewed SQL. Once approved, use `npm run ci` for a migration-enabled build;
+it runs `PAYLOAD_MIGRATING=true payload migrate` before `next build`. Confirm
+the Vercel preview's build setting actually uses this command. Payload records
+applied migrations, but only point the command at the intended database
+environment. Confirm existing collections still respond before testing the
+public flow. Rolling the
+migration back removes all submitted Event data, so take a database backup
+first and prefer unpublishing the preview if a rollback is needed.
+
+This is a preview workflow, not a production-ready public intake. Before
+launching publicly, add a durable distributed rate limit, working Turnstile
+verification, notification delivery to reviewers, and stakeholder approval.
+The current submission limiter is process-local and the form does not send
+review notifications.

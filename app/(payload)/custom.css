@@ -1,3 +1,5 @@
+@import "../../components/admin/contentForms.css";
+@import "../../components/admin/adminMotion.css";
 /* MASCA's public brand, adapted conservatively to Payload's admin tokens. */
 :root {
   --masca-blue: #010066;
@@ -15,6 +17,139 @@ html[data-theme="light"] {
   --theme-success-600: var(--masca-blue);
   --theme-success-700: var(--masca-blue-dark);
   --theme-bg: #ffffff;
+}
+
+/* Wide forms are easier to scan when they share the dashboard's centred rhythm. */
+@media (min-width: 64rem) {
+  .collection-edit:not(.collection-edit--is-live-previewing) .document-fields {
+    max-width: 76rem;
+    margin-inline: auto;
+  }
+
+  .collection-list__wrap {
+    max-width: 96rem;
+    margin-inline: auto;
+  }
+}
+
+.masca-admin-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: 8px;
+  color: var(--theme-text);
+  background: var(--theme-elevation-0);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.masca-admin-theme-toggle:hover {
+  border-color: var(--masca-blue);
+  color: var(--masca-blue);
+  background: var(--masca-blue-soft);
+}
+
+.masca-admin-theme-toggle:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--masca-yellow) 75%, transparent);
+  outline-offset: 2px;
+}
+
+.masca-admin-theme-toggle__icon {
+  display: grid;
+  width: 1rem;
+  height: 1rem;
+  place-items: center;
+  font-size: 1rem;
+}
+
+.masca-editor-section h2 {
+  margin: 0;
+  color: var(--theme-text);
+  font-size: 1.15rem;
+}
+
+.masca-editor-section__eyebrow {
+  margin: 0 0 0.25rem;
+  color: var(--masca-blue);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.masca-document-back-link,
+.doc-controls:has(.masca-document-back-link) .doc-controls__popup .popup-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  box-sizing: border-box;
+  height: 44px;
+  min-height: 44px;
+  padding: .6rem .85rem;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: 8px;
+  color: var(--theme-text);
+  background: var(--theme-elevation-0);
+  font: inherit;
+  font-size: .85rem;
+  font-weight: 550;
+  text-decoration: none;
+  cursor: pointer;
+}
+.doc-controls:has(.masca-document-back-link) .doc-controls__popup .popup-button { width: 44px; padding: 0; }
+.doc-controls:has(.masca-document-back-link) .doc-controls__dots { border: 0; background: transparent; box-shadow: none; }
+.masca-document-back-link:hover,
+.doc-controls:has(.masca-document-back-link) .doc-controls__popup .popup-button:hover { background: var(--theme-elevation-100); border-color: var(--theme-elevation-400); }
+.masca-document-back-link:focus-visible,
+.doc-controls:has(.masca-document-back-link) .doc-controls__popup .popup-button:focus-visible { outline: 3px solid var(--masca-yellow); outline-offset: 3px; }
+
+.masca-editor-section {
+  margin: 2.25rem 0 1.25rem;
+  padding: 0 0 0.85rem;
+  border-bottom: 1px solid var(--theme-elevation-150);
+}
+
+.masca-editor-section h2 {
+  color: var(--masca-blue);
+}
+
+.masca-editor-section > p:last-child {
+  max-width: 48rem;
+  margin: 0.35rem 0 0;
+  color: var(--theme-elevation-700);
+}
+
+.masca-editor-section--decision {
+  padding: 1.15rem 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--masca-blue) 35%, var(--theme-elevation-200));
+  border-left: 5px solid var(--masca-blue);
+  border-radius: var(--style-radius-m);
+  background: linear-gradient(135deg, var(--masca-blue-soft), var(--theme-elevation-0) 72%);
+}
+
+html[data-theme="dark"] .masca-editor-section--decision {
+  border-color: #46509b;
+  border-left-color: #aeb8ff;
+  background: linear-gradient(135deg, #202348, var(--theme-elevation-0) 72%);
+}
+
+html[data-theme="dark"] .masca-editor-section__eyebrow,
+html[data-theme="dark"] .masca-editor-section h2 {
+  color: #e7e9ff;
+}
+
+html[data-theme="dark"] .masca-admin-theme-toggle:hover {
+  border-color: #aeb8ff;
+  color: #eef0ff;
+  background: #272a47;
 }
 
 .masca-admin-logo {
@@ -70,339 +205,151 @@ html[data-theme="light"] {
   background: var(--masca-red);
 }
 
-.masca-dashboard {
-  --dashboard-surface: #fff;
-  --dashboard-surface-muted: #f7f7fb;
-  --dashboard-border: #dedeea;
-  --dashboard-text: #101018;
-  --dashboard-text-muted: #666678;
-  --dashboard-blue-accent: var(--masca-blue);
-  --dashboard-red-accent: var(--masca-red);
-  --dashboard-yellow-accent: #8a6a00;
-  --dashboard-hero-start: var(--masca-blue-dark);
-  --dashboard-hero-middle: var(--masca-blue);
-  --dashboard-hero-end: #1b1e80;
-  --dashboard-hero-muted: #d0d0e7;
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-  width: min(100%, 96rem);
-  padding: 2.5rem var(--gutter-h) 4rem;
-  color: var(--dashboard-text);
-}
+.masca-event-review-decision { margin-top: 1.5rem; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.masca-event-review-decision .field-label { color: var(--theme-text); font-weight: 550; }
+.masca-event-review-decision .description { max-width: 44rem; color: var(--theme-elevation-650); font-size: .85rem; }
+.masca-event-review-decision .react-select { max-width: 24rem; }
+.masca-event-review-decision .rs__control { border-color: var(--theme-elevation-200); background: var(--theme-input-bg, var(--theme-elevation-0)); }
 
-html[data-theme="dark"] .masca-dashboard {
-  --dashboard-surface: #24242b;
-  --dashboard-surface-muted: #1c1d24;
-  --dashboard-border: #484954;
-  --dashboard-text: #fbfbff;
-  --dashboard-text-muted: #c4c5d2;
-  --dashboard-blue-accent: #9aa9ff;
-  --dashboard-red-accent: #ff7375;
-  --dashboard-yellow-accent: #ffda4d;
-  --dashboard-hero-start: #162b73;
-  --dashboard-hero-middle: #263b92;
-  --dashboard-hero-end: #40358f;
-  --dashboard-hero-muted: #e0e2f3;
-}
-
-.masca-dashboard__hero {
-  position: relative;
-  display: flex;
-  min-height: 15rem;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
-  overflow: hidden;
-  padding: clamp(2rem, 5vw, 4rem);
-  border-radius: 1.5rem;
-  color: #fff;
-  background:
-    radial-gradient(circle at 92% 15%, rgb(255 204 0 / 95%) 0 0.45rem, transparent 0.5rem),
-    radial-gradient(circle at 87% 22%, rgb(204 0 1 / 90%) 0 3rem, transparent 3.05rem),
-    linear-gradient(
-      125deg,
-      var(--dashboard-hero-start),
-      var(--dashboard-hero-middle) 62%,
-      var(--dashboard-hero-end)
-    );
-  box-shadow: 0 22px 55px rgb(1 0 102 / 18%);
-}
-
-html[data-theme="dark"] .masca-dashboard__hero {
-  border: 1px solid rgb(154 169 255 / 35%);
-  box-shadow: 0 24px 60px rgb(0 0 0 / 32%);
-}
-
-.masca-dashboard__hero::after {
-  position: absolute;
-  right: -4rem;
-  bottom: -7rem;
-  width: 18rem;
-  height: 18rem;
-  border: 1px solid rgb(255 255 255 / 20%);
+.masca-event-status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid transparent;
   border-radius: 999px;
-  content: "";
-}
-
-.masca-dashboard__hero-copy {
-  position: relative;
-  z-index: 1;
-  max-width: 44rem;
-}
-
-.masca-dashboard__eyebrow {
-  display: block;
-  margin-bottom: 0.7rem;
-  color: var(--dashboard-blue-accent);
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   font-weight: 700;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.masca-dashboard__hero .masca-dashboard__eyebrow {
-  color: var(--masca-yellow);
+.masca-event-status-badge--approved {
+  border-color: #9edbb5;
+  color: #126a3a;
+  background: #e5f7ec;
 }
 
-.masca-dashboard__hero h1 {
-  margin: 0;
-  color: #fff;
-  font-size: clamp(2.4rem, 6vw, 4.7rem);
-  line-height: 1;
-  letter-spacing: -0.045em;
+.masca-event-status-badge--pending {
+  border-color: #ead28c;
+  color: #795600;
+  background: #fff7da;
 }
 
-.masca-dashboard__hero p {
-  max-width: 40rem;
-  margin: 1.25rem 0 0;
-  color: var(--dashboard-hero-muted);
-  font-size: 1rem;
-  line-height: 1.65;
+.masca-event-status-badge--rejected {
+  border-color: #f0b4b4;
+  color: #a51d1d;
+  background: #fff0f0;
 }
 
-.masca-dashboard__site-link {
-  position: relative;
-  z-index: 1;
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.8rem 1.05rem;
-  border: 1px solid rgb(255 255 255 / 35%);
-  border-radius: 999px;
-  color: #fff;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background-color 160ms ease, border-color 160ms ease;
+html[data-theme="dark"] .masca-event-status-badge--approved {
+  border-color: #337852;
+  color: #b7f4ca;
+  background: #173d29;
 }
 
-.masca-dashboard__site-link:hover {
-  border-color: #fff;
-  background: rgb(255 255 255 / 12%);
+html[data-theme="dark"] .masca-event-status-badge--pending {
+  border-color: #80652b;
+  color: #ffe6a2;
+  background: #423516;
 }
 
-.masca-dashboard__site-link:focus-visible {
-  outline: 3px solid var(--masca-yellow);
-  outline-offset: 4px;
+html[data-theme="dark"] .masca-event-status-badge--rejected {
+  border-color: #854343;
+  color: #ffc2c2;
+  background: #4c2020;
 }
 
-.masca-dashboard__site-link svg,
-.masca-dashboard__admin a svg {
-  width: 1.15rem;
-  height: 1.15rem;
+.masca-admin-loading { min-height: 2rem; }
+
+.masca-admin-loading__bar,
+.masca-admin-route-progress {
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  width: 34%;
+  height: 2px;
+  border-radius: 0 999px 999px 0;
+  background: var(--theme-elevation-500);
+  animation: masca-admin-progress 950ms ease-in-out infinite;
 }
 
-.masca-dashboard__section {
-  display: flex;
-  flex-direction: column;
-  gap: 1.4rem;
+@keyframes masca-admin-progress {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(330%); }
 }
 
-.masca-dashboard__section-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 2rem;
+@media (prefers-reduced-motion: reduce) {
+  .masca-admin-loading__bar,
+  .masca-admin-route-progress { animation: none; }
 }
 
-.masca-dashboard__section-heading h2,
-.masca-dashboard__admin h2 {
-  margin: 0;
-  color: var(--dashboard-text);
-  font-size: 1.65rem;
-  letter-spacing: -0.025em;
+
+/* Actions share one shape; pills are reserved for status indicators. */
+.btn { border-radius: 8px; }
+.masca-action { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-height: 44px; padding: .65rem 1rem; border: 1px solid transparent; border-radius: 8px; color: var(--theme-text); font: inherit; font-size: .9rem; font-weight: 600; text-decoration: none; line-height: 1.3; transition: background-color 160ms ease; }
+.masca-action--primary { background: var(--masca-blue); border-color: var(--masca-blue); color: #fff; }
+.masca-action--primary:hover { background: #151582; }
+.masca-action--secondary { border-color: var(--theme-elevation-300); background: var(--theme-elevation-0); }
+.masca-action--secondary:hover, .masca-action--quiet:hover { background: var(--theme-elevation-100); }
+.masca-action:focus-visible { outline: 3px solid var(--masca-yellow); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .masca-action { transition: none; } }
+
+html[data-theme="dark"] .masca-action--primary, html[data-theme="dark"] .masca-wizard-primary { background: #292780; border-color: #6563bd; }
+html[data-theme="dark"] .masca-action--primary:hover, html[data-theme="dark"] .masca-wizard-primary:hover:not(:disabled) { background: #383694; }
+
+.masca-collection-back { width: 100%; max-width: 96rem; margin: 1rem auto 1.25rem; padding-inline: var(--gutter-h); }
+
+
+[role="dialog"] .masca-collection-back, [role="dialog"] .masca-document-back-link { display: none; }
+
+/* Leave room for theme/account controls when a record has a long title. */
+@media (max-width: 600px) {
+  .app-header__step-nav-wrapper { min-width: 0; flex: 1; overflow: hidden; }
+  .app-header__step-nav { max-width: 100%; }
+  .app-header__step-nav .step-nav__last { min-width: 0; }
+  .app-header__actions-wrapper { flex-shrink: 0; }
 }
 
-.masca-dashboard__section-heading p,
-.masca-dashboard__admin p {
-  max-width: 30rem;
-  margin: 0;
-  color: var(--dashboard-text-muted);
-  line-height: 1.55;
-}
+/* Quiet return navigation across document editors and account settings. */
+.masca-document-back-link { border-color: transparent; background: transparent; color: var(--theme-elevation-650); padding-inline: .25rem; }
+.masca-document-back-link:hover { background: transparent; border-color: transparent; color: var(--theme-text); text-decoration: underline; }
 
-.masca-dashboard__cards {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-.masca-dashboard__card {
-  position: relative;
-  display: flex;
-  min-height: 19rem;
-  flex-direction: column;
-  gap: 1.4rem;
-  overflow: hidden;
-  padding: 1.5rem;
-  border: 1px solid var(--dashboard-border);
-  border-radius: 1.15rem;
-  background: var(--dashboard-surface);
-  box-shadow: 0 7px 24px rgb(1 0 102 / 5%);
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
-}
-
-.masca-dashboard__card:hover {
-  border-color: color-mix(in srgb, var(--card-accent) 55%, var(--dashboard-border));
-  box-shadow: 0 15px 35px rgb(1 0 102 / 10%);
-  transform: translateY(-3px);
-}
-
-.masca-dashboard__card[data-accent="blue"] { --card-accent: var(--dashboard-blue-accent); }
-.masca-dashboard__card[data-accent="yellow"] { --card-accent: var(--dashboard-yellow-accent); }
-.masca-dashboard__card[data-accent="red"] { --card-accent: var(--dashboard-red-accent); }
-
-.masca-dashboard__card::before {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 0.3rem;
-  background: var(--card-accent);
-  content: "";
-}
-
-.masca-dashboard__card-icon {
-  display: grid;
-  width: 3.2rem;
-  height: 3.2rem;
-  place-items: center;
-  border-radius: 0.9rem;
-  color: var(--card-accent);
-  background: color-mix(in srgb, var(--card-accent) 10%, transparent);
-}
-
-.masca-dashboard__card-icon svg {
-  width: 1.7rem;
-  height: 1.7rem;
-}
-
-.masca-dashboard__card-copy {
-  flex: 1;
-}
-
-.masca-dashboard__card-copy h3 {
-  margin: 0 0 0.65rem;
-  color: var(--dashboard-text);
-  font-size: 1.25rem;
-}
-
-.masca-dashboard__card-copy p {
-  margin: 0;
-  color: var(--dashboard-text-muted);
-  line-height: 1.55;
-}
-
-.masca-dashboard__card-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-top: 1.1rem;
-  border-top: 1px solid var(--dashboard-border);
-}
-
-.masca-dashboard__card-actions a,
-.masca-dashboard__admin a {
-  color: var(--dashboard-text);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.masca-dashboard__card-actions a:hover,
-.masca-dashboard__admin a:hover {
-  color: var(--card-accent, var(--masca-blue));
-}
-
-.masca-dashboard__card-actions .masca-dashboard__add-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: var(--card-accent);
-  font-size: 0.85rem;
-}
-
-.masca-dashboard__card-actions a:focus-visible,
-.masca-dashboard__admin a:focus-visible {
-  border-radius: 0.2rem;
-  outline: 3px solid var(--dashboard-blue-accent);
-  outline-offset: 4px;
-}
-
-.masca-dashboard__add-link svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-.masca-dashboard__admin {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  padding: 1.5rem 1.7rem;
-  border: 1px solid var(--dashboard-border);
-  border-radius: 1.15rem;
-  background: var(--dashboard-surface-muted);
-}
-
-.masca-dashboard__admin p {
-  margin-top: 0.45rem;
-}
-
-.masca-dashboard__admin a {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-@media (max-width: 64rem) {
-  .masca-dashboard__cards {
-    grid-template-columns: 1fr;
-  }
-
-  .masca-dashboard__card {
-    min-height: 0;
-  }
-}
-
-@media (max-width: 48rem) {
-  .masca-dashboard {
-    gap: 2rem;
-    padding-top: 1.25rem;
-  }
-
-  .masca-dashboard__hero,
-  .masca-dashboard__section-heading,
-  .masca-dashboard__admin {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .masca-dashboard__hero {
-    min-height: 20rem;
-  }
-
-  .masca-dashboard__section-heading {
-    gap: 0.75rem;
-  }
-}
+/* The dashboard has its own navigation cards and stays full width. */
+.template-default:has(.masca-dashboard-nav-hidden) { grid-template-columns: minmax(0, 1fr); }
+body:has(.masca-dashboard-nav-hidden) .template-default__nav-toggler-wrapper,
+body:has(.masca-dashboard-nav-hidden) .app-header__mobile-nav-toggler { display: none; }
+.masca-nav { border-right: 1px solid var(--theme-elevation-150); background: var(--theme-bg); }
+.masca-nav .nav__scroll { padding: 1.25rem 1rem; }
+.masca-nav__heading { display: flex; align-items: center; justify-content: space-between; min-height: 3rem; margin-bottom: 1.25rem; padding-inline: .75rem; font-weight: 750; letter-spacing: .04em; }
+.masca-nav__heading small { color: var(--theme-elevation-550); font-size: .7rem; font-weight: 500; }
+.masca-nav__heading button { display: grid; place-items: center; min-width: 36px; min-height: 36px; border: 0; border-radius: 8px; background: transparent; color: var(--theme-elevation-650); cursor: pointer; }
+.masca-nav__heading button:hover { background: var(--theme-elevation-100); }
+.masca-nav__links { display: flex; flex-direction: column; flex: 1; gap: 1.75rem; }
+.masca-nav__links h2 { margin: 0 0 .6rem; padding-inline: .85rem; font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--theme-elevation-550); }
+.masca-nav__link { --section-accent: var(--theme-elevation-400); display: flex; align-items: center; gap: .8rem; min-height: 44px; margin-block: .2rem; padding: .55rem .8rem; border: 1px solid transparent; border-radius: 8px; color: var(--theme-text); text-decoration: none; font-size: .9rem; }
+.masca-nav__link:hover { background: var(--theme-elevation-100); }
+.masca-nav__link[aria-current] { font-weight: 650; background: color-mix(in srgb, var(--section-accent) 14%, var(--theme-bg)); border-color: color-mix(in srgb, var(--section-accent) 35%, var(--theme-elevation-100)); }
+.masca-nav__icon { display: grid; place-items: center; width: 29px; height: 29px; border-radius: 7px; background: color-mix(in srgb, var(--section-accent) 25%, var(--theme-bg)); }
+.masca-nav__link > svg { margin-inline: 5px; }
+.masca-nav__account { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--theme-elevation-150); }
+.masca-nav :is(a, button):focus-visible { outline: 2px solid var(--masca-yellow); outline-offset: 3px; }
+/* The sidebar supplies its own close control while open. */
+body:has(.masca-nav.nav--nav-open) .template-default__nav-toggler-wrapper { display: none; }
+/* Account controls have one visible home, including on the dashboard. */
+body:has(.masca-nav.nav--nav-open) .app-header .masca-admin-theme-toggle,
+body:has(.masca-nav.nav--nav-open) .app-header__account { display: none; }
+.masca-nav__theme { padding: .5rem .8rem; }
+.masca-nav__theme .masca-admin-theme-toggle { width: 100%; justify-content: flex-start; min-height: 40px; }
+.collection-list:has(.masca-empty-state) .no-results { display: none; }
+.masca-empty-state { padding: 3rem 1rem; text-align: center; }
+.masca-empty-state h3 { margin: 0 0 .75rem; font-size: 1.25rem; }
+.masca-empty-state p { color: var(--theme-elevation-650); margin-bottom: 1.5rem; }
+.masca-nav__brand { display: inline-flex; align-items: center; gap: .65rem; white-space: nowrap; }
+.masca-nav__brand .masca-admin-icon { width: 1.9rem; height: 1.9rem; }
+.masca-admin-home { display: inline-flex; align-items: center; }
+.masca-admin-home__label { display: none; font-size: 1rem; font-weight: 500; color: var(--theme-text); }
+body:has(.masca-nav.nav--nav-open) .masca-admin-home__mark { display: none; }
+body:has(.masca-nav.nav--nav-open) .masca-admin-home__label { display: inline; }
+body:has(.masca-nav.nav--nav-open) .step-nav__home:has(.masca-admin-home) { width: auto; height: auto; flex-shrink: 0; }

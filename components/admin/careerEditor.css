@@ -1,0 +1,24 @@
+.masca-career-editor .masca-editor-section { display: none; }
+.masca-career-editor[data-step="0"] .masca-career-step:not(.masca-career-step-0),
+.masca-career-editor[data-step="1"] .masca-career-step:not(.masca-career-step-1),
+.masca-career-editor[data-step="2"] .masca-career-step:not(.masca-career-step-2),
+.masca-career-editor[data-step="3"] .masca-career-step { display: none; }
+.masca-career-editor .masca-career-step { animation: masca-step-enter 180ms ease-out backwards; }
+.masca-career-editor > .collection-edit--careers > form > .doc-controls { width: 100%; max-width: 76rem; margin-inline: auto; }
+.masca-career-editor .masca-wizard-footer .form-submit { margin: 0; }
+.masca-career-editor .masca-wizard-footer .btn { margin: 0; min-height: 44px; border-radius: 8px; }
+.masca-career-review { margin-top: 2rem; }
+.masca-career-review__identity h3 { font-size: 2rem; margin: 0 0 .5rem; }
+.masca-career-review__identity p { color: var(--theme-elevation-650); }
+.masca-career-review .masca-overview-section { border-bottom: 1px solid var(--theme-elevation-150); padding-block: 1.25rem; }
+@media (prefers-reduced-motion: reduce) { .masca-career-editor .masca-career-step { animation: none; } }
+
+.masca-career-review__identity { display: block; }
+
+html[data-theme="dark"] .masca-career-editor .masca-wizard-footer .btn--style-primary { background: #292780; border: 1px solid #6563bd; color: #fff; }
+html[data-theme="dark"] .masca-career-editor .masca-wizard-footer .btn--style-primary:hover { background: #383694; }
+
+.masca-career-review p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.masca-career-private-note { padding: 1rem; background: var(--theme-elevation-50); border-radius: 8px; }
+.masca-career-editor .masca-wizard-save-actions { flex-wrap: wrap; }
+.masca-career-editor > .collection-edit--careers > form > .doc-controls .doc-controls__content:has(> .doc-controls__meta:only-child) { display: none; }

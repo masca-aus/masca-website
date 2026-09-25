@@ -1,14 +1,24 @@
+import { adminSearchFields, adminSearchHooks, withAdminSearch } from './features/admin/adminSearch.ts';
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from "next/cache.js";
 
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { resendAdapter } from "@payloadcms/email-resend";
 import { s3Storage } from "@payloadcms/storage-s3";
-import { buildConfig } from "payload";
+import { buildConfig, type Field } from "payload";
+import sharp from "sharp";
 
-import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments";
+import { SPONSOR_STEPS } from './features/sponsors/sponsorEditor.ts';
+import { COMMITTEE_STEPS } from "./features/committee/committeeEditor.ts";
+import { Organisations } from "./collections/Organisations.ts";
+import { EventLifecycle } from "./collections/EventLifecycle.ts";
+import { Careers } from "./collections/Careers.ts";
+import { CareerLifecycle } from "./collections/CareerLifecycle.ts";
+import { Events } from "./collections/Events.ts";
+import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments.js";
+import { editorSection } from "./utils/editorSection.ts";
 
 export function createDatabasePoolConfig(
   connectionString: string | undefined,
@@ -34,9 +44,12 @@ export function createDatabasePoolConfig(
 
   return {
     connectionString: selectedConnectionString,
-    // Payload reserves one client for its reconnect listener, so two is the
-    // smallest pool that still leaves a client available for real queries.
-    max: 2,
+    // Payload holds a reconnect client and a transaction client while media
+    // saves run a separate document-lock query. A two-client pool deadlocks
+    // that save. Leave bounded headroom for these queries and concurrent edits.
+    max: 5,
+    // Exhaustion must fail visibly instead of leaving the CMS submitting forever.
+    connectionTimeoutMillis: 10_000,
   };
 }
 
@@ -97,13 +110,25 @@ const revalidateSponsorPages = () => {
 };
 
 // Ruthlessly minimal Payload setup (issue #3): one shared admin account in a
-// single auth collection. No roles, drafts/versions, or extra collections.
+// single auth collection, with no roles. Events alone use drafts/versions for
+// the moderated public-submission workflow.
 // Supabase is a dumb Postgres host reached through the transaction-mode
 // pooler — no Supabase Auth/RLS/JS client anywhere. Media uploads (issue #4)
 // go to Supabase Storage via its S3-compatible API. The committee directory
 // (issue #5) and the sponsors marquee (issue #6) live in the `committee` and
 // `sponsors` collections and are read by the public site through the Local API.
+// Moderated event submissions live in the isolated `events` collection.
 export default buildConfig({
+  i18n: {
+    translations: {
+      en: {
+        general: { payloadSettings: "Preferences" },
+        version: {
+          versions: "Change history",
+        },
+      },
+    },
+  },
   admin: {
     user: "users",
     meta: {
@@ -113,6 +138,9 @@ export default buildConfig({
       ],
     },
     components: {
+      Nav: "/components/admin/MascaNav#MascaNav",
+      providers: ["/components/admin/AdminNavigationEnhancements#AdminNavigationEnhancements"],
+      actions: ["/components/admin/ThemeToggle#ThemeToggle"],
       graphics: {
         Logo: "/components/admin/MascaBrand#MascaLogo",
         Icon: "/components/admin/MascaBrand#MascaIcon",
@@ -128,10 +156,21 @@ export default buildConfig({
     },
   },
   collections: [
+    Careers,
+    CareerLifecycle,
+    Organisations,
+    EventLifecycle,
     {
       slug: "users",
       admin: {
         useAsTitle: "email",
+        description: "Manage the people who can sign in and update MASCA website content.",
+        components: {
+          beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
+          edit: {
+            beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
+          },
+        },
       },
       access: {
         // Payload <=3.88 permits any authenticated user to unlock another
@@ -146,6 +185,16 @@ export default buildConfig({
     },
     {
       slug: "media",
+      admin: {
+        useAsTitle: "filename",
+        description: "Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.",
+        components: {
+          beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
+          edit: {
+            beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
+          },
+        },
+      },
       // Anyone may read media metadata (the files themselves are public-bucket
       // objects anyway); only the logged-in admin can create/update/delete.
       access: {
@@ -154,43 +203,104 @@ export default buildConfig({
       fields: [
         {
           name: "alt",
+          label: "Alt text",
           type: "text",
           required: true,
+          admin: {
+            description: "Describe the image’s useful content in a short sentence. For a portrait, include the person’s name; for a logo, use the organisation’s name. Avoid filenames or ‘image of’.",
+          },
         },
       ],
       upload: {
         // Images only — a committee member cannot upload PDFs, zips, etc.
         mimeTypes: ["image/*"],
-        // Crop/focal-point UIs need sharp, which we deliberately don't ship.
+        // The CMS uses this compact derivative in list and relation previews
+        // instead of fetching a full-size original image for every row.
+        // Payload resolves thumbnailURL before the storage plugin rewrites
+        // size URLs, so build it from the filename instead of a local URL.
+        adminThumbnail: ({ doc }) => {
+          const sizes = doc.sizes as { "admin-preview"?: { filename?: string } } | undefined;
+          const filename = sizes?.["admin-preview"]?.filename || doc.filename;
+          return typeof filename === 'string' && filename ? publicFileURL(filename) : null;
+        },
+        imageSizes: [
+          {
+            name: "admin-preview",
+            width: 480,
+            height: 320,
+            fit: "inside",
+            withoutEnlargement: true,
+            formatOptions: {
+              format: "webp",
+              options: { quality: 75 },
+            },
+          },
+        ],
+        // This directory needs predictable portraits, so editors do not crop
+        // or choose focal points from the CMS.
         crop: false,
         focalPoint: false,
       },
     },
     {
       slug: "committee",
+      versions: { maxPerDoc: 0 },
       admin: {
         useAsTitle: "name",
+        listSearchableFields: adminSearchFields.committee, baseFilter: withAdminSearch("committee"),
+        hideAPIURL: true,
         defaultColumns: ["name", "role", "department", "year"],
+        description:
+          "Create and update committee profiles step by step. Changes appear on the website when you Save.",
+        components: {
+          beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink", "/components/admin/AdminSearchHelp#AdminSearchHelp"],
+          edit: {
+            beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
+            SaveButton: "/components/admin/CommitteeEditor#CommitteeSaveControl",
+          },
+          views: { edit: { default: { Component: "/components/admin/CommitteeEditor#CommitteeEditorView" }, versions: { tab: { label: "Change history" } } } },
+        },
       },
       // Anyone may read (the public site renders from this collection); only
       // the logged-in admin can create/update/delete.
       access: {
         read: () => true,
+        readVersions: ({ req }) => Boolean(req.user),
       },
-      // Drag-and-drop ordering in the admin list view via Payload's hidden
-      // `_order` key. The sequence is global across all years — filter the
-      // list to one year before dragging; the public page filters per year,
-      // so per-year relative order is all that matters.
-      orderable: true,
-      defaultSort: "_order",
+      defaultSort: "name",
       // Fields mirror the shape the committee page has always rendered, and
       // are validated here so bad entries are rejected at save time.
       fields: [
+        // Retain stored ordering for existing public pages without exposing reordering.
+        { name: "_order", type: "text", index: true, admin: { hidden: true, readOnly: true, disableListColumn: true, disableListFilter: true, disableBulkEdit: true } },
+        { name: "committeeWizardHeader", type: "ui", admin: { components: { Field: "/components/admin/CommitteeEditor#CommitteeEditorHeader" }, disableListColumn: true, disableBulkEdit: true } },
+        editorSection({
+          title: "Identity",
+          description: "Introduce the member as they should appear in the public directory.",
+        }),
         {
           name: "name",
           type: "text",
           required: true,
         },
+        {
+          name: "university",
+          type: "text",
+          admin: {
+            description: 'Full name, e.g. "Monash University". Optional.',
+          },
+        },
+        {
+          name: "course",
+          type: "text",
+          admin: {
+            description: 'Degree or course name, e.g. "Bachelor of Commerce". Optional.',
+          },
+        },
+        editorSection({
+          title: "Role and term",
+          description: "Choose the position, department and committee year. List order is managed by dragging members in the committee list.",
+        }),
         {
           name: "role",
           type: "text",
@@ -211,26 +321,6 @@ export default buildConfig({
           },
         },
         {
-          name: "university",
-          type: "text",
-          admin: {
-            description: 'Full name, e.g. "Monash University". Optional.',
-          },
-        },
-        {
-          name: "course",
-          type: "text",
-          admin: {
-            description: 'Degree or course name, e.g. "Bachelor of Commerce". Optional.',
-          },
-        },
-        {
-          name: "portrait",
-          type: "upload",
-          relationTo: "media",
-          required: true,
-        },
-        {
           name: "year",
           type: "text",
           required: true,
@@ -242,8 +332,31 @@ export default buildConfig({
               'Committee term, e.g. "2026/2027" — drives the year tabs on the page.',
           },
         },
+        editorSection({
+          title: "Portrait and profile",
+          description: "Choose the member portrait and add an optional LinkedIn profile.",
+        }),
+        {
+          name: "portrait",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+          displayPreview: true,
+          admin: {
+            description: "Choose an existing portrait or upload an image up to 5 MB. Include the member’s name in its alt text.",
+          },
+        },
+        {
+          name: "bio",
+          type: "textarea",
+          admin: {
+            description:
+            "Shown in the expanded modal on the committee page. Optional — the modal simply omits it when empty.",
+          },
+        },
         {
           name: "linkedin_url",
+          label: "LinkedIn profile",
           type: "text",
           validate: (value: string | null | undefined) => {
             if (!value) return true;
@@ -257,16 +370,13 @@ export default buildConfig({
             }
           },
         },
-        {
-          name: "bio",
-          type: "textarea",
-          admin: {
-            description:
-              "Shown in the expanded modal on the committee page. Optional — the modal simply omits it when empty.",
-          },
-        },
-      ],
+        { name: "committeeWizardFooter", type: "ui", admin: { components: { Field: "/components/admin/CommitteeEditor#CommitteeEditorFooter" }, disableListColumn: true, disableBulkEdit: true } },
+      ].map((field) => {
+        const step = COMMITTEE_STEPS.findIndex(section => (section.fields as readonly string[]).includes(field.name ?? ""));
+        return step < 0 ? field : { ...field, admin: { ...field.admin, className: `masca-committee-step masca-committee-step-${step}` } };
+      }) as Field[],
       hooks: {
+        ...adminSearchHooks,
         afterChange: [revalidateCommitteePages],
         afterDelete: [revalidateCommitteePages],
       },
@@ -275,7 +385,18 @@ export default buildConfig({
       slug: "sponsors",
       admin: {
         useAsTitle: "name",
+        listSearchableFields: adminSearchFields.sponsors, baseFilter: withAdminSearch("sponsors"),
+        hideAPIURL: true,
         defaultColumns: ["name", "date"],
+        description: "Add sponsor details, choose a logo and review before saving. Changes appear on the homepage when saved.",
+        components: {
+          beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink", "/components/admin/AdminSearchHelp#AdminSearchHelp"],
+          views: { edit: { default: { Component: "/components/admin/SponsorEditor#SponsorEditorView" } } },
+          edit: {
+            SaveButton: "/components/admin/SponsorEditor#SponsorSaveControl",
+            beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
+          },
+        },
       },
       // Anyone may read (the public site renders the marquee from this
       // collection); only the logged-in admin can create/update/delete.
@@ -287,6 +408,11 @@ export default buildConfig({
       // Fields mirror the shape the marquee has always rendered, but the logo
       // is now an upload into Media instead of a hand-pasted URL.
       fields: [
+        { name: "sponsorEditorHeader", type: "ui", admin: { components: { Field: "/components/admin/SponsorEditor#SponsorEditorHeader" }, disableListColumn: true, disableBulkEdit: true } },
+        editorSection({
+          title: "Sponsor details",
+          description: "The sponsor name and date shown with MASCA's partner recognition.",
+        }),
         {
           name: "name",
           type: "text",
@@ -296,26 +422,41 @@ export default buildConfig({
           },
         },
         {
-          name: "logo",
-          type: "upload",
-          relationTo: "media",
-          required: true,
-        },
-        {
           name: "date",
           type: "date",
           required: true,
           admin: {
             description:
-              "When they came on board — newest sponsors lead the marquee.",
+            "When they came on board — newest sponsors lead the marquee.",
           },
         },
-      ],
+        editorSection({
+          title: "Logo",
+          description: "Choose the sponsor logo that will appear on the MASCA homepage.",
+        }),
+        {
+          name: "logo",
+          type: "upload",
+          relationTo: "media",
+          required: true,
+          displayPreview: true,
+          admin: {
+            description: "Choose an existing logo or upload an image up to 5 MB. A transparent background works best.",
+          },
+        },
+        { name: "sponsorEditorFooter", type: "ui", admin: { components: { Field: "/components/admin/SponsorEditor#SponsorEditorFooter" }, disableListColumn: true, disableBulkEdit: true } },
+      ].map(field => {
+        const name = 'name' in field ? field.name : '';
+        const step = SPONSOR_STEPS.findIndex(section => (section.fields as readonly string[]).includes(name ?? ''));
+        return step < 0 ? field : { ...field, admin: { ...field.admin, className: `masca-sponsor-step masca-sponsor-step-${step}` } };
+      }) as Field[],
       hooks: {
+        ...adminSearchHooks,
         afterChange: [revalidateSponsorPages],
         afterDelete: [revalidateSponsorPages],
       },
     },
+    Events,
   ],
   db: postgresAdapter({
     // Transaction-mode pooler connection string — required on Vercel
@@ -364,6 +505,7 @@ export default buildConfig({
     }),
   ],
   secret: process.env.PAYLOAD_SECRET || "",
+  sharp,
   telemetry: false,
   upload: {
     // Hard 5 MB cap: oversized uploads get a 413 instead of a truncated file.

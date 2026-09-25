@@ -1,0 +1,70 @@
+/* Small, interruptible transitions: no delayed actions or layout animation. */
+:root {
+  --masca-motion-ease: cubic-bezier(.2, .8, .2, 1);
+  --masca-motion-fast: 140ms;
+  --masca-motion-normal: 220ms;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .masca-status-action__control {
+    transition: background-color var(--masca-motion-normal) var(--masca-motion-ease),
+      color var(--masca-motion-normal) var(--masca-motion-ease),
+      border-color var(--masca-motion-normal) var(--masca-motion-ease);
+  }
+  .masca-status-action__trigger { transition: opacity var(--masca-motion-fast) ease; }
+  .masca-status-action__label { display: inline-block; animation: masca-status-label-in 180ms var(--masca-motion-ease); }
+  .masca-status-action__chevron { transition: transform var(--masca-motion-fast) var(--masca-motion-ease); }
+  .masca-status-action__control:has([aria-expanded="true"]) .masca-status-action__chevron { transform: rotate(180deg); }
+  .masca-event-menu[role="menu"] { animation: masca-menu-reveal 160ms var(--masca-motion-ease); }
+  .masca-event-menu button,
+  .masca-nav__link,
+  .masca-nav__heading button,
+  .masca-admin-theme-toggle,
+  .masca-section-toolbar a,
+  .masca-document-back-link,
+  .masca-dashboard__shortcuts a {
+    transition: background-color var(--masca-motion-fast) ease,
+      border-color var(--masca-motion-fast) ease, color var(--masca-motion-fast) ease;
+  }
+  .template-default .btn,
+  .template-default .masca-action,
+  .masca-admin-theme-toggle,
+  .masca-wizard-primary,
+  .masca-wizard-secondary {
+    transition: background-color var(--masca-motion-fast) ease,
+      border-color var(--masca-motion-fast) ease, box-shadow var(--masca-motion-fast) ease,
+      transform 100ms var(--masca-motion-ease);
+  }
+  .template-default .btn:active:not(:disabled),
+  .masca-action:active:not(:disabled),
+  .masca-admin-theme-toggle:active:not(:disabled),
+  .masca-wizard-primary:active:not(:disabled),
+  .masca-wizard-secondary:active:not(:disabled) { transform: scale(.985); }
+  .template-default .table tbody tr { transition: background-color var(--masca-motion-fast) ease; }
+  .masca-empty-state { animation: masca-surface-in var(--masca-motion-normal) var(--masca-motion-ease); }
+  .masca-status-action__error,
+  .masca-status-action__feedback { animation: masca-surface-in 160ms var(--masca-motion-ease); }
+}
+
+@keyframes masca-status-label-in {
+  from { opacity: .25; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes masca-menu-reveal {
+  from { opacity: 0; transform: scale(.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes masca-surface-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Also cover the native sidebar and editor animations. Keep feedback visible. */
+@media (prefers-reduced-motion: reduce) {
+  .template-default, .template-default *, .template-default *::before, .template-default *::after,
+  .masca-event-menu, .masca-event-menu *, .masca-status-action__label {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

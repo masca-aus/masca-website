@@ -1,0 +1,39 @@
+/* Server-rendered dashboard: the same open layout and hierarchy as the wizard. */
+.masca-dashboard { width: min(100%, 76rem); padding: 2.5rem var(--gutter-h) 4rem; color: var(--theme-text); display: flex; flex-direction: column; gap: 3rem; }
+.masca-dashboard h1, .masca-dashboard h2, .masca-dashboard h3, .masca-dashboard p { margin: 0; }
+.masca-dashboard__heading { align-items: start; padding-bottom: 2rem; border-bottom: 3px solid #ffcc00; }
+.masca-dashboard__eyebrow { display: block; font-size: .75rem; letter-spacing: .07em; font-weight: 650; color: var(--theme-elevation-650); margin-bottom: .75rem; }
+.masca-dashboard h1 { font-size: clamp(2rem, 4vw, 2.6rem); line-height: 1.15; letter-spacing: -.025em; font-weight: 700; }
+.masca-dashboard h2 { font-size: 1.6rem; font-weight: 650; }
+.masca-dashboard h3 { font-size: 1.05rem; font-weight: 650; }
+.masca-dashboard p { color: var(--theme-elevation-650); line-height: 1.6; margin-top: .5rem; max-width: 60ch; }
+.masca-dashboard__section-heading { margin-bottom: 1.5rem; }
+.masca-dashboard__shortcuts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-block: 1px solid var(--theme-elevation-200); }
+.masca-dashboard__shortcuts a { display: flex; align-items: center; gap: 1rem; padding: 1.5rem 1rem; color: inherit; text-decoration: none; border-radius: 8px; }
+.masca-dashboard__shortcuts a + a { border-left: 1px solid var(--theme-elevation-200); }
+.masca-dashboard__shortcuts strong { font-size: 2rem; font-weight: 650; line-height: 1; font-variant-numeric: tabular-nums; }
+.masca-dashboard__shortcuts a > span:first-of-type { font-weight: 600; flex: 1; }
+.masca-dashboard small { display: block; font-size: .8rem; font-weight: 400; color: var(--theme-elevation-650); line-height: 1.5; margin-top: .35rem; }
+.masca-dashboard__content-row { padding: 1.25rem 0; border-bottom: 1px solid var(--theme-elevation-150); }
+.masca-dashboard__content-row p { font-size: .9rem; }
+.masca-dashboard__actions { display: flex; gap: .5rem; flex-shrink: 0; }
+.masca-dashboard footer { padding-top: 0; border-bottom: 0; }
+@media (max-width: 1000px) { .masca-dashboard__shortcuts { grid-template-columns: 1fr; } .masca-dashboard__shortcuts a + a { border-left: 0; border-top: 1px solid var(--theme-elevation-150); } }
+
+.masca-dashboard__content-label { display: flex; align-items: center; gap: 1.1rem; }
+.masca-dashboard__content-label > svg { flex-shrink: 0; color: var(--theme-elevation-600); }
+
+.masca-dashboard__heading, .masca-dashboard__section-heading, .masca-dashboard__content-row { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; }
+.masca-dashboard__heading { align-items: start; }
+.masca-dashboard__shortcuts a:hover { background: var(--theme-elevation-50); }
+.masca-dashboard__shortcuts a:focus-visible { outline: 3px solid #ffcc00; outline-offset: 3px; }
+@media (max-width: 600px) { .masca-dashboard { gap: 2rem; padding-top: 1.5rem; } .masca-dashboard__heading, .masca-dashboard__section-heading, .masca-dashboard__content-row { flex-direction: column; align-items: stretch; gap: 1rem; } .masca-dashboard__heading > a { align-self: start; } .masca-dashboard__actions { flex-wrap: wrap; } }
+
+/* Match the section colours used by each editor's progress bar. */
+.masca-dashboard__content-row[data-area="events"] { --section-accent: #ef476f; }
+.masca-dashboard__content-row[data-area="committee"] { --section-accent: #9bdd9b; }
+.masca-dashboard__content-row[data-area="careers"] { --section-accent: #ffcc00; }
+.masca-dashboard__content-row[data-area="sponsors"] { --section-accent: #86b8ef; }
+.masca-dashboard__content-row[data-area] { border-inline-start: 3px solid var(--section-accent, transparent); padding-inline: 1rem; }
+.masca-dashboard__content-row[data-area] .masca-dashboard__content-label > svg { box-sizing: content-box; padding: .65rem; border-radius: 10px; background: var(--section-accent, var(--theme-elevation-100)); }
+.masca-dashboard__content-row:is([data-area="events"], [data-area="committee"], [data-area="careers"], [data-area="sponsors"]) .masca-dashboard__content-label > svg { color: #202038; }

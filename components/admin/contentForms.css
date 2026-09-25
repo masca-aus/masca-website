@@ -1,0 +1,22 @@
+/* Keep these short native forms readable without changing Payload controls. */
+:is(.collection-edit--committee, .collection-edit--sponsors, .collection-edit--media, .collection-edit--organisations, .collection-edit--users) .document-fields {
+  max-width: 64rem;
+}
+:is(.collection-edit--committee, .collection-edit--sponsors) .masca-editor-section {
+  margin-top: 2rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+}
+:is(.collection-edit--committee, .collection-edit--sponsors) .masca-editor-section h2 {
+  font-size: 1.25rem;
+}
+:is(.collection-edit--committee, .collection-edit--sponsors, .collection-edit--media, .collection-edit--organisations, .collection-edit--users) .field-description {
+  line-height: 1.6;
+  max-width: 70ch;
+}
+@media (max-width: 600px) {
+  :is(.collection-edit--committee, .collection-edit--sponsors) .masca-editor-section {
+    padding: 1rem;
+    margin-top: 1.5rem;
+  }
+}

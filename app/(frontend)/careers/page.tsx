@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import Button from "@/components/Button";
-import { getCareerBoard } from "@/utils/careersSource";
+import { getCMSCareerBoard } from "@/features/careers/publicCareers";
 import { pageMetadata } from "@/utils/seo";
 import BoardEmpty from "./BoardEmpty";
 import CareerBoard from "./CareerBoard";
@@ -13,14 +13,11 @@ export const metadata: Metadata = pageMetadata({
   path: "/careers",
 });
 
-// The sheet fetch already revalidates every 5 minutes; this makes the page
-// re-check on the same clock even when the sheet isn't configured yet.
+// Refresh date-based expiry even when no editor has changed a role.
 export const revalidate = 300;
 
 export default async function CareersPage() {
-  // Throws when the sheet can't be read, so ISR keeps serving the last good
-  // page (see utils/careersSource.ts); a missing env var is a normal state.
-  const board = await getCareerBoard();
+  const board = await getCMSCareerBoard();
 
   return (
     <main id="main">
