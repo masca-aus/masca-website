@@ -1,0 +1,37 @@
+.masca-account-page { display: contents; }
+.masca-account-page .doc-header,
+.masca-account-page .collection-edit--users > form > .doc-controls,
+.masca-account-page .document-fields {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+}
+.masca-account-page .doc-controls__meta { display: none; }
+.masca-account-page .auth-fields {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  gap: 1.5rem;
+}
+.masca-account-page .auth-fields__controls { gap: .75rem; }
+.masca-account-page .auth-fields__controls .btn,
+.masca-account-page .payload-settings .btn {
+  min-height: 44px;
+  border: 1px solid var(--theme-elevation-300);
+  border-radius: 8px;
+  background: var(--theme-elevation-0);
+  color: var(--theme-text);
+  box-shadow: none;
+}
+.masca-account-page .payload-settings {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--theme-elevation-150);
+}
+.masca-account-page .payload-settings h3 { font-size: 1.5rem; font-weight: 650; }
+.masca-account-page .auth-fields__controls .btn:hover,
+.masca-account-page .payload-settings .btn:hover { background: var(--theme-elevation-100); }
+@media (max-width: 600px) {
+  .masca-account-page .doc-header h1 { overflow-wrap: anywhere; }
+  .masca-account-page .auth-fields__controls { flex-wrap: wrap; }
+}

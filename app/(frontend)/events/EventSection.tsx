@@ -66,7 +66,7 @@ export default function EventList({ events, chapters }: { events: Event[]; chapt
       </fieldset>
 
       {filtered.length === 0 ? (
-        <p className="text-center text-gray-500">No upcoming events for this chapter.</p>
+        <p className="text-center text-gray-500">No events for this chapter.</p>
       ) : (
         <div 
           ref={gridRef}

@@ -12,7 +12,8 @@ describe("database connection pooling", () => {
     ).toEqual({
       connectionString:
         "postgresql://user:pass@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres",
-      max: 2,
+      max: 5,
+      connectionTimeoutMillis: 10_000,
     });
   });
 
@@ -24,7 +25,8 @@ describe("database connection pooling", () => {
     ).toEqual({
       connectionString:
         "postgresql://user:pass@aws-0-ap-southeast-2.pooler.supabase.com:6543/postgres",
-      max: 2,
+      max: 5,
+      connectionTimeoutMillis: 10_000,
     });
   });
 
@@ -33,7 +35,8 @@ describe("database connection pooling", () => {
       createDatabasePoolConfig("postgresql://user:pass@database.example.com:5432/app"),
     ).toEqual({
       connectionString: "postgresql://user:pass@database.example.com:5432/app",
-      max: 2,
+      max: 5,
+      connectionTimeoutMillis: 10_000,
     });
   });
 
@@ -45,14 +48,16 @@ describe("database connection pooling", () => {
     ).toEqual({
       connectionString:
         "postgresql://user:pass@aws-0-ap-southeast-2.pooler.supabase.com:6543/postgres",
-      max: 2,
+      max: 5,
+      connectionTimeoutMillis: 10_000,
     });
   });
 
   it("does not invent a connection string when DATABASE_URI is absent", () => {
     expect(createDatabasePoolConfig(undefined)).toEqual({
       connectionString: undefined,
-      max: 2,
+      max: 5,
+      connectionTimeoutMillis: 10_000,
     });
   });
 });

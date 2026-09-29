@@ -137,8 +137,9 @@ describe("CareerBoard (static render)", () => {
     expect(html).toContain("Featured");
     expect(html).toContain("Penultimate");
     expect(html).toContain("Rolling");
-    expect(html).toContain("Carlton");
-    expect(html).toContain("ACT · Remote");
+    // Cards keep location details in the selected role panel.
+    expect(html).not.toContain("Carlton");
+    expect(html).not.toContain("ACT · Remote");
     // The country (earth icon) is a row in the details panel only, never on a card.
     expect(html).toContain("Australia");
     expect(html.match(/lucide-earth/g)).toHaveLength(1);
@@ -195,6 +196,7 @@ describe("JobDetails", () => {
     expect(html).not.toContain('href="mailto:jobs@kopi.example" target');
     expect(html).toContain("Check working rights");
     expect(html).toContain("Rolling applications");
+    expect(html).toContain("Carlton, Victoria");
   });
 
   it("explains a citizens-only role and lists pay and locations", () => {
@@ -243,7 +245,8 @@ describe("BoardEmpty", () => {
   it("keeps configuration problems out of the public copy", () => {
     const html = renderToStaticMarkup(<BoardEmpty variant="unconfigured" />);
     expect(html).toContain("still being pinned up");
-    expect(html).toContain("/careers/health");
+    expect(html).toContain("Manage opportunities in the CMS");
+    expect(html).not.toContain("/careers/health");
     expect(html).not.toMatch(/google|sheet id|404|status|readme/i);
   });
 

@@ -69,7 +69,7 @@ export default function BoardEmpty({
       <p className="max-w-md text-gray-700">{body}</p>
       {actions && <div className="mt-2 flex flex-wrap justify-center gap-4">{actions}</div>}
       {(variant === "unconfigured" || variant === "unavailable") && (
-        <p className="text-caption text-gray-700">Committee? See /careers/health.</p>
+        <p className="text-caption text-gray-700">Committee? Manage opportunities in the CMS.</p>
       )}
     </div>
   )

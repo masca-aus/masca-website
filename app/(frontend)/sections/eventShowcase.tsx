@@ -1,12 +1,12 @@
 import Button from "@/components/Button"
-import { CHAPTERS, tryGetUpcomingEvents } from "@/utils/events"
+import { CMS_EVENT_CHAPTERS, getApprovedUpcomingEvents } from "@/features/events/publicEvents"
 
 import EventShowcaseGrid from "./eventShowcaseGrid"
 
 export default async function EventShowcaseSection() {
   // An unreachable calendar reads as "nothing right now" here; the /events
   // page is where the distinction is worth spelling out.
-  const events = ((await tryGetUpcomingEvents()) ?? []).slice(0, 3)
+  const events = (await getApprovedUpcomingEvents().catch(() => [])).slice(0, 3)
 
   return (
     // Soft blue tint so the band reads as its own section after the white
@@ -27,7 +27,7 @@ export default async function EventShowcaseSection() {
           <p className="text-gray-500">No upcoming events right now — check back soon!</p>
         ) : (
           <>
-            <EventShowcaseGrid events={events} chapters={CHAPTERS} />
+            <EventShowcaseGrid events={events} chapters={CMS_EVENT_CHAPTERS} />
             <div className="flex justify-end">
               <Button href="/events" variant="outline">
                 More Events <span aria-hidden>&rarr;</span>

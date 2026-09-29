@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation"
 
 import Button from "@/components/Button"
 
-// Route error boundary. In production the page is prerendered, and a sheet
-// that can't be read at build time renders the "unavailable" state instead
-// of throwing, so this mostly appears in development or after a cache purge.
-// The message stays in MASCA's voice; the cause is in the logs.
+// CMS read failures preserve the cached page during background revalidation.
+// This boundary handles an uncached request; the cause stays in server logs.
 
 export default function CareersError({
   error,

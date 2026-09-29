@@ -57,11 +57,11 @@ describe("committee collection (Payload-served committee page)", () => {
     expect("defaultValue" in department && department.defaultValue).toBe("unassigned");
   });
 
-  it("orders by drag-and-drop instead of a manual order field", async () => {
+  it("uses a compact alphabetical list without reordering", async () => {
     const committee = await getCommitteeCollection();
-    expect(committee.orderable).toBe(true);
-    expect(committee.defaultSort).toBe("_order");
-    // The old numeric field is gone — `_order` is injected by Payload itself.
+    expect(committee.orderable).not.toBe(true);
+    expect(committee.defaultSort).toBe("name");
+    // No manual order field is exposed.
     const order = committee.fields.find((f) => "name" in f && f.name === "order");
     expect(order).toBeUndefined();
   });

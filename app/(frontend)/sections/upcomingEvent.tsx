@@ -1,5 +1,5 @@
 import Button from "@/components/Button"
-import { tryGetUpcomingEvents } from "@/utils/events"
+import { getApprovedUpcomingEvents } from "@/features/events/publicEvents"
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -22,7 +22,7 @@ function dateRange(startLocal: string, endLocal: string) {
 }
 
 export default async function UpcomingEvent() {
-  const [event] = (await tryGetUpcomingEvents()) ?? []
+  const [event] = await getApprovedUpcomingEvents().catch(() => [])
   if (!event) return null
 
   const location = event.venue?.name ?? "Online"

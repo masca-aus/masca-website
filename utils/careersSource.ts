@@ -1,21 +1,5 @@
-// Careers board — fetching the Google Sheet (server only).
-//
-// The sheet is shared "Anyone with the link can view" and read as CSV through
-// Google's export endpoint, keyed by the spreadsheet ID and the tab's gid (a
-// gid survives the tab being renamed; a tab name does not). The page that
-// calls getCareerBoard() stays statically rendered: the fetch carries a
-// 5-minute revalidate window, so a row added to the sheet shows on the live
-// site within five minutes without a redeploy.
-//
-// Two entry points:
-// - loadCareerBoard() never throws. It returns a status plus an officer-facing
-//   explanation and the full list of hidden rows and warnings — this is what
-//   /careers/health renders.
-// - getCareerBoard() is for the page. A missing CAREERS_SHEET_ID is a normal
-//   "unconfigured" result (preview deploys still build); anything else that
-//   is not "ok" THROWS on purpose: when a background revalidation throws,
-//   Next keeps serving the last good page, so students see slightly stale
-//   roles rather than an error, and the Vercel log names the cause.
+// Legacy Google Sheets reader retained for one-time import and source diagnostics.
+// The public careers page now reads Payload; it does not call this module.
 
 import {
   CareerSheetShapeError,
@@ -24,8 +8,8 @@ import {
   parseSheet,
   type HiddenRow,
   type Job,
-} from "./careers"
-import { parseCsv } from "./csv"
+} from "./careers.ts"
+import { parseCsv } from "./csv.ts"
 
 /** Seconds between background refreshes of the sheet. */
 export const CAREERS_REVALIDATE_SECONDS = 300

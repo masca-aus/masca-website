@@ -27,6 +27,14 @@ vi.mock("@payloadcms/db-postgres", async () => {
 import configPromise from "@payload-config";
 
 describe("payload config", () => {
+  it("adds a persistent light and dark mode toggle to the admin top bar", async () => {
+    const config = await configPromise;
+
+    expect(config.admin.components?.actions).toContain(
+      "/components/admin/ThemeToggle#ThemeToggle",
+    );
+  });
+
   it("mounts the admin panel at /admin backed by the users auth collection", async () => {
     const config = await configPromise;
     expect(config.routes.admin).toBe("/admin");
@@ -44,16 +52,47 @@ describe("payload config", () => {
     expect(config.admin.components.views.dashboard.Component).toBeTruthy();
   });
 
-  it("defines exactly four collections: auth-enabled users, media, committee, sponsors", async () => {
+  it("registers the CMS collections and keeps users as the auth collection", async () => {
     const config = await configPromise;
     // Sanitization adds Payload-internal collections (payload-preferences,
     // payload-migrations, ...); beyond those there must only be `users`,
-    // `media` (issue #4), `committee` (issue #5) and `sponsors` (issue #6).
+    // `media` (issue #4), `committee` (issue #5), `sponsors` (issue #6),
+    // the moderated `events` collection, and the organisation directory.
     const ours = config.collections.filter((c) => !c.slug.startsWith("payload-"));
-    expect(ours.map((c) => c.slug).sort()).toEqual(["committee", "media", "sponsors", "users"]);
+    expect(ours.map((c) => c.slug).sort()).toEqual([
+      "career-lifecycle",
+      "careers",
+      "committee",
+      "event-lifecycle",
+      "events",
+      "media",
+      "organisations",
+      "sponsors",
+      "users",
+    ]);
     const users = ours.find((c) => c.slug === "users");
     expect(users?.auth).toBeTruthy();
     expect(users?.auth.disableLocalStrategy).toBeFalsy();
+  });
+
+  it("generates compact WebP previews for newly uploaded media in the CMS", async () => {
+    const config = await configPromise;
+    const media = config.collections.find((collection) => collection.slug === "media");
+
+    const thumbnail = media?.upload && typeof media.upload === "object" ? media.upload.adminThumbnail : undefined;
+    expect(thumbnail).toBeTypeOf('function');
+    if (typeof thumbnail === 'function') {
+      expect(thumbnail({ doc: { filename: 'poster.png', sizes: { 'admin-preview': { filename: 'poster-240x320.webp' } } } })).toMatch(/\/object\/public\/[^/]+\/poster-240x320\.webp$/);
+      expect(thumbnail({ doc: { filename: 'legacy.png' } })).toMatch(/\/object\/public\/[^/]+\/legacy\.png$/);
+    }
+    expect(media?.upload && typeof media.upload === "object" ? media.upload.imageSizes : undefined).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "admin-preview",
+          width: 480,
+        }),
+      ]),
+    );
   });
 
   it("only allows an authenticated user to unlock their own account", async () => {
@@ -73,9 +112,9 @@ describe("payload config", () => {
     expect(config.db.name).toBe("postgres");
   });
 
-  it("limits each serverless instance to two database connections", async () => {
+  it("reserves bounded capacity for saves and their document-lock queries", async () => {
     await configPromise;
-    expect(capturedDatabasePool.max).toBe(2);
+    expect(capturedDatabasePool.max).toBe(5);
   });
 
   it("uses Supabase transaction mode for website and CMS traffic", async () => {
@@ -104,4 +143,13 @@ describe("payload config", () => {
     const config = await configPromise;
     expect(config.secret).toBe("test-secret");
   });
+});
+
+it('keeps event publication options unique when Payload adds its built-in draft fields', async () => {
+  const config = await configPromise;
+  const events = config.collections.find(collection => collection.slug === 'events');
+  const status = events?.fields.find(field => 'name' in field && field.name === '_status');
+  if (!status || status.type !== 'select') throw new Error('Missing publication status');
+  const values = status.options.map(option => typeof option === 'string' ? option : option.value);
+  expect(values).toEqual(['draft', 'published']);
 });

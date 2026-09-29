@@ -1,0 +1,103 @@
+.masca-event-editor { --wizard-accent: var(--theme-text); }
+.masca-event-editor .document-fields { max-width: 76rem; }
+/* Share the form's width and native gutters, leaving the app navigation full-width. */
+.doc-header:has(~ .masca-event-editor),
+.masca-event-editor > .collection-edit--events > form > .doc-controls {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+}
+.masca-event-editor .masca-event-section, .masca-event-editor .masca-editor-section { display: none; }
+.masca-event-editor[data-step="0"] .masca-event-step:not(.masca-event-step-0),
+.masca-event-editor[data-step="1"] .masca-event-step:not(.masca-event-step-1),
+.masca-event-editor[data-step="2"] .masca-event-step:not(.masca-event-step-2),
+.masca-event-editor[data-step="3"] .masca-event-step:not(.masca-event-step-3),
+.masca-event-editor[data-step="4"] .masca-event-step:not(.masca-event-step-4) { display: none; }
+.masca-wizard-header { margin-bottom: 2rem; }
+.masca-wizard-heading-row { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
+.masca-wizard-eyebrow { font-size: .75rem; font-weight: 700; letter-spacing: .04em; }
+.masca-wizard-count { color: var(--theme-elevation-650); font-size: .8rem; }
+.masca-wizard-progress-label { display: flex; align-items: center; gap: .75rem; }
+.masca-wizard-badge { font-size: .75rem; font-weight: 650; padding: .25rem .6rem; border-radius: 999px; background: var(--theme-elevation-100); }
+.masca-wizard-badge[data-live="true"] { color: #176842; background: #eaf7ee; }
+.masca-wizard-text-button { font: inherit; font-size: .85rem; font-weight: 550; min-height: 44px; padding: .5rem; border: 0; border-radius: 8px; color: var(--theme-text); background: transparent; cursor: pointer; white-space: nowrap; }
+.masca-wizard-text-button:hover:not(:disabled) { background: var(--theme-elevation-100); }
+.masca-wizard-steps { list-style: none; padding: .5rem 0; margin: .75rem 0 0; border-bottom: 1px solid var(--theme-elevation-150); }
+.masca-wizard-steps button { display: flex; align-items: center; gap: .75rem; width: 100%; min-height: 44px; padding: .6rem .75rem; border: 0; background: transparent; color: var(--theme-text); border-radius: 8px; font: inherit; font-size: .85rem; text-align: left; cursor: pointer; }
+.masca-wizard-step-number { width: 1.5rem; text-align: center; color: var(--theme-elevation-650); }
+.masca-wizard-steps button[aria-current="step"] { background: var(--theme-elevation-100); font-weight: 650; }
+.masca-wizard-steps button[aria-current="step"] .masca-wizard-step-number { color: var(--theme-text); }
+.masca-wizard-intro { margin-top: 2rem; }
+.doc-header:has(~ .masca-event-editor) .doc-header__after-header { display: none; }
+.masca-wizard-intro h2:focus { outline: none; }
+.masca-wizard-header h2 { font-size: 1.65rem; margin: 0 0 .5rem; }
+.masca-wizard-header > p, .masca-wizard-intro p { color: var(--theme-elevation-700); line-height: 1.6; }
+.masca-wizard-note { padding: 1rem; border-left: 3px solid #ffcc00; background: var(--theme-elevation-50); border-radius: 4px; }
+.masca-wizard-error { padding: 1rem; margin: 1rem 0; border: 1px solid var(--theme-error-500); border-radius: 8px; color: var(--theme-error-700); }
+.masca-wizard-error button { margin-left: 1rem; }
+.masca-wizard-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-top: 1px solid var(--theme-elevation-150); padding: 1.5rem 0; margin-top: 1rem; }
+.masca-wizard-footer > div { display: flex; align-items: center; gap: .75rem; }
+.masca-wizard-save-actions { flex-wrap: wrap; }
+.masca-event-editor > :is(.collection-edit--events, .collection-edit--committee, .collection-edit--sponsors) > form > .doc-controls .doc-controls__content:has(> .doc-controls__meta:only-child) { display: none; }
+.masca-wizard-primary, .masca-wizard-secondary, .masca-wizard-error button { font: inherit; font-weight: 650; min-height: 44px; padding: .75rem 1.1rem; border-radius: 8px; cursor: pointer; border: 1px solid var(--theme-elevation-300); }
+.masca-wizard-primary { background: #010066; color: #fff; border-color: #010066; }
+.masca-wizard-secondary, .masca-wizard-error button { background: var(--theme-elevation-0); color: var(--theme-text); }
+.masca-event-editor button:focus-visible { outline: 3px solid #ffcc00; outline-offset: 3px; }
+.masca-event-editor button:disabled { opacity: .55; cursor: wait; }
+.masca-event-overview { margin: 1.5rem 0 0; }
+.masca-event-preview { padding: 0 0 1.5rem; border-bottom: 1px solid var(--theme-elevation-150); }
+.masca-event-preview > .masca-wizard-eyebrow { display: block; color: var(--theme-elevation-650); margin-bottom: 1rem; }
+.masca-event-preview__main { display: grid; grid-template-columns: 144px minmax(0, 1fr); gap: 1.5rem; }
+.masca-event-preview__poster img { width: 144px; height: 180px; object-fit: contain; display: block; background: var(--theme-elevation-50); border-radius: 6px; }
+.masca-event-preview__poster > button { padding-inline: .5rem; font-size: .8rem; white-space: normal; text-align: left; }
+.masca-event-preview__placeholder { min-height: 144px; padding: 1rem; display: grid; place-items: center; background: var(--theme-elevation-50); color: var(--theme-elevation-650); font-size: .8rem; border-radius: 6px; }
+.masca-event-preview__body { min-width: 0; overflow-wrap: anywhere; }
+.masca-overview-heading { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
+.masca-event-preview__body h3 { margin: 0 0 .35rem; font-size: clamp(1.9rem, 3vw, 2.4rem); font-weight: 700; letter-spacing: -.025em; line-height: 1.15; }
+.masca-overview-heading p { margin: 0; color: var(--theme-elevation-650); }
+.masca-event-preview__description { white-space: pre-wrap; line-height: 1.7; margin: 1.25rem 0; max-width: 65ch; }
+.masca-overview-section { display: flex; align-items: start; justify-content: space-between; gap: 1rem; padding: 1rem 0 0; }
+.masca-overview-section h3, .masca-overview-section h4 { font-size: .9rem; font-weight: 600; margin: 0 0 .5rem; }
+.masca-overview-section p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; }
+.masca-overview-section small { color: var(--theme-elevation-650); }
+.masca-event-preview__registration { margin: .75rem 0 0; color: var(--theme-elevation-650); font-size: .85rem; }
+.masca-event-preview__registration a { color: var(--theme-text); text-underline-offset: .2rem; }
+.masca-overview-review-heading { margin: 2rem 0 .25rem; font-size: 1.25rem; font-weight: 650; }
+.masca-overview-section--private { padding: 1rem 0 0; }
+.masca-overview-section--private details { margin-top: .65rem; color: var(--theme-elevation-650); }
+.masca-overview-section--private summary { cursor: pointer; font-size: .85rem; }
+.masca-overview-section--private details p { margin-top: .5rem; }
+.masca-overview-section--private summary:focus-visible { outline: 3px solid #ffcc00; outline-offset: 3px; }
+.masca-save-indicator { font-size: .85rem; color: var(--theme-elevation-700); }
+@media (max-width: 600px) { .masca-event-preview__main { grid-template-columns: 1fr; gap: 1rem; } .masca-event-preview__poster { display: flex; align-items: end; gap: 1rem; } .masca-event-preview__poster img { width: 100px; height: 125px; } }
+@media (max-width: 480px) { .masca-wizard-heading-row { align-items: start; } .masca-wizard-footer { flex-direction: column-reverse; align-items: stretch; } .masca-wizard-footer > div { justify-content: space-between; } .masca-wizard-footer > button { width: 100%; } }
+
+/* Keep fields mounted for Payload form state; animate their visibility only. */
+.masca-wizard-progress { height: 3px; border-radius: 999px; background: var(--theme-elevation-100); margin-top: .5rem; overflow: hidden; }
+.masca-wizard-progress > span { display: block; height: 100%; background: #ffcc00; border-radius: inherit; transition: width 220ms ease-out; }
+.masca-wizard-step-label { display: block; font-weight: 650; line-height: 1.35; }
+.masca-wizard-steps button { transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
+.masca-wizard-steps button:hover { background: var(--theme-elevation-100); }
+.masca-wizard-steps button[data-complete="true"] .masca-wizard-step-number { color: #176842; }
+.masca-wizard-intro, .masca-event-editor .masca-event-step, .masca-event-overview { animation: masca-step-enter 180ms ease-out backwards; }
+.masca-wizard-intro p { margin-bottom: 0; }
+.masca-wizard-primary, .masca-wizard-secondary { transition: box-shadow 160ms ease, background-color 160ms ease; }
+.masca-wizard-primary:hover:not(:disabled) { background: #151582; box-shadow: 0 3px 10px #01006620; }
+.masca-wizard-secondary:hover:not(:disabled) { background: var(--theme-elevation-100); }
+[data-theme="dark"] .masca-wizard-badge[data-live="true"] { background: #153c2d; color: #9be2b4; }
+[data-theme="dark"] .masca-wizard-steps button[data-complete="true"] .masca-wizard-step-number { color: #9be2b4; }
+@keyframes masca-step-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 600px) { .masca-wizard-count { font-size: .8rem; } .masca-wizard-eyebrow { line-height: 1.5; } }
+@media (prefers-reduced-motion: reduce) {
+  .masca-wizard-intro, .masca-event-editor .masca-event-step, .masca-event-overview { animation: none; }
+  .masca-wizard-progress > span, .masca-wizard-steps button, .masca-wizard-primary, .masca-wizard-secondary { transition: none; }
+}
+
+.masca-wizard-step-disclosure { display: grid; grid-template-rows: 0fr; opacity: 0; visibility: hidden; transition: grid-template-rows 220ms ease, opacity 160ms ease, visibility 0s 220ms; }
+.masca-wizard-step-disclosure[data-open="true"] { grid-template-rows: 1fr; opacity: 1; visibility: visible; transition-delay: 0s; }
+.masca-wizard-step-disclosure__inner { min-height: 0; overflow: hidden; }
+.masca-wizard-step-chevron { display: inline-block; transition: transform 220ms ease; }
+[aria-expanded="true"] > .masca-wizard-step-chevron { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { .masca-wizard-step-disclosure, .masca-wizard-step-chevron { transition: none; } }
+
+.masca-events-editor .masca-wizard-progress > span { background: #ef476f; }

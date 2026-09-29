@@ -1,0 +1,55 @@
+.masca-event-dates { margin-bottom: 2rem; }
+.masca-event-dates__fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.masca-event-dates legend { padding: 0; margin-bottom: .75rem; font-weight: 550; }
+.masca-event-dates legend > span { color: var(--theme-error-500); }
+.masca-event-dates__modes { display: flex; gap: 1.75rem; margin-bottom: .75rem; }
+.masca-event-dates__modes label, .masca-event-dates__optional { display: flex; align-items: center; gap: .5rem; min-height: 44px; cursor: pointer; }
+.masca-event-dates input[type='radio'], .masca-event-dates input[type='checkbox'] { accent-color: #010066; width: 1rem; height: 1rem; }
+.masca-event-dates__summary { display: flex; align-items: center; gap: 1rem; width: 100%; padding: 1rem; background: var(--theme-input-bg, var(--theme-elevation-0)); color: var(--theme-text); border: 1px solid var(--theme-elevation-200); border-radius: 8px; font: inherit; text-align: left; cursor: pointer; }
+.masca-event-dates__summary small, .masca-event-dates__summary strong { display: block; }
+.masca-event-dates__summary small { font-size: .8rem; color: var(--theme-elevation-650); margin-bottom: .3rem; }
+.masca-event-dates__summary strong { font-weight: 550; }
+.masca-event-dates__change { margin-left: auto; font-size: .8rem; color: var(--theme-elevation-650); }
+.masca-event-dates__calendar { padding: 1rem 0; border-bottom: 1px solid var(--theme-elevation-150); }
+.masca-event-dates__calendar > p { margin: 0 0 .5rem; font-size: .85rem; color: var(--theme-elevation-650); }
+.masca-event-dates .react-datepicker { display: flex; gap: 1.5rem; position: relative; font: inherit; width: 100%; }
+.masca-event-dates .react-datepicker__month-container { flex: 1; min-width: 0; }
+.masca-event-dates__month-heading { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-bottom: .5rem; }
+.masca-event-dates__month-heading strong { font-size: 1rem; font-weight: 600; }
+.masca-event-dates__month-heading button { width: 44px; height: 44px; border: 0; border-radius: 8px; font-size: 1.5rem; background: transparent; color: var(--theme-text); cursor: pointer; }
+.masca-event-dates__month-heading button:hover { background: var(--theme-elevation-100); }
+.masca-event-dates .react-datepicker__day-names, .masca-event-dates .react-datepicker__week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.masca-event-dates .react-datepicker__day-name, .masca-event-dates .react-datepicker__day { display: grid; place-items: center; min-height: 44px; font-size: .9rem; margin: 2px 0; }
+.masca-event-dates .react-datepicker__day-name { color: var(--theme-elevation-600); font-size: .8rem; }
+.masca-event-dates .react-datepicker__day { cursor: pointer; border: 1px solid transparent; border-radius: 50%; }
+.masca-event-dates .react-datepicker__day:hover { border-color: var(--theme-elevation-500); }
+.masca-event-dates .react-datepicker__day--today { font-weight: 750; text-decoration: underline; text-underline-offset: .25rem; }
+.masca-event-dates .react-datepicker__day:focus-visible, .masca-event-dates input:focus-visible { outline: 3px solid #ffcc00; outline-offset: 2px; }
+.masca-event-dates .react-datepicker__aria-live { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.masca-event-dates__calendar-actions { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: .5rem; font-size: .85rem; color: var(--theme-elevation-650); }
+.masca-event-dates__times { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.25rem; }
+.masca-event-dates__times label { display: flex; flex-direction: column; gap: .6rem; }
+.masca-event-dates input[type='time'] { box-sizing: border-box; width: 100%; min-width: 0; min-height: 44px; padding: .75rem; background: var(--theme-input-bg, var(--theme-elevation-0)); color: var(--theme-text); border: 1px solid var(--theme-elevation-200); border-radius: 6px; font: inherit; }
+.masca-event-dates__optional { margin-top: .75rem; }
+.masca-event-dates__optional span, .masca-event-dates__timezone { color: var(--theme-elevation-650); font-size: .85rem; }
+.masca-event-dates__timezone { margin: .75rem 0 0; line-height: 1.5; }
+.masca-event-dates__error { color: var(--theme-error-700); }
+.masca-event-dates__fieldset:disabled { opacity: .65; }
+[data-theme='dark'] .masca-event-dates input { color-scheme: dark; }
+[data-theme='dark'] .masca-event-dates input[type='radio'], [data-theme='dark'] .masca-event-dates input[type='checkbox'] { accent-color: #ffcc00; }
+@media (max-width: 480px) {
+  .masca-event-dates__summary { flex-wrap: wrap; gap: .75rem; }
+  .masca-event-dates__change { flex-basis: 100%; margin-left: 0; }
+}
+/* Isolate the inline picker from Payload's floating-calendar defaults. */
+.masca-event-dates .react-datepicker { border: 0; border-radius: 0; background: transparent; color: var(--theme-text); box-shadow: none; line-height: normal; }
+.masca-event-dates .react-datepicker .react-datepicker__header { border: 0; border-radius: 0; background: transparent; padding: 0; }
+.masca-event-dates .react-datepicker .react-datepicker__month { margin: 0; }
+.masca-event-dates .react-datepicker .react-datepicker__day-name { width: auto; line-height: normal; }
+.masca-event-dates .react-datepicker .react-datepicker__day { width: 44px; max-width: 100%; height: 44px; justify-self: center; padding: 0; line-height: normal; box-sizing: border-box; color: var(--theme-text); }
+.masca-event-dates .react-datepicker .react-datepicker__day--outside-month { color: var(--theme-elevation-450); }
+.masca-event-dates .react-datepicker .react-datepicker__day--keyboard-selected { background: var(--theme-elevation-100); }
+.masca-event-dates .react-datepicker .react-datepicker__day--in-range, .masca-event-dates .react-datepicker .react-datepicker__day--in-selecting-range { width: 100%; background: var(--theme-elevation-100); color: var(--theme-text); border-radius: 0; }
+.masca-event-dates .react-datepicker .react-datepicker__day--selected, .masca-event-dates .react-datepicker .react-datepicker__day--range-start, .masca-event-dates .react-datepicker .react-datepicker__day--range-end, .masca-event-dates .react-datepicker .react-datepicker__day--selecting-range-start, .masca-event-dates .react-datepicker .react-datepicker__day--selecting-range-end { width: 44px; background: #010066; color: #fff; border-radius: 50%; }
+
+.masca-event-dates__summary[data-invalid='true'] { border-color: var(--theme-error-500); }

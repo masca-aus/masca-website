@@ -15,6 +15,7 @@ export const CHAPTERS: Chapter[] = [
 ]
 
 export type Event = {
+  isPast?: boolean;
   id: string;
   name: { text: string };
   start: { local: string; utc: string };
@@ -22,7 +23,7 @@ export type Event = {
   url: string;
   summary?: string;
   logo?: { url: string } | null;
-  venue?: { name: string; address: { localized_address_display: string } } | null;
+  venue?: { name: string; details?: string; address: { localized_address_display: string } } | null;
   organizer?: { id: string; name: string } | null;
   ticket_availability?: {
     is_free?: boolean;

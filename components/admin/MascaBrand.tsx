@@ -9,7 +9,7 @@ export function MascaLogo() {
   );
 }
 
-export function MascaIcon() {
+export function MascaMark() {
   return (
     <img
       className="masca-admin-icon"
@@ -17,4 +17,8 @@ export function MascaIcon() {
       alt="MASCA"
     />
   );
+}
+
+export function MascaIcon() {
+  return <span className="masca-admin-home"><span className="masca-admin-home__mark"><MascaMark /></span><span className="masca-admin-home__label">Dashboard</span></span>;
 }
