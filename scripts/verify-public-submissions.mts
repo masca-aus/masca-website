@@ -6,6 +6,8 @@ export async function verifyPublicSubmissions(payload:Payload) {
  const admin=(await payload.find({collection:'users',where:{email:{equals:'admin@masca.org.au'}},limit:1})).docs[0];
  const req={user:{...admin,collection:'users' as const}};
  for(const collection of ['careers','events'] as const) {
+  const leftovers=await payload.find({collection,draft:true,req,where:{and:[{title:{equals:'Submission verification'}},{contactEmail:{equals:'test@example.org'}}]},limit:100});
+  for(const old of leftovers.docs)await payload.delete({collection,id:old.id,req,overrideAccess:true});
   let id:number|undefined;
   try {
    const data=collection==='careers'?{title:'Submission verification',company:'Test only',type:'internship',country:'Australia',state:'QLD',city:'Brisbane',workMode:'onsite',international:'yes',studyLevels:['any'],description:'Temporary submission to verify moderation.',applyUrl:'https://example.org/apply',added:'2026-10-01'}:{title:'Submission verification',organisation:'MASCA',description:'Temporary submission to verify moderation.',venue:'Brisbane',state:'QLD',startDate:'2027-10-01T08:00:00.000Z',reviewStatus:'pending'};
@@ -18,7 +20,7 @@ export async function verifyPublicSubmissions(payload:Payload) {
    const live=await payload.find({collection,overrideAccess:false,where:{id:{equals:id}}});assert.equal(live.totalDocs,1);
    assert.equal(live.docs[0].contactEmail,undefined);assert.equal(live.docs[0].contactName,undefined);
    const approved=await payload.findByID({collection,id,req,overrideAccess:false});assert.equal(approved.submittedForReview,false);
-  } finally {if(id)await payload.delete({collection,id,overrideAccess:true});}
+  } finally {if(id)await payload.delete({collection,id,req,overrideAccess:true});}
  }
  console.log('Public submission moderation and contact privacy verified for both collections.');
 }
