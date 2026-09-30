@@ -10,6 +10,8 @@ import {
 import { PublicFormWizard } from "@/components/forms/PublicFormWizard";
 import { fieldClass, FieldShell, TextField, TextAreaField } from "@/components/forms/PublicFields";
 import { SubmissionSuccess } from '@/components/forms/SubmissionSuccess';
+import { reconcileSubmissionErrors } from '@/components/forms/submissionErrors';
+import { parseEventSubmission } from '@/features/events/eventSubmission';
 import Button from "@/components/Button";
 import { EVENT_STATES, MAX_POSTER_SIZE } from "@/features/events/eventSubmission";
 
@@ -69,7 +71,7 @@ export function EventSubmissionForm({
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (response && formRef.current) {
+    if (response && formRef.current && (response.ok || !(formRef.current.contains(document.activeElement) && document.activeElement?.matches("input,select,textarea")))) {
       applySubmissionResult(response, formRef.current, errorSummaryRef.current);
     }
   }, [response]);
@@ -174,7 +176,11 @@ export function EventSubmissionForm({
       <SubmissionSuccess open={response?.ok===true} message={response?.message||''} href="/events" label="Back to Events" onClose={()=>setResponse(null)}/>
 
       <PublicFormWizard innerRef={formRef} action="/api/submit-event" onSubmit={handleSubmit}
-        steps={['Event details','Review contact']} pending={pending} response={response}>
+        steps={['Event details','Review contact']} pending={pending} response={response} onChange={()=>{
+          if(!formRef.current || !response || response.ok)return;
+          const result=parseEventSubmission(new FormData(formRef.current));
+          setResponse(current=>reconcileSubmissionErrors(current,result.ok?{}:result.fieldErrors));
+        }}>
         <fieldset className="flex flex-col gap-6 rounded-xl border-2 border-blue-100 p-6 md:p-8">
           <legend className="px-2 text-lg font-bold text-blue-600">About the event</legend>
           <div className="grid gap-6 md:grid-cols-2">

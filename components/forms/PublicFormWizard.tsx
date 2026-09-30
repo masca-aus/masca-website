@@ -3,8 +3,8 @@ import { Children, useEffect, useRef, useState, type FormEvent, type ReactNode, 
 import Button from '@/components/Button';
 import './publicFormWizard.css';
 type ResponseState={ok:boolean;fieldErrors?:Record<string,string[]>}|null;
-export function PublicFormWizard({children,steps,action,onSubmit,innerRef,pending,response}: {
- children:ReactNode;steps:string[];action:string;onSubmit:(event:FormEvent<HTMLFormElement>)=>void;innerRef:RefObject<HTMLFormElement|null>;pending:boolean;response:ResponseState;
+export function PublicFormWizard({children,steps,action,onSubmit,innerRef,pending,response,onChange}: {
+ children:ReactNode;steps:string[];action:string;onSubmit:(event:FormEvent<HTMLFormElement>)=>void;innerRef:RefObject<HTMLFormElement|null>;pending:boolean;response:ResponseState;onChange?:()=>void;
 }) {
  const [step,setStep]=useState(0);
  const [summary,setSummary]=useState<[string,string][]>([]);
@@ -40,7 +40,7 @@ export function PublicFormWizard({children,steps,action,onSubmit,innerRef,pendin
  useEffect(()=>{
   const frame=requestAnimationFrame(()=>{
   if(response?.ok) {setStep(0);setSummary([]);}
-  else if(response?.fieldErrors) {
+  else if(response?.fieldErrors && !(innerRef.current?.contains(document.activeElement) && document.activeElement?.matches("input,select,textarea"))) {
    const name=Object.keys(response.fieldErrors)[0];
    const el=innerRef.current?.elements.namedItem(name);
    if(el instanceof HTMLElement) {const index=el.closest<HTMLElement>('[data-form-step]')?.dataset.formStep;if(index)setStep(Number(index));requestAnimationFrame(()=>el.focus());}
@@ -48,7 +48,7 @@ export function PublicFormWizard({children,steps,action,onSubmit,innerRef,pendin
   });
   return ()=>cancelAnimationFrame(frame);
  },[response,innerRef]);
- return <form ref={innerRef} action={action} method="post" encType="multipart/form-data" noValidate onSubmit={submit} className="public-form-wizard" aria-busy={pending}>
+ return <form ref={innerRef} action={action} method="post" encType="multipart/form-data" noValidate onChange={onChange} onSubmit={submit} className="public-form-wizard" aria-busy={pending}>
   <div className="rounded-xl border-2 border-blue-100 bg-blue-50 p-6 md:p-8">
    <p className="eyebrow text-blue-600">Step {step+1} of {titles.length}</p>
    <h3 ref={heading} tabIndex={-1} className="mt-2 text-blue-600">{titles[step]}</h3>
