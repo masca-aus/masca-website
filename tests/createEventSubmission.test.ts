@@ -1,3 +1,4 @@
+import { publicEventSubmission } from "../features/access/publicSubmissionContext";
 import { describe, expect, it, vi } from "vitest";
 
 import { createEventSubmission } from "@/features/events/createEventSubmission";
@@ -40,7 +41,8 @@ describe("createEventSubmission", () => {
       collection: "events",
       overrideAccess: true,
       draft: true,
-      data: { ...data, poster: 17, reviewStatus: "pending", _status: "draft" },
+      context: { publicEventSubmission },
+      data: { ...data, poster: 17, reviewStatus: "pending", _status: "draft", owningScope: "National" },
     });
     expect(result).toEqual({ id: 42 });
   });
@@ -61,7 +63,8 @@ describe("createEventSubmission", () => {
       collection: "events",
       overrideAccess: true,
       draft: true,
-      data: { ...data, reviewStatus: "pending", _status: "draft" },
+      context: { publicEventSubmission },
+      data: { ...data, reviewStatus: "pending", _status: "draft", owningScope: "National" },
     });
   });
 

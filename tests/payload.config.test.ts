@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 const { capturedDatabasePool } = vi.hoisted(() => ({
   capturedDatabasePool: {
+    schemaName: undefined as string | undefined,
     connectionString: undefined as string | undefined,
     max: undefined as number | undefined,
   },
@@ -17,6 +18,7 @@ vi.mock("@payloadcms/db-postgres", async () => {
     postgresAdapter: (
       options: Parameters<typeof actual.postgresAdapter>[0],
     ) => {
+      capturedDatabasePool.schemaName = options.schemaName;
       capturedDatabasePool.connectionString = options.pool?.connectionString;
       capturedDatabasePool.max = options.pool?.max;
       return actual.postgresAdapter(options);
@@ -27,6 +29,10 @@ vi.mock("@payloadcms/db-postgres", async () => {
 import configPromise from "@payload-config";
 
 describe("payload config", () => {
+  it("uses the implicit public schema required by the database adapter", async () => {
+    await configPromise;
+    expect(capturedDatabasePool.schemaName).toBeUndefined();
+  });
   it("adds a persistent light and dark mode toggle to the admin top bar", async () => {
     const config = await configPromise;
 

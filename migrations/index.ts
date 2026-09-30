@@ -1,3 +1,4 @@
+import * as workspaceAccess from "./20260930_221300_workspace_access";
 import * as migration_20260802_071222_restructure_committee from './20260802_071222_restructure_committee';
 import * as migration_20260907_142655_add_committee_departments from './20260907_142655_add_committee_departments';
 import * as migration_20260916_010000_add_events_submission_workflow from './20260916_010000_add_events_submission_workflow';
@@ -48,4 +49,5 @@ export const migrations = [
     down: migration_20260917_124307_careers_cms.down,
     name: '20260917_124307_careers_cms'
   },
+  {up: workspaceAccess.up, down: workspaceAccess.down, name: "20260930_221300_workspace_access"},
 ];

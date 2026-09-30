@@ -1,3 +1,4 @@
+import { workspaceSchema, workspaceSchemaPush } from "./features/access/workspaceEnvironment.ts";
 import { configureWorkspace } from "./features/access/configureWorkspace.ts";
 import { adminSearchFields, adminSearchHooks, withAdminSearch } from './features/admin/adminSearch.ts';
 import path from "path";
@@ -54,7 +55,7 @@ export function createDatabasePoolConfig(
   };
 }
 
-if (process.env.WORKSPACE_AUTH_ENABLED === 'true' && process.env.VERCEL_ENV === 'production') throw new Error('Workspace access is preview-only until migration is approved.');
+
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -163,10 +164,10 @@ export default buildConfig({
   collections: process.env.WORKSPACE_AUTH_ENABLED === "true" ? configureWorkspace(workspaceCollections()) : workspaceCollections(),
   /* Collections are declared below to share the existing public configuration. */
   db: postgresAdapter({
-    schemaName: process.env.WORKSPACE_AUTH_ENABLED === "true" ? "cms_auth_preview" : undefined,
+    schemaName: workspaceSchema() === "public" ? undefined : workspaceSchema(),
     pool: createDatabasePoolConfig(process.env.DATABASE_URI),
     migrationDir: path.resolve(dirname, "migrations"),
-    push: process.env.WORKSPACE_AUTH_ENABLED === "true" && process.env.WORKSPACE_INIT_SCHEMA === "true",
+    push: workspaceSchemaPush(),
   }),
   email: resendAdapter({
     apiKey: process.env.RESEND_KEY || "",
