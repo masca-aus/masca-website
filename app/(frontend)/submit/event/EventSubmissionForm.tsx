@@ -15,6 +15,7 @@ import { parseEventSubmission } from '@/features/events/eventSubmission';
 import {PublicChoice} from '@/components/forms/ChoiceSelect';
 import {PublicDateField} from '@/components/forms/PublicDateField';
 import {PosterUpload} from '@/components/forms/PosterUpload';
+import { PublicOrganisationSearch } from '@/components/forms/PublicOrganisationSearch';
 import Button from "@/components/Button";
 import { EVENT_STATES, MAX_POSTER_SIZE } from "@/features/events/eventSubmission";
 
@@ -196,13 +197,11 @@ export function EventSubmissionForm({
               maxLength={160}
               error={titleError}
             />
-            <TextField
+            <PublicOrganisationSearch
               id="event-organisation"
-              label="Organisation"
               name="organisation"
+              label="Organisation"
               required
-              minLength={2}
-              maxLength={160}
               error={organisationError}
             />
           </div>
