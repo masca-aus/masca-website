@@ -46,7 +46,9 @@ export function mayManage(
     return false;
   return (
     account.role === "administrator" ||
-    account.grants.some((grant) => grant.area === area && grant.scope === scope)
+    (account.grants ?? []).some(
+      (grant) => grant.area === area && grant.scope === scope,
+    )
   );
 }
 export function mayManagePeople(account: ApprovedAccount | null | undefined) {

@@ -418,3 +418,5 @@ html[data-theme="dark"] .nav { border-right-color: var(--theme-elevation-200); b
 .masca-login-help a:hover { color: var(--theme-text); text-decoration: underline; }
 @keyframes masca-login-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .template-minimal__wrap:has(.masca-login-welcome) { animation: none; } }
+
+.masca-google-signin { display: flex; justify-content: center; padding: 14px 20px; margin-top: 26px; border-radius: 10px; text-decoration: none; background: var(--masca-blue); color: white; font-size: .9rem; }

@@ -1,3 +1,4 @@
+import { configureWorkspace } from "./features/access/configureWorkspace.ts";
 import { adminSearchFields, adminSearchHooks, withAdminSearch } from './features/admin/adminSearch.ts';
 import path from "path";
 import { fileURLToPath } from "url";
@@ -52,6 +53,8 @@ export function createDatabasePoolConfig(
     connectionTimeoutMillis: 10_000,
   };
 }
+
+if (process.env.WORKSPACE_AUTH_ENABLED === 'true' && process.env.VERCEL_ENV === 'production') throw new Error('Workspace access is preview-only until migration is approved.');
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -157,7 +160,64 @@ export default buildConfig({
       baseDir: dirname,
     },
   },
-  collections: [
+  collections: process.env.WORKSPACE_AUTH_ENABLED === "true" ? configureWorkspace(workspaceCollections()) : workspaceCollections(),
+  /* Collections are declared below to share the existing public configuration. */
+  db: postgresAdapter({
+    schemaName: process.env.WORKSPACE_AUTH_ENABLED === "true" ? "cms_auth_preview" : undefined,
+    pool: createDatabasePoolConfig(process.env.DATABASE_URI),
+    migrationDir: path.resolve(dirname, "migrations"),
+    push: process.env.WORKSPACE_AUTH_ENABLED === "true" && process.env.WORKSPACE_INIT_SCHEMA === "true",
+  }),
+  email: resendAdapter({
+    apiKey: process.env.RESEND_KEY || "",
+    // The org inbox anchors recovery: reset emails come from (and go to)
+    // addresses the committee controls, surviving annual handover.
+    defaultFromAddress: "hello@masca.org.au",
+    defaultFromName: "MASCA",
+  }),
+  graphQL: {
+    disable: true,
+  },
+  plugins: [
+    s3Storage({
+      bucket: s3Bucket,
+      collections: {
+        media: {
+          // Serve files straight from the public bucket URL — Payload never
+          // proxies file bytes, so images survive redeploys and cost no
+          // serverless time.
+          disablePayloadAccessControl: true,
+          generateFileURL: ({ filename }) => publicFileURL(filename),
+        },
+      },
+      config: {
+        credentials: {
+          accessKeyId: process.env.S3_ACCESS_KEY_ID || "",
+          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || "",
+        },
+        endpoint: s3Endpoint,
+        // Supabase's S3 gateway only supports path-style addressing.
+        forcePathStyle: true,
+        region: process.env.S3_REGION || "",
+      },
+    }),
+  ],
+  secret: process.env.PAYLOAD_SECRET || "",
+  sharp,
+  telemetry: false,
+  upload: {
+    // Hard 5 MB cap: oversized uploads get a 413 instead of a truncated file.
+    abortOnLimit: true,
+    limits: {
+      fileSize: 5 * 1024 * 1024,
+    },
+  },
+  typescript: {
+    outputFile: path.resolve(dirname, "payload-types.ts"),
+  },
+});
+
+function workspaceCollections(): import("payload").CollectionConfig[] { return [
     Careers,
     CareerLifecycle,
     Organisations,
@@ -459,64 +519,4 @@ export default buildConfig({
       },
     },
     Events,
-  ],
-  db: postgresAdapter({
-    // Transaction-mode pooler connection string — required on Vercel
-    // serverless where connections must not be held open.
-    pool: createDatabasePoolConfig(process.env.DATABASE_URI),
-    migrationDir: path.resolve(dirname, "migrations"),
-    // Local dev points at the SAME production database, so dev mode must never
-    // push schema changes directly: a push stamps a `dev` row into
-    // payload_migrations, and the next `payload migrate` on Vercel hangs on an
-    // interactive data-loss prompt. Schema changes go through
-    // `payload migrate:create` + `payload migrate` instead.
-    push: false,
-  }),
-  email: resendAdapter({
-    apiKey: process.env.RESEND_KEY || "",
-    // The org inbox anchors recovery: reset emails come from (and go to)
-    // addresses the committee controls, surviving annual handover.
-    defaultFromAddress: "hello@masca.org.au",
-    defaultFromName: "MASCA",
-  }),
-  graphQL: {
-    disable: true,
-  },
-  plugins: [
-    s3Storage({
-      bucket: s3Bucket,
-      collections: {
-        media: {
-          // Serve files straight from the public bucket URL — Payload never
-          // proxies file bytes, so images survive redeploys and cost no
-          // serverless time.
-          disablePayloadAccessControl: true,
-          generateFileURL: ({ filename }) => publicFileURL(filename),
-        },
-      },
-      config: {
-        credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY_ID || "",
-          secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || "",
-        },
-        endpoint: s3Endpoint,
-        // Supabase's S3 gateway only supports path-style addressing.
-        forcePathStyle: true,
-        region: process.env.S3_REGION || "",
-      },
-    }),
-  ],
-  secret: process.env.PAYLOAD_SECRET || "",
-  sharp,
-  telemetry: false,
-  upload: {
-    // Hard 5 MB cap: oversized uploads get a 413 instead of a truncated file.
-    abortOnLimit: true,
-    limits: {
-      fileSize: 5 * 1024 * 1024,
-    },
-  },
-  typescript: {
-    outputFile: path.resolve(dirname, "payload-types.ts"),
-  },
-});
+  ]; }

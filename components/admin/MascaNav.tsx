@@ -52,7 +52,7 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
           })}
           <div className="masca-nav__account">
             <div className="masca-nav__theme"><ThemeToggle /></div>
-            {visibleEntities.collections.includes("users") && <Link href="/admin/collections/users" className="masca-nav__link" aria-current={pathname.startsWith("/admin/collections/users") ? "page" : undefined}><ShieldCheck size={19} />CMS access</Link>}
+            {visibleEntities.collections.includes("users") && <Link href="/admin/collections/users" className="masca-nav__link" aria-current={pathname.startsWith("/admin/collections/users") ? "page" : undefined}><ShieldCheck size={19} />People & access</Link>}
             <Link href="/admin/account" className="masca-nav__link" aria-current={pathname === "/admin/account" ? "page" : undefined}><UserRound size={19} />My account</Link>
             <Link href="/admin/logout" prefetch={false} className="masca-nav__link"><LogOut size={19} />Log out</Link>
           </div>
