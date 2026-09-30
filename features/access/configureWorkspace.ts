@@ -8,6 +8,7 @@ import {
 } from "payload";
 import {
   contentAreas,
+  mayView, mayEditArea, permissionsFor, validPermissions,
   ownershipScopes,
   mayManage,
   mayManagePeople,
@@ -89,7 +90,7 @@ export function configureWorkspace(
           {
             name: "allContentAccess",
             type: "checkbox",
-            label: "All content",
+            label: "Edit all content",
             defaultValue: false,
             admin: {
               condition: (_, data) => data.role === "editor",
@@ -98,26 +99,20 @@ export function configureWorkspace(
             },
           },
           {
-            name: "grants",
-            type: "array",
-            label: "Department and state access",
+            name: "permissions",
+            type: "json",
+            label: "Content permissions",
+            validate: (value) => validPermissions(value) || "Choose viewing access and at least one editing team for editable sections.",
             admin: {
-              condition: (_, data) =>
-                data.role === "editor" && !data.allContentAccess,
+              condition: (_, data) => data.role === "editor" && !data.allContentAccess,
+              components: { Field: "/components/admin/ContentPermissionsField#ContentPermissionsField" },
             },
+          },
+          {
+            name: "grants", type: "array", admin: { hidden: true },
             fields: [
-              {
-                name: "area",
-                type: "select",
-                required: true,
-                options: [...contentAreas],
-              },
-              {
-                name: "scope",
-                type: "select",
-                required: true,
-                options: [...ownershipScopes],
-              },
+              { name: "area", type: "select", required: true, options: [...contentAreas] },
+              { name: "scope", type: "select", required: true, options: [...ownershipScopes] },
             ],
           },
           {
@@ -139,6 +134,7 @@ export function configureWorkspace(
           },
         ] as Field[],
         hooks: {
+          afterRead: [({ doc }) => ({ ...doc, permissions: permissionsFor(doc as ApprovedAccount) })],
           refresh: [
             async ({ args, user }) => {
               const current = await args.req.payload.findByID({
@@ -217,11 +213,11 @@ export function configureWorkspace(
         access: {
           ...collection.access,
           read: (args) =>
-            args.req.user ? scoped(args) : read ? read(args) : true,
+            args.req.user ? mayView(accountOf(args.req.user), area) : read ? read(args) : true,
           create,
           update: scoped,
           delete: scoped,
-          readVersions: ({ req }) => scopeFilter(req.user, area, "version."),
+          readVersions: ({ req }) => mayView(accountOf(req.user), area),
           unlock: scoped,
         },
         fields: [
@@ -233,8 +229,7 @@ export function configureWorkspace(
             defaultValue: ({ user }) =>
               mayManageSharedContent(accountOf(user))
                 ? "National"
-                : accountOf(user)?.grants?.find((grant) => grant.area === area)
-                    ?.scope,
+                : permissionsFor(accountOf(user))[area]?.scopes?.[0],
             options: [...ownershipScopes],
             admin: {
               position: "sidebar",
@@ -269,28 +264,30 @@ export function configureWorkspace(
     }
     if (["event-lifecycle", "career-lifecycle"].includes(collection.slug)) {
       const area = collection.slug === "event-lifecycle" ? "events" : "careers";
-      const prefix = area === "events" ? "event." : "career.";
+
       return {
         ...collection,
         access: {
           ...collection.access,
-          read: ({ req }) => scopeFilter(req.user, area, prefix),
+          read: ({ req }) => mayView(accountOf(req.user), area),
           readVersions: ({ req }) =>
-            scopeFilter(req.user, area, `version.${prefix}`),
+            mayView(accountOf(req.user), area),
         },
       };
     }
     if (["media", "organisations"].includes(collection.slug)) {
-      const shared: Access = ({ req }) =>
-        mayManageSharedContent(accountOf(req.user));
+      const area = collection.slug as "media" | "organisations";
+      const originalRead = collection.access?.read;
+      const shared: Access = ({ req }) => mayEditArea(accountOf(req.user), area);
       return {
         ...collection,
         access: {
           ...collection.access,
+          read: (args) => args.req.user ? mayView(accountOf(args.req.user), area) : originalRead ? originalRead(args) : true,
           create: shared,
           update: shared,
           delete: shared,
-          readVersions: shared,
+          readVersions: ({ req }) => mayView(accountOf(req.user), area),
         },
       };
     }

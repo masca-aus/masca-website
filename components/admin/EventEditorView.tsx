@@ -29,7 +29,7 @@ export function useEventEditor() {
 }
 
 export function EventEditorView(props: DocumentViewClientProps) {
-  const { data, id } = useDocumentInfo();
+  const { data, id, hasSavePermission } = useDocumentInfo();
   const dateSelectionValidationRef = useRef<(() => Record<string, string>) | null>(null);
   const [step, setStep] = useState(() => id ? firstIncompleteEventStep(data ?? {}) : 0);
   const [saveState, setSaveState] = useState<SaveState>(id ? 'saved' : 'idle');
@@ -39,14 +39,14 @@ export function EventEditorView(props: DocumentViewClientProps) {
   const registerSave = useCallback((handler: ((intent: SaveIntent) => Promise<boolean>) | null) => { save.current = handler; }, []);
   return (
     <Context.Provider value={{ dateSelectionValidationRef, saveStatusTarget, setSaveStatusTarget, step, setStep, saveState, setSaveState, error, setError, save, registerSave }}>
-      <div className="masca-event-editor masca-events-editor" data-step={step} onSubmitCapture={(event) => {
+      <div className="masca-event-editor masca-events-editor" data-read-only={hasSavePermission === false} data-step={step} onSubmitCapture={(event) => {
         if (!(event.target instanceof HTMLFormElement) || !event.target.matches('.collection-edit--events > form')) return;
         // Native Enter submission must use the same single writer as autosave.
         event.preventDefault();
         event.stopPropagation();
         void save.current?.('draft');
       }}>
-        <DefaultEditView {...props} />
+        {hasSavePermission === false && <p className="masca-read-only-notice" role="status">Read only — you can view this record, but cannot change it.</p>}<DefaultEditView {...props} />
       </div>
     </Context.Provider>
   );

@@ -1,14 +1,18 @@
 'use client';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { useConfig } from '@payloadcms/ui';
+import { mayManage, type ApprovedAccount, type OwnershipScope } from '@/features/access/workspacePolicy';
+import { useAuth, useConfig } from '@payloadcms/ui';
 import { EventActionMenu } from './EventActionMenu';
 import { statusActions, statusLabels, type CMSCollection, type CMSStatus } from '@/features/admin/cmsStatus';
 import './eventStatusCell.css';
 
-type Props = { cellData?: CMSStatus; rowData?: { id?: number | string; title?: string } };
+type Props = { cellData?: CMSStatus; rowData?: { id?: number | string; title?: string; owningScope?: OwnershipScope } };
 function CMSStatusCell({ collection, cellData, rowData }: Props & { collection: CMSCollection }) {
   const router = useRouter();
+  const { user } = useAuth();
+  const account = user as unknown as ApprovedAccount | undefined;
+  const editable = !account?.role || mayManage(account, collection, rowData?.owningScope as OwnershipScope);
   const { config } = useConfig();
   const [busy, setBusy] = useState(false);
   const [refreshing, startTransition] = useTransition();
@@ -16,7 +20,7 @@ function CMSStatusCell({ collection, cellData, rowData }: Props & { collection: 
   if (!cellData || !(cellData.status in statusLabels)) return <span>—</span>;
   const state = cellData;
   async function choose(action: string) {
-    if (busy || refreshing || rowData?.id == null) return;
+    if (!editable || busy || refreshing || rowData?.id == null) return;
     if (action === 'edit') { router.push(`${config.routes.admin}/collections/${collection}/${rowData.id}`); return; }
     setBusy(true); setError('');
     const publication = action === 'publish' || action === 'unpublish';
@@ -34,6 +38,7 @@ function CMSStatusCell({ collection, cellData, rowData }: Props & { collection: 
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not update the status.'); }
     finally { setBusy(false); }
   }
+  if (!editable) return <span className="masca-wizard-badge" title="Read only">{statusLabels[state.status]}</span>;
   return <div className="masca-status-action" onClick={event => event.stopPropagation()}>
     <EventActionMenu label={`Status for ${rowData?.title || 'item'}`} text={statusLabels[state.status]} tone={state.status}
       options={statusActions(collection, state)} disabled={busy || refreshing || rowData?.id == null} busy={busy || refreshing} onChoose={action => void choose(action)} />

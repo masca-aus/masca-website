@@ -1,6 +1,6 @@
 import {
   mayManagePeople,
-  mayManageSharedContent,
+  mayView, mayEditArea, type PermissionArea,
   type ApprovedAccount,
 } from "@/features/access/workspacePolicy";
 import Link from "next/link";
@@ -90,9 +90,7 @@ export async function MascaDashboard({
       ? (req.user as unknown as ApprovedAccount)
       : undefined;
   const showEvents =
-    !account ||
-    mayManageSharedContent(account) ||
-    (account.grants ?? []).some((g) => g.area === "events");
+    !account || mayView(account, "events");
   const overview = showEvents
     ? await loadEventDashboard(req.payload, req)
     : { pending: 0, published: 0, drafts: 0, pendingEvents: [] };
@@ -107,9 +105,8 @@ export function DashboardContent({
   account?: ApprovedAccount;
 }) {
   const isAdmin = !account || mayManagePeople(account);
-  const allContent = !account || mayManageSharedContent(account);
   const showEvents =
-    allContent || account?.grants?.some((g) => g.area === "events");
+    !account || mayView(account, "events");
   return (
     <main className="masca-dashboard" style={{ marginInline: "auto" }}>
       <header className="masca-dashboard__heading">
@@ -157,7 +154,7 @@ export function DashboardContent({
           { id: "resources", title: "Resources" },
         ] as const
       )
-        .filter((group) => allContent || group.id === "content")
+        .filter(group => contentAreas.some(area => area.group === group.id && (!account || mayView(account, area.href.split("/").pop() as PermissionArea))))
         .map((group) => (
           <section key={group.id} aria-labelledby={`manage-${group.id}`}>
             <div className="masca-dashboard__section-heading">
@@ -168,10 +165,7 @@ export function DashboardContent({
                 .filter(
                   (area) =>
                     area.group === group.id &&
-                    (allContent ||
-                      account?.grants?.some((g) =>
-                        area.href.endsWith(`/${g.area}`),
-                      )),
+                    (!account || mayView(account, area.href.split("/").pop() as PermissionArea)),
                 )
                 .map((area) => (
                   <article
@@ -196,14 +190,14 @@ export function DashboardContent({
                         href={area.href}
                         aria-label={`Manage ${area.name.toLowerCase()}`}
                       >
-                        Manage
+                        {account && !mayEditArea(account, area.href.split("/").pop() as PermissionArea) ? "View only" : "Manage"}
                       </Link>
-                      <Link
+                      {(!account || mayEditArea(account, area.href.split("/").pop() as PermissionArea)) && <Link
                         className="masca-action masca-action--secondary"
                         href={area.createHref}
                       >
                         {area.action}
-                      </Link>
+                      </Link>}
                     </div>
                   </article>
                 ))}

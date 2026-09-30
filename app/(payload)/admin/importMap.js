@@ -11,6 +11,7 @@ import { CareerPublishControl as CareerPublishControl_57c74453f1f49818c0cb8c1e92
 import { CareerSaveControl as CareerSaveControl_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
 import { CareerEditorView as CareerEditorView_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
 import { CollectionBackLink as CollectionBackLink_b7eb021eac5b101e7ce71970147e89df } from '../../../components/admin/DocumentBackLink'
+import { ContentPermissionsField as ContentPermissionsField_d1257e98ee6e87bc3a795e8f49bc774e } from '../../../components/admin/ContentPermissionsField'
 import { CommitteeEditorHeader as CommitteeEditorHeader_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
 import { EditorSection as EditorSection_671b0a745dc229cca2346e4a81fc980a } from '../../../components/admin/EditorSection'
 import { CommitteeEditorFooter as CommitteeEditorFooter_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
@@ -61,6 +62,7 @@ export const importMap = {
   "/components/admin/CareerEditor#CareerSaveControl": CareerSaveControl_57c74453f1f49818c0cb8c1e92524236,
   "/components/admin/CareerEditor#CareerEditorView": CareerEditorView_57c74453f1f49818c0cb8c1e92524236,
   "/components/admin/DocumentBackLink#CollectionBackLink": CollectionBackLink_b7eb021eac5b101e7ce71970147e89df,
+  "/components/admin/ContentPermissionsField#ContentPermissionsField": ContentPermissionsField_d1257e98ee6e87bc3a795e8f49bc774e,
   "/components/admin/CommitteeEditor#CommitteeEditorHeader": CommitteeEditorHeader_134396005f96c581663d9f2ff7dee8de,
   "/components/admin/EditorSection#EditorSection": EditorSection_671b0a745dc229cca2346e4a81fc980a,
   "/components/admin/CommitteeEditor#CommitteeEditorFooter": CommitteeEditorFooter_134396005f96c581663d9f2ff7dee8de,

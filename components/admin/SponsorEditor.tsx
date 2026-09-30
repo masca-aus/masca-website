@@ -13,19 +13,19 @@ const Context = createContext<{ step: number; setStep: (step: number) => void; a
 function useSponsorEditor() { const value = useContext(Context); if (!value) throw new Error('Sponsor editor is missing'); return value; }
 
 export function SponsorEditorView(props: DocumentViewClientProps) {
-  const { id } = useDocumentInfo();
+  const { id, hasSavePermission } = useDocumentInfo();
   const [step, setStep] = useState(id ? 2 : 0);
   const [error, setError] = useState('');
   const [attemptedSave, setAttemptedSave] = useState(false);
   const nextRef = useRef<(() => void) | null>(null);
   return <Context.Provider value={{ step, setStep, error, setError, nextRef, attemptedSave, setAttemptedSave }}>
-    <div className="masca-event-editor masca-sponsor-editor" data-step={step} onSubmitCapture={event => {
+    <div className="masca-event-editor masca-sponsor-editor" data-read-only={hasSavePermission === false} data-step={step} onSubmitCapture={event => {
       // A media drawer has its own form and must keep its native submit behaviour.
       if (!(event.target instanceof HTMLFormElement) || !event.target.matches('.collection-edit--sponsors > form')) return;
       if (step < 2) {
         event.preventDefault(); event.stopPropagation(); nextRef.current?.();
       } else setAttemptedSave(true);
-    }}><DefaultEditView {...props} /></div>
+    }}>{hasSavePermission === false && <p className="masca-read-only-notice" role="status">Read only — you can view this record, but cannot change it.</p>}<DefaultEditView {...props} /></div>
   </Context.Provider>;
 }
 export function SponsorSaveControl() { return null; }

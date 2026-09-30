@@ -1,3 +1,4 @@
+import { mayManage, type ApprovedAccount, type OwnershipScope } from '../access/workspacePolicy.ts';
 import { initTransaction, commitTransaction, killTransaction, type Payload, type PayloadRequest, type PayloadHandler, type Where } from 'payload';
 import { sql, type PostgresAdapter } from '@payloadcms/db-postgres';
 import { revalidatePath } from 'next/cache.js';
@@ -60,7 +61,8 @@ export const careerLifecycleAction: PayloadHandler = async req => {
   let action: string;
   try { action = (await req.json!()).action; } catch { return Response.json({ message: 'Invalid action.' }, { status: 400 }); }
   if (!['close', 'archive', 'restore', 'reopen'].includes(action)) return Response.json({ message: 'Invalid action.' }, { status: 400 });
-  await req.payload.findByID({ collection: 'careers', id, req, overrideAccess: false, draft: true, depth: 0 });
+  const record = await req.payload.findByID({ collection: 'careers', id, req, overrideAccess: false, draft: true, depth: 0 });
+  if (process.env.WORKSPACE_AUTH_ENABLED === 'true' && !mayManage(req.user as unknown as ApprovedAccount, 'careers', (record as unknown as { owningScope: OwnershipScope }).owningScope)) return Response.json({ message: 'You have read-only access to this record.' }, { status: 403 });
   const ownsTransaction = await initTransaction(req);
   try {
     const tx = (req.payload.db as unknown as PostgresAdapter).sessions[String(await req.transactionID)]?.db;

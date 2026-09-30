@@ -51,17 +51,8 @@ export async function verifyWorkspacePreview(payload: Payload) {
       req: editorReq,
       where: { id: { in: created } },
     });
-    assert.equal(list.totalDocs, 1);
-    assert.equal(list.docs[0].id, created[0]);
-    await assert.rejects(() =>
-      payload.findByID({
-        collection: "careers",
-        id: created[1],
-        draft: true,
-        overrideAccess: false,
-        req: editorReq,
-      }),
-    );
+    assert.equal(list.totalDocs, 2);
+    await payload.findByID({ collection: "careers", id: created[1], draft: true, overrideAccess: false, req: editorReq });
     await assert.rejects(() =>
       payload.update({
         collection: "careers",
@@ -105,7 +96,7 @@ export async function verifyWorkspacePreview(payload: Payload) {
       req: editorReq,
       where: { parent: { equals: created[1] } },
     });
-    assert.equal(versions.totalDocs, 0);
+    assert.ok(versions.totalDocs > 0);
     const ownVersions = await payload.findVersions({
       collection: "careers",
       overrideAccess: false,
@@ -119,6 +110,17 @@ export async function verifyWorkspacePreview(payload: Payload) {
       overrideAccess: false,
       req: editorReq,
     });
+    const viewer = await payload.update({ collection: "users", id: editor.id, overrideAccess: true,
+      data: { permissions: { careers: { view: true, edit: false, scopes: [] } } } as never });
+    const viewerReq = { user: { ...viewer, collection: "users" as const } };
+    const viewed = await payload.find({ collection: "careers", draft: true, overrideAccess: false, req: viewerReq, where: { id: { in: created } } });
+    assert.equal(viewed.totalDocs, 2);
+    for (const id of created) {
+      await assert.rejects(() => payload.update({ collection: "careers", id, draft: true, overrideAccess: false, req: viewerReq, data: { title: "forbidden" } }));
+      await assert.rejects(() => payload.delete({ collection: "careers", id, overrideAccess: false, req: viewerReq }));
+    }
+    await assert.rejects(() => payload.create({ collection: "careers", draft: true, overrideAccess: false, req: viewerReq, data: { title: "forbidden", owningScope: "QLD" } as never }));
+    await assert.rejects(() => payload.find({ collection: "events", draft: true, overrideAccess: false, req: viewerReq }));
     const broadEditor = await payload.update({
       collection: "users",
       id: editor.id,

@@ -3,7 +3,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { EventCMSStatusCell, CareerCMSStatusCell } from '@/components/admin/CMSStatusCell';
 const h = vi.hoisted(() => ({ refresh: vi.fn(), fetch: vi.fn() }));
-vi.mock('@payloadcms/ui', () => ({ useConfig: () => ({ config: { routes: { api: '/api', admin: '/admin' } } }) }));
+vi.mock('@payloadcms/ui', () => ({ useAuth: () => ({ user: undefined }), useConfig: () => ({ config: { routes: { api: '/api', admin: '/admin' } } }) }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: h.refresh }) }));
 beforeEach(() => { vi.clearAllMocks(); vi.stubGlobal('fetch', h.fetch); });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });

@@ -15,7 +15,7 @@ const tables = await connection.query(
 );
 if (tables.rows[0].count > 0)
   await connection.query(
-    "ALTER TABLE cms_auth_preview.users ADD COLUMN IF NOT EXISTS all_content_access boolean DEFAULT false",
+    "ALTER TABLE cms_auth_preview.users ADD COLUMN IF NOT EXISTS all_content_access boolean DEFAULT false, ADD COLUMN IF NOT EXISTS permissions jsonb",
   );
 await connection.end();
 process.env.WORKSPACE_INIT_SCHEMA =

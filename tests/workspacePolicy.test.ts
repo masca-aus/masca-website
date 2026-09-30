@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   approvedGoogleIdentity,
+  mayView, mayEditArea, validPermissions,
   contentAreas,
   ownershipScopes,
   mayManageSharedContent,
@@ -89,5 +90,36 @@ describe("All-content editor", () => {
     expect(mayManageSharedContent({ ...account, status: "suspended" })).toBe(
       false,
     );
+  });
+});
+
+describe('Section viewing and editing', () => {
+  it('preserves legacy editing scopes while allowing viewing across sections', () => {
+    expect(mayView(editor, 'careers')).toBe(true);
+    expect(mayView(editor, 'sponsors')).toBe(true);
+    expect(mayEditArea(editor, 'careers')).toBe(true);
+    expect(mayEditArea(editor, 'sponsors')).toBe(false);
+  });
+  it('enforces explicit read-only and hidden sections', () => {
+    const user: ApprovedAccount = { ...editor, permissions: {
+      careers: { view: true, edit: false, scopes: ['QLD'] },
+      events: { view: false, edit: false, scopes: [] },
+      media: { view: true, edit: true, scopes: [] },
+    } };
+    expect(mayView(user, 'careers')).toBe(true);
+    expect(mayManage(user, 'careers', 'QLD')).toBe(false);
+    expect(mayView(user, 'events')).toBe(false);
+    expect(mayEditArea(user, 'media')).toBe(true);
+    expect(mayManagePeople(user)).toBe(false);
+    expect(mayView({ ...user, status: 'suspended' }, 'careers')).toBe(false);
+  });
+  it('requires the selected editing team and rejects malformed permissions', () => {
+    const permissions = { careers: { view: true, edit: true, scopes: ['QLD' as const] } };
+    expect(mayManage({ ...editor, permissions }, 'careers', 'QLD')).toBe(true);
+    expect(mayManage({ ...editor, permissions }, 'careers', 'NSW')).toBe(false);
+    expect(validPermissions(permissions)).toBe(true);
+    expect(validPermissions({ careers: { view: false, edit: true, scopes: ['QLD'] } })).toBe(false);
+    expect(validPermissions({ careers: { view: true, edit: true, scopes: [] } })).toBe(false);
+    expect(validPermissions({ users: { view: true, edit: true, scopes: [] } })).toBe(false);
   });
 });
