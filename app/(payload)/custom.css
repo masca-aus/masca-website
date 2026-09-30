@@ -378,39 +378,43 @@ html[data-theme="dark"] .masca-admin-logo { color: #d9dcff; }
 html[data-theme="dark"] .login__wrap { border-top-color: #7775cc; box-shadow: 0 18px 50px #0005; }
 html[data-theme="dark"] .nav { border-right-color: var(--theme-elevation-200); background: var(--theme-bg); }
 
-/* Login keeps Payload's authentication form and validation intact. */
+/* Keep the native authentication form, with one compact visual rhythm. */
 .template-minimal:has(.masca-login-welcome) {
-  background: var(--theme-bg);
   min-height: 100dvh;
+  background: var(--theme-bg);
+  padding: 40px 20px;
 }
 .template-minimal__wrap:has(.masca-login-welcome) {
-  width: min(100%, 400px);
+  width: min(100%, 360px);
   box-sizing: border-box;
-  padding: 24px;
+  padding: 0;
   border: 0;
-  border-radius: 0;
-  background: var(--theme-bg);
+  background: transparent;
   box-shadow: none;
-  animation: masca-login-enter 280ms ease-out;
+  animation: masca-login-enter 240ms ease-out;
 }
-.template-minimal__wrap:has(.masca-login-welcome) .login__brand { margin-bottom: 24px; }
-.template-minimal__wrap:has(.masca-login-welcome) .masca-admin-logo img { width: 40px; margin: 0; }
+.template-minimal__wrap:has(.masca-login-welcome) .login__brand {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 18px;
+}
+.template-minimal__wrap:has(.masca-login-welcome) .masca-admin-logo { margin: 0; gap: 0; }
+.template-minimal__wrap:has(.masca-login-welcome) .masca-admin-logo img { width: 40px; height: auto; margin: 0; }
 .template-minimal__wrap:has(.masca-login-welcome) .masca-admin-logo span { display: none; }
-.masca-login-welcome { text-align: left; margin-bottom: 28px; }
-.masca-login-welcome h1 { font-size: 1.75rem; letter-spacing: -.035em; margin: 10px 0; line-height: 1.15; }
-.masca-login-welcome p { color: var(--theme-elevation-650); font-size: .9rem; line-height: 1.6; margin: 0; }
-.template-minimal__wrap:has(.masca-login-welcome) input { border-radius: 10px; min-height: 46px; }
-.template-minimal__wrap:has(.masca-login-welcome) button[type="submit"] { width: 100%; min-height: 46px; border-radius: 10px; }
-.masca-login-help { margin-top: 24px; padding-top: 0; border-top: 0; text-align: center; font-size: .8rem; line-height: 1.6; color: var(--theme-elevation-650); }
-.masca-login-help p { margin: 0 0 12px; }
-.masca-login-help a { color: var(--theme-text); text-decoration: none; }
-.masca-login-help a:hover { text-decoration: underline; }
-@keyframes masca-login-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.masca-login-welcome { text-align: center; margin: 0 0 28px; }
+.masca-login-welcome h1 { font-size: 1.65rem; font-weight: 600; letter-spacing: -.035em; margin: 0 0 8px; line-height: 1.2; }
+.masca-login-welcome p { color: var(--theme-elevation-650); font-size: .85rem; line-height: 1.5; margin: 0; }
+.template-minimal__wrap:has(.masca-login-welcome) .login__form { margin: 0; }
+.template-minimal__wrap:has(.masca-login-welcome) .login__form__inputWrap { display: grid; gap: 18px; margin: 0 0 12px; }
+.template-minimal__wrap:has(.masca-login-welcome) .login__form__inputWrap .field-type { margin: 0; padding: 0; }
+.template-minimal__wrap:has(.masca-login-welcome) input { border-radius: 9px; min-height: 44px; box-shadow: none; background: var(--theme-elevation-50); }
+.template-minimal__wrap:has(.masca-login-welcome) .field-label { font-size: .8rem; margin-bottom: 6px; }
+.template-minimal__wrap:has(.masca-login-welcome) .login__form > a { display: block; text-align: right; font-size: .8rem; text-decoration: none; color: var(--theme-elevation-650); }
+.template-minimal__wrap:has(.masca-login-welcome) .login__form > a:hover { text-decoration: underline; }
+.template-minimal__wrap:has(.masca-login-welcome) button[type="submit"] { display: block; width: 100%; min-height: 44px; border-radius: 9px; margin: 20px 0 0; }
+.masca-login-help { margin: 24px 0 0; padding: 0; border: 0; text-align: center; font-size: .75rem; line-height: 1.5; color: var(--theme-elevation-650); }
+.masca-login-help p { margin: 0 0 10px; }
+.masca-login-help a { color: var(--theme-elevation-650); text-decoration: none; }
+.masca-login-help a:hover { color: var(--theme-text); text-decoration: underline; }
+@keyframes masca-login-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .template-minimal__wrap:has(.masca-login-welcome) { animation: none; } }
-
-.template-minimal__wrap:has(.masca-login-welcome) .masca-admin-logo { align-items: flex-start; gap: 0; }
-.template-minimal__wrap:has(.masca-login-welcome) input { box-shadow: none; background: var(--theme-elevation-50); }
-.template-minimal__wrap:has(.masca-login-welcome) .field-type { margin-bottom: 18px; }
-.template-minimal__wrap:has(.masca-login-welcome) .field-label { font-size: .85rem; }
-.template-minimal__wrap:has(.masca-login-welcome) form a { font-size: .8rem; text-decoration: none; color: var(--theme-elevation-650); }
-.template-minimal__wrap:has(.masca-login-welcome) form a:hover { text-decoration: underline; }
