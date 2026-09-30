@@ -164,7 +164,7 @@ export default buildConfig({
   collections: process.env.WORKSPACE_AUTH_ENABLED === "true" ? configureWorkspace(workspaceCollections()) : workspaceCollections(),
   /* Collections are declared below to share the existing public configuration. */
   db: postgresAdapter({
-    schemaName: workspaceSchema(),
+    schemaName: workspaceSchema() === "public" ? undefined : workspaceSchema(),
     pool: createDatabasePoolConfig(process.env.DATABASE_URI),
     migrationDir: path.resolve(dirname, "migrations"),
     push: workspaceSchemaPush(),
