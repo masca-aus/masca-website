@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   approvedGoogleIdentity,
+  contentAreas,
+  ownershipScopes,
+  mayManageSharedContent,
   mayManage,
   mayManagePeople,
   type ApprovedAccount,
@@ -68,5 +71,23 @@ describe("Workspace access boundaries", () => {
     expect(mayManagePeople(admin)).toBe(true);
     expect(mayManage(admin, "sponsors", "National")).toBe(true);
     expect(mayManagePeople({ ...admin, status: "suspended" })).toBe(false);
+  });
+});
+
+describe("All-content editor", () => {
+  it("can manage every content area and state without managing people", () => {
+    const account = { ...editor, allContentAccess: true };
+    for (const area of contentAreas)
+      for (const scope of ownershipScopes)
+        expect(mayManage(account, area, scope)).toBe(true);
+    expect(mayManageSharedContent(account)).toBe(true);
+    expect(mayManagePeople(account)).toBe(false);
+    expect(mayManageSharedContent(editor)).toBe(false);
+    expect(
+      mayManage({ ...account, status: "suspended" }, "careers", "QLD"),
+    ).toBe(false);
+    expect(mayManageSharedContent({ ...account, status: "suspended" })).toBe(
+      false,
+    );
   });
 });

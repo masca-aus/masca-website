@@ -119,6 +119,38 @@ export async function verifyWorkspacePreview(payload: Payload) {
       overrideAccess: false,
       req: editorReq,
     });
+    const broadEditor = await payload.update({
+      collection: "users",
+      id: editor.id,
+      overrideAccess: true,
+      data: { allContentAccess: true } as never,
+    });
+    const broadReq = { user: { ...broadEditor, collection: "users" as const } };
+    const allRecords = await payload.find({
+      collection: "careers",
+      draft: true,
+      overrideAccess: false,
+      req: broadReq,
+      where: { id: { in: created } },
+    });
+    assert.equal(allRecords.totalDocs, 2);
+    await payload.update({
+      collection: "careers",
+      id: created[1],
+      draft: true,
+      overrideAccess: false,
+      req: broadReq,
+      data: { title: prefix + " allowed national editing" },
+    });
+    await assert.rejects(() =>
+      payload.update({
+        collection: "users",
+        id: editor.id,
+        overrideAccess: false,
+        req: broadReq,
+        data: { role: "administrator" } as never,
+      }),
+    );
     const user = await payload.findByID({
       collection: "users",
       id: editor.id,

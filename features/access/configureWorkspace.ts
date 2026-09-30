@@ -11,6 +11,7 @@ import {
   ownershipScopes,
   mayManage,
   mayManagePeople,
+  mayManageSharedContent,
   isWorkspaceEmail,
   type ApprovedAccount,
   type ContentArea,
@@ -25,7 +26,7 @@ function scopeFilter(
   prefix = "",
 ): boolean | Where {
   const account = accountOf(user);
-  if (mayManagePeople(account)) return true;
+  if (mayManageSharedContent(account)) return true;
   if (!account || account.status !== "active") return false;
   const scopes = ownershipScopes.filter((scope) =>
     mayManage(account, area, scope),
@@ -86,9 +87,24 @@ export function configureWorkspace(
             options: ["invited", "active", "suspended"],
           },
           {
+            name: "allContentAccess",
+            type: "checkbox",
+            label: "All content",
+            defaultValue: false,
+            admin: {
+              condition: (_, data) => data.role === "editor",
+              description:
+                "Manage all departments and states, including Organisations and Media. Account management remains restricted to administrators.",
+            },
+          },
+          {
             name: "grants",
             type: "array",
             label: "Department and state access",
+            admin: {
+              condition: (_, data) =>
+                data.role === "editor" && !data.allContentAccess,
+            },
             fields: [
               {
                 name: "area",
@@ -167,7 +183,8 @@ export function configureWorkspace(
                 );
               // Administrators cannot suspend/demote themselves; deletion is disabled.
               if (
-                req.user?.id != null && req.user.id === originalDoc?.id &&
+                req.user?.id != null &&
+                req.user.id === originalDoc?.id &&
                 ((data.role && data.role !== "administrator") ||
                   (data.status && data.status !== "active"))
               )
@@ -214,7 +231,7 @@ export function configureWorkspace(
             type: "select",
             required: true,
             defaultValue: ({ user }) =>
-              mayManagePeople(accountOf(user))
+              mayManageSharedContent(accountOf(user))
                 ? "National"
                 : accountOf(user)?.grants?.find((grant) => grant.area === area)
                     ?.scope,
@@ -263,7 +280,21 @@ export function configureWorkspace(
         },
       };
     }
-    // Shared resources are readable but only administrators can mutate them.
+    if (["media", "organisations"].includes(collection.slug)) {
+      const shared: Access = ({ req }) =>
+        mayManageSharedContent(accountOf(req.user));
+      return {
+        ...collection,
+        access: {
+          ...collection.access,
+          create: shared,
+          update: shared,
+          delete: shared,
+          readVersions: shared,
+        },
+      };
+    }
+    // Any future settings collections stay administrator-only.
     return {
       ...collection,
       access: {

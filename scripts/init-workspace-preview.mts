@@ -13,6 +13,10 @@ await connection.query("CREATE SCHEMA IF NOT EXISTS cms_auth_preview");
 const tables = await connection.query(
   "SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema='cms_auth_preview'",
 );
+if (tables.rows[0].count > 0)
+  await connection.query(
+    "ALTER TABLE cms_auth_preview.users ADD COLUMN IF NOT EXISTS all_content_access boolean DEFAULT false",
+  );
 await connection.end();
 process.env.WORKSPACE_INIT_SCHEMA =
   tables.rows[0].count === 0 ? "true" : "false";

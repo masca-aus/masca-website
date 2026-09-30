@@ -234,6 +234,10 @@ export interface User {
   email: string;
   role: 'administrator' | 'editor';
   status: 'invited' | 'active' | 'suspended';
+  /**
+   * Manage all departments and states, including Organisations and Media. Account management remains restricted to administrators.
+   */
+  allContentAccess?: boolean | null;
   grants?:
     | {
         area: 'events' | 'careers' | 'committee' | 'sponsors';
@@ -631,6 +635,7 @@ export interface UsersSelect<T extends boolean = true> {
   email?: T;
   role?: T;
   status?: T;
+  allContentAccess?: T;
   grants?:
     | T
     | {

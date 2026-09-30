@@ -25,6 +25,7 @@ export type ApprovedAccount = {
   status: "invited" | "active" | "suspended";
   role: "administrator" | "editor";
   grants: AccessGrant[];
+  allContentAccess?: boolean | null;
   googleSubject?: string | null;
 };
 export function normalizedEmail(email: string) {
@@ -46,6 +47,7 @@ export function mayManage(
     return false;
   return (
     account.role === "administrator" ||
+    account.allContentAccess === true ||
     (account.grants ?? []).some(
       (grant) => grant.area === area && grant.scope === scope,
     )
@@ -83,4 +85,15 @@ export function approvedGoogleIdentity(
   )
     return false;
   return !account.googleSubject || account.googleSubject === claims.sub;
+}
+
+export function mayManageSharedContent(
+  account: ApprovedAccount | null | undefined,
+) {
+  return (
+    !!account &&
+    account.status === "active" &&
+    isWorkspaceEmail(account.email) &&
+    (account.role === "administrator" || account.allContentAccess === true)
+  );
 }

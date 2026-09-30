@@ -1,5 +1,6 @@
 import {
   mayManagePeople,
+  mayManageSharedContent,
   type ApprovedAccount,
 } from "@/features/access/workspacePolicy";
 import Link from "next/link";
@@ -90,7 +91,7 @@ export async function MascaDashboard({
       : undefined;
   const showEvents =
     !account ||
-    mayManagePeople(account) ||
+    mayManageSharedContent(account) ||
     (account.grants ?? []).some((g) => g.area === "events");
   const overview = showEvents
     ? await loadEventDashboard(req.payload, req)
@@ -106,8 +107,9 @@ export function DashboardContent({
   account?: ApprovedAccount;
 }) {
   const isAdmin = !account || mayManagePeople(account);
+  const allContent = !account || mayManageSharedContent(account);
   const showEvents =
-    isAdmin || account?.grants?.some((g) => g.area === "events");
+    allContent || account?.grants?.some((g) => g.area === "events");
   return (
     <main className="masca-dashboard" style={{ marginInline: "auto" }}>
       <header className="masca-dashboard__heading">
@@ -154,54 +156,60 @@ export function DashboardContent({
           { id: "content", title: "Content" },
           { id: "resources", title: "Resources" },
         ] as const
-      ).filter(group => isAdmin || group.id === "content").map((group) => (
-        <section key={group.id} aria-labelledby={`manage-${group.id}`}>
-          <div className="masca-dashboard__section-heading">
-            <h2 id={`manage-${group.id}`}>{group.title}</h2>
-          </div>
-          <div className="masca-dashboard__content">
-            {contentAreas
-              .filter(
-                (area) =>
-                  area.group === group.id &&
-                  (isAdmin ||
-                    account?.grants?.some((g) =>
-                      area.href.endsWith(`/${g.area}`),
-                    )),
-              )
-              .map((area) => (
-                <article
-                  className="masca-dashboard__content-row"
-                  data-area={area.name.toLowerCase()}
-                  key={area.name}
-                >
-                  <div className="masca-dashboard__content-label">
-                    <area.Icon size={21} strokeWidth={1.5} aria-hidden="true" />
-                    <div>
-                      <h3>{area.name}</h3>
-                      <p>{area.description}</p>
+      )
+        .filter((group) => allContent || group.id === "content")
+        .map((group) => (
+          <section key={group.id} aria-labelledby={`manage-${group.id}`}>
+            <div className="masca-dashboard__section-heading">
+              <h2 id={`manage-${group.id}`}>{group.title}</h2>
+            </div>
+            <div className="masca-dashboard__content">
+              {contentAreas
+                .filter(
+                  (area) =>
+                    area.group === group.id &&
+                    (allContent ||
+                      account?.grants?.some((g) =>
+                        area.href.endsWith(`/${g.area}`),
+                      )),
+                )
+                .map((area) => (
+                  <article
+                    className="masca-dashboard__content-row"
+                    data-area={area.name.toLowerCase()}
+                    key={area.name}
+                  >
+                    <div className="masca-dashboard__content-label">
+                      <area.Icon
+                        size={21}
+                        strokeWidth={1.5}
+                        aria-hidden="true"
+                      />
+                      <div>
+                        <h3>{area.name}</h3>
+                        <p>{area.description}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="masca-dashboard__actions">
-                    <Link
-                      className="masca-action masca-action--quiet"
-                      href={area.href}
-                      aria-label={`Manage ${area.name.toLowerCase()}`}
-                    >
-                      Manage
-                    </Link>
-                    <Link
-                      className="masca-action masca-action--secondary"
-                      href={area.createHref}
-                    >
-                      {area.action}
-                    </Link>
-                  </div>
-                </article>
-              ))}
-          </div>
-        </section>
-      ))}
+                    <div className="masca-dashboard__actions">
+                      <Link
+                        className="masca-action masca-action--quiet"
+                        href={area.href}
+                        aria-label={`Manage ${area.name.toLowerCase()}`}
+                      >
+                        Manage
+                      </Link>
+                      <Link
+                        className="masca-action masca-action--secondary"
+                        href={area.createHref}
+                      >
+                        {area.action}
+                      </Link>
+                    </div>
+                  </article>
+                ))}
+            </div>
+          </section>
+        ))}
       {isAdmin && (
         <footer className="masca-dashboard__content-row">
           <div>
