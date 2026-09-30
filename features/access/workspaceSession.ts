@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto';
 import { jwtVerify, SignJWT } from "jose";
 import { parseCookies, type AuthStrategy } from "payload";
 import type { ApprovedAccount } from "./workspacePolicy.ts";
@@ -14,7 +15,7 @@ export const workspaceStrategy: AuthStrategy = {
       if (!token) return { user: null };
       const { payload: claims } = await jwtVerify(
         token,
-        new TextEncoder().encode(payload.secret),
+        sessionKey(payload.secret),
         {
           algorithms: ["HS256"],
           audience: "masca-cms",
@@ -56,5 +57,7 @@ export async function signWorkspaceSession(
     .setAudience("masca-cms")
     .setIssuedAt()
     .setExpirationTime("8h")
-    .sign(new TextEncoder().encode(secret));
+    .sign(sessionKey(secret));
 }
+
+function sessionKey(secret:string) { return createHmac("sha256", secret).update("masca-workspace-session-v1").digest(); }
