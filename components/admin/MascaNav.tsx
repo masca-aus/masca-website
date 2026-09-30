@@ -27,10 +27,11 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
   const dashboard = pathname === "/admin" || pathname === "/admin/";
 
   useEffect(() => {
+    if (!hydrated) return;
     // Payload closes on small phones; also close its tablet overlay after navigation.
     if (window.matchMedia("(max-width: 1024px)").matches) setNavOpen(false);
     else if (dashboard) setNavOpen(true);
-  }, [pathname, dashboard, setNavOpen]);
+  }, [pathname, dashboard, hydrated, setNavOpen]);
 
   return (
     <>
