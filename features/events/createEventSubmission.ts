@@ -1,3 +1,4 @@
+import { publicEventSubmission } from "../access/publicSubmissionContext.ts";
 import "server-only";
 
 import type { File as PayloadFile } from "payload";
@@ -16,8 +17,10 @@ export interface EventSubmissionPayload {
         collection: "events";
         overrideAccess: true;
         draft: true;
+        context: { publicEventSubmission: symbol };
         data: EventSubmissionInput & {
           poster?: number | string;
+          owningScope: "National";
           reviewStatus: "pending";
           _status: "draft";
         };
@@ -55,6 +58,7 @@ export async function createEventSubmission({
     collection: "events",
     overrideAccess: true,
     draft: true,
+    context: { publicEventSubmission },
     data: {
       title: data.title,
       organisation: data.organisation,
@@ -67,6 +71,7 @@ export async function createEventSubmission({
       contactName: data.contactName,
       contactEmail: data.contactEmail,
       ...(posterID !== undefined ? { poster: posterID } : {}),
+      owningScope: "National",
       reviewStatus: "pending",
       _status: "draft",
     },

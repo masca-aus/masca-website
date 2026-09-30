@@ -1,3 +1,4 @@
+import { workspaceSchema } from "@/features/access/workspaceEnvironment";
 import { sql } from "@payloadcms/db-postgres";
 import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
     // A single conditional SQL update prevents a concurrent suspension or identity
     // binding from being overwritten between approval lookup and first login.
     const bound = await payload.db.drizzle.execute(sql`
-      UPDATE "cms_auth_preview"."users"
+      UPDATE ${sql.identifier(workspaceSchema())}."users"
       SET google_subject = ${identity.sub}, status = 'active', updated_at = NOW()
       WHERE id = ${account.id} AND session_revision = ${account.sessionRevision}
         AND status IN ('invited','active')

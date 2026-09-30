@@ -1,3 +1,4 @@
+import { publicEventSubmission } from "./publicSubmissionContext.ts";
 import { randomUUID } from "node:crypto";
 import {
   APIError,
@@ -247,7 +248,8 @@ export function configureWorkspace(
           ...collection.hooks,
           beforeChange: [
             ...(collection.hooks?.beforeChange ?? []),
-            ({ data, originalDoc, req }) => {
+            ({ data, originalDoc, req, context, operation }) => {
+              if (area === "events" && operation === "create" && context.publicEventSubmission === publicEventSubmission && data._status === "draft" && data.reviewStatus === "pending" && data.owningScope === "National") return data;
               if (
                 !mayManage(
                   accountOf(req.user),
