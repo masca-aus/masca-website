@@ -1,5 +1,5 @@
 import { type MigrateUpArgs, type MigrateDownArgs, sql } from '@payloadcms/db-postgres';
-import { submissionSchemaSQL } from '../features/submissions/schema';
+import { submissionSchemaSQL } from '../features/submissions/schema.ts';
 export async function up({db}:MigrateUpArgs):Promise<void> {await db.execute(sql.raw(submissionSchemaSQL('public')));}
 export async function down({db}:MigrateDownArgs):Promise<void> {
  await db.execute(sql`ALTER TABLE public.events DROP COLUMN IF EXISTS submitted_for_review;
