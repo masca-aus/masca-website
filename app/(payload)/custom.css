@@ -446,3 +446,8 @@ html[data-theme="dark"] .template-minimal:has(.masca-login-welcome)::before {
   .template-minimal:has(.masca-login-welcome) { padding-bottom: 85px; }
   .template-minimal:has(.masca-login-welcome)::before { bottom: 16px; }
 }
+
+@media (min-width: 1025px) {
+  .template-default:has(.masca-nav--dashboard) { grid-template-columns: var(--nav-width) minmax(0, 1fr); }
+  .masca-nav--dashboard .masca-nav__heading button { display: none; }
+}

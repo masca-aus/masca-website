@@ -2,7 +2,7 @@
 
 import { Link, NavToggler, useNav } from "@payloadcms/ui";
 import { usePathname } from "next/navigation";
-import { useEffect, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { BriefcaseBusiness, CalendarDays, Handshake, House, Images, Building2, Users, UserRound, PanelLeftClose, PanelLeftOpen, ShieldCheck, LogOut } from "lucide-react";
 
 import { MascaMark } from "./MascaBrand";
@@ -26,17 +26,27 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
   const { navOpen, navRef, hydrated, shouldAnimate, setNavOpen } = useNav();
   const dashboard = pathname === "/admin" || pathname === "/admin/";
 
+  const [desktop, setDesktop] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 1025px)");
+    const update = () => setDesktop(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  const open = navOpen || (dashboard && desktop);
+
   useEffect(() => {
     if (!hydrated) return;
     // Payload closes on small phones; also close its tablet overlay after navigation.
     if (window.matchMedia("(max-width: 1024px)").matches) setNavOpen(false);
-    else if (dashboard) setNavOpen(true);
+
   }, [pathname, dashboard, hydrated, setNavOpen]);
 
   return (
     <>
-    {dashboard && !navOpen && <button type="button" className="masca-dashboard-menu" aria-label="Open account menu" onClick={() => setNavOpen(true)}><PanelLeftOpen size={20} /><span>Menu</span></button>}
-    <aside className={["nav", "masca-nav", dashboard && "masca-nav--dashboard", navOpen && "nav--nav-open", hydrated && "nav--nav-hydrated", shouldAnimate && "nav--nav-animate"].filter(Boolean).join(" ")} inert={!navOpen}>
+    {dashboard && !open && <button type="button" className="masca-dashboard-menu" aria-label="Open account menu" onClick={() => setNavOpen(true)}><PanelLeftOpen size={20} /><span>Menu</span></button>}
+    <aside className={["nav", "masca-nav", dashboard && "masca-nav--dashboard", open && "nav--nav-open", hydrated && "nav--nav-hydrated", shouldAnimate && "nav--nav-animate"].filter(Boolean).join(" ")} inert={!open}>
       <div className="nav__scroll" ref={navRef}>
         <div className="masca-nav__heading"><span className="masca-nav__brand"><MascaMark /><span>MASCA <small>CMS</small></span></span><NavToggler><PanelLeftClose size={19} /></NavToggler></div>
         <nav aria-label="CMS navigation" className="masca-nav__links">
