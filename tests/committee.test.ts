@@ -122,6 +122,7 @@ describe("committee collection (Payload-served committee page)", () => {
 
 describe("toCommitteeMember (Payload doc → page shape)", () => {
   const doc: Committee = {
+    ...{owningScope:"National" as const},
     id: 7,
     _order: "a0",
     name: "Ava Tan",
@@ -181,6 +182,7 @@ describe("toCommitteeMember (Payload doc → page shape)", () => {
 describe("getCommitteeGroups", () => {
   const member = (id: string, department: Committee["department"]) =>
     toCommitteeMember({
+      ...{owningScope:"National" as const},
       id: Number(id),
       _order: id,
       name: `Member ${id}`,

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function LoginWelcome({
   searchParams,
 }: {
@@ -15,6 +17,8 @@ export function LoginWelcome({
               the Digital team.
             </p>
           )}
+          {/* OAuth starts with a full navigation; prefetching must not create a login transaction. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a
             className="masca-google-signin masca-action masca-action--primary"
             href="/api/auth/google/start"
@@ -30,7 +34,7 @@ export function LoginHelp() {
   return (
     <div className="masca-login-help">
       <p>Need access? Contact the Digital team.</p>
-      <a href="/">← Back to MASCA website</a>
+      <Link href="/">← Back to MASCA website</Link>
     </div>
   );
 }

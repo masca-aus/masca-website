@@ -139,6 +139,10 @@ export interface UserAuthOperations {
  */
 export interface Career {
   id: number;
+  /**
+   * The team responsible for this record. Independent of the public event/job location.
+   */
+  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
   cmsStatus?:
     | {
         [k: string]: unknown;
@@ -220,30 +224,27 @@ export interface CareerLifecycle {
   createdAt: string;
 }
 /**
- * Manage the people who can sign in and update MASCA website content.
+ * Approve a MASCA Workspace email, assign access, or suspend an account.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
-  updatedAt: string;
-  createdAt: string;
   email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
+  role: 'administrator' | 'editor';
+  status: 'invited' | 'active' | 'suspended';
+  grants?:
     | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
+        area: 'events' | 'careers' | 'committee' | 'sponsors';
+        scope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
+        id?: string | null;
       }[]
     | null;
-  password?: string | null;
+  googleSubject?: string | null;
+  sessionRevision?: string | null;
+  updatedAt: string;
+  createdAt: string;
   collection: 'users';
 }
 /**
@@ -291,13 +292,17 @@ export interface EventLifecycle {
   createdAt: string;
 }
 /**
- * Add events for MASCA students and review submissions before they appear on the website. An event appears publicly only after it is approved and published.
+ * Manage events for MASCA students. Save a private draft or publish when ready.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "events".
  */
 export interface Event {
   id: number;
+  /**
+   * The team responsible for this record. Independent of the public event/job location.
+   */
+  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
   cmsStatus?:
     | {
         [k: string]: unknown;
@@ -388,6 +393,10 @@ export interface Media {
  */
 export interface Committee {
   id: number;
+  /**
+   * The team responsible for this record. Independent of the public event/job location.
+   */
+  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
   _order?: string | null;
   name: string;
   /**
@@ -430,6 +439,10 @@ export interface Committee {
  */
 export interface Sponsor {
   id: number;
+  /**
+   * The team responsible for this record. Independent of the public event/job location.
+   */
+  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
   /**
    * Sponsor name — doubles as the logo's alt text.
    */
@@ -536,6 +549,7 @@ export interface PayloadMigration {
  * via the `definition` "careers_select".
  */
 export interface CareersSelect<T extends boolean = true> {
+  owningScope?: T;
   cmsStatus?: T;
   title?: T;
   company?: T;
@@ -614,22 +628,20 @@ export interface EventLifecycleSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  updatedAt?: T;
-  createdAt?: T;
   email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
+  role?: T;
+  status?: T;
+  grants?:
     | T
     | {
+        area?: T;
+        scope?: T;
         id?: T;
-        createdAt?: T;
-        expiresAt?: T;
       };
+  googleSubject?: T;
+  sessionRevision?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -668,6 +680,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "committee_select".
  */
 export interface CommitteeSelect<T extends boolean = true> {
+  owningScope?: T;
   _order?: T;
   name?: T;
   university?: T;
@@ -686,6 +699,7 @@ export interface CommitteeSelect<T extends boolean = true> {
  * via the `definition` "sponsors_select".
  */
 export interface SponsorsSelect<T extends boolean = true> {
+  owningScope?: T;
   name?: T;
   date?: T;
   logo?: T;
@@ -697,6 +711,7 @@ export interface SponsorsSelect<T extends boolean = true> {
  * via the `definition` "events_select".
  */
 export interface EventsSelect<T extends boolean = true> {
+  owningScope?: T;
   cmsStatus?: T;
   lifecycle?: T;
   title?: T;
