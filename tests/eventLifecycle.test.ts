@@ -3,10 +3,10 @@ import { nextLifecycle, eventListFilter, reportPeriodKey, csvCell } from '@/feat
 
 describe('event lifecycle', () => {
  it('retains completion when archiving and restoring', () => {
-  const completed = nextLifecycle(null, 'complete', '2026-09-17T00:00:00Z');
+  const completed = { status: 'completed', completedAt: '2026-09-17T00:00:00Z' };
   const archived = nextLifecycle(completed, 'archive', '2026-09-18T00:00:00Z');
   expect(archived.completedAt).toBe(completed.completedAt);
-  expect(nextLifecycle(archived, 'restore', '2026-09-19T00:00:00Z')).toMatchObject({ status: 'completed', archivedAt: null });
+  expect(nextLifecycle(archived, 'restore', '2026-09-19T00:00:00Z')).toMatchObject({ status: 'active', archivedAt: null, completedAt: null });
  });
  it('restores an uncompleted event to active and rejects invalid transitions', () => {
   expect(nextLifecycle(nextLifecycle(null, 'archive', 'now'), 'restore', 'now').status).toBe('active');
@@ -23,16 +23,10 @@ describe('event lifecycle', () => {
  });
 });
 
-it('reopens completed events and clears completion before a later archive/restore', () => {
- const active = nextLifecycle({ status: 'completed', completedAt: 'yesterday' }, 'reopen', 'today');
- expect(active).toMatchObject({ status: 'active', completedAt: null });
- expect(nextLifecycle(nextLifecycle(active, 'archive', 'today'), 'restore', 'tomorrow').status).toBe('active');
- expect(() => nextLifecycle({ status: 'archived' }, 'reopen', 'today')).toThrow();
-});
 it('keeps active, completed and archived event lists separate', async () => {
  const payload = { find: async () => ({ docs: [{ event: 1, status: 'completed' }, { event: 2, status: 'archived' }, { event: 3, status: 'active' }] }) };
  const filter = (eventView: string) => eventListFilter({ req: { payload, query: { eventView } } as never });
- expect(await filter('current')).toEqual({ id: { not_in: [1, 2] } });
- expect(await filter('completed')).toEqual({ id: { in: [1] } });
+ expect(await filter('current')).toEqual({ id: { not_in: [2] } });
+ expect(await filter('completed')).toEqual({ id: { not_in: [2] } });
  expect(await filter('archived')).toEqual({ id: { in: [2] } });
 });

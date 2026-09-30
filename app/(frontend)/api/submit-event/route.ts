@@ -23,6 +23,7 @@ function submissionKey(request: NextRequest): string {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse<SubmitEventResponse>> {
+  if (process.env.WORKSPACE_AUTH_ENABLED === "true") return NextResponse.json({ ok: false, message: "Public submissions are unavailable on this authentication test preview." }, { status: 503 });
   if (!consumeSubmissionAttempt(submissionKey(request))) {
     return NextResponse.json(
       { ok: false, message: "Too many submission attempts. Please try again in an hour." },

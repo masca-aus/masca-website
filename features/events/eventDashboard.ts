@@ -28,7 +28,6 @@ export async function loadEventDashboard(
   now = new Date(),
 ): Promise<EventDashboardOverview> {
   const ids = (await lifecycleIDs(payload, "archived", req)).concat(-1);
-  const completedIDs = await lifecycleIDs(payload, "completed", req);
   const visible: Where = { id: { not_in: ids } };
   const pendingWhere: Where = { ...visible, reviewStatus: { equals: "pending" } };
   const publishedWhere: Where = {
@@ -55,7 +54,7 @@ export async function loadEventDashboard(
     payload.find({ ...shared, draft: true, where: draftWhere, sort: "-updatedAt", limit: 3, depth: 0,
       select: { title: true, organisation: true, updatedAt: true } }),
     payload.find({ ...shared, draft: false,
-      where: { id: { not_in: [...ids, ...completedIDs] }, and: [...publishedWhere.and!, { or: [
+      where: { id: { not_in: ids }, and: [...publishedWhere.and!, { or: [
         { startDate: { greater_than_equal: now.toISOString() } },
         { endDate: { greater_than_equal: now.toISOString() } },
       ] }] }, sort: "startDate", limit: 3, depth: 0,

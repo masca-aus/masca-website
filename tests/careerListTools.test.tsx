@@ -9,22 +9,22 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: h.refresh }), u
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.clearAllMocks(); });
 it('selects the requested career list with accessible tabs', () => {
   render(<CareerListTools />);
-  expect(screen.getByRole('link', { name: 'Closed' }).getAttribute('aria-current')).toBe('page');
+  expect(screen.getByRole('link', { name: 'Archived' }).getAttribute('aria-current')).toBe('page');
   expect(screen.getByRole('link', { name: 'Current' }).getAttribute('href')).toBe('/admin/collections/careers?careerView=active');
 });
 it('sends lifecycle changes separately from draft content', async () => {
   const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) }); vi.stubGlobal('fetch', fetcher);
   render(<CareerLifecycleCell rowData={{ id: 12, title: 'Engineer' }} cellData="closed" />);
-  fireEvent.click(screen.getByRole('button', { name: 'Listing state for Engineer: Closed' }));
-  fireEvent.click(screen.getByRole('menuitem', { name: 'Reopen opportunity' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Listing state for Engineer: Archived' }));
+  fireEvent.click(screen.getByRole('menuitem', { name: 'Restore as draft' }));
   await waitFor(() => expect(h.refresh).toHaveBeenCalledOnce());
-  expect(fetcher).toHaveBeenCalledWith('/api/careers/12/lifecycle', expect.objectContaining({ method: 'POST', body: JSON.stringify({ action: 'reopen' }) }));
+  expect(fetcher).toHaveBeenCalledWith('/api/careers/12/lifecycle', expect.objectContaining({ method: 'POST', body: JSON.stringify({ action: 'restore' }) }));
 });
 it('shows failed lifecycle actions without claiming success', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, json: async () => ({ message: 'Please sign in again.' }) }));
   render(<CareerLifecycleCell rowData={{ id: 12 }} cellData="archived" />);
   fireEvent.click(screen.getByRole('button'));
-  fireEvent.click(screen.getByRole('menuitem', { name: 'Restore opportunity' }));
+  fireEvent.click(screen.getByRole('menuitem', { name: 'Restore as draft' }));
   await waitFor(() => expect(screen.getByRole('alert').textContent).toBe('Please sign in again.'));
   expect(h.refresh).not.toHaveBeenCalled();
 });

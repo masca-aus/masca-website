@@ -12,7 +12,7 @@ export const eventReport: PayloadHandler = async req => {
     select: { title: true, organisation: true, startDate: true, endDate: true, state: true, reviewStatus: true, _status: true } });
   const rows = docs.filter(doc => doc.startDate && Number.isFinite(Date.parse(doc.startDate)) && reportPeriodKey(doc.startDate, doc.state).startsWith(period)).map(doc => {
     const record = lifecycle.get(doc.id);
-    return { id: doc.id, title: doc.title || 'Untitled event', organisation: doc.organisation || 'Not specified', startDate: doc.startDate, state: doc.state, lifecycle: record?.status ?? 'active', completedAt: record?.completedAt ?? null, reviewStatus: doc.reviewStatus, publication: doc._status };
+    return { id: doc.id, title: doc.title || 'Untitled event', organisation: doc.organisation || 'Not specified', startDate: doc.startDate, state: doc.state, lifecycle: record?.status ?? 'active', completedAt: record?.completedAt ?? (Date.parse(doc.endDate || doc.startDate) < Date.now() ? (doc.endDate || doc.startDate) : null), reviewStatus: doc.reviewStatus, publication: doc._status };
   }).sort((a, b) => a.startDate.localeCompare(b.startDate));
   const counts = (key: 'state' | 'organisation') => Object.entries(rows.reduce<Record<string, number>>((totals, row) => { const label = row[key] || 'Not specified'; totals[label] = (totals[label] ?? 0) + 1; return totals; }, {})).sort((a,b) => b[1]-a[1]);
   const headers = { 'Cache-Control': 'private, no-store' };

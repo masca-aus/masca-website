@@ -71,6 +71,7 @@ describe("sponsors collection (Payload-served marquee)", () => {
 
 describe("toSponsor (Payload doc → marquee shape)", () => {
   const doc: SponsorDoc = {
+    ...{owningScope:"National" as const},
     id: 3,
     name: "Teh Tarik Co",
     logo: {

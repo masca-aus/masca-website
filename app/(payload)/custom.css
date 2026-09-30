@@ -316,10 +316,12 @@ html[data-theme="dark"] .masca-action--primary:hover, html[data-theme="dark"] .m
 .masca-document-back-link { border-color: transparent; background: transparent; color: var(--theme-elevation-650); padding-inline: .25rem; }
 .masca-document-back-link:hover { background: transparent; border-color: transparent; color: var(--theme-text); text-decoration: underline; }
 
-/* The dashboard has its own navigation cards and stays full width. */
-.template-default:has(.masca-dashboard-nav-hidden) { grid-template-columns: minmax(0, 1fr); }
-body:has(.masca-dashboard-nav-hidden) .template-default__nav-toggler-wrapper,
-body:has(.masca-dashboard-nav-hidden) .app-header__mobile-nav-toggler { display: none; }
+/* Dashboard cards supply content navigation; the sidebar holds settings. */
+body:has(.masca-nav--dashboard) .app-header,
+body:has(.masca-nav--dashboard) .template-default__nav-toggler-wrapper { display: none; }
+.masca-nav--dashboard .masca-nav__account { margin-top: 0; padding-top: 1rem; }
+.masca-dashboard-menu { position: fixed; top: 12px; left: 16px; z-index: var(--z-modal); display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 12px; border: 1px solid var(--theme-elevation-150); border-radius: 10px; background: var(--theme-bg); color: var(--theme-text); cursor: pointer; }
+body:has(.masca-dashboard-menu) .template-default__wrap { padding-top: 56px; }
 .masca-nav { border-right: 1px solid var(--theme-elevation-150); background: var(--theme-bg); }
 .masca-nav .nav__scroll { padding: 1.25rem 1rem; }
 .masca-nav__heading { display: flex; align-items: center; justify-content: space-between; min-height: 3rem; margin-bottom: 1.25rem; padding-inline: .75rem; font-weight: 750; letter-spacing: .04em; }
@@ -377,3 +379,89 @@ html[data-theme="dark"] .btn--style-primary {
 html[data-theme="dark"] .masca-admin-logo { color: #d9dcff; }
 html[data-theme="dark"] .login__wrap { border-top-color: #7775cc; box-shadow: 0 18px 50px #0005; }
 html[data-theme="dark"] .nav { border-right-color: var(--theme-elevation-200); background: var(--theme-bg); }
+
+/* Keep the native authentication form, with one compact visual rhythm. */
+.template-minimal:has(.masca-login-welcome) {
+  min-height: 100dvh;
+  background: var(--theme-bg);
+  padding: 40px 20px;
+}
+.template-minimal__wrap:has(.masca-login-welcome) {
+  width: min(100%, 360px);
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  animation: masca-login-enter 240ms ease-out;
+}
+.template-minimal__wrap:has(.masca-login-welcome) .login__brand {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 18px;
+}
+.template-minimal__wrap:has(.masca-login-welcome) .masca-admin-logo { margin: 0; gap: 0; }
+.template-minimal__wrap:has(.masca-login-welcome) .masca-admin-logo img { width: 40px; height: auto; margin: 0; }
+.template-minimal__wrap:has(.masca-login-welcome) .masca-admin-logo span { display: none; }
+.masca-login-welcome { text-align: center; margin: 0 0 28px; }
+.masca-login-welcome h1 { font-size: 1.65rem; font-weight: 600; letter-spacing: -.035em; margin: 0 0 8px; line-height: 1.2; }
+.masca-login-welcome p { color: var(--theme-elevation-650); font-size: .85rem; line-height: 1.5; margin: 0; }
+.template-minimal__wrap:has(.masca-login-welcome) .login__form { margin: 0; }
+.template-minimal__wrap:has(.masca-login-welcome) .login__form__inputWrap { display: grid; gap: 18px; margin: 0 0 12px; }
+.template-minimal__wrap:has(.masca-login-welcome) .login__form__inputWrap .field-type { margin: 0; padding: 0; }
+.template-minimal__wrap:has(.masca-login-welcome) input { border-radius: 9px; min-height: 44px; box-shadow: none; background: var(--theme-elevation-50); }
+.template-minimal__wrap:has(.masca-login-welcome) .field-label { font-size: .8rem; margin-bottom: 6px; }
+.template-minimal__wrap:has(.masca-login-welcome) .login__form > a { display: block; text-align: right; font-size: .8rem; text-decoration: none; color: var(--theme-elevation-650); }
+.template-minimal__wrap:has(.masca-login-welcome) .login__form > a:hover { text-decoration: underline; }
+.template-minimal__wrap:has(.masca-login-welcome) button[type="submit"] { display: block; width: 100%; min-height: 44px; border-radius: 9px; margin: 20px 0 0; }
+.masca-login-help { margin: 24px 0 0; padding: 0; border: 0; text-align: center; font-size: .75rem; line-height: 1.5; color: var(--theme-elevation-650); }
+.masca-login-help p { margin: 0 0 10px; }
+.masca-login-help a { color: var(--theme-elevation-650); text-decoration: none; }
+.masca-login-help a:hover { color: var(--theme-text); text-decoration: underline; }
+@keyframes masca-login-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .template-minimal__wrap:has(.masca-login-welcome) { animation: none; } }
+
+.masca-google-signin { display: flex; justify-content: center; padding: 14px 20px; margin-top: 26px; border-radius: 10px; text-decoration: none; background: var(--masca-blue); color: white; font-size: .9rem; }
+/* A quiet national skyline, kept away from the sign-in controls. */
+.template-minimal:has(.masca-login-welcome) {
+  position: relative;
+  isolation: isolate;
+  padding-bottom: clamp(110px, 16vw, 210px);
+}
+.template-minimal:has(.masca-login-welcome)::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 12px;
+  height: clamp(90px, 16.25vw, 240px);
+  background: url('/illustrations/australia-landmarks.svg') center bottom / 100% auto no-repeat;
+  opacity: .13;
+  pointer-events: none;
+  z-index: -1;
+}
+html[data-theme="dark"] .template-minimal:has(.masca-login-welcome)::before {
+  filter: brightness(2.7) saturate(.5);
+  opacity: .16;
+}
+@media (max-width: 600px) {
+  .template-minimal:has(.masca-login-welcome) { padding-bottom: 85px; }
+  .template-minimal:has(.masca-login-welcome)::before { bottom: 16px; }
+}
+
+@media (min-width: 1025px) {
+  .template-default:has(.masca-nav--dashboard) { grid-template-columns: var(--nav-width) minmax(0, 1fr); }
+  .masca-nav--dashboard .masca-nav__heading button { display: none; }
+}
+
+.masca-permissions { border: 0; padding: 0; margin: 24px 0; }
+.masca-permissions > legend { font-size: 1.1rem; font-weight: 600; }
+.masca-permissions > p { color: var(--theme-elevation-650); }
+.masca-permissions__table { border: 1px solid var(--theme-elevation-150); border-radius: 12px; overflow: hidden; }
+.masca-permissions__row { display: grid; grid-template-columns: minmax(110px,1fr) 85px 85px; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--theme-elevation-100); }
+.masca-permissions__head { background: var(--theme-elevation-50); font-weight: 600; }
+.masca-permissions input { width: 18px; height: 18px; accent-color: var(--masca-blue); }
+.masca-permissions__scopes { border: 0; padding: 12px 16px 20px; display: flex; flex-wrap: wrap; gap: 14px; }
+.masca-permissions__scopes legend { font-size: .8rem; color: var(--theme-elevation-650); padding-top: 12px; }
+.masca-permissions__scopes label { display: flex; align-items: center; gap: 6px; }
+
+[data-read-only="true"] .masca-wizard-footer { display: none; }
+.masca-read-only-notice { padding: 12px 16px; background: var(--theme-elevation-50); border: 1px solid var(--theme-elevation-150); border-radius: 10px; color: var(--theme-elevation-650); }

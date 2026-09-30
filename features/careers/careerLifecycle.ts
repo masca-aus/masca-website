@@ -1,3 +1,4 @@
+import { mayManage, type ApprovedAccount, type OwnershipScope } from '../access/workspacePolicy.ts';
 import { initTransaction, commitTransaction, killTransaction, type Payload, type PayloadRequest, type PayloadHandler, type Where } from 'payload';
 import { sql, type PostgresAdapter } from '@payloadcms/db-postgres';
 import { revalidatePath } from 'next/cache.js';
@@ -7,9 +8,7 @@ export type CareerState = { status: string; closedAt?: string | null; archivedAt
 export function nextCareerLifecycle(previous: CareerState | null, action: string, now: string): CareerState {
   const current = previous ?? { status: 'active' };
   if (action === 'archive' && current.status !== 'archived') return { ...current, status: 'archived', archivedAt: now };
-  if (action === 'close' && current.status === 'active') return { ...current, status: 'closed', closedAt: now };
-  if (action === 'reopen' && current.status === 'closed') return { ...current, status: 'active', closedAt: null };
-  if (action === 'restore' && current.status === 'archived') return { ...current, status: current.closedAt ? 'closed' : 'active', archivedAt: null };
+  if (action === 'restore') return { ...current, status: 'active', closedAt: null, archivedAt: null };
   throw new Error('This action is unavailable for the current role status. Refresh and try again.');
 }
 export async function careerLifecycleRecords(payload: Pick<Payload, 'find'>, req?: PayloadRequest) {
@@ -41,7 +40,6 @@ export async function careerListFilter({ req }: { req: PayloadRequest }): Promis
   const records = await careerLifecycleRecords(req.payload, req);
   const idsFor = (status: string) => records.filter(row => row.status === status).map(row => typeof row.career === 'object' ? row.career.id : row.career);
   const archived = idsFor('archived');
-  if (view === 'archived') return { id: { in: archived.length ? archived : [-1] } };
   // Use published dates: an unpublished extension must not reopen the live listing.
   const context = { ...req.context, cmsStatusRead: true };
   const expired = await req.payload.find({ collection: 'careers', draft: false, pagination: false, depth: 0,
@@ -49,9 +47,8 @@ export async function careerListFilter({ req }: { req: PayloadRequest }): Promis
     where: { and: [{ _status: { equals: 'published' } }, careerExpiredWhere()] },
   });
   const closed = [...new Set([...idsFor('closed'), ...expired.docs.map(row => row.id)])];
-  if (view === 'closed') return { and: [{ id: { in: closed.length ? closed : [-1] } }, { id: { not_in: archived.length ? archived : [-1] } }] };
   const hidden = [...new Set([...closed, ...archived])];
-  return { id: { not_in: hidden.length ? hidden : [-1] } };
+  return { id: { [view === 'archived' || view === 'closed' ? 'in' : 'not_in']: hidden.length ? hidden : [-1] } };
 }
 export const careerLifecycleAction: PayloadHandler = async req => {
   if (!req.user) return Response.json({ message: 'Sign in to manage careers.' }, { status: 401 });
@@ -59,8 +56,9 @@ export const careerLifecycleAction: PayloadHandler = async req => {
   if (!Number.isSafeInteger(id) || id <= 0) return Response.json({ message: 'Invalid role.' }, { status: 400 });
   let action: string;
   try { action = (await req.json!()).action; } catch { return Response.json({ message: 'Invalid action.' }, { status: 400 }); }
-  if (!['close', 'archive', 'restore', 'reopen'].includes(action)) return Response.json({ message: 'Invalid action.' }, { status: 400 });
-  await req.payload.findByID({ collection: 'careers', id, req, overrideAccess: false, draft: true, depth: 0 });
+  if (!['archive', 'restore'].includes(action)) return Response.json({ message: 'Invalid action.' }, { status: 400 });
+  const record = await req.payload.findByID({ collection: 'careers', id, req, overrideAccess: false, draft: true, depth: 0 });
+  if (process.env.WORKSPACE_AUTH_ENABLED === 'true' && !mayManage(req.user as unknown as ApprovedAccount, 'careers', (record as unknown as { owningScope: OwnershipScope }).owningScope)) return Response.json({ message: 'You have read-only access to this record.' }, { status: 403 });
   const ownsTransaction = await initTransaction(req);
   try {
     const tx = (req.payload.db as unknown as PostgresAdapter).sessions[String(await req.transactionID)]?.db;
@@ -71,6 +69,7 @@ export const careerLifecycleAction: PayloadHandler = async req => {
     try { state = nextCareerLifecycle(previous ?? null, action, new Date().toISOString()); }
     catch (error) { return Response.json({ message: (error as Error).message }, { status: 409 }); }
     const data = { ...state, career: id, changedBy: req.user.id };
+    if (action === 'restore') await req.payload.update({ collection: 'careers', id, req, overrideAccess: false, unpublishAllLocales: true, data: { _status: 'draft' } });
     if (previous) await req.payload.update({ collection: 'career-lifecycle', id: previous.id, data, req, overrideAccess: true });
     else await req.payload.create({ collection: 'career-lifecycle', data, req, overrideAccess: true });
     if (ownsTransaction) await commitTransaction(req);

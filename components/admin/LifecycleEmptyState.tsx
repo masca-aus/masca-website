@@ -6,8 +6,9 @@ export function LifecycleEmptyState() {
   const { data, query, collectionSlug } = useListQuery();
   const params = useSearchParams();
   const events = collectionSlug === 'events';
-  const view = params.get(events ? 'eventView' : 'careerView');
-  if (data?.docs.length !== 0 || !['closed', 'completed', 'archived'].includes(view || '')) return null;
+  const requested = params.get(events ? 'eventView' : 'careerView');
+  const view = !events && requested === 'closed' ? 'archived' : requested;
+  if (data?.docs.length !== 0 || !['archived'].includes(view || '')) return null;
   const noun = events ? 'events' : 'opportunities';
   const filtered = Boolean(query.search || (query.where && Object.keys(query.where).length));
   const title = filtered ? `No matching ${noun}` : `No ${view} ${noun}`;

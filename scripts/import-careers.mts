@@ -27,7 +27,7 @@ async function main() {
     stage = 'database import'
     const result = await executeCareerImport(plan, {
       findBySourceKey: async sourceKey => (await payload.find({ collection: 'careers', where: { sourceKey: { equals: sourceKey } }, limit: 1, depth: 0, draft: true, overrideAccess: true })).docs.length > 0,
-      create: data => payload.create({ collection: 'careers', data, draft: data._status === 'draft', overrideAccess: true }),
+      create: data => payload.create({ collection: 'careers', data: {...data, ...{owningScope:'National' as const}}, draft: data._status === 'draft', overrideAccess: true }),
     }, apply)
     console.log(JSON.stringify(result))
   } finally { await payload.destroy() }

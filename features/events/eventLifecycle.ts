@@ -1,3 +1,4 @@
+import { mayManage, type ApprovedAccount, type OwnershipScope } from '../access/workspacePolicy.ts';
 import { initTransaction, commitTransaction, killTransaction, type Payload, type PayloadRequest, type PayloadHandler, type Where } from 'payload';
 import { sql, type PostgresAdapter } from '@payloadcms/db-postgres';
 import { revalidatePath } from 'next/cache.js';
@@ -7,9 +8,7 @@ export type Lifecycle = { status: string; completedAt?: string | null; archivedA
 export function nextLifecycle(previous: Lifecycle | null, action: string, now: string): Lifecycle {
   const current = previous ?? { status: 'active' };
   if (action === 'archive' && current.status !== 'archived') return { ...current, status: 'archived', archivedAt: now };
-  if (action === 'complete' && current.status === 'active') return { ...current, status: 'completed', completedAt: now };
-  if (action === 'reopen' && current.status === 'completed') return { ...current, status: 'active', completedAt: null };
-  if (action === 'restore' && current.status === 'archived') return { ...current, status: current.completedAt ? 'completed' : 'active', archivedAt: null };
+  if (action === 'restore' && current.status === 'archived') return { ...current, status: 'active', completedAt: null, archivedAt: null };
   throw new Error('This action is not available for the current event status. Refresh and try again.');
 }
 export async function lifecycleRecords(payload: Pick<Payload, 'find'>, req?: PayloadRequest) {
@@ -21,11 +20,10 @@ export async function lifecycleIDs(payload: Pick<Payload, 'find'>, status: strin
 }
 export async function eventListFilter({ req }: { req: PayloadRequest }): Promise<Where> {
   const archived = req.query?.eventView === 'archived';
-  const completed = req.query?.eventView === 'completed';
   const records = await lifecycleRecords(req.payload, req);
-  const statuses = archived ? ['archived'] : completed ? ['completed'] : ['completed', 'archived'];
+  const statuses = ['archived'];
   const ids = records.filter(row => statuses.includes(row.status)).map(row => typeof row.event === 'object' ? row.event.id : row.event);
-  return { id: { [archived || completed ? 'in' : 'not_in']: ids.length ? ids : [-1] } };
+  return { id: { [archived ? 'in' : 'not_in']: ids.length ? ids : [-1] } };
 }
 export const eventLifecycleAction: PayloadHandler = async req => {
   if (!req.user) return Response.json({ message: 'Sign in to manage events.' }, { status: 401 });
@@ -33,7 +31,8 @@ export const eventLifecycleAction: PayloadHandler = async req => {
   if (typeof id !== 'string' && typeof id !== 'number') return Response.json({ message: 'Invalid event.' }, { status: 400 });
   let action: string;
   try { action = (await req.json!()).action; } catch { return Response.json({ message: 'Invalid action.' }, { status: 400 }); }
-  await req.payload.findByID({ collection: 'events', id, req, overrideAccess: false, draft: true, depth: 0 });
+  const record = await req.payload.findByID({ collection: 'events', id, req, overrideAccess: false, draft: true, depth: 0 });
+  if (process.env.WORKSPACE_AUTH_ENABLED === 'true' && !mayManage(req.user as unknown as ApprovedAccount, 'events', (record as unknown as { owningScope: OwnershipScope }).owningScope)) return Response.json({ message: 'You have read-only access to this record.' }, { status: 403 });
   const ownsTransaction = await initTransaction(req);
   try {
   const tx = (req.payload.db as unknown as PostgresAdapter).sessions[String(await req.transactionID)]?.db;
@@ -45,6 +44,7 @@ export const eventLifecycleAction: PayloadHandler = async req => {
   catch (error) { return Response.json({ message: (error as Error).message }, { status: 409 }); }
   const values = { ...data, event: Number(id), changedBy: req.user.id };
   // A separate versioned record avoids publishing, unpublishing or overwriting event drafts.
+  if (action === 'restore') await req.payload.update({ collection: 'events', id, req, overrideAccess: false, unpublishAllLocales: true, data: { _status: 'draft' } });
   if (previous) await req.payload.update({ collection: 'event-lifecycle', id: previous.id, data: values, req, overrideAccess: true });
   else await req.payload.create({ collection: 'event-lifecycle', data: values, req, overrideAccess: true });
   if (ownsTransaction) await commitTransaction(req);
