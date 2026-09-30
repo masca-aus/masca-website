@@ -152,6 +152,12 @@ export interface Career {
     | number
     | boolean
     | null;
+  submittedForReview?: boolean | null;
+  /**
+   * Private contact for this public submission.
+   */
+  contactName?: string | null;
+  contactEmail?: string | null;
   title: string;
   company: string;
   type?:
@@ -177,13 +183,7 @@ export interface Career {
   studyLevels?: ('any' | 'pre-penultimate' | 'penultimate' | 'final' | 'graduate' | 'postgraduate')[] | null;
   eligibility?: string | null;
   applyUrl: string;
-  /**
-   * YYYY-MM-DD. Leave empty for rolling applications.
-   */
   closes?: string | null;
-  /**
-   * YYYY-MM-DD. Only update after reconfirming that a role is still available.
-   */
   added?: string | null;
   /**
    * For example $35/hour, RM 4,800/month, or Not disclosed.
@@ -238,6 +238,15 @@ export interface User {
    * Manage all departments and states, including Organisations and Media. Account management remains restricted to administrators.
    */
   allContentAccess?: boolean | null;
+  permissions?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   grants?:
     | {
         area: 'events' | 'careers' | 'committee' | 'sponsors';
@@ -316,6 +325,7 @@ export interface Event {
     | number
     | boolean
     | null;
+  submittedForReview?: boolean | null;
   lifecycle?: string | null;
   title: string;
   organisation: string;
@@ -555,6 +565,9 @@ export interface PayloadMigration {
 export interface CareersSelect<T extends boolean = true> {
   owningScope?: T;
   cmsStatus?: T;
+  submittedForReview?: T;
+  contactName?: T;
+  contactEmail?: T;
   title?: T;
   company?: T;
   type?: T;
@@ -636,6 +649,7 @@ export interface UsersSelect<T extends boolean = true> {
   role?: T;
   status?: T;
   allContentAccess?: T;
+  permissions?: T;
   grants?:
     | T
     | {
@@ -718,6 +732,7 @@ export interface SponsorsSelect<T extends boolean = true> {
 export interface EventsSelect<T extends boolean = true> {
   owningScope?: T;
   cmsStatus?: T;
+  submittedForReview?: T;
   lifecycle?: T;
   title?: T;
   organisation?: T;

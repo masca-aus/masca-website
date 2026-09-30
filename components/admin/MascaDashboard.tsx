@@ -135,7 +135,7 @@ export function DashboardContent({
               <span>Drafts</span>
               <span aria-hidden="true">→</span>
             </Link>
-            <Link href="/admin/collections/events?where[reviewStatus][equals]=pending">
+            <Link href="/admin/collections/events?where[submittedForReview][equals]=true&where[_status][equals]=draft">
               <strong>{overview.pending}</strong>
               <span>Awaiting review</span>
               <span aria-hidden="true">→</span>

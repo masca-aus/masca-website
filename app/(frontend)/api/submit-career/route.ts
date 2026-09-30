@@ -4,13 +4,13 @@ import config from "@payload-config";
 import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 
-import { createEventSubmission, type EventSubmissionPayload } from "@/features/events/createEventSubmission";
-import { parseEventSubmission } from "@/features/events/eventSubmission";
+import { createCareerSubmission } from "@/features/careers/createCareerSubmission";
+import { parseCareerSubmission } from "@/features/careers/careerSubmission";
 import { consumeSubmissionAttempt } from "@/features/events/submissionRateLimit";
 
 export const runtime = "nodejs";
 
-type SubmitEventResponse =
+type SubmitCareerResponse =
   | { ok: true; message: string }
   | { ok: false; message: string; fieldErrors?: Record<string, string[]> };
 
@@ -22,7 +22,7 @@ function submissionKey(request: NextRequest): string {
   return isIP(ip) ? ip : "unknown";
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse<SubmitEventResponse>> {
+export async function POST(request: NextRequest): Promise<NextResponse<SubmitCareerResponse>> {
   if (!consumeSubmissionAttempt(submissionKey(request))) {
     return NextResponse.json(
       { ok: false, message: "Too many submission attempts. Please try again in an hour." },
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SubmitEve
   }
 
   try {
-    const result = parseEventSubmission(formData);
+    const result = parseCareerSubmission(formData);
     if (!result.ok) {
       return NextResponse.json(
         { ok: false, message: "Please check the highlighted fields.", fieldErrors: result.fieldErrors },
@@ -50,15 +50,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<SubmitEve
     }
 
     const payload = await getPayload({ config });
-    await createEventSubmission({
-      // Temporary until Task 6 regenerates Payload types for the registered Events collection.
-      payload: payload as unknown as EventSubmissionPayload,
-      data: result.data,
-      poster: result.poster,
-    });
+    await createCareerSubmission(payload, result.data);
 
     return NextResponse.json(
-      { ok: true, message: "Your event has been submitted and is pending review." },
+      { ok: true, message: "Your opportunity has been received. The Careers team will review it before publication." },
       { status: 201 },
     );
   } catch {

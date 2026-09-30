@@ -1,3 +1,4 @@
+import { submittedForReviewField, completeSubmissionReview } from "../features/submissions/review.ts";
 import { adminSearchFields, adminSearchHooks, withAdminSearch } from '../features/admin/adminSearch.ts';
 import { cmsStatusField } from '../features/admin/cmsStatusField.ts';
 import { randomUUID } from 'node:crypto';
@@ -40,6 +41,9 @@ export const Careers: CollectionConfig = {
   endpoints: [{ path: '/:id/lifecycle', method: 'post', handler: careerLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: careerQuickAction }],
   fields: ([
     cmsStatusField('careers'),
+    submittedForReviewField,
+    {name:'contactName',type:'text',label:'Submitter name',access:{read:({req})=>Boolean(req.user)},admin:{readOnly:true,description:'Private contact for this public submission.'}},
+    {name:'contactEmail',type:'email',label:'Submitter email',access:{read:({req})=>Boolean(req.user)},admin:{readOnly:true}},
     { name: '_status', label: 'Publication', type: 'select', options: [], admin: { disableListColumn: true, components: { Field: false, Cell: '/components/admin/CareerStatusCell#CareerPublicationStatusCell' }, disableBulkEdit: true } },
     { name: 'careerWizardHeader', type: 'ui', admin: { components: { Field: '/components/admin/CareerEditor#CareerEditorHeader' }, disableListColumn: true, disableBulkEdit: true } },
     { name: 'title', type: 'text', required: true, maxLength: 120 },
@@ -86,7 +90,7 @@ export const Careers: CollectionConfig = {
       data.slug = originalDoc?.slug || data.slug || `${deriveJobId(data.company || '', data.title || '')}-${randomUUID().slice(0, 8)}`;
       return data;
     }],
-    beforeChange: [({ data, originalDoc, req }) => {
+    beforeChange: [completeSubmissionReview, ({ data, originalDoc, req }) => {
       const draft = req.query?.draft === 'true' || req.query?.draft === true;
       if (!draft && data._status === 'published') {
         const errors = careerPublicationErrors({ ...originalDoc, ...data });

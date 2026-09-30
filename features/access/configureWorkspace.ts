@@ -1,4 +1,4 @@
-import { publicEventSubmission } from "./publicSubmissionContext.ts";
+import { publicEventSubmission, publicCareerSubmission } from "./publicSubmissionContext.ts";
 import { randomUUID } from "node:crypto";
 import {
   APIError,
@@ -249,6 +249,7 @@ export function configureWorkspace(
           beforeChange: [
             ...(collection.hooks?.beforeChange ?? []),
             ({ data, originalDoc, req, context, operation }) => {
+              if (area === "careers" && operation === "create" && context.publicCareerSubmission === publicCareerSubmission && data._status === "draft" && data.submittedForReview === true && data.owningScope === "National") return data;
               if (area === "events" && operation === "create" && context.publicEventSubmission === publicEventSubmission && data._status === "draft" && data.reviewStatus === "pending" && data.owningScope === "National") return data;
               if (
                 !mayManage(

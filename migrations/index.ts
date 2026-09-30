@@ -1,3 +1,4 @@
+import * as publicSubmissions from './20261001_120000_public_submissions';
 import * as workspaceAccess from "./20260930_221300_workspace_access";
 import * as migration_20260802_071222_restructure_committee from './20260802_071222_restructure_committee';
 import * as migration_20260907_142655_add_committee_departments from './20260907_142655_add_committee_departments';
@@ -50,4 +51,5 @@ export const migrations = [
     name: '20260917_124307_careers_cms'
   },
   {up: workspaceAccess.up, down: workspaceAccess.down, name: "20260930_221300_workspace_access"},
+  {up: publicSubmissions.up, down: publicSubmissions.down, name: "20261001_120000_public_submissions"},
 ];

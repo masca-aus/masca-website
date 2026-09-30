@@ -29,7 +29,7 @@ export async function loadEventDashboard(
 ): Promise<EventDashboardOverview> {
   const ids = (await lifecycleIDs(payload, "archived", req)).concat(-1);
   const visible: Where = { id: { not_in: ids } };
-  const pendingWhere: Where = { ...visible, reviewStatus: { equals: "pending" } };
+  const pendingWhere: Where = { ...visible, submittedForReview: { equals: true }, _status: { equals: "draft" } };
   const publishedWhere: Where = {
     ...visible,
     and: [

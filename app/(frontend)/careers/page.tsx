@@ -31,7 +31,7 @@ export default async function CareersPage() {
             variant={board.status === "ok" ? "none" : board.status}
             actions={
               board.status === "ok" ? (
-                <Button href="/contact" variant="primary">
+                <Button href="/submit/career" variant="primary">
                   Suggest an employer <span aria-hidden>&rarr;</span>
                 </Button>
               ) : (
@@ -87,7 +87,7 @@ function CtaBand() {
           and the Careers team will have it on the board within the week.
         </p>
         <div className="flex flex-wrap justify-center gap-4 mt-2">
-          <Button href="/contact" variant="accent">
+          <Button href="/submit/career" variant="accent">
             Post a role <span aria-hidden>&rarr;</span>
           </Button>
         </div>
