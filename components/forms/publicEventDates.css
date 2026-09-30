@@ -1,0 +1,20 @@
+.public-event-dates { margin-bottom: 0; --theme-text: #262633; --theme-elevation-0: #fff; --theme-elevation-100: #f3f3f9; --theme-elevation-150: #e8e8ef; --theme-elevation-200: #e3e3ee; --theme-elevation-450: #8b8b99; --theme-elevation-600: #646475; --theme-elevation-650: #525263; --theme-error-500: #c62828; --theme-error-700: #a61d24; }
+.public-event-dates .masca-event-dates__fieldset > legend { color: #383947; font-size: .875rem; font-weight: 700; }
+.public-event-dates .masca-event-dates__fieldset > legend > span { color: #c62828; }
+.public-event-dates .masca-event-dates__modes { gap: .65rem; }
+.public-event-dates .masca-event-dates__modes label, .public-event-dates .masca-event-dates__optional { min-height: 2.75rem; border: 1px solid #e3e3ee; border-radius: .65rem; padding: .5rem .8rem; background: #fff; color: #4b4c59; font-size: .875rem; transition: border-color 150ms ease, background 150ms ease; }
+.public-event-dates .masca-event-dates__modes label:has(input:checked) { border-color: #17117b; background: #f2f1fa; color: #17117b; font-weight: 650; }
+.public-event-dates .masca-event-dates__summary { margin-top: 0; min-height: 3.5rem; border: 2px solid #e3e3ee; border-radius: .75rem; transition: border-color 150ms ease, box-shadow 150ms ease; }
+.public-event-dates .masca-event-dates__summary:focus-visible { outline: 3px solid rgb(23 17 123 / 13%); outline-offset: 1px; }
+.public-event-dates .masca-event-dates__summary[data-invalid='true'] { border-color: #c62828; }
+.public-event-dates .masca-event-dates__calendar { margin-top: .5rem; border: 1px solid #e3e3ee; border-radius: .9rem; padding: .85rem; background: #fff; box-shadow: 0 10px 28px rgb(25 30 75 / 8%); animation: public-event-calendar-in 170ms ease-out; }
+.public-event-dates .masca-event-dates__times { max-width: 44rem; margin-top: .85rem; }
+.public-event-dates .masca-event-dates__times label { font-size: .875rem; font-weight: 600; color: #4b4c59; }
+.public-event-dates .masca-event-dates__times input[type='time'] { border: 2px solid #e3e3ee; border-radius: .75rem; padding: .7rem .8rem; }
+.public-event-dates .masca-event-dates__times input[type='time']:focus-visible { outline: 3px solid rgb(23 17 123 / 13%); outline-offset: 1px; border-color: #17117b; }
+.public-event-dates .masca-event-dates__optional { display: inline-flex; margin-top: .65rem; font-size: .875rem; }
+.public-event-dates .masca-event-dates__timezone { margin-top: .3rem; }
+.public-event-dates__native { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+@keyframes public-event-calendar-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 560px) { .public-event-dates .masca-event-dates__times { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .public-event-dates .masca-event-dates__calendar, .public-event-dates * { animation: none !important; transition: none !important; } }

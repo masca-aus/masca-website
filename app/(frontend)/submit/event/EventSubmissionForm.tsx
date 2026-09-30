@@ -13,7 +13,7 @@ import { SubmissionSuccess } from '@/components/forms/SubmissionSuccess';
 import { reconcileSubmissionErrors } from '@/components/forms/submissionErrors';
 import { parseEventSubmission } from '@/features/events/eventSubmission';
 import {PublicChoice} from '@/components/forms/ChoiceSelect';
-import {PublicDateField} from '@/components/forms/PublicDateField';
+import { PublicEventDates } from '@/components/forms/PublicEventDates';
 import {PosterUpload} from '@/components/forms/PosterUpload';
 import { PublicOrganisationSearch } from '@/components/forms/PublicOrganisationSearch';
 import Button from "@/components/Button";
@@ -216,8 +216,7 @@ export function EventSubmissionForm({
             error={descriptionError}
           />
           <div className="grid gap-6 md:grid-cols-2">
-            <PublicDateField name="startDate" label="Start date and time" required withTime error={startDateError}/>
-            <PublicDateField name="endDate" label="End date and time" withTime error={endDateError}/>
+            <PublicEventDates startError={startDateError} endError={endDateError}/>
             <TextField
               id="event-venue"
               label="Venue"
