@@ -160,14 +160,14 @@ export function configureWorkspace(
               data.email = (data.email ?? originalDoc?.email)
                 .trim()
                 .toLowerCase();
-              if (originalDoc && data.email !== originalDoc.email)
+              if (originalDoc?.id != null && data.email !== originalDoc.email)
                 throw new APIError(
                   "Create a new invitation to change an approved email.",
                   400,
                 );
               // Administrators cannot suspend/demote themselves; deletion is disabled.
               if (
-                req.user?.id === originalDoc?.id &&
+                req.user?.id != null && req.user.id === originalDoc?.id &&
                 ((data.role && data.role !== "administrator") ||
                   (data.status && data.status !== "active"))
               )
