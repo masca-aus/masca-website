@@ -1,6 +1,7 @@
 import { CMSStatusHeading as CMSStatusHeading_f45eec8b84c53ac532890f2ee67945df } from '../../../components/admin/CMSStatusHeading'
 import { CareerCMSStatusCell as CareerCMSStatusCell_7b142bce0343383e5a0dfdc8f07ad33f } from '../../../components/admin/CMSStatusCell'
 import { CareerEditorHeader as CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
+import { CareerChoiceField as CareerChoiceField_b571a13772d70ef4b785a0c59e796355 } from '../../../components/admin/CareerChoiceField'
 import { CareerDateField as CareerDateField_59404842b3b8e6cda85bec35a9da686f } from '../../../components/admin/CareerDateField'
 import { CareerLifecycleCell as CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34 } from '../../../components/admin/CareerLifecycleCell'
 import { CareerEditorFooter as CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
@@ -28,6 +29,7 @@ import { EventLifecycleCell as EventLifecycleCell_b28290272084401b0c4a1bb58db7c1
 import { EventEditorHeader as EventEditorHeader_cc3f89cc91de38306fe76806fb36c1a8 } from '../../../components/admin/EventEditorFields'
 import { OrganisationSearchField as OrganisationSearchField_af4e53f6f5550c1030d91670e14f5e57 } from '../../../components/admin/OrganisationSearchField'
 import { EventDateRangeField as EventDateRangeField_569debf66701d7a979275558e0d1a058 } from '../../../components/admin/EventDateRangeField'
+import { EventStateField as EventStateField_b571a13772d70ef4b785a0c59e796355 } from '../../../components/admin/CareerChoiceField'
 import { EventReviewStatusCell as EventReviewStatusCell_332664cf88e7bd66848f8853819758ec } from '../../../components/admin/EventStatusCell'
 import { EventReviewField as EventReviewField_5a421c0e67930f3c32456aa664ce8801 } from '../../../components/admin/EventReviewField'
 import { EventEditorFooter as EventEditorFooter_cc3f89cc91de38306fe76806fb36c1a8 } from '../../../components/admin/EventEditorFields'
@@ -53,6 +55,7 @@ export const importMap = {
   "/components/admin/CMSStatusHeading#CMSStatusHeading": CMSStatusHeading_f45eec8b84c53ac532890f2ee67945df,
   "/components/admin/CMSStatusCell#CareerCMSStatusCell": CareerCMSStatusCell_7b142bce0343383e5a0dfdc8f07ad33f,
   "/components/admin/CareerEditor#CareerEditorHeader": CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236,
+  "/components/admin/CareerChoiceField#CareerChoiceField": CareerChoiceField_b571a13772d70ef4b785a0c59e796355,
   "/components/admin/CareerDateField#CareerDateField": CareerDateField_59404842b3b8e6cda85bec35a9da686f,
   "/components/admin/CareerLifecycleCell#CareerLifecycleCell": CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34,
   "/components/admin/CareerEditor#CareerEditorFooter": CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236,
@@ -80,6 +83,7 @@ export const importMap = {
   "/components/admin/EventEditorFields#EventEditorHeader": EventEditorHeader_cc3f89cc91de38306fe76806fb36c1a8,
   "/components/admin/OrganisationSearchField#OrganisationSearchField": OrganisationSearchField_af4e53f6f5550c1030d91670e14f5e57,
   "/components/admin/EventDateRangeField#EventDateRangeField": EventDateRangeField_569debf66701d7a979275558e0d1a058,
+  "/components/admin/CareerChoiceField#EventStateField": EventStateField_b571a13772d70ef4b785a0c59e796355,
   "/components/admin/EventStatusCell#EventReviewStatusCell": EventReviewStatusCell_332664cf88e7bd66848f8853819758ec,
   "/components/admin/EventReviewField#EventReviewField": EventReviewField_5a421c0e67930f3c32456aa664ce8801,
   "/components/admin/EventEditorFields#EventEditorFooter": EventEditorFooter_cc3f89cc91de38306fe76806fb36c1a8,

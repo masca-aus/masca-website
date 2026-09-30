@@ -15,6 +15,8 @@ export function PublicFormWizard({children,steps,action,onSubmit,innerRef,pendin
  function validate(index:number) {
   const group=innerRef.current?.querySelector(`[data-form-step="${index}"]`);
   const fields=Array.from(group?.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement>('input,select,textarea')??[]);
+  const levels=fields.filter(field=>field.name==='studyLevels' && field instanceof HTMLInputElement) as HTMLInputElement[];
+  if(levels.length)levels[0].setCustomValidity(levels.some(field=>field.checked)?'':'Choose at least one study level.');
   const invalid=fields.find(field=>!field.checkValidity());
   if(invalid) {move(index);requestAnimationFrame(()=>invalid.reportValidity());return false;}
   return true;
@@ -25,7 +27,7 @@ export function PublicFormWizard({children,steps,action,onSubmit,innerRef,pendin
   for(const el of Array.from(form.elements)) {
    if(!(el instanceof HTMLInputElement||el instanceof HTMLTextAreaElement||el instanceof HTMLSelectElement)||!el.name||el.name==='accuracyConfirmed')continue;
    if(el instanceof HTMLInputElement && el.type==='checkbox' && !el.checked)continue;
-   const label=el.labels?.[0]?.textContent?.trim()||el.name;
+   const label=el.labels?.[0]?.textContent?.trim()||el.getAttribute('aria-label')||el.name;
    const value=el instanceof HTMLSelectElement ? Array.from(el.selectedOptions).map(o=>o.text).join(', ') : el instanceof HTMLInputElement && el.type==='file' ? el.files?.[0]?.name||'' : el.value;
    if(value)rows.push([label,value]);
   }
@@ -42,7 +44,8 @@ export function PublicFormWizard({children,steps,action,onSubmit,innerRef,pendin
   if(response?.ok) {setStep(0);setSummary([]);}
   else if(response?.fieldErrors && !(innerRef.current?.contains(document.activeElement) && document.activeElement?.matches("input,select,textarea"))) {
    const name=Object.keys(response.fieldErrors)[0];
-   const el=innerRef.current?.elements.namedItem(name);
+   const found=innerRef.current?.elements.namedItem(name);
+   const el=found instanceof RadioNodeList?found.item(0):found;
    if(el instanceof HTMLElement) {const index=el.closest<HTMLElement>('[data-form-step]')?.dataset.formStep;if(index)setStep(Number(index));requestAnimationFrame(()=>el.focus());}
   }
   });

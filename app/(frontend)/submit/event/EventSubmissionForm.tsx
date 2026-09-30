@@ -8,10 +8,13 @@ import {
 } from "react";
 
 import { PublicFormWizard } from "@/components/forms/PublicFormWizard";
-import { fieldClass, FieldShell, TextField, TextAreaField } from "@/components/forms/PublicFields";
+import { TextField, TextAreaField } from "@/components/forms/PublicFields";
 import { SubmissionSuccess } from '@/components/forms/SubmissionSuccess';
 import { reconcileSubmissionErrors } from '@/components/forms/submissionErrors';
 import { parseEventSubmission } from '@/features/events/eventSubmission';
+import {PublicChoice} from '@/components/forms/ChoiceSelect';
+import {PublicDateField} from '@/components/forms/PublicDateField';
+import {PosterUpload} from '@/components/forms/PosterUpload';
 import Button from "@/components/Button";
 import { EVENT_STATES, MAX_POSTER_SIZE } from "@/features/events/eventSubmission";
 
@@ -214,21 +217,8 @@ export function EventSubmissionForm({
             error={descriptionError}
           />
           <div className="grid gap-6 md:grid-cols-2">
-            <TextField
-              id="event-start-date"
-              label="Start date and time"
-              name="startDate"
-              type="datetime-local"
-              required
-              error={startDateError}
-            />
-            <TextField
-              id="event-end-date"
-              label="End date and time"
-              name="endDate"
-              type="datetime-local"
-              error={endDateError}
-            />
+            <PublicDateField name="startDate" label="Start date and time" required withTime error={startDateError}/>
+            <PublicDateField name="endDate" label="End date and time" withTime error={endDateError}/>
             <TextField
               id="event-venue"
               label="Venue"
@@ -238,26 +228,8 @@ export function EventSubmissionForm({
               maxLength={240}
               error={venueError}
             />
-            <FieldShell id="event-state" label="State or territory *" error={stateError}>
-              <select
-                id="event-state"
-                name="state"
-                required
-                defaultValue=""
-                aria-invalid={stateError ? true : undefined}
-                aria-describedby={stateError ? "event-state-error" : undefined}
-                className={`${fieldClass} ${stateError ? "border-red-600 bg-red-50" : ""}`}
-              >
-                <option value="">
-                  Select a state or territory
-                </option>
-                {EVENT_STATES.map((state) => (
-                  <option key={state.value} value={state.value}>
-                    {state.label}
-                  </option>
-                ))}
-              </select>
-            </FieldShell>
+            <PublicChoice id="event-state" name="state" label="State or territory" required options={[...EVENT_STATES]} error={stateError}/>
+
           </div>
           <TextField
             id="event-ticket-url"
@@ -268,20 +240,7 @@ export function EventSubmissionForm({
             placeholder="https://"
             error={ticketURLError}
           />
-          <TextField
-            id="event-poster"
-            label="Event poster"
-            name="poster"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={event => {
-              const input=event.currentTarget;
-              input.setCustomValidity(input.files?.[0] && input.files[0].size > MAX_POSTER_SIZE ? "Choose an image under 4 MB, or remove the optional poster." : "");
-              if (!input.checkValidity()) input.reportValidity();
-            }}
-            error={posterError}
-            hint="Optional. Upload a JPEG, PNG or WebP image up to 4 MB."
-          />
+          <PosterUpload error={posterError}/>
         </fieldset>
 
         <fieldset className="flex flex-col gap-6 rounded-xl border-2 border-blue-100 p-6 md:p-8">

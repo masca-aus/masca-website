@@ -173,6 +173,7 @@ export const Events: CollectionConfig = {
       type: "select",
       required: true,
       options: EVENT_STATES.map(({ label, value }) => ({ label, value })),
+      admin: { components: { Field: "/components/admin/CareerChoiceField#EventStateField" } },
     },
     editorSection({
       title: "Images and links",

@@ -1,0 +1,18 @@
+.masca-choice { position:relative; min-width:0; color:var(--theme-text,#262633); --choice-bg:var(--theme-input-bg,var(--theme-elevation-0,#fff)); --choice-line:var(--theme-elevation-200,#e3e3ee); --choice-soft:var(--theme-elevation-100,#f3f3f9); --choice-accent:var(--masca-accent,#010066); }
+.masca-choice>label{display:block;font-size:.9rem;font-weight:600;margin-bottom:.5rem}
+.masca-choice>button{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:50px;padding:12px 16px;border:1px solid var(--choice-line);border-radius:12px;background:var(--choice-bg);color:inherit;font:inherit;text-align:left;cursor:pointer;transition:border-color .16s,box-shadow .16s}
+.masca-choice button:focus-visible,.masca-choice input:focus-visible{outline:2px solid var(--choice-accent);outline-offset:3px}
+.masca-choice>button[aria-expanded=true]{border-color:var(--choice-accent)}
+.masca-choice>button>svg{flex-shrink:0;transition:transform .16s}.masca-choice>button[aria-expanded=true]>svg{transform:rotate(180deg)}
+.masca-choice button:disabled{opacity:.55;cursor:not-allowed}.masca-choice__placeholder{opacity:.65}
+.masca-choice__panel{position:absolute;top:100%;left:0;right:0;z-index:100;margin-top:6px;border:1px solid var(--choice-line);border-radius:14px;padding:8px;background:var(--choice-bg);box-shadow:0 14px 40px #0002;animation:choice-in .15s ease-out}
+.masca-choice__search{display:flex;align-items:center;gap:8px;padding:4px 8px 10px;border-bottom:1px solid var(--choice-line)}
+.masca-choice__search input{min-width:0;width:100%;border:0;background:transparent;color:inherit;font:inherit;padding:8px}
+.masca-choice [role=listbox]{max-height:240px;overflow-y:auto;overscroll-behavior:contain;padding-top:6px}
+.masca-choice [role=option]{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;border:0;border-radius:8px;background:transparent;color:inherit;text-align:left;font:inherit;padding:10px;cursor:pointer}
+.masca-choice [role=option]:hover,.masca-choice [role=option]:focus-visible,.masca-choice .is-active{background:var(--choice-soft)}
+.masca-choice__clear{border:0;background:transparent;color:inherit;padding:10px;font:inherit;text-decoration:underline;cursor:pointer}
+.masca-choice__native{position:absolute!important;width:1px!important;height:1px!important;opacity:0;pointer-events:none;overflow:hidden}
+.masca-choice__error{color:var(--theme-error-500,#bd1212);font-size:.85rem;margin-top:6px}
+@keyframes choice-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.masca-choice *{animation:none!important;transition:none!important}}

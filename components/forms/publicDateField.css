@@ -1,0 +1,6 @@
+.public-date{margin:0;--theme-text:#262633;--theme-elevation-0:#fff;--theme-elevation-100:#f3f3f9;--theme-elevation-150:#e8e8ef;--theme-elevation-200:#e3e3ee;--theme-elevation-450:#8b8b99;--theme-elevation-600:#646475;--theme-elevation-650:#525263}
+.public-date .masca-event-dates__summary{margin-top:8px;min-height:50px;border-radius:12px;justify-content:space-between}
+.public-date .masca-event-dates__calendar{border:1px solid #e3e3ee;border-radius:14px;padding:12px;margin-top:8px;animation:choice-in .18s ease-out}
+.public-date__native{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.public-date__time{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:.85rem}.public-date__time input{padding:8px 12px;border:1px solid #e3e3ee;border-radius:8px;background:#fff}.public-date__time span{color:#646475}
+@media(prefers-reduced-motion:reduce){.public-date *{animation:none!important;transition:none!important}}
