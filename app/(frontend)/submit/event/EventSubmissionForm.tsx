@@ -10,7 +10,7 @@ import {
 import { PublicFormWizard } from "@/components/forms/PublicFormWizard";
 import { fieldClass, FieldShell, TextField, TextAreaField } from "@/components/forms/PublicFields";
 import Button from "@/components/Button";
-import { EVENT_STATES } from "@/features/events/eventSubmission";
+import { EVENT_STATES, MAX_POSTER_SIZE } from "@/features/events/eventSubmission";
 
 export type SubmitEventResponse =
   | { ok: true; message: string }
@@ -76,6 +76,11 @@ export function EventSubmissionForm({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
+    const poster = new FormData(form).get("poster");
+    if (poster instanceof File && poster.size > MAX_POSTER_SIZE) {
+      setResponse({ok:false,message:"Please choose a smaller poster.",fieldErrors:{poster:["Use an image under 4 MB, or remove the optional poster and submit without it."]}});
+      return;
+    }
     setPending(true);
     setResponse(null);
 
@@ -86,6 +91,11 @@ export function EventSubmissionForm({
         body: new FormData(form),
         headers: { Accept: "application/json" },
       });
+      if (request.status === 413) {
+        setResponse({ok:false,message:"The upload is too large. Please choose a poster under 4 MB or remove it.",fieldErrors:{poster:["Choose an image under 4 MB."]}});
+        setPending(false);
+        return;
+      }
       const body: unknown = await request.json();
       if (!isSubmitEventResponse(body)) throw new Error("Unexpected submission response");
       result = body;
@@ -262,8 +272,13 @@ export function EventSubmissionForm({
             name="poster"
             type="file"
             accept="image/jpeg,image/png,image/webp"
+            onChange={event => {
+              const input=event.currentTarget;
+              input.setCustomValidity(input.files?.[0] && input.files[0].size > MAX_POSTER_SIZE ? "Choose an image under 4 MB, or remove the optional poster." : "");
+              if (!input.checkValidity()) input.reportValidity();
+            }}
             error={posterError}
-            hint="Optional. Upload a JPEG, PNG or WebP image up to 5 MB."
+            hint="Optional. Upload a JPEG, PNG or WebP image up to 4 MB."
           />
         </fieldset>
 

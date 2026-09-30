@@ -30,7 +30,7 @@ export type EventSubmissionResult =
   | { ok: true; data: EventSubmissionInput; poster?: File }
   | { ok: false; fieldErrors: Record<string, string[]> };
 
-const MAX_POSTER_SIZE = 5 * 1024 * 1024;
+export const MAX_POSTER_SIZE = 4 * 1024 * 1024;
 const POSTER_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 const STATE_CODES = EVENT_STATES.map((state) => state.value);
 export const EVENT_TIME_ZONES: Record<EventState, string> = {
@@ -263,7 +263,7 @@ export function parseEventSubmission(formData: FormData): EventSubmissionResult 
   const poster = posterEntry instanceof File ? posterEntry : undefined;
   if (poster && !(poster.name === "" && poster.size === 0) && !isAllowedPoster(poster)) {
     if (poster.size > MAX_POSTER_SIZE) {
-      addError(fieldErrors, "poster", "Poster must be 5 MB or smaller.");
+      addError(fieldErrors, "poster", "Poster must be 4 MB or smaller.");
     } else if (!POSTER_MIME_TYPES.includes(poster.type as (typeof POSTER_MIME_TYPES)[number])) {
       addError(fieldErrors, "poster", "Upload a JPEG, PNG or WebP image.");
     }

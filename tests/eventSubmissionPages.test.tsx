@@ -41,7 +41,7 @@ describe("public submission pages", () => {
     expect(html).toContain('type="file"');
     expect(html).toContain('accept="image/jpeg,image/png,image/webp"');
     expect(html).toContain("JPEG, PNG or WebP");
-    expect(html).toContain("5 MB");
+    expect(html).toContain("4 MB");
     expect(html).toContain("I confirm the event details are accurate");
     expect(html).toContain("used only to review this submission");
     expect(html).toContain("does not guarantee publication");

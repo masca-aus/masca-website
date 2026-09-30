@@ -172,7 +172,7 @@ describe("event submission validation", () => {
     });
   });
 
-  it("rejects a poster over 5 MB", () => {
+  it("rejects a poster over 4 MB", () => {
     const poster = new File([new Uint8Array(5 * 1024 * 1024 + 1)], "poster.png", {
       type: "image/png",
     });
@@ -180,7 +180,7 @@ describe("event submission validation", () => {
 
     expect(result).toEqual({
       ok: false,
-      fieldErrors: { poster: ["Poster must be 5 MB or smaller."] },
+      fieldErrors: { poster: ["Poster must be 4 MB or smaller."] },
     });
   });
 
