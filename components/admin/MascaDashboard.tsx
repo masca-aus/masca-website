@@ -91,7 +91,7 @@ export async function MascaDashboard({
   const showEvents =
     !account ||
     mayManagePeople(account) ||
-    account.grants.some((g) => g.area === "events");
+    (account.grants ?? []).some((g) => g.area === "events");
   const overview = showEvents
     ? await loadEventDashboard(req.payload, req)
     : { pending: 0, published: 0, drafts: 0, pendingEvents: [] };
@@ -107,7 +107,7 @@ export function DashboardContent({
 }) {
   const isAdmin = !account || mayManagePeople(account);
   const showEvents =
-    isAdmin || account?.grants.some((g) => g.area === "events");
+    isAdmin || account?.grants?.some((g) => g.area === "events");
   return (
     <main className="masca-dashboard" style={{ marginInline: "auto" }}>
       <header className="masca-dashboard__heading">
@@ -154,7 +154,7 @@ export function DashboardContent({
           { id: "content", title: "Content" },
           { id: "resources", title: "Resources" },
         ] as const
-      ).map((group) => (
+      ).filter(group => isAdmin || group.id === "content").map((group) => (
         <section key={group.id} aria-labelledby={`manage-${group.id}`}>
           <div className="masca-dashboard__section-heading">
             <h2 id={`manage-${group.id}`}>{group.title}</h2>
@@ -165,7 +165,7 @@ export function DashboardContent({
                 (area) =>
                   area.group === group.id &&
                   (isAdmin ||
-                    account?.grants.some((g) =>
+                    account?.grants?.some((g) =>
                       area.href.endsWith(`/${g.area}`),
                     )),
               )
