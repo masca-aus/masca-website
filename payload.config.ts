@@ -138,6 +138,8 @@ export default buildConfig({
       ],
     },
     components: {
+      beforeLogin: ["/components/admin/LoginWelcome#LoginWelcome"],
+      afterLogin: ["/components/admin/LoginWelcome#LoginHelp"],
       Nav: "/components/admin/MascaNav#MascaNav",
       providers: ["/components/admin/AdminNavigationEnhancements#AdminNavigationEnhancements"],
       actions: ["/components/admin/ThemeToggle#ThemeToggle"],
