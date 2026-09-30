@@ -44,3 +44,6 @@ const { verifyWorkspacePreview } =
   await import("./verify-workspace-preview.mts");
 await verifyWorkspacePreview(payload);
 await payload.destroy();
+// Payload's adapter destroy resets its schema but leaves pool handles alive.
+// All verification and cleanup has completed; finish this one-shot build step.
+process.exit(0);
