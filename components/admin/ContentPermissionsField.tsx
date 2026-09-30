@@ -1,19 +1,23 @@
 "use client";
 
-import { useField } from "@payloadcms/ui";
+import { useAuth, useField } from "@payloadcms/ui";
 import type { JSONFieldClientComponent } from "payload";
-import { contentAreas, ownershipScopes, permissionAreas, permissionsFor, type ContentPermissions, type PermissionArea, type SectionPermission, type ContentArea } from "../../features/access/workspacePolicy";
+import { mayManagePeople, type ApprovedAccount, contentAreas, ownershipScopes, permissionAreas, permissionsFor, type ContentPermissions, type PermissionArea, type SectionPermission, type ContentArea } from "../../features/access/workspacePolicy";
 
 const labels = { events: "Events", careers: "Careers", committee: "Committee", sponsors: "Sponsors", organisations: "Organisations", media: "Media" };
-export const ContentPermissionsField: JSONFieldClientComponent = ({ path }) => {
+export const ContentPermissionsField: JSONFieldClientComponent = ({ path, readOnly }) => {
   const { value, setValue, disabled, showError, errorMessage } = useField<ContentPermissions>({ path });
+  const { user } = useAuth();
+  const locked = Boolean(readOnly || disabled || !mayManagePeople(user as unknown as ApprovedAccount));
   const permissions = value ?? permissionsFor();
   const update = (area: PermissionArea, changes: Partial<SectionPermission>) => {
+    if (locked) return;
     const current = permissions[area] ?? { view: false, edit: false, scopes: [] };
     setValue({ ...permissions, [area]: { ...current, ...changes } });
   };
-  return <fieldset className="masca-permissions" disabled={disabled}>
+  return <fieldset className="masca-permissions" disabled={locked}>
     <legend>Content permissions</legend>
+    {locked && <p>Your access is managed by an administrator.</p>}
     <p>Viewing includes all states. Editing is limited to the teams you tick below. Editors cannot manage people or account access.</p>
     <div className="masca-permissions__table">
       <div className="masca-permissions__row masca-permissions__head"><span>Section</span><span>Can view</span><span>Can edit</span></div>

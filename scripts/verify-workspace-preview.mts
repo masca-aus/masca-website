@@ -90,6 +90,12 @@ export async function verifyWorkspacePreview(payload: Payload) {
         data: { role: "administrator" } as never,
       }),
     );
+    await assert.rejects(() => payload.update({
+      collection: "users", id: editor.id, overrideAccess: false, req: editorReq,
+      data: { allContentAccess: true, permissions: { events: { view: true, edit: true, scopes: ["National"] } } } as never,
+    }));
+    const unchanged = await payload.findByID({ collection: "users", id: editor.id, overrideAccess: true });
+    assert.equal((unchanged as unknown as { allContentAccess?: boolean }).allContentAccess, false);
     const versions = await payload.findVersions({
       collection: "careers",
       overrideAccess: false,

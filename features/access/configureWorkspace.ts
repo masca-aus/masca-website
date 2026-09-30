@@ -72,6 +72,7 @@ export function configureWorkspace(
           { name: "email", type: "email", required: true, unique: true },
           {
             name: "role",
+            access: { create: ({ req }) => mayManagePeople(accountOf(req.user)), update: ({ req }) => mayManagePeople(accountOf(req.user)) },
             type: "select",
             required: true,
             defaultValue: "editor",
@@ -82,6 +83,7 @@ export function configureWorkspace(
           },
           {
             name: "status",
+            access: { create: ({ req }) => mayManagePeople(accountOf(req.user)), update: ({ req }) => mayManagePeople(accountOf(req.user)) },
             type: "select",
             required: true,
             defaultValue: "invited",
@@ -89,6 +91,7 @@ export function configureWorkspace(
           },
           {
             name: "allContentAccess",
+            access: { create: ({ req }) => mayManagePeople(accountOf(req.user)), update: ({ req }) => mayManagePeople(accountOf(req.user)) },
             type: "checkbox",
             label: "Edit all content",
             defaultValue: false,
@@ -100,6 +103,7 @@ export function configureWorkspace(
           },
           {
             name: "permissions",
+            access: { create: ({ req }) => mayManagePeople(accountOf(req.user)), update: ({ req }) => mayManagePeople(accountOf(req.user)) },
             type: "json",
             label: "Content permissions",
             validate: (value) => validPermissions(value) || "Choose viewing access and at least one editing team for editable sections.",
