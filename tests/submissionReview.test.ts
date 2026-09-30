@@ -10,3 +10,11 @@ it('distinguishes public submissions from internal drafts in both collections', 
   expect(deriveCMSStatus(collection,submitted,submitted,'archived').status).toBe('archived');
  }
 });
+
+import { completeSubmissionReview } from '../features/submissions/review';
+it('clears review only on publication, not when saving or autosaving a draft', () => {
+ const run=(data:Record<string,unknown>,draft:boolean)=>completeSubmissionReview({data,req:{query:{draft}}} as never);
+ expect(run({_status:'published',submittedForReview:true},false)).toMatchObject({submittedForReview:false});
+ expect(run({_status:'draft',submittedForReview:true},true)).toMatchObject({submittedForReview:true});
+ expect(run({_status:'published',submittedForReview:true},true)).toMatchObject({submittedForReview:true});
+});
