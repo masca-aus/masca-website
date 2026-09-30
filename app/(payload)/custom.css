@@ -316,10 +316,12 @@ html[data-theme="dark"] .masca-action--primary:hover, html[data-theme="dark"] .m
 .masca-document-back-link { border-color: transparent; background: transparent; color: var(--theme-elevation-650); padding-inline: .25rem; }
 .masca-document-back-link:hover { background: transparent; border-color: transparent; color: var(--theme-text); text-decoration: underline; }
 
-/* The dashboard has its own navigation cards and stays full width. */
-.template-default:has(.masca-dashboard-nav-hidden) { grid-template-columns: minmax(0, 1fr); }
-body:has(.masca-dashboard-nav-hidden) .template-default__nav-toggler-wrapper,
-body:has(.masca-dashboard-nav-hidden) .app-header__mobile-nav-toggler { display: none; }
+/* Dashboard cards supply content navigation; the sidebar holds settings. */
+body:has(.masca-nav--dashboard) .app-header,
+body:has(.masca-nav--dashboard) .template-default__nav-toggler-wrapper { display: none; }
+.masca-nav--dashboard .masca-nav__account { margin-top: 0; padding-top: 1rem; }
+.masca-dashboard-menu { position: fixed; top: 12px; left: 16px; z-index: var(--z-modal); display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 12px; border: 1px solid var(--theme-elevation-150); border-radius: 10px; background: var(--theme-bg); color: var(--theme-text); cursor: pointer; }
+body:has(.masca-dashboard-menu) .template-default__wrap { padding-top: 56px; }
 .masca-nav { border-right: 1px solid var(--theme-elevation-150); background: var(--theme-bg); }
 .masca-nav .nav__scroll { padding: 1.25rem 1rem; }
 .masca-nav__heading { display: flex; align-items: center; justify-content: space-between; min-height: 3rem; margin-bottom: 1.25rem; padding-inline: .75rem; font-weight: 750; letter-spacing: .04em; }

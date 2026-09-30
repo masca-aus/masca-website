@@ -3,7 +3,7 @@
 import { Link, NavToggler, useNav } from "@payloadcms/ui";
 import { usePathname } from "next/navigation";
 import { useEffect, type CSSProperties } from "react";
-import { BriefcaseBusiness, CalendarDays, Handshake, House, Images, Building2, Users, UserRound, PanelLeftClose, ShieldCheck, LogOut } from "lucide-react";
+import { BriefcaseBusiness, CalendarDays, Handshake, House, Images, Building2, Users, UserRound, PanelLeftClose, PanelLeftOpen, ShieldCheck, LogOut } from "lucide-react";
 
 import { MascaMark } from "./MascaBrand";
 import { ThemeToggle } from "./ThemeToggle";
@@ -29,17 +29,18 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
   useEffect(() => {
     // Payload closes on small phones; also close its tablet overlay after navigation.
     if (window.matchMedia("(max-width: 1024px)").matches) setNavOpen(false);
-  }, [pathname, setNavOpen]);
-
-  if (dashboard) return <span className="masca-dashboard-nav-hidden" hidden />;
+    else if (dashboard) setNavOpen(true);
+  }, [pathname, dashboard, setNavOpen]);
 
   return (
-    <aside className={["nav", "masca-nav", navOpen && "nav--nav-open", hydrated && "nav--nav-hydrated", shouldAnimate && "nav--nav-animate"].filter(Boolean).join(" ")} inert={!navOpen}>
+    <>
+    {dashboard && !navOpen && <button type="button" className="masca-dashboard-menu" aria-label="Open account menu" onClick={() => setNavOpen(true)}><PanelLeftOpen size={20} /><span>Menu</span></button>}
+    <aside className={["nav", "masca-nav", dashboard && "masca-nav--dashboard", navOpen && "nav--nav-open", hydrated && "nav--nav-hydrated", shouldAnimate && "nav--nav-animate"].filter(Boolean).join(" ")} inert={!navOpen}>
       <div className="nav__scroll" ref={navRef}>
         <div className="masca-nav__heading"><span className="masca-nav__brand"><MascaMark /><span>MASCA <small>CMS</small></span></span><NavToggler><PanelLeftClose size={19} /></NavToggler></div>
         <nav aria-label="CMS navigation" className="masca-nav__links">
-          <Link href="/admin" className="masca-nav__link"><House size={19} />Dashboard</Link>
-          {groups.map(group => {
+          {!dashboard && <Link href="/admin" className="masca-nav__link"><House size={19} />Dashboard</Link>}
+          {!dashboard && groups.map(group => {
             const items = group.items.filter(item => visibleEntities.collections.includes(item.slug));
             return items.length ? <section key={group.label} aria-label={group.label}>
               <h2>{group.label}</h2>
@@ -51,6 +52,7 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
             </section> : null;
           })}
           <div className="masca-nav__account">
+            {dashboard && <h2>Settings</h2>}
             <div className="masca-nav__theme"><ThemeToggle /></div>
             {visibleEntities.collections.includes("users") && <Link href="/admin/collections/users" className="masca-nav__link" aria-current={pathname.startsWith("/admin/collections/users") ? "page" : undefined}><ShieldCheck size={19} />People & access</Link>}
             <Link href="/admin/account" className="masca-nav__link" aria-current={pathname === "/admin/account" ? "page" : undefined}><UserRound size={19} />My account</Link>
@@ -59,5 +61,6 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
         </nav>
       </div>
     </aside>
+    </>
   );
 }
