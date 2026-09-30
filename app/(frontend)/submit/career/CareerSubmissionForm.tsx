@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState, type FormEvent } from 'react';
+import { SubmissionSuccess } from '@/components/forms/SubmissionSuccess';
 import Button from '@/components/Button';
 import { PublicFormWizard } from '@/components/forms/PublicFormWizard';
 import { FieldShell, TextField, TextAreaField, fieldClass } from '@/components/forms/PublicFields';
@@ -20,7 +21,8 @@ export function CareerSubmissionForm() {
   finally {setPending(false);}
  }
  return <div className="mx-auto max-w-4xl"><p className="mb-8 text-gray-700">Fields marked * are required. You can check everything before submitting.</p>
- {response&&<div role={response.ok?'status':'alert'} className={`mb-8 rounded-lg p-5 ${response.ok?'bg-blue-50 text-blue-600':'bg-red-50 text-red-600'}`}><p>{response.message}</p>{!response.ok&&response.fieldErrors&&<ul className="mt-3 list-disc pl-5">{Object.entries(response.fieldErrors).map(([key,errors])=><li key={key}>{errors.join(' ')}</li>)}</ul>}</div>}
+ {response&&!response.ok&&<div role={response.ok?'status':'alert'} className={`mb-8 rounded-lg p-5 ${response.ok?'bg-blue-50 text-blue-600':'bg-red-50 text-red-600'}`}><p>{response.message}</p>{!response.ok&&response.fieldErrors&&<ul className="mt-3 list-disc pl-5">{Object.entries(response.fieldErrors).map(([key,errors])=><li key={key}>{errors.join(' ')}</li>)}</ul>}</div>}
+ <SubmissionSuccess open={response?.ok===true} message={response?.message||''} href="/careers" label="Back to Careers" onClose={()=>setResponse(null)}/>
  <PublicFormWizard innerRef={formRef} action="/api/submit-career" onSubmit={submit} steps={['Role & company','Location & eligibility','Application & contact']} pending={pending} response={response}>
  <fieldset className="flex flex-col gap-6 rounded-xl border-2 border-blue-100 p-6 md:p-8"><legend className="px-2 text-lg font-bold text-blue-600">Role & company</legend><div className="grid gap-6 md:grid-cols-2">{text('title','Role title',true,'text',120)}{text('company','Company',true,'text',80)}{select('type','Opportunity type',JOB_TYPES)}{text('industry','Industry')}{text('companyWebsite','Company website',false,'url',2000)}{text('pay','Pay or salary',false,'text',80)}</div><TextAreaField id="career-description" name="description" label="Role description" required minLength={20} maxLength={4000} rows={6} error={error('description')}/></fieldset>
  <fieldset className="flex flex-col gap-6 rounded-xl border-2 border-blue-100 p-6 md:p-8"><legend className="px-2 text-lg font-bold text-blue-600">Location & eligibility</legend><div className="grid gap-6 md:grid-cols-2">{text('country','Country',true,'text',80)}{text('state','State or region')}{text('city','City')}{select('workMode','Work mode',WORK_MODES)}{select('international','Open to international students?',INTERNATIONAL_OPTIONS)}{select('studyLevels','Study levels',STUDY_LEVELS,true)}</div><p className="text-body-sm text-gray-700">Select all relevant study levels (hold Command or Ctrl on desktop), or choose Any.</p>{text('eligibility','Additional eligibility requirements',false,'text',200)}</fieldset>

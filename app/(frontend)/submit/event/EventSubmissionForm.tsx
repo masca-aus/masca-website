@@ -9,6 +9,7 @@ import {
 
 import { PublicFormWizard } from "@/components/forms/PublicFormWizard";
 import { fieldClass, FieldShell, TextField, TextAreaField } from "@/components/forms/PublicFields";
+import { SubmissionSuccess } from '@/components/forms/SubmissionSuccess';
 import Button from "@/components/Button";
 import { EVENT_STATES, MAX_POSTER_SIZE } from "@/features/events/eventSubmission";
 
@@ -170,12 +171,7 @@ export function EventSubmissionForm({
         </div>
       )}
 
-      {response?.ok && (
-        <div role="status" aria-live="polite" className="mb-8 rounded-lg bg-blue-50 p-5">
-          <h3 className="text-blue-600">Thanks — we&apos;ve got it</h3>
-          <p className="mt-2 text-gray-700">{response.message}</p>
-        </div>
-      )}
+      <SubmissionSuccess open={response?.ok===true} message={response?.message||''} href="/events" label="Back to Events" onClose={()=>setResponse(null)}/>
 
       <PublicFormWizard innerRef={formRef} action="/api/submit-event" onSubmit={handleSubmit}
         steps={['Event details','Review contact']} pending={pending} response={response}>

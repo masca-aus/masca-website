@@ -1,0 +1,5 @@
+.submission-success { margin: auto; padding: 0; width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 48px); overflow-y: auto; border: 0; border-radius: 24px; background: white; box-shadow: 0 24px 80px rgb(0 0 40 / 20%); }
+.submission-success::backdrop { background: rgb(0 0 30 / 45%); backdrop-filter: blur(4px); }
+.submission-success[open] { animation: submission-confirm 180ms ease-out; }
+@keyframes submission-confirm { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .submission-success[open] { animation: none; } }

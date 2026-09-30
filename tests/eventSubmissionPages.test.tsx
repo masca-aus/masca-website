@@ -59,7 +59,8 @@ describe("public submission pages", () => {
         initialResponse={{ ok: true, message: "Your event is pending review." }}
       />,
     );
-    expect(successHtml).toContain('role="status"');
+    expect(successHtml).toContain('<dialog');
+    expect(successHtml).toContain('Submitted for review');
     expect(successHtml).toContain("Your event is pending review.");
 
     const errorHtml = renderToStaticMarkup(
