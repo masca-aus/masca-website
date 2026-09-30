@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 260" fill="none" stroke="#454482" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+<title>Australia: landmarks from six states and two territories</title>
+<!-- WA: Perth Bell Tower -->
+<g transform="translate(15 0)"><path d="M20 220h140M64 220 89 56l25 164M89 56v-22M49 220 76 92M129 220 102 92M61 164h56M69 130h39M78 94h22M47 220q8-63 24-81M131 220q-8-63-24-81"/><path d="M32 220q-10-21-6-33m0 8-12-7m12 10 11-12"/></g>
+<!-- NT: Uluru -->
+<g transform="translate(200 0)"><path d="M5 220h185M15 217l9-27 13-7 8-18 17-9 21 1 9-5 37 4 9 8 13 1 13 20 8 9 8 23M48 183l-9 34m32-50-8 45m38-45 1 43m25-37 11 38m13-20 8 22"/></g>
+<!-- SA: St Peter's Cathedral -->
+<g transform="translate(400 0)"><path d="M5 220h180M25 220V115h30v105M120 220V115h30v105M22 115l18-57 18 57m59 0 18-57 18 57M40 58V43m-5 8h10M135 58V43m-5 8h10M55 169l32-32 33 32M55 175h65M75 220v-22q12-24 24 0v22M33 136v18m14-18v18m81-18v18m14-18v18"/><circle cx="87" cy="169" r="9"/></g>
+<!-- VIC: Flinders Street Station -->
+<g transform="translate(600 0)"><path d="M4 220h187M17 220v-59h156v59M10 161h170M25 161v-16h38m47 0h54v16M65 161v-30q22-14 44 0v30M64 131q0-32 23-42 23 10 23 42M87 89V73M56 220v-29q10-18 20 0v29m21 0v-29q10-18 20 0v29M27 179h16v22H27zm102 0h16v22h-16zM17 212h156"/><circle cx="87" cy="142" r="8"/></g>
+<!-- TAS: Cradle Mountain -->
+<g transform="translate(800 0)"><path d="M4 220h188M8 214l33-60 15 11 24-55 15 21 12-14 22 49 15-12 41 60M56 165l18 9 13-25 18 24 24-7M37 225q45 11 101 0m-85 12q29 6 66 0"/></g>
+<!-- ACT: Parliament House -->
+<g transform="translate(1000 0)"><path d="M3 220h189M12 220l30-34h110l30 34M29 220v-25h137v25M38 206h119M46 206v14m15-14v14m15-14v14m15-14v14m15-14v14m15-14v14m15-14v14m15-14v14M65 186l32-89 32 89M81 186l16-89 16 89M97 97V62l23 7-23 8"/></g>
+<!-- NSW: Sydney Opera House -->
+<g transform="translate(1200 0)"><path d="M3 220h190M14 207h164l-8 13H24zM29 207Q17 171 8 163q47 3 65 44M73 207Q46 153 48 111q68 29 76 96M48 111l25 96M124 207q-14-55 12-100 27 58 22 100M136 107l-12 100M158 207q7-33 29-49-1 34-14 49M14 232q20-6 40 0t40 0 40 0 40 0"/></g>
+<!-- QLD: Brisbane Story Bridge -->
+<g transform="translate(1400 0)"><path d="M2 199h191M5 211h184M42 220V115h12v105m87 0V115h12v105M38 115h20m79 0h20M7 199l35-52m12 0 43 52 44-52m12 0 35 52M7 199h181M22 179v20m12-37v37m34-35v35m14-18v18m31-18v18m15-35v35m35-37v37m13-20v20M36 232h25m73 0h27"/></g>
+</svg>
