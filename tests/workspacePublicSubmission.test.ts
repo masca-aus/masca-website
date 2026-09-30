@@ -5,7 +5,7 @@ const collection = configureWorkspace([{slug:'events',fields:[]}])[0];
 const hook = collection.hooks!.beforeChange!.at(-1)!;
 function run(token: unknown, operation = 'create', status = 'draft') {
  const args = {data:{owningScope:'National',reviewStatus:'pending',_status:status},req:{user:null},context:{publicEventSubmission:token},operation};
- return hook(args as Parameters<typeof hook>[0]);
+ return hook(args as unknown as Parameters<typeof hook>[0]);
 }
 describe('Public submissions under Workspace authentication', () => {
  it('accepts a trusted pending draft', () => {
