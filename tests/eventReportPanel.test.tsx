@@ -42,20 +42,20 @@ it("preserves month across frequency switches and clears stale export when dates
     vi.fn().mockResolvedValue({ ok: true, json: async () => report }),
   );
   render(<EventReportPanel />);
-  fireEvent.change(screen.getByLabelText("Month"), { target: { value: "09" } });
-  fireEvent.change(screen.getByLabelText("Year"), {
-    target: { value: "2026" },
-  });
-  fireEvent.change(screen.getByLabelText("Report period"), {
-    target: { value: "year" },
-  });
-  expect(screen.queryByLabelText("Month")).toBeNull();
-  fireEvent.change(screen.getByLabelText("Report period"), {
-    target: { value: "month" },
-  });
-  expect((screen.getByLabelText("Month") as HTMLSelectElement).value).toBe(
-    "09",
-  );
+  const select = (label: string, option: string) => {
+    fireEvent.click(
+      screen.getByRole("combobox", { name: new RegExp(`^${label} `) }),
+    );
+    fireEvent.click(screen.getByRole("option", { name: option }));
+  };
+  select("Month", "September");
+  select("Year", "2026");
+  select("Report period", "Yearly");
+  expect(screen.queryByRole("combobox", { name: /^Month / })).toBeNull();
+  select("Report period", "Monthly");
+  expect(
+    screen.getByRole("combobox", { name: /^Month / }).textContent,
+  ).toContain("September");
   fireEvent.click(screen.getByRole("button", { name: "Generate report" }));
   await screen.findByRole("button", { name: "Print / save PDF" });
   expect(fetch).toHaveBeenCalledWith(
@@ -63,18 +63,16 @@ it("preserves month across frequency switches and clears stale export when dates
     expect.anything(),
   );
   expect(screen.getByText("Draft")).toBeTruthy();
-  fireEvent.change(screen.getByLabelText("Month"), { target: { value: "10" } });
+  select("Month", "October");
   expect(screen.queryByRole("button", { name: "Print / save PDF" })).toBeNull();
 });
 it("shows an actionable error and permits retry", async () => {
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue({
-        ok: false,
-        json: async () => ({ message: "Please sign in again." }),
-      }),
+    vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({ message: "Please sign in again." }),
+    }),
   );
   render(<EventReportPanel />);
   fireEvent.click(screen.getByRole("button", { name: "Generate report" }));
@@ -100,4 +98,18 @@ it("escapes report values, includes local date and draft status, and has print-o
   expect(html).toContain("<thead>");
   expect(html).toContain("@page");
   expect(reportDate("2026-09-30T14:30:00Z", "QLD")).toContain("1 Oct 2026");
+});
+
+it("supports keyboard selection and Escape without committing a date", () => {
+  render(<EventReportPanel />);
+  const month = screen.getByRole("combobox", { name: /^Month / });
+  fireEvent.keyDown(month, { key: "ArrowDown" });
+  fireEvent.keyDown(month, { key: "Home" });
+  fireEvent.keyDown(month, { key: "Enter" });
+  expect(month.textContent).toContain("January");
+  fireEvent.click(month);
+  fireEvent.keyDown(month, { key: "ArrowDown" });
+  fireEvent.keyDown(month, { key: "Escape" });
+  expect(screen.queryByRole("listbox")).toBeNull();
+  expect(month.textContent).toContain("January");
 });

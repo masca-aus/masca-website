@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
-  ChevronDown,
   Download,
   FileText,
   LoaderCircle,
@@ -18,6 +17,7 @@ import {
   reportStage,
 } from "@/features/events/reportPresentation";
 import "./eventListTools.css";
+import { ReportSelect } from "./ReportSelect";
 export function EventReportPanel() {
   const today = new Intl.DateTimeFormat("en-CA", {
     year: "numeric",
@@ -78,54 +78,38 @@ export function EventReportPanel() {
         </div>
       </div>
       <form onSubmit={generate} aria-busy={busy}>
-        <label>
-          Report period
-          <span className="masca-report-select">
-            <select
-              disabled={busy}
-              value={frequency}
-              onChange={(e) => change(() => setFrequency(e.target.value))}
-            >
-              <option value="month">Monthly</option>
-              <option value="year">Yearly</option>
-            </select>
-            <ChevronDown size={16} aria-hidden="true" />
-          </span>
-        </label>
+        <ReportSelect
+          label="Report period"
+          value={frequency}
+          disabled={busy}
+          options={[
+            { value: "month", label: "Monthly" },
+            { value: "year", label: "Yearly" },
+          ]}
+          onChange={(value) => change(() => setFrequency(value))}
+        />
         {frequency === "month" && (
-          <label>
-            Month
-            <span className="masca-report-select">
-              <select
-                disabled={busy}
-                value={month}
-                onChange={(e) => change(() => setMonth(e.target.value))}
-              >
-                {reportMonths.map((name, i) => (
-                  <option key={name} value={String(i + 1).padStart(2, "0")}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={16} aria-hidden="true" />
-            </span>
-          </label>
+          <ReportSelect
+            label="Month"
+            value={month}
+            disabled={busy}
+            options={reportMonths.map((label, i) => ({
+              label,
+              value: String(i + 1).padStart(2, "0"),
+            }))}
+            onChange={(value) => change(() => setMonth(value))}
+          />
         )}
-        <label>
-          Year
-          <span className="masca-report-select">
-            <select
-              disabled={busy}
-              value={year}
-              onChange={(e) => change(() => setYear(e.target.value))}
-            >
-              {Array.from({ length: 301 }, (_, i) => 2200 - i).map((y) => (
-                <option key={y}>{y}</option>
-              ))}
-            </select>
-            <ChevronDown size={16} aria-hidden="true" />
-          </span>
-        </label>
+        <ReportSelect
+          label="Year"
+          value={year}
+          disabled={busy}
+          options={Array.from({ length: 301 }, (_, i) => ({
+            label: String(2200 - i),
+            value: String(2200 - i),
+          }))}
+          onChange={(value) => change(() => setYear(value))}
+        />
         <button
           type="submit"
           className="masca-action masca-action--primary"

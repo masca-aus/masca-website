@@ -26,6 +26,7 @@ export function EventListTools() {
           <button
             className="masca-action masca-action--secondary"
             aria-expanded={reports}
+            aria-controls="masca-event-reports"
             onClick={() => setReports(!reports)}
           >
             Reports
@@ -63,7 +64,15 @@ export function EventListTools() {
           their history and their entries in reports.
         </p>
       )}
-      {reports && <EventReportPanel />}
+      <div
+        id="masca-event-reports"
+        className={`masca-report-disclosure ${reports ? "is-open" : ""}`}
+        inert={!reports}
+      >
+        <div className="masca-report-disclosure__inner">
+          <EventReportPanel />
+        </div>
+      </div>
     </div>
   );
 }

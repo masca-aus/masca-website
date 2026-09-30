@@ -260,3 +260,128 @@
     flex: 1;
   }
 }
+
+.masca-report-disclosure {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition:
+    grid-template-rows 240ms ease,
+    opacity 180ms ease,
+    transform 240ms ease,
+    visibility 240ms;
+}
+.masca-report-disclosure.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.masca-report-disclosure__inner {
+  min-height: 0;
+  overflow: hidden;
+}
+.masca-report-disclosure.is-open .masca-report-disclosure__inner {
+  overflow: visible;
+}
+.masca-report-field {
+  position: relative;
+  display: grid;
+  gap: 0.5rem;
+  min-width: 150px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.masca-report-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--theme-elevation-250);
+  border-radius: 10px;
+  background: var(--theme-input-bg, var(--theme-bg));
+  color: var(--theme-text);
+  font: inherit;
+  font-weight: 400;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.masca-report-select-trigger[aria-expanded="true"] {
+  border-color: #ed5269;
+  box-shadow: 0 0 0 3px color-mix(in srgb, #ed5269 12%, transparent);
+}
+.masca-report-select-trigger svg {
+  flex-shrink: 0;
+  transition: transform 180ms ease;
+}
+.masca-report-select-trigger[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+.masca-report-options {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  max-height: 248px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+  border: 1px solid var(--theme-elevation-200);
+  border-radius: 12px;
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.14);
+  animation: masca-report-reveal 150ms ease-out;
+}
+.masca-report-options [role="option"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.65rem 0.7rem;
+  min-height: 40px;
+  border-radius: 7px;
+  font-weight: 400;
+  cursor: pointer;
+}
+.masca-report-options [aria-selected="true"] {
+  color: var(--theme-text);
+  font-weight: 600;
+}
+.masca-report-options [aria-selected="true"] svg {
+  color: #ed5269;
+}
+.masca-report-options .is-active {
+  background: color-mix(in srgb, #ed5269 12%, var(--theme-bg));
+}
+@media (max-width: 650px) {
+  .masca-report-field {
+    flex: 1;
+    min-width: 130px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .masca-report-disclosure,
+  .masca-report-select-trigger,
+  .masca-report-select-trigger svg {
+    transition: none;
+  }
+  .masca-report-options {
+    animation: none;
+  }
+}
+.masca-report-options,
+.masca-report-options [role="option"] {
+  box-sizing: border-box;
+}
+.masca-report-options [role="option"] {
+  line-height: 1.4;
+}
