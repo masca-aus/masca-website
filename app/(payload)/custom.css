@@ -420,3 +420,27 @@ html[data-theme="dark"] .nav { border-right-color: var(--theme-elevation-200); b
 @media (prefers-reduced-motion: reduce) { .template-minimal__wrap:has(.masca-login-welcome) { animation: none; } }
 
 .masca-google-signin { display: flex; justify-content: center; padding: 14px 20px; margin-top: 26px; border-radius: 10px; text-decoration: none; background: var(--masca-blue); color: white; font-size: .9rem; }
+/* A quiet national skyline, kept away from the sign-in controls. */
+.template-minimal:has(.masca-login-welcome) {
+  position: relative;
+  isolation: isolate;
+  padding-bottom: clamp(110px, 16vw, 210px);
+}
+.template-minimal:has(.masca-login-welcome)::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 12px;
+  height: clamp(90px, 16.25vw, 240px);
+  background: url('/illustrations/australia-landmarks.svg') center bottom / 100% auto no-repeat;
+  opacity: .13;
+  pointer-events: none;
+  z-index: -1;
+}
+html[data-theme="dark"] .template-minimal:has(.masca-login-welcome)::before {
+  filter: brightness(2.7) saturate(.5);
+  opacity: .16;
+}
+@media (max-width: 600px) {
+  .template-minimal:has(.masca-login-welcome) { padding-bottom: 85px; }
+  .template-minimal:has(.masca-login-welcome)::before { bottom: 16px; }
+}
