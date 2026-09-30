@@ -4,12 +4,10 @@ import Button from "@/components/Button"
 import CompanyMark from "@/app/(frontend)/careers/CompanyMark"
 import { ClosingChip, WorkingRightsBadge } from "@/app/(frontend)/careers/JobBadges"
 import type { Job } from "@/utils/careers"
-import { loadCareerBoard } from "@/utils/careersSource"
+import { getCMSCareerBoard } from "@/features/careers/publicCareers"
 
-// Home-page spotlight for the /careers board: the message on the left, a
-// live peek at the board on the right. Uses loadCareerBoard (never throws)
-// so a sheet hiccup shrinks this to a plain pitch instead of taking the
-// home page down. Rows deep-link into the board via ?job=.
+// Home-page spotlight for the /careers board. It uses the same published CMS
+// records as the public board, and rows deep-link into it via ?job=.
 
 const PREVIEW_COUNT = 3
 
@@ -29,7 +27,7 @@ const PROMISES = [
 ]
 
 export default async function CareerSpotlightSection() {
-  const board = await loadCareerBoard()
+  const board = await getCMSCareerBoard()
   const jobs = board.status === "ok" ? board.jobs : []
   const preview = jobs.slice(0, PREVIEW_COUNT)
 
@@ -42,7 +40,7 @@ export default async function CareerSpotlightSection() {
           <header className="flex flex-col gap-4">
             <span className="eyebrow text-yellow-500">the jobs board</span>
             <h2 className="title text-white">
-              Find your next <span className="text-yellow-500">opportunity</span>
+              Find your next <span className="text-yellow-500">Job</span>
             </h2>
           </header>
 
