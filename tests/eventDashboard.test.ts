@@ -12,7 +12,7 @@ describe("event dashboard summary", () => {
       return { totalDocs: 1 };
     });
     const find = vi.fn().mockImplementation(async ({ where }) => ({
-      totalDocs: where._status?.equals === 'draft' ? 3 : 2,
+      totalDocs: where.submittedForReview?.equals === true ? 2 : where._status?.equals === 'draft' ? 3 : 2,
       docs: [{ id: 7, title: "Community dinner", organisation: "MASCA QLD" }],
     }));
 
@@ -39,7 +39,7 @@ describe("event dashboard summary", () => {
       sort: "-createdAt",
       depth: 0,
       draft: true,
-      where: { id: { not_in: [-1] }, reviewStatus: { equals: "pending" } },
+      where: { id: { not_in: [-1] }, submittedForReview: { equals: true }, _status: { equals: "draft" } },
     }));
   });
 });

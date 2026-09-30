@@ -1,0 +1,5 @@
+.public-form-wizard { display:flex; flex-direction:column; gap:1.5rem; }
+.public-form-wizard__step:not([hidden]) { animation:public-form-enter 180ms ease-out; }
+.public-form-wizard [hidden] { display:none; }
+@keyframes public-form-enter { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+@media(prefers-reduced-motion:reduce) { .public-form-wizard__step:not([hidden]) {animation:none;} }

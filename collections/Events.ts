@@ -1,3 +1,4 @@
+import { submittedForReviewField, completeSubmissionReview } from "../features/submissions/review.ts";
 import { adminSearchFields, adminSearchHooks, withAdminSearch } from '../features/admin/adminSearch.ts';
 import { cmsStatusField } from '../features/admin/cmsStatusField.ts';
 import { revalidatePath } from "next/cache.js";
@@ -100,6 +101,7 @@ export const Events: CollectionConfig = {
   endpoints: [{ path: '/report', method: 'get', handler: eventReport }, { path: '/:id/lifecycle', method: 'post', handler: eventLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: eventQuickAction }],
   fields: [
     cmsStatusField('events'),
+    submittedForReviewField,
     { name: 'lifecycle', type: 'text', virtual: true, label: 'Event stage',
       admin: { disableListColumn: true, components: { Field: false, Cell: '/components/admin/EventLifecycleCell#EventLifecycleCell' }, disableBulkEdit: true },
       hooks: { afterRead: [async ({ data, req }: Parameters<FieldHook>[0]) => {
@@ -269,7 +271,7 @@ export const Events: CollectionConfig = {
   hooks: {
     ...adminSearchHooks,
     beforeDelete: [deleteEventLifecycle],
-    beforeChange: [validateQuickPublish],
+    beforeChange: [completeSubmissionReview, validateQuickPublish],
     afterChange: [revalidatePublishedEvent],
     afterDelete: [revalidateEventPages],
   },

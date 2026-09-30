@@ -5,11 +5,10 @@ import {
   useRef,
   useState,
   type FormEvent,
-  type InputHTMLAttributes,
-  type ReactNode,
-  type TextareaHTMLAttributes,
 } from "react";
 
+import { PublicFormWizard } from "@/components/forms/PublicFormWizard";
+import { fieldClass, FieldShell, TextField, TextAreaField } from "@/components/forms/PublicFields";
 import Button from "@/components/Button";
 import { EVENT_STATES } from "@/features/events/eventSubmission";
 
@@ -29,9 +28,6 @@ export function applySubmissionResult(
   else errorSummary?.focus();
 }
 
-const fieldClass =
-  "w-full rounded-md border-2 border-blue-100 bg-white px-4 py-3 text-body text-black outline-none transition-colors placeholder:text-gray-300 focus:border-blue-600 focus:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 motion-reduce:transition-none";
-const labelClass = "text-body-sm font-bold text-gray-700";
 const fieldIds: Record<string, string> = {
   title: "event-title",
   organisation: "event-organisation",
@@ -60,91 +56,6 @@ function isSubmitEventResponse(value: unknown): value is SubmitEventResponse {
 
 function firstError(response: SubmitEventResponse | null, name: string) {
   return response && !response.ok ? response.fieldErrors?.[name]?.[0] : undefined;
-}
-
-function FieldShell({
-  id,
-  label,
-  error,
-  hint,
-  children,
-}: {
-  id: string;
-  label: string;
-  error?: string;
-  hint?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={id} className={error ? "text-body-sm font-bold text-red-600" : labelClass}>
-        {label}
-      </label>
-      {children}
-      {hint && (
-        <p id={`${id}-hint`} className="text-body-sm text-gray-700">
-          {hint}
-        </p>
-      )}
-      {error && (
-        <p id={`${id}-error`} role="alert" className="text-body-sm font-bold text-red-600">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function TextField({
-  id,
-  label,
-  error,
-  hint,
-  ...props
-}: InputHTMLAttributes<HTMLInputElement> & {
-  id: string;
-  label: string;
-  error?: string;
-  hint?: ReactNode;
-}) {
-  const describedBy = [hint ? `${id}-hint` : "", error ? `${id}-error` : ""]
-    .filter(Boolean)
-    .join(" ");
-
-  return (
-    <FieldShell id={id} label={label} error={error} hint={hint}>
-      <input
-        id={id}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy || undefined}
-        className={`${fieldClass} ${error ? "border-red-600 bg-red-50" : ""}`}
-        {...props}
-      />
-    </FieldShell>
-  );
-}
-
-function TextAreaField({
-  id,
-  label,
-  error,
-  ...props
-}: TextareaHTMLAttributes<HTMLTextAreaElement> & {
-  id: string;
-  label: string;
-  error?: string;
-}) {
-  return (
-    <FieldShell id={id} label={label} error={error}>
-      <textarea
-        id={id}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-error` : undefined}
-        className={`${fieldClass} resize-y ${error ? "border-red-600 bg-red-50" : ""}`}
-        {...props}
-      />
-    </FieldShell>
-  );
 }
 
 export function EventSubmissionForm({
@@ -256,14 +167,8 @@ export function EventSubmissionForm({
         </div>
       )}
 
-      <form
-        ref={formRef}
-        action="/api/submit-event"
-        method="post"
-        encType="multipart/form-data"
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-10"
-      >
+      <PublicFormWizard innerRef={formRef} action="/api/submit-event" onSubmit={handleSubmit}
+        steps={['Event details','Review contact']} pending={pending} response={response}>
         <fieldset className="flex flex-col gap-6 rounded-xl border-2 border-blue-100 p-6 md:p-8">
           <legend className="px-2 text-lg font-bold text-blue-600">About the event</legend>
           <div className="grid gap-6 md:grid-cols-2">
@@ -321,7 +226,7 @@ export function EventSubmissionForm({
               maxLength={240}
               error={venueError}
             />
-            <FieldShell id="event-state" label="State or territory" error={stateError}>
+            <FieldShell id="event-state" label="State or territory *" error={stateError}>
               <select
                 id="event-state"
                 name="state"
@@ -433,7 +338,7 @@ export function EventSubmissionForm({
             We review every submission before it can appear on the MASCA events calendar.
           </p>
         </div>
-      </form>
+      </PublicFormWizard>
     </div>
   );
 }

@@ -20,6 +20,7 @@ export interface EventSubmissionPayload {
         context: { publicEventSubmission: symbol };
         data: EventSubmissionInput & {
           poster?: number | string;
+          submittedForReview: true;
           owningScope: "National";
           reviewStatus: "pending";
           _status: "draft";
@@ -71,6 +72,7 @@ export async function createEventSubmission({
       contactName: data.contactName,
       contactEmail: data.contactEmail,
       ...(posterID !== undefined ? { poster: posterID } : {}),
+      submittedForReview: true,
       owningScope: "National",
       reviewStatus: "pending",
       _status: "draft",

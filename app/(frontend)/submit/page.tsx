@@ -5,7 +5,7 @@ import { pageMetadata } from "@/utils/seo";
 
 export const metadata: Metadata = pageMetadata({
   title: "Submit to MASCA",
-  description: "Share an event with MASCA for review and possible publication.",
+  description: "Share an event or career opportunity with MASCA for review and possible publication.",
   path: "/submit",
 });
 
@@ -49,6 +49,7 @@ export default function SubmitPage() {
             </Button>
           </div>
         </div>
+        <div className="mt-8 max-w-3xl rounded-xl border-2 border-blue-100 bg-blue-50 p-8 md:p-10"><span className="eyebrow text-red-600">careers</span><h2 className="mt-3 text-blue-600">Share a career opportunity</h2><p className="my-5 text-gray-700">Submit a job, internship or graduate role for our team to review.</p><Button href="/submit/career" variant="primary">Submit an opportunity →</Button></div>
       </section>
     </main>
   );

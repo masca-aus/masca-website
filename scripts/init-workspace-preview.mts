@@ -1,5 +1,6 @@
 // One-time initialization of the isolated authentication preview only.
 import pg from "pg";
+import { submissionSchemaSQL } from "../features/submissions/schema.ts";
 if (
   process.env.WORKSPACE_AUTH_ENABLED !== "true" ||
   process.env.VERCEL_ENV === "production"
@@ -17,6 +18,7 @@ if (tables.rows[0].count > 0)
   await connection.query(
     "ALTER TABLE cms_auth_preview.users ADD COLUMN IF NOT EXISTS all_content_access boolean DEFAULT false, ADD COLUMN IF NOT EXISTS permissions jsonb",
   );
+if (tables.rows[0].count > 0) await connection.query(submissionSchemaSQL("cms_auth_preview"));
 await connection.end();
 process.env.WORKSPACE_INIT_SCHEMA =
   tables.rows[0].count === 0 ? "true" : "false";
@@ -47,6 +49,8 @@ console.log("Isolated preview schema and initial administrator are ready.");
 const { verifyWorkspacePreview } =
   await import("./verify-workspace-preview.mts");
 await verifyWorkspacePreview(payload);
+const { verifyPublicSubmissions } = await import("./verify-public-submissions.mts");
+await verifyPublicSubmissions(payload);
 await payload.destroy();
 // Payload's adapter destroy resets its schema but leaves pool handles alive.
 // All verification and cleanup has completed; finish this one-shot build step.

@@ -42,7 +42,7 @@ describe("createEventSubmission", () => {
       overrideAccess: true,
       draft: true,
       context: { publicEventSubmission },
-      data: { ...data, poster: 17, reviewStatus: "pending", _status: "draft", owningScope: "National" },
+      data: { ...data, poster: 17, reviewStatus: "pending", _status: "draft", owningScope: "National", submittedForReview: true },
     });
     expect(result).toEqual({ id: 42 });
   });
@@ -64,7 +64,7 @@ describe("createEventSubmission", () => {
       overrideAccess: true,
       draft: true,
       context: { publicEventSubmission },
-      data: { ...data, reviewStatus: "pending", _status: "draft", owningScope: "National" },
+      data: { ...data, reviewStatus: "pending", _status: "draft", owningScope: "National", submittedForReview: true },
     });
   });
 
