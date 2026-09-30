@@ -262,6 +262,9 @@
 }
 
 .masca-report-disclosure {
+  /* Keep menus above the list controls below this animated panel. */
+  position: relative;
+  z-index: 20;
   display: grid;
   grid-template-rows: 0fr;
   opacity: 0;
@@ -277,7 +280,7 @@
   grid-template-rows: 1fr;
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: none;
 }
 .masca-report-disclosure__inner {
   min-height: 0;
