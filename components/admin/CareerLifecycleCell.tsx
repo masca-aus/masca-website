@@ -8,7 +8,7 @@ export function CareerLifecycleCell({ cellData, rowData }: { cellData?: unknown;
   const [busy, setBusy] = useState(false);
   const [refreshing, startTransition] = useTransition();
   const [error, setError] = useState('');
-  const status = String(cellData || 'active');
+  const status = cellData === 'closed' ? 'archived' : String(cellData || 'active');
   async function run(action: string) {
     if (!action || busy || refreshing) return;
     setBusy(true); setError('');
@@ -20,12 +20,10 @@ export function CareerLifecycleCell({ cellData, rowData }: { cellData?: unknown;
     } catch (cause) { setError((cause as Error).message); } finally { setBusy(false); }
   }
   return <div className="masca-status-action">
-    <EventActionMenu label={`Listing state for ${rowData?.title || 'opportunity'}`} text={status === 'closed' ? 'Closed' : status === 'archived' ? 'Archived' : 'Active'}
-      tone={status === 'closed' ? 'approved' : status} disabled={busy || refreshing || rowData?.id == null} busy={busy || refreshing} onChoose={action => void run(action)}
+    <EventActionMenu label={`Listing state for ${rowData?.title || 'opportunity'}`} text={status === 'archived' ? 'Archived' : 'Active'}
+      tone={status} disabled={busy || refreshing || rowData?.id == null} busy={busy || refreshing} onChoose={action => void run(action)}
       options={[
-        ...(status === 'active' ? [{ value: 'close', label: 'Close opportunity' }] : []),
-        status === 'archived' ? { value: 'restore', label: 'Restore opportunity' } : { value: 'archive', label: 'Archive opportunity' },
-        ...(status === 'closed' ? [{ value: 'reopen', label: 'Reopen opportunity' }] : []),
+        status === 'archived' ? { value: 'restore', label: 'Restore as draft' } : { value: 'archive', label: 'Archive opportunity' },
       ]} />
     {(busy || refreshing) && <small className="masca-status-action__announcement" role="status">Saving…</small>}
     {error && <small role="alert">{error}</small>}

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import type { Payload } from "payload";
+import { createLocalReq, type Payload } from "payload";
+import { careerLifecycleAction } from "../features/careers/careerLifecycle.ts";
 import {
   signWorkspaceSession,
   workspaceStrategy,
@@ -159,6 +160,22 @@ export async function verifyWorkspacePreview(payload: Payload) {
         data: { role: "administrator" } as never,
       }),
     );
+    // Restoring an archive must unpublish without losing a newer draft.
+    await payload.update({ collection: "careers", id: created[1], overrideAccess: false, req: broadReq,
+      data: { title: prefix + " published", company: "Preview test", applyUrl: "https://example.com/apply", added: new Date().toISOString().slice(0, 10), _status: "published" } as never });
+    await payload.update({ collection: "careers", id: created[1], draft: true, overrideAccess: false, req: broadReq,
+      data: { title: prefix + " unpublished edits", _status: "draft" } });
+    for (const action of ["archive", "restore"]) {
+      const actionReq = await createLocalReq({ user: broadReq.user }, payload);
+      actionReq.routeParams = { id: String(created[1]) };
+      actionReq.json = async () => ({ action });
+      const response = await careerLifecycleAction(actionReq);
+      assert.equal(response.status, 200);
+    }
+    const restored = await payload.findByID({ collection: "careers", id: created[1], draft: true, overrideAccess: true });
+    const restoredLive = await payload.findByID({ collection: "careers", id: created[1], draft: false, overrideAccess: true });
+    assert.equal(restored.title, prefix + " unpublished edits");
+    assert.equal(restoredLive._status, "draft");
     const user = await payload.findByID({
       collection: "users",
       id: editor.id,

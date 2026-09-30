@@ -45,8 +45,20 @@ export function CareerEditorHeader() {
   useEffect(() => {
     if (attemptedSave && submitted && firstError && !busy) { setStep(careerFieldStep(firstError)); setError('Check the highlighted field before saving.'); setAttemptedSave(false); }
   }, [attemptedSave, firstError, submitted, busy, setStep, setError, setAttemptedSave]);
+  const { getData, dispatchFields, setSubmitted } = useForm();
   const moveTo = (target: number) => {
     if (busy) return;
+    if (target > step) {
+      for (let index = 0; index < target; index++) {
+        const errors = careerStepErrors(getData(), index);
+        if (Object.keys(errors).length) {
+          dispatchFields({ type: 'ADD_SERVER_ERRORS', errors: Object.entries(errors).map(([path, message]) => ({ path, message })) });
+          setSubmitted(true); setStep(index); setOpen(false);
+          setError('Complete the highlighted fields before continuing.');
+          return;
+        }
+      }
+    }
     setOpen(false);
     setAttemptedSave(false);
     setError(''); setStep(target); heading.current?.focus();

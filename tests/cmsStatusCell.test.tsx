@@ -27,7 +27,7 @@ it('restores archived content without silently publishing it', async () => {
  render(<EventCMSStatusCell cellData={{ status: 'archived', hasChanges: false }} rowData={{ id: 9 }} />);
  fireEvent.click(screen.getByRole('button'));
  expect(screen.queryByRole('menuitem', { name: 'Publish' })).toBeNull();
- await act(async () => fireEvent.click(screen.getByRole('menuitem', { name: 'Restore' })));
+ await act(async () => fireEvent.click(screen.getByRole('menuitem', { name: 'Restore as draft' })));
  expect(h.fetch).toHaveBeenCalledWith('/api/events/9/lifecycle', expect.objectContaining({ body: JSON.stringify({ action: 'restore' }) }));
 });
 it('keeps the original badge and surfaces validation errors', async () => {

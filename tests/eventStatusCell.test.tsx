@@ -70,10 +70,10 @@ describe.each([['events', EventPublicationStatusCell], ['careers', CareerPublica
 it('keeps event stage actions separate from internal audit records', async () => {
  h.fetch.mockResolvedValue({ ok: true, json: async () => ({}) });
  render(<EventLifecycleCell cellData="completed" rowData={{ id: 44, title: 'Dinner' }} />);
- fireEvent.click(screen.getByRole('button', { name: 'Event stage for Dinner: Completed' }));
+ fireEvent.click(screen.getByRole('button', { name: 'Event stage for Dinner: Active' }));
  expect(screen.queryByRole('menuitem', { name: /history/i })).toBeNull();
- await act(async () => { fireEvent.click(screen.getByRole('menuitem', { name: 'Reopen event' })); });
- expect(h.fetch).toHaveBeenCalledWith('/api/events/44/lifecycle', expect.objectContaining({ body: JSON.stringify({ action: 'reopen' }) }));
+ await act(async () => { fireEvent.click(screen.getByRole('menuitem', { name: 'Archive event' })); });
+ expect(h.fetch).toHaveBeenCalledWith('/api/events/44/lifecycle', expect.objectContaining({ body: JSON.stringify({ action: 'archive' }) }));
 });
 
 it('names approval and unpublishing side effects in event menus', () => {

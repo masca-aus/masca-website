@@ -12,7 +12,7 @@ export function EventListTools() {
   const params = useSearchParams();
   const requested = params.get("eventView");
   const view =
-    requested === "completed" || requested === "archived"
+    requested === "archived"
       ? requested
       : "current";
   const [reports, setReports] = useState(false);
@@ -36,7 +36,6 @@ export function EventListTools() {
         <nav aria-label="Event lists">
           {[
             ["current", "Current"],
-            ["completed", "Completed"],
             ["archived", "Archived"],
           ].map(([key, label]) => (
             <Link
@@ -50,16 +49,10 @@ export function EventListTools() {
         </nav>
       </SectionToolbar>
 
-      {view === "completed" && (
-        <p>
-          Completed events are kept for your records. Reopen an event to return
-          it to Current.
-        </p>
-      )}
       {view === "archived" && (
         <p>
           Archived events are kept for your records and reports. Restore an
-          event to return it to its previous Current or Completed list, or
+          event as a draft to review before republishing, or
           select archived events and choose Delete to permanently remove them,
           their history and their entries in reports.
         </p>

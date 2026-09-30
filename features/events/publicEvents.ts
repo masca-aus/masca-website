@@ -6,7 +6,6 @@ import { getPayload } from "payload";
 import type { Event as PayloadEvent } from "@/payload-types";
 import type { Chapter, Event } from "@/utils/events";
 
-import { lifecycleIDs } from "./eventLifecycle";
 import { EVENT_STATES, EVENT_TIME_ZONES } from "./eventSubmission";
 
 export const CMS_EVENT_CHAPTERS: Chapter[] = EVENT_STATES.map(({ value }) => ({
@@ -48,7 +47,6 @@ export async function getApprovedPastEvents(now = new Date()): Promise<Event[]> 
 async function getPublicEvents(now: Date, past: boolean): Promise<Event[]> {
   const payload = await getPayload({ config });
   const instant = now.toISOString();
-  const completed = await lifecycleIDs(payload, "completed");
   const { docs } = await payload.find({
     collection: "events",
     overrideAccess: false,
@@ -60,10 +58,9 @@ async function getPublicEvents(now: Date, past: boolean): Promise<Event[]> {
       reviewStatus: { equals: "approved" },
       _status: { equals: "published" },
       ...(past ? { or: [
-        { id: { in: completed.length ? completed : [-1] } },
         { endDate: { less_than: instant } },
         { and: [{ endDate: { exists: false } }, { startDate: { less_than: instant } }] },
-      ] } : { id: { not_in: completed.length ? completed : [-1] }, or: [
+      ] } : { or: [
         { endDate: { greater_than_equal: instant } },
         {
           and: [

@@ -8,9 +8,7 @@ export type Lifecycle = { status: string; completedAt?: string | null; archivedA
 export function nextLifecycle(previous: Lifecycle | null, action: string, now: string): Lifecycle {
   const current = previous ?? { status: 'active' };
   if (action === 'archive' && current.status !== 'archived') return { ...current, status: 'archived', archivedAt: now };
-  if (action === 'complete' && current.status === 'active') return { ...current, status: 'completed', completedAt: now };
-  if (action === 'reopen' && current.status === 'completed') return { ...current, status: 'active', completedAt: null };
-  if (action === 'restore' && current.status === 'archived') return { ...current, status: current.completedAt ? 'completed' : 'active', archivedAt: null };
+  if (action === 'restore' && current.status === 'archived') return { ...current, status: 'active', completedAt: null, archivedAt: null };
   throw new Error('This action is not available for the current event status. Refresh and try again.');
 }
 export async function lifecycleRecords(payload: Pick<Payload, 'find'>, req?: PayloadRequest) {
@@ -22,11 +20,10 @@ export async function lifecycleIDs(payload: Pick<Payload, 'find'>, status: strin
 }
 export async function eventListFilter({ req }: { req: PayloadRequest }): Promise<Where> {
   const archived = req.query?.eventView === 'archived';
-  const completed = req.query?.eventView === 'completed';
   const records = await lifecycleRecords(req.payload, req);
-  const statuses = archived ? ['archived'] : completed ? ['completed'] : ['completed', 'archived'];
+  const statuses = ['archived'];
   const ids = records.filter(row => statuses.includes(row.status)).map(row => typeof row.event === 'object' ? row.event.id : row.event);
-  return { id: { [archived || completed ? 'in' : 'not_in']: ids.length ? ids : [-1] } };
+  return { id: { [archived ? 'in' : 'not_in']: ids.length ? ids : [-1] } };
 }
 export const eventLifecycleAction: PayloadHandler = async req => {
   if (!req.user) return Response.json({ message: 'Sign in to manage events.' }, { status: 401 });
@@ -47,6 +44,7 @@ export const eventLifecycleAction: PayloadHandler = async req => {
   catch (error) { return Response.json({ message: (error as Error).message }, { status: 409 }); }
   const values = { ...data, event: Number(id), changedBy: req.user.id };
   // A separate versioned record avoids publishing, unpublishing or overwriting event drafts.
+  if (action === 'restore') await req.payload.update({ collection: 'events', id, req, overrideAccess: false, unpublishAllLocales: true, data: { _status: 'draft' } });
   if (previous) await req.payload.update({ collection: 'event-lifecycle', id: previous.id, data: values, req, overrideAccess: true });
   else await req.payload.create({ collection: 'event-lifecycle', data: values, req, overrideAccess: true });
   if (ownsTransaction) await commitTransaction(req);

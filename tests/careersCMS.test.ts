@@ -31,13 +31,13 @@ describe('CMS careers public adapter', () => {
 });
 describe('careers lifecycle', () => {
  it('restores the previous closed state and requires reopen explicitly', () => {
-  const closed = nextCareerLifecycle(null, 'close', 'now');
+  const closed = { status: 'closed', closedAt: 'now' };
   const archived = nextCareerLifecycle(closed, 'archive', 'later');
-  expect(nextCareerLifecycle(archived, 'restore', 'later')).toMatchObject({ status: 'closed', closedAt: 'now', archivedAt: null });
-  expect(nextCareerLifecycle(closed, 'reopen', 'later')).toMatchObject({ status: 'active', closedAt: null });
+  expect(nextCareerLifecycle(archived, 'restore', 'later')).toMatchObject({ status: 'active', closedAt: null, archivedAt: null });
+
  });
  it('rejects illegal actions', () => {
-  expect(() => nextCareerLifecycle(null, 'restore', 'now')).toThrow();
+  expect(() => nextCareerLifecycle(null, 'close', 'now')).toThrow();
   expect(() => nextCareerLifecycle({ status: 'archived' }, 'reopen', 'now')).toThrow();
  });
 });

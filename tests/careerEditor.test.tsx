@@ -28,7 +28,7 @@ it('allows an incomplete draft at every step without publishing', () => {
 it('blocks invalid publication and opens the field step', () => {
   h.data.applyUrl = 'javascript:alert(1)'; render(editor());
   for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Publish opportunity' }));
+  expect(screen.queryByRole('button', { name: 'Publish opportunity' })).toBeNull();
   expect(screen.getByRole('heading', { name: 'Application and details' })).toBeTruthy();
   expect(h.errors).toHaveBeenCalled(); expect(h.publish).not.toHaveBeenCalled();
 });
@@ -61,7 +61,7 @@ it('closes step navigation with Escape and restores focus', () => {
 it('routes missing identity fields back to role and company before publishing', () => {
   h.data.company = ' '; render(editor());
   for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Publish opportunity' }));
+  expect(screen.queryByRole('button', { name: 'Publish opportunity' })).toBeNull();
   expect(screen.getByRole('heading', { name: 'Role and company' })).toBeTruthy();
   expect(h.publish).not.toHaveBeenCalled();
 });
@@ -78,4 +78,12 @@ it('reviews readable labels and the public listing details', () => {
 it('validates optional URLs and actual calendar dates consistently with publication', () => {
   expect(careerStepErrors({ ...h.data, companyWebsite: 'http://localhost', logoUrl: 'http://example.com/logo.png' }, 0)).toEqual(expect.objectContaining({ companyWebsite: expect.any(String), logoUrl: expect.any(String) }));
   expect(careerStepErrors({ ...h.data, applyUrl: 'https://user:pass@example.com', closes: '2026-02-30', added: 'not-a-date' }, 2)).toEqual(expect.objectContaining({ applyUrl: expect.any(String), closes: expect.any(String), added: expect.any(String) }));
+});
+
+it('prevents skipping required fields through the step menu', () => {
+ h.data = {}; render(editor());
+ fireEvent.click(screen.getByRole('button', { name: 'View steps' }));
+ fireEvent.click(screen.getByRole('button', { name: /Review and publish/ }));
+ expect(screen.getByRole('heading', { name: 'Role and company' })).toBeTruthy();
+ expect(h.errors).toHaveBeenCalled();
 });

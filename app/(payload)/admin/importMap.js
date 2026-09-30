@@ -1,6 +1,7 @@
 import { CMSStatusHeading as CMSStatusHeading_f45eec8b84c53ac532890f2ee67945df } from '../../../components/admin/CMSStatusHeading'
 import { CareerCMSStatusCell as CareerCMSStatusCell_7b142bce0343383e5a0dfdc8f07ad33f } from '../../../components/admin/CMSStatusCell'
 import { CareerEditorHeader as CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
+import { CareerDateField as CareerDateField_59404842b3b8e6cda85bec35a9da686f } from '../../../components/admin/CareerDateField'
 import { CareerLifecycleCell as CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34 } from '../../../components/admin/CareerLifecycleCell'
 import { CareerEditorFooter as CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
 import { CareerPublicationStatusCell as CareerPublicationStatusCell_f07b37ac41f692f48fee9d222ed514bf } from '../../../components/admin/CareerStatusCell'
@@ -52,6 +53,7 @@ export const importMap = {
   "/components/admin/CMSStatusHeading#CMSStatusHeading": CMSStatusHeading_f45eec8b84c53ac532890f2ee67945df,
   "/components/admin/CMSStatusCell#CareerCMSStatusCell": CareerCMSStatusCell_7b142bce0343383e5a0dfdc8f07ad33f,
   "/components/admin/CareerEditor#CareerEditorHeader": CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236,
+  "/components/admin/CareerDateField#CareerDateField": CareerDateField_59404842b3b8e6cda85bec35a9da686f,
   "/components/admin/CareerLifecycleCell#CareerLifecycleCell": CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34,
   "/components/admin/CareerEditor#CareerEditorFooter": CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236,
   "/components/admin/CareerStatusCell#CareerPublicationStatusCell": CareerPublicationStatusCell_f07b37ac41f692f48fee9d222ed514bf,

@@ -70,7 +70,7 @@ export function reportDocument(report: EventReport) {
 </style></head><body><header><div class="brand">MASCA / EVENTS</div><h1>Event report</h1><p>${escape(reportPeriod(report.period))}</p><p>Generated ${escape(reportDate(report.generatedAt, "QLD"))} (Australia/Brisbane)</p></header>
 <div class="stats">${[
     [report.total, "Events"],
-    [report.completed, "Completed"],
+    [report.completed, "Past events"],
     [report.archived, "Archived"],
     [report.organisations.length, "Organisations"],
   ]
