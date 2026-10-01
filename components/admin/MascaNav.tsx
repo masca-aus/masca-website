@@ -10,8 +10,8 @@ import { ThemeToggle } from "./ThemeToggle";
 
 const groups = [
   { label: "Content", items: [
-    { slug: "events", label: "Events", icon: CalendarDays, color: "#ef476f" },
     { slug: "careers", label: "Careers", icon: BriefcaseBusiness, color: "#ffcc00" },
+    { slug: "events", label: "Events", icon: CalendarDays, color: "#ef476f" },
     { slug: "committee", label: "Committee", icon: Users, color: "#9bdd9b" },
     { slug: "sponsors", label: "Sponsors", icon: Handshake, color: "#86b8ef" },
   ] },
