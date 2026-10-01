@@ -18,6 +18,7 @@ const navLinks = [
   { name: "Careers", href: "/careers"},
   // { name: "Unite", href: "/unite"},
   { name: "Committee", href: "/committee"},
+  { name: "Post with us", href: "/submit"},
 ]
 
 type IsActive = (href: string) => boolean
@@ -331,7 +332,7 @@ function SatayToggle({ open, onToggle }: { open: boolean; onToggle: () => void }
 // Centered primary navigation (desktop only).
 function DesktopNav({ isActive }: { isActive: IsActive }) {
   return (
-    <nav className="col-2 justify-self-center hidden lg:flex gap-6">
+    <nav className="col-2 justify-self-center hidden lg:flex gap-2 xl:gap-6">
       {navLinks.map((link) => {
         const active = isActive(link.href)
         return (
