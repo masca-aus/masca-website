@@ -1,11 +1,27 @@
 'use client';
-import {useEffect,useId,useRef,useState} from 'react';
+import {useEffect,useLayoutEffect,useId,useRef,useState} from 'react';
 import {Check,ChevronDown,Search} from 'lucide-react';
 import type {FormOption} from '@/features/forms/options';
 import './choiceSelect.css';
 export function ChoiceSelect({label,value,options,onChange,disabled=false,error,required=false,name,id:providedId}:{label:string;value:string;options:FormOption[];onChange:(value:string)=>void;disabled?:boolean;error?:string;required?:boolean;name?:string;id?:string}) {
  const generated=useId();const id=providedId||generated;const root=useRef<HTMLDivElement>(null);const trigger=useRef<HTMLButtonElement>(null);const input=useRef<HTMLSelectElement>(null);
  const [open,setOpen]=useState(false);const [query,setQuery]=useState('');const [active,setActive]=useState(-1);
+ const [placement,setPlacement]=useState({above:false,maxHeight:320,bottom:0});
+ useLayoutEffect(()=>{
+  if(!open)return;
+  const update=()=>{
+   const rect=trigger.current?.getBoundingClientRect();if(!rect)return;
+   const viewport=window.visualViewport;
+   const top=viewport?.offsetTop??0;
+   const bottom=top+(viewport?.height??window.innerHeight);
+   const below=Math.max(0,bottom-rect.bottom-14), above=Math.max(0,rect.top-top-14);
+   const flip=below<280&&above>below;
+   setPlacement({above:flip,maxHeight:Math.min(340,flip?above:below),bottom:(root.current?.getBoundingClientRect().bottom??rect.bottom)-rect.top+6});
+  };
+  update();window.addEventListener('resize',update);window.addEventListener('scroll',update,true);
+  window.visualViewport?.addEventListener('resize',update);
+  return()=>{window.removeEventListener('resize',update);window.removeEventListener('scroll',update,true);window.visualViewport?.removeEventListener('resize',update);};
+ },[open]);
  const available=value&&!options.some(o=>o.value===value)?[{value,label:value},...options]:options;
  const filtered=available.filter(o=>o.label.toLowerCase().includes(query.toLowerCase()));
  useEffect(()=>{if(!open)return;const close=(e:PointerEvent)=>{if(!root.current?.contains(e.target as Node))setOpen(false);};document.addEventListener('pointerdown',close);return()=>document.removeEventListener('pointerdown',close);},[open]);
@@ -16,7 +32,7 @@ export function ChoiceSelect({label,value,options,onChange,disabled=false,error,
   <button ref={trigger} id={id} type="button" role="combobox" aria-expanded={open} aria-activedescendant={open&&active>=0?`${id}-option-${active}`:undefined} aria-controls={`${id}-list`} aria-labelledby={`${id}-label`} aria-invalid={!!error} aria-describedby={error?`${id}-error`:undefined} disabled={disabled} onClick={()=>{setOpen(!open);setQuery('');setActive(-1);}} onKeyDown={e=>{if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();setOpen(true);setActive(Math.max(0,Math.min(filtered.length-1,active+(e.key==='ArrowDown'?1:-1))));}if(e.key==='Escape'){e.preventDefault();setOpen(false);}if(e.key==='Enter'&&open&&active>=0&&filtered[active]){e.preventDefault();choose(filtered[active].value);}}}>
    <span className={value?'':'masca-choice__placeholder'}>{available.find(o=>o.value===value)?.label||'Choose an option'}</span><ChevronDown size={18} aria-hidden="true"/>
   </button>
-  {open&&<div className="masca-choice__panel"><div className="masca-choice__search"><Search size={16} aria-hidden="true"/><input aria-label={`Search ${label}`} placeholder="Search options…" value={query} onChange={e=>{setQuery(e.target.value);setActive(-1);}} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();if(filtered.length===1)choose(filtered[0].value);}if(e.key==='Escape'){setOpen(false);trigger.current?.focus();}if(e.key==='ArrowDown'){e.preventDefault();root.current?.querySelector<HTMLButtonElement>('[role=option]')?.focus();}}}/></div><div id={`${id}-list`} role="listbox" aria-label={label}>{filtered.map((o,index)=><button type="button" role="option" id={`${id}-option-${index}`} aria-selected={value===o.value} className={index===active?'is-active':''} key={o.value} onClick={()=>choose(o.value)} onKeyDown={e=>{if(e.key==='Escape'){setOpen(false);trigger.current?.focus();}if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const buttons=root.current?.querySelectorAll<HTMLButtonElement>('[role=option]');buttons?.[Math.max(0,Math.min(filtered.length-1,index+(e.key==='ArrowDown'?1:-1)))]?.focus();}}}>{o.label}{value===o.value&&<Check size={16} aria-hidden="true"/>}</button>)}{!filtered.length&&<p>No matching options.</p>}</div>{!required&&value&&<button type="button" className="masca-choice__clear" onClick={()=>choose('')}>Clear selection</button>}</div>}
+  {open&&<div className="masca-choice__panel" data-above={placement.above} style={{maxHeight:placement.maxHeight,...(placement.above?{top:'auto',bottom:placement.bottom}: {})}}><div className="masca-choice__search"><Search size={16} aria-hidden="true"/><input aria-label={`Search ${label}`} placeholder="Search options…" value={query} onChange={e=>{setQuery(e.target.value);setActive(-1);}} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();if(filtered.length===1)choose(filtered[0].value);}if(e.key==='Escape'){setOpen(false);trigger.current?.focus();}if(e.key==='ArrowDown'){e.preventDefault();root.current?.querySelector<HTMLButtonElement>('[role=option]')?.focus();}}}/></div><div id={`${id}-list`} role="listbox" aria-label={label}>{filtered.map((o,index)=><button type="button" role="option" id={`${id}-option-${index}`} aria-selected={value===o.value} className={index===active?'is-active':''} key={o.value} onClick={()=>choose(o.value)} onKeyDown={e=>{if(e.key==='Escape'){setOpen(false);trigger.current?.focus();}if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const buttons=root.current?.querySelectorAll<HTMLButtonElement>('[role=option]');buttons?.[Math.max(0,Math.min(filtered.length-1,index+(e.key==='ArrowDown'?1:-1)))]?.focus();}}}>{o.label}{value===o.value&&<Check size={16} aria-hidden="true"/>}</button>)}{!filtered.length&&<p>No matching options.</p>}</div>{!required&&value&&<button type="button" className="masca-choice__clear" onClick={()=>choose('')}>Clear selection</button>}</div>}
   {error&&<p id={`${id}-error`} role="alert" className="masca-choice__error">{error}</p>}
  </div>;
 }
