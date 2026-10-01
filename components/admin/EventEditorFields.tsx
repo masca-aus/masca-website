@@ -1,4 +1,5 @@
 'use client';
+import { ListingTutorial } from './ListingTutorial';
 import { CMSStatusBadge } from './CMSStatusBadge';
 
 import React, { useEffect, useId, useRef, useState } from 'react';
@@ -54,6 +55,7 @@ export function EventEditorHeader() {
     setStep(next);
   };
   return <section className="masca-wizard-header" aria-label="Event editor">
+    <ListingTutorial collection="events" editor currentStep={step} onPreviewStep={setStep} />
     <div className="masca-wizard-heading-row">
       <div className="masca-wizard-progress-label"><CMSStatusBadge /><span className="masca-wizard-count">Step {step + 1} of 5 · {EVENT_EDITOR_STEPS[step].title}</span></div>
       <button ref={stepToggle} type="button" className="masca-wizard-text-button" aria-expanded={stepsOpen} aria-controls={stepListID} onClick={() => setStepsOpen(open => !open)}>View steps <span className="masca-wizard-step-chevron" aria-hidden="true">⌄</span></button>
@@ -140,9 +142,9 @@ export function EventEditorFooter() {
   };
   const busy = disabled || saveState === 'saving' || uploadStatus === 'uploading';
   return <div className="masca-wizard-footer">
-    <div className="masca-wizard-save-actions"><button type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => void save.current?.('exit')}>Save and exit</button><span ref={setSaveStatusTarget} /></div>
+    <div className="masca-wizard-save-actions"><button data-tutorial="save" type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => void save.current?.('exit')}>Save and exit</button><span ref={setSaveStatusTarget} /></div>
     <div>{step > 0 && <button type="button" className="masca-wizard-secondary" onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}
-      {step < 4 ? <button type="button" className="masca-wizard-primary" onClick={next} disabled={disabled}>Continue</button> : <button type="button" className="masca-wizard-primary" disabled={busy} onClick={() => void save.current?.('publish')}>{hasPublishedDoc ? 'Publish changes' : 'Publish event'}</button>}
+      {step < 4 ? <button type="button" className="masca-wizard-primary" onClick={next} disabled={disabled}>Continue</button> : <button data-tutorial="publish" type="button" className="masca-wizard-primary" disabled={busy} onClick={() => void save.current?.('publish')}>{hasPublishedDoc ? 'Publish changes' : 'Publish event'}</button>}
     </div>
   </div>;
 }

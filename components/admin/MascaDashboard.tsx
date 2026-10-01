@@ -1,3 +1,4 @@
+import { DashboardTutorial } from "./DashboardTutorial";
 import {
   mayManagePeople,
   mayView, mayEditArea, type PermissionArea,
@@ -26,7 +27,7 @@ const contentAreas = [
     group: "content",
     Icon: Briefcase,
     description:
-      "Publish opportunities, continue drafts and manage applications.",
+      "Publish opportunities, continue drafts and review submissions.",
     href: "/admin/collections/careers",
     createHref: "/admin/collections/careers/create",
     action: "Add opportunity",
@@ -113,7 +114,7 @@ export function DashboardContent({
         <div>
           <span className="masca-dashboard__eyebrow">MASCA CMS</span>
           <h1>Your workspace</h1>
-          <p>Manage events and keep the website up to date.</p>
+          <p>Manage your content and keep the website up to date.</p>
         </div>
         <Link
           className="masca-action masca-action--quiet"
@@ -124,6 +125,7 @@ export function DashboardContent({
           View website ↗
         </Link>
       </header>
+      <DashboardTutorial areas={contentAreas.filter(area => !account || mayView(account, area.href.split("/").pop() as PermissionArea)).map(area => area.name.toLowerCase())} showEvents={showEvents} isAdmin={isAdmin} />
       {showEvents && (
         <section aria-labelledby="events-overview">
           <div className="masca-dashboard__section-heading">
