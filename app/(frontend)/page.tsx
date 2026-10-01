@@ -13,6 +13,7 @@ import YearbookSection from "./sections/yearbook";
 import AboutSection from "./sections/about";
 import SponsorsSection from "./sections/sponsors";
 import FollowUsSection from "./sections/followUs";
+import PostOnOurPageSection from "./sections/postOnOurPage";
 import JoinUsSection from "./sections/joinUs";
 import { getSponsors } from "@/utils/sponsors";
 
@@ -55,6 +56,7 @@ export default async function Home() {
       <MascaVoiceSection />
       <FollowUsSection />
       <JoinUsSection />
+      <PostOnOurPageSection />
     </main>
   );
 }
