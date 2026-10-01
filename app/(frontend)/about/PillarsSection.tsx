@@ -40,7 +40,7 @@ const PILLARS: Pillar[] = [
     sub: "Welfare and Advocacy",
     mission:
       "To represent, champion, and advocate for our Malaysian students’ welfare and interests.",
-    href: "/care",
+    href: "/welfare",
     bg: "#CC0001",
     fg: "#FFFFFF",
     text: "text-red-800",
