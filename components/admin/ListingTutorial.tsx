@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import Link from 'next/link';
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { TutorialSpotlight, type SpotlightStep } from './TutorialSpotlight';
 import './listingTutorial.css';
 
 type Collection = 'careers' | 'events';
@@ -27,52 +26,48 @@ export function reviewQueueHref(collection: Collection) {
   return `/admin/collections/${collection}?where[submittedForReview][equals]=true&where[_status][equals]=draft`;
 }
 
-export function ListingTutorial({ collection, accountId, editor = false }: { collection: Collection; accountId?: string | number; editor?: boolean }) {
+export function ListingTutorial({ collection, accountId, editor = false, currentStep = 0, onPreviewStep }: { collection: Collection; accountId?: string | number; editor?: boolean; currentStep?: number; onPreviewStep?: (step: number) => void }) {
   const [open, setOpen] = useState(false);
-  const [index, setIndex] = useState(0);
-  const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
-  const title = useRef<HTMLHeadingElement>(null);
-  const titleID = useId();
-  const storageKey = accountId == null ? null : `masca:tutorial:v1:${accountId}:${collection}`;
-  const steps: Step[] = [...guides[collection],
-    { title: 'Public submissions need your review', body: `Anyone can suggest ${collection === 'careers' ? 'an opportunity' : 'an event'} through the public website form. A successful submission arrives in this CMS as “To be reviewed”. It stays private until published.`, tip: 'Public submission → To be reviewed → Check details → Publish' },
-    { title: 'Check a submission before approval', body: 'Open To be reviewed from the list toolbar, then open a record. Check the organisation, dates, eligibility or venue, and application or registration link. Use the private contact details to follow up if anything is missing.', tip: 'Saving a draft does not approve a submission. Public submissions are assigned to National; ask a National editor if your account is read only.' },
-    { title: 'Publish only when ready', body: `Once the details are verified, use ${collection === 'careers' ? 'Publish opportunity' : 'Publish event'} on the final form step. This clears the review flag and makes the listing public. If it is not ready, keep it private and add an internal note.`, tip: 'You can replay this guide anytime using Show tutorial.' },
-  ];
+  const originalStep = useRef(currentStep);
+  const storageKey = accountId == null ? null : `masca:tutorial:v2:${accountId}:${collection}`;
+  const continuationKey = `masca:tutorial:continue:${collection}`;
+  const steps = useMemo<SpotlightStep[]>(() => {
+    if (!editor) return [
+      { ...guides[collection][0], target: `a[href="/admin/collections/${collection}/create"]`, action: 'create' },
+      { title: 'Public submissions need your review', body: 'The public submission form sends records here as “To be reviewed”. They stay private until an authorised editor checks and publishes them.', tip: 'Public form → To be reviewed → Check details → Publish', target: '[data-tutorial="review-queue"]', action: 'review' },
+      { title: 'Open a listing to check its details', body: 'Open a title in the table to review the form, dates and links. Use Show tutorial inside the editor for a guided tour of its fields.', target: 'table a, .table a' },
+      { title: 'Keep your listings current', body: 'Use Archived to find previous listings. Restore an archived listing as a draft, check its details, then publish when ready.', target: '[data-tutorial="archived"]' },
+    ];
+    const formSteps = collection === 'careers' ? guides.careers.slice(1) : [guides.events[1], guides.events[2], { title: 'Poster and links', body: 'Add the event poster and check the registration link.' }, { title: 'Contact details', body: 'Check the submitter’s name and email. These details and internal notes stay private to the committee.' }, guides.events[4]];
+    const count = formSteps.length;
+    return [
+      ...formSteps.map((s, i) => ({ ...s, editorStep: i, target: i === count - 1 ? '[data-tutorial="publish"]' : collection === 'careers' ? `.masca-career-step-${i}.field-type, .masca-wizard-intro` : i === 0 ? '#field-title, .masca-wizard-intro' : i === 1 ? '.masca-event-dates__summary' : i === 2 ? '#field-ticketURL, .masca-wizard-intro' : '#field-contactName, .masca-wizard-intro' })),
+      { title: 'Save your progress privately', body: collection === 'careers' ? 'Save draft keeps a new opportunity private. Saving a submission as a draft leaves it in the review queue.' : 'Save and exit keeps a new event private. Saving a submission as a draft leaves it in the review queue.', target: '[data-tutorial="save"]', editorStep: count - 1 },
+      { title: 'Approve a public submission', body: 'Check every detail and use the private contact information if anything is missing. Publishing is the approval action: it clears “To be reviewed” and makes the listing public.', tip: 'The tutorial never saves or publishes. Close it when you are ready to edit.', target: '[data-tutorial="publish"]', editorStep: count - 1 },
+    ];
+  }, [collection, editor]);
   useEffect(() => {
-    if (editor || !storageKey) return;
     const timer = window.setTimeout(() => {
-      try { if (!localStorage.getItem(storageKey)) setOpen(true); } catch { /* Manual replay remains available when storage is blocked. */ }
+      try {
+        if (editor && sessionStorage.getItem(continuationKey)) {
+          sessionStorage.removeItem(continuationKey); setOpen(true);
+        } else if (!editor && storageKey && !localStorage.getItem(storageKey)) setOpen(true);
+      } catch { /* Manual replay remains available. */ }
     }, 350);
     return () => window.clearTimeout(timer);
-  }, [editor, storageKey]);
-  useEffect(() => {
-    if (!open) return;
-    dialog.current?.showModal();
-    title.current?.focus();
-  }, [open, index]);
+  }, [editor, storageKey, continuationKey]);
   function close() {
     if (storageKey) { try { localStorage.setItem(storageKey, 'seen'); } catch { /* Best effort. */ } }
-    dialog.current?.close();
+    if (editor) onPreviewStep?.(originalStep.current);
     setOpen(false);
     trigger.current?.focus();
   }
   return <>
-    <button ref={trigger} type="button" className="masca-action masca-action--secondary" onClick={() => { setIndex(0); setOpen(true); }}>Show tutorial</button>
-    {open && createPortal(<dialog ref={dialog} className="masca-listing-tutorial" aria-labelledby={titleID} onCancel={event => { event.preventDefault(); close(); }} onKeyDown={event => event.stopPropagation()}>
-      <header><span>{collection === 'careers' ? 'Careers' : 'Events'} · Quick guide</span><button type="button" onClick={close} aria-label="Close tutorial">×</button></header>
-      <div className="masca-listing-tutorial__progress" role="progressbar" aria-label="Tutorial progress" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={index + 1}><span style={{ width: `${(index + 1) / steps.length * 100}%` }} /></div>
-      <div key={index} className="masca-listing-tutorial__page">
-        <p className="masca-listing-tutorial__count">Step {index + 1} of {steps.length}</p>
-        <h2 ref={title} tabIndex={-1} id={titleID}>{steps[index].title}</h2>
-        <p>{steps[index].body}</p>
-        {steps[index].tip && <aside>{steps[index].tip}</aside>}
-        {index >= 5 && <ol className="masca-listing-tutorial__flow" aria-label="Submission review flow">{['Public form', 'To be reviewed', 'Check details', 'Publish'].map((label, i) => <li key={label}><span aria-hidden="true">{i + 1}</span>{label}</li>)}</ol>}
-        {index === 5 && <a href={`/submit/${collection === 'careers' ? 'career' : 'event'}`} target="_blank" rel="noopener noreferrer">View public submission form ↗</a>}
-        {!editor && index === steps.length - 1 && <Link href={reviewQueueHref(collection)} onClick={close}>Open submissions to review →</Link>}
-      </div>
-      <footer><button type="button" className="masca-action masca-action--secondary" onClick={close}>Skip tutorial</button><div><button type="button" className="masca-action masca-action--secondary" disabled={index === 0} onClick={() => setIndex(value => value - 1)}>Back</button><button type="button" className="masca-action masca-action--primary" onClick={() => index === steps.length - 1 ? close() : setIndex(value => value + 1)}>{index === steps.length - 1 ? 'Done' : 'Next'}</button></div></footer>
-    </dialog>, document.body)}
+    <button ref={trigger} type="button" className="masca-action masca-action--secondary" onClick={() => { originalStep.current = currentStep; setOpen(true); }}>Show tutorial</button>
+    {open && <TutorialSpotlight steps={steps} label={collection === 'careers' ? 'Careers' : 'Events'} onClose={close} onPreviewStep={onPreviewStep} onNavigate={(href, action) => {
+      if (action === 'create') { try { sessionStorage.setItem(continuationKey, 'true'); } catch { /* Replay inside the form is still available. */ } }
+      close(); window.location.assign(href);
+    }} />}
   </>;
 }

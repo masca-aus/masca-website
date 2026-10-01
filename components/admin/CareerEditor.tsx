@@ -69,7 +69,7 @@ export function CareerEditorHeader() {
     return () => { nextRef.current = null; };
   });
   return <section className="masca-wizard-header" aria-label="Career editor">
-    <ListingTutorial collection="careers" editor />
+    <ListingTutorial collection="careers" editor currentStep={step} onPreviewStep={setStep} />
     <div className="masca-wizard-heading-row"><div className="masca-wizard-progress-label"><CMSStatusBadge /><span className="masca-wizard-count">Step {step + 1} of 4 · {CAREER_STEPS[step].title}</span></div><button ref={toggle} type="button" className="masca-wizard-text-button" aria-expanded={open} aria-controls={listID} onClick={() => setOpen(value => !value)}>View steps <span className="masca-wizard-step-chevron" aria-hidden="true">⌄</span></button></div>
     <div className="masca-wizard-progress" role="progressbar" aria-label="Career setup progress" aria-valuemin={1} aria-valuemax={4} aria-valuenow={step + 1}><span style={{ width: `${(step + 1) * 25}%` }} /></div>
     <nav id={listID} className="masca-wizard-step-disclosure" data-open={open} aria-label="Career steps" aria-hidden={!open} inert={!open} onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); setOpen(false); toggle.current?.focus(); } }}><div className="masca-wizard-step-disclosure__inner"><ol className="masca-wizard-steps">{CAREER_STEPS.map(({ title }, index) => <li key={title}><button type="button" disabled={busy} tabIndex={open ? 0 : -1} aria-current={index === step ? 'step' : undefined} onClick={() => moveTo(index)}><span className="masca-wizard-step-number" aria-hidden="true">{index < step ? '✓' : index + 1}</span>{title}</button></li>)}</ol></div></nav>
@@ -111,7 +111,7 @@ export function CareerEditorFooter() {
     setAttemptedSave(true);
   }
   return <footer className="masca-wizard-footer">
-    <div className="masca-wizard-save-actions"><Link href="/admin/collections/careers" className="masca-action masca-action--secondary">Cancel</Link><div onClickCapture={() => setAttemptedSave(false)}><SaveDraftButton /></div><span className="masca-save-indicator" role="status">{busy ? 'Saving…' : id && !modified ? 'Saved' : 'Drafts stay private until published'}</span></div>
-    <div>{step > 0 && <button type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}{step < 3 ? <button type="button" className="masca-wizard-primary" disabled={busy} onClick={() => nextRef.current?.()}>Continue</button> : <div onClickCapture={validatePublication}><PublishButton label="Publish opportunity" /></div>}</div>
+    <div className="masca-wizard-save-actions"><Link href="/admin/collections/careers" className="masca-action masca-action--secondary">Cancel</Link><div onClickCapture={() => setAttemptedSave(false)}><span data-tutorial="save"><SaveDraftButton /></span></div><span className="masca-save-indicator" role="status">{busy ? 'Saving…' : id && !modified ? 'Saved' : 'Drafts stay private until published'}</span></div>
+    <div>{step > 0 && <button type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}{step < 3 ? <button type="button" className="masca-wizard-primary" disabled={busy} onClick={() => nextRef.current?.()}>Continue</button> : <div data-tutorial="publish" onClickCapture={validatePublication}><PublishButton label="Publish opportunity" /></div>}</div>
   </footer>;
 }
