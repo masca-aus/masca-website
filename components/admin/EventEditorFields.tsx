@@ -1,4 +1,5 @@
 'use client';
+import './listingReview.css';
 import { ListingTools } from './ListingTools';
 import { ListingTutorial } from './ListingTutorial';
 import { CMSStatusBadge } from './CMSStatusBadge';
@@ -107,14 +108,14 @@ function EventOverview({ poster }: { poster: EventPoster | null }) {
   const registration = typeof data.ticketURL === 'string' && data.ticketURL.startsWith('https://') ? data.ticketURL : null;
   const row = (label: string, value: React.ReactNode) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>;
   const heading = (title: string, step: number, label: string) => <header><h4>{title}</h4><button type="button" className="masca-wizard-text-button" onClick={() => setStep(step)} aria-label={label}>Edit</button></header>;
-  return <div className="masca-event-overview">
+  return <div className="masca-listing-review">
     <article className="masca-event-review" aria-label="Public event preview">
-      <div className="masca-event-review__identity"><h3>{text('title')}</h3><p>{text('organisation')}</p></div>
-      <section className="masca-event-review__section">
+      <div className="masca-listing-review__identity"><h3>{text('title')}</h3><p>{text('organisation')}</p></div>
+      <section className="masca-listing-review__section">
         {heading('Event details', 0, 'Edit basics')}
         <dl>{row('Description', text('description'))}</dl>
       </section>
-      <section className="masca-event-review__section">
+      <section className="masca-listing-review__section">
         {heading('Date and location', 1, 'Edit date and location')}
         <dl>
           {row('Starts', date('startDate'))}
@@ -126,18 +127,18 @@ function EventOverview({ poster }: { poster: EventPoster | null }) {
           {data.venueDetails ? row('Venue details', text('venueDetails')) : null}
         </dl>
       </section>
-      <section className="masca-event-review__section">
+      <section className="masca-listing-review__section">
         {heading('Poster and links', 2, 'Edit poster and links')}
         <dl>
           {row('Poster', image ? /* eslint-disable-next-line @next/next/no-img-element */
-            <img className="masca-event-review__poster" src={image} alt={poster?.alt || text('title')} width={100} height={125} decoding="async" /> : data.poster ? 'Poster selected · preview unavailable' : 'No poster selected')}
+            <img className="masca-listing-review__poster" src={image} alt={poster?.alt || text('title')} width={100} height={125} decoding="async" /> : data.poster ? 'Poster selected · preview unavailable' : 'No poster selected')}
           {row('Registration', registration ? <a href={registration} target="_blank" rel="noopener noreferrer">Registration link ↗</a> : 'No registration link')}
         </dl>
       </section>
     </article>
-    <section className="masca-event-review__section masca-event-review__private">
+    <section className="masca-listing-review__section masca-listing-review__private">
       {heading('Contact details · committee only', 3, 'Edit contact details · committee only')}
-      <p className="masca-event-review__hint">These details are not shown on the public website.</p>
+      <p className="masca-listing-review__hint">These details are not shown on the public website.</p>
       <dl>{row('Contact name', text('contactName'))}{row('Contact email', text('contactEmail'))}
         {data.internalNotes ? row('Internal notes', text('internalNotes')) : null}
       </dl>
