@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useDocumentTitle, useDocumentInfo } from "@payloadcms/ui";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
@@ -8,6 +9,11 @@ import { SectionToolbar } from './SectionToolbar';
 import { adminBackTarget } from './adminBackTarget';
 
 export function DocumentBackLink() {
+  const { title, setDocumentTitle } = useDocumentTitle();
+  const { data } = useDocumentInfo();
+  useEffect(() => {
+    if (title === '[Untitled]' && !data?.title) setDocumentTitle('Untitled');
+  }, [title, data?.title, setDocumentTitle]);
   const pathname = usePathname();
   const linkRef = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
