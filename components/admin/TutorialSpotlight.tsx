@@ -35,6 +35,15 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
     let frame = 0;
     let disposed = false;
     const find = () => step.target.split(',').flatMap(selector => Array.from(document.querySelectorAll<HTMLElement>(selector.trim()))).find(el => el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height > 0 && !el.closest('dialog')) ?? null;
+    function revealTarget() {
+      const element = target.current;
+      if (!element) return;
+      // Leave room for the CMS's sticky header and document controls.
+      const previous = element.style.scrollMarginTop;
+      element.style.scrollMarginTop = '160px';
+      element.scrollIntoView({ block: 'start', behavior: 'instant' });
+      element.style.scrollMarginTop = previous;
+    }
     function measure() {
       if (disposed) return;
       target.current = find();
@@ -46,11 +55,11 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
     }
     const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(measure); };
     target.current = find();
-    target.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
+    revealTarget();
     measure();
     const initialFrame = requestAnimationFrame(() => {
       target.current = find();
-      target.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
+      revealTarget();
       title.current?.focus({ preventScroll: true });
       measure();
       setFading(false);
