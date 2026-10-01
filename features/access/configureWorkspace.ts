@@ -238,6 +238,7 @@ export function configureWorkspace(
             options: [...ownershipScopes],
             admin: {
               position: "sidebar",
+              hidden: true,
               description:
                 "The team responsible for this record. Independent of the public event/job location.",
             },

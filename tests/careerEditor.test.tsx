@@ -71,9 +71,9 @@ it('reviews readable labels and the public listing details', () => {
   for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
   expect(screen.getByText('Internship')).toBeTruthy();
   expect(screen.getByText('Remote')).toBeTruthy();
-  expect(screen.getByText('Study levels: Any year level')).toBeTruthy();
-  expect(screen.getByText('International students: Check working rights')).toBeTruthy();
-  for (const text of ['Company website: https://example.com', 'Logo URL: https://example.com/logo.png', 'Featured: Yes', 'Tags: Engineering, Technology', 'Listed date: 2026-09-17']) expect(screen.getByText(text)).toBeTruthy();
+  expect(screen.getByText('Any year level')).toBeTruthy();
+  expect(screen.getByText('Check working rights')).toBeTruthy();
+  for (const text of ['https://example.com', 'Yes', 'Engineering, Technology', '17 Sept 2026']) expect(screen.getByText(text)).toBeTruthy();
 });
 it('validates optional URLs and actual calendar dates consistently with publication', () => {
   expect(careerStepErrors({ ...h.data, companyWebsite: 'http://localhost', logoUrl: 'http://example.com/logo.png' }, 0)).toEqual(expect.objectContaining({ companyWebsite: expect.any(String), logoUrl: expect.any(String) }));

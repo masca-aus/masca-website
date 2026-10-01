@@ -22,3 +22,13 @@ html[data-theme="dark"] .masca-career-editor .masca-wizard-footer .btn--style-pr
 .masca-career-private-note { padding: 1rem; background: var(--theme-elevation-50); border-radius: 8px; }
 .masca-career-editor .masca-wizard-save-actions { flex-wrap: wrap; }
 .masca-career-editor > .collection-edit--careers > form > .doc-controls .doc-controls__content:has(> .doc-controls__meta:only-child) { display: none; }
+
+.masca-career-review__identity h3 { font-size: 1.5rem; overflow-wrap: anywhere; }
+.masca-career-review__section { margin-top: 1rem; padding: 1.25rem; border: 1px solid var(--theme-elevation-150); border-radius: 12px; }
+.masca-career-review__section header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.masca-career-review__section h4 { margin: 0; font-size: 1rem; }
+.masca-career-review__section dl { margin: 1rem 0 0; }
+.masca-career-review__section dl > div { display: grid; grid-template-columns: 10rem minmax(0, 1fr); gap: 1rem; padding: .45rem 0; }
+.masca-career-review__section dt { color: var(--theme-elevation-650); }
+.masca-career-review__section dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+@media (max-width: 600px) { .masca-career-review__section dl > div { grid-template-columns: 1fr; gap: .2rem; padding: .65rem 0; } }
