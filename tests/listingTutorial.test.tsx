@@ -5,6 +5,7 @@ import { ListingTutorial, reviewQueueHref } from '@/components/admin/ListingTuto
 beforeEach(() => {
   localStorage.clear();
   sessionStorage.clear();
+  window.matchMedia = vi.fn().mockReturnValue({ matches: true });
   vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
   HTMLElement.prototype.scrollIntoView = vi.fn();
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
