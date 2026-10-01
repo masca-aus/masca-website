@@ -111,3 +111,19 @@
  .masca-wizard-save-actions { flex-wrap: wrap; }
  .masca-save-indicator { flex-basis: 100%; }
 }
+
+/* Match the labelled review cards used by Careers. */
+.masca-event-review__identity h3 { margin: 0 0 .35rem; font-size: 1.5rem; overflow-wrap: anywhere; }
+.masca-event-review__identity p { margin: 0; color: var(--theme-elevation-650); overflow-wrap: anywhere; }
+.masca-event-review__section { margin-top: 1rem; padding: 1.25rem; border: 1px solid var(--theme-elevation-150); border-radius: 12px; min-width: 0; }
+.masca-event-review__section header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.masca-event-review__section h4 { margin: 0; font-size: 1rem; }
+.masca-event-review__section dl { margin: 1rem 0 0; }
+.masca-event-review__section dl > div { display: grid; grid-template-columns: 10rem minmax(0, 1fr); gap: 1rem; padding: .45rem 0; }
+.masca-event-review__section dt, .masca-event-review__hint { color: var(--theme-elevation-650); }
+.masca-event-review__section dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+.masca-event-review__section a { color: inherit; text-underline-offset: .2rem; }
+.masca-event-review__poster { display: block; width: 100px; height: 125px; object-fit: contain; border-radius: 6px; background: var(--theme-elevation-50); }
+.masca-event-review__private { margin-top: 1.5rem; }
+.masca-event-review__hint { margin: .5rem 0 0; font-size: .85rem; }
+@media (max-width: 600px) { .masca-event-review__section dl > div { grid-template-columns: 1fr; gap: .2rem; padding: .65rem 0; } }
