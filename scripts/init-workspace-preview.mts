@@ -1,3 +1,4 @@
+import { reviewSchemaSQL } from '../features/submissions/reviewSchema.ts';
 // One-time initialization of the isolated authentication preview only.
 import pg from "pg";
 import { submissionSchemaSQL } from "../features/submissions/schema.ts";
@@ -19,6 +20,7 @@ if (tables.rows[0].count > 0)
     "ALTER TABLE cms_auth_preview.users ADD COLUMN IF NOT EXISTS all_content_access boolean DEFAULT false, ADD COLUMN IF NOT EXISTS permissions jsonb",
   );
 if (tables.rows[0].count > 0) await connection.query(submissionSchemaSQL("cms_auth_preview"));
+if (tables.rows[0].count > 0) await connection.query(reviewSchemaSQL("cms_auth_preview"));
 await connection.end();
 process.env.WORKSPACE_INIT_SCHEMA =
   tables.rows[0].count === 0 ? "true" : "false";

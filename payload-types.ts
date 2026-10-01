@@ -153,6 +153,8 @@ export interface Career {
     | boolean
     | null;
   submittedForReview?: boolean | null;
+  needsChanges?: boolean | null;
+  reviewNotes?: string | null;
   /**
    * Private contact for this public submission.
    */
@@ -170,11 +172,11 @@ export interface Career {
    */
   logoUrl?: string | null;
   /**
-   * Australia, Malaysia, or both.
+   * Choose the country where the role is based.
    */
   country?: string | null;
   /**
-   * Use the state name or describe multiple locations.
+   * Options follow the selected country. Existing values are preserved.
    */
   state?: string | null;
   city?: string | null;
@@ -326,6 +328,8 @@ export interface Event {
     | boolean
     | null;
   submittedForReview?: boolean | null;
+  needsChanges?: boolean | null;
+  reviewNotes?: string | null;
   lifecycle?: string | null;
   title: string;
   organisation: string;
@@ -566,6 +570,8 @@ export interface CareersSelect<T extends boolean = true> {
   owningScope?: T;
   cmsStatus?: T;
   submittedForReview?: T;
+  needsChanges?: T;
+  reviewNotes?: T;
   contactName?: T;
   contactEmail?: T;
   title?: T;
@@ -733,6 +739,8 @@ export interface EventsSelect<T extends boolean = true> {
   owningScope?: T;
   cmsStatus?: T;
   submittedForReview?: T;
+  needsChanges?: T;
+  reviewNotes?: T;
   lifecycle?: T;
   title?: T;
   organisation?: T;

@@ -5,6 +5,7 @@ import { CareerEditorView, CareerEditorHeader, CareerEditorFooter } from '@/comp
 import { careerStepErrors } from '@/features/careers/careerEditor';
 import type { DocumentViewClientProps } from 'payload';
 const h = vi.hoisted(() => ({ data: {} as Record<string, unknown>, errors: vi.fn(), draft: vi.fn(), publish: vi.fn(), submitted: false, firstError: '' }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock('@payloadcms/ui', () => ({
   DefaultEditView: () => <><CareerEditorHeader /><CareerEditorFooter /></>,
   SaveDraftButton: () => <button onClick={h.draft}>Save draft</button>,

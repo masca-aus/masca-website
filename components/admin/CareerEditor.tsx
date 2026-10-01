@@ -1,4 +1,5 @@
 'use client';
+import { ListingTools } from './ListingTools';
 import { ListingTutorial } from './ListingTutorial';
 import { CMSStatusBadge } from './CMSStatusBadge';
 
@@ -84,7 +85,7 @@ export function CareerEditorHeader() {
     <nav id={listID} className="masca-wizard-step-disclosure" data-open={open} aria-label="Career steps" aria-hidden={!open} inert={!open} onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); setOpen(false); toggle.current?.focus(); } }}><div className="masca-wizard-step-disclosure__inner"><ol className="masca-wizard-steps">{CAREER_STEPS.map(({ title }, index) => <li key={title}><button type="button" disabled={busy} tabIndex={open ? 0 : -1} aria-current={index === step ? 'step' : undefined} onClick={() => moveTo(index)}><span className="masca-wizard-step-number" aria-hidden="true">{index < step ? '✓' : index + 1}</span>{title}</button></li>)}</ol></div></nav>
     <div key={step} className="masca-wizard-intro"><h2 ref={heading} tabIndex={-1}>{CAREER_STEPS[step].title}</h2><p>{CAREER_STEPS[step].description}</p></div>
     {error && <div className="masca-wizard-error" role="alert">{error}</div>}
-    {step === 3 && <CareerReview />}
+    {step === 3 && <><ListingTools collection="careers" review /><CareerReview /></>}
   </section>;
 }
 function CareerReview() {

@@ -12,7 +12,9 @@ const h = vi.hoisted(() => ({
   save: vi.fn(), setSubmitted: vi.fn(), dispatchFields: vi.fn(),
   context: null as null | Context<{ step: number; setStep: Dispatch<SetStateAction<number>>; error: string; setError: Dispatch<SetStateAction<string>>; saveState: string; dateSelectionValidationRef: { current: () => Record<string, string> }; save: { current: (intent: string) => Promise<boolean> } } | null>,
 }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock('@payloadcms/ui', () => ({
+  useFormModified: () => false,
   useConfig: () => ({ config: { routes: { api: '/api' } } }),
   useDocumentInfo: () => ({ hasPublishedDoc: h.published }),
   useFormFields: (selector: (state: [Record<string, { value: unknown }>]) => unknown) => selector([Object.fromEntries(Object.entries(h.data).map(([key, value]) => [key, { value }]))]),
