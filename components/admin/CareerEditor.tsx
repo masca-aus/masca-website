@@ -81,17 +81,28 @@ export function CareerEditorHeader() {
 function CareerReview() {
   const { setStep } = useCareerEditor();
   const data = useFormFields(([fields]) => Object.fromEntries(Object.entries(fields).map(([key, field]) => [key, field.value])));
-  const value = (key: string) => Array.isArray(data[key]) ? data[key].join(', ') : typeof data[key] === 'string' && data[key] ? String(data[key]) : 'Not provided';
+  const value = (key: string) => Array.isArray(data[key]) ? data[key].join(', ') : typeof data[key] === 'string' ? String(data[key]) : '';
   const label = (key: string, labels: Record<string, string>) => labels[String(data[key])] || value(key);
-  const studyLevels = Array.isArray(data.studyLevels) && data.studyLevels.length ? data.studyLevels.map(level => STUDY_LEVEL_LABEL[level as keyof typeof STUDY_LEVEL_LABEL] || level).join(', ') : 'Not provided';
+  const date = (key: string) => {
+    const raw = value(key);
+    if (!raw) return '';
+    const parsed = new Date(raw);
+    return Number.isNaN(parsed.getTime()) ? raw : parsed.toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  };
+  const studyLevels = Array.isArray(data.studyLevels) ? data.studyLevels.map(level => STUDY_LEVEL_LABEL[level as keyof typeof STUDY_LEVEL_LABEL] || level).join(', ') : '';
+  const groups: [string, string][][] = [
+    [['Job type', label('type', JOB_TYPE_LABEL)], ['Industry', value('industry')], ['Company website', value('companyWebsite')]],
+    [['Location', [data.city, data.state, data.country].filter(Boolean).join(', ')], ['Work arrangement', label('workMode', WORK_MODE_LABEL)], ['Eligibility', value('eligibility')], ['Study levels', studyLevels], ['International students', label('international', INTERNATIONAL_LABEL)]],
+    [['Apply at', value('applyUrl')], ['Closing date', date('closes') || 'Rolling applications'], ['Description', value('description')], ['Pay', value('pay')], ['Listed', date('added')], ['Tags', value('tags')], ['Featured', data.featured ? 'Yes' : ''], ['Private notes', value('internalNotes')]],
+  ];
   return <div className="masca-career-review">
-    <div className="masca-career-review__identity"><h3>{value('title')}</h3><p>{value('company')}</p></div>
-    {CAREER_STEPS.slice(0, 3).map(({ title }, index) => <section className="masca-overview-section" key={title}><div><h4>{title}</h4>
-      {index === 0 && <><p>{[data.type && label('type', JOB_TYPE_LABEL), data.industry].filter(Boolean).join(' · ') || 'No role details provided'}</p><p>Company website: {value('companyWebsite')}</p><p>Logo URL: {value('logoUrl')}</p></>}
-      {index === 1 && <><p>{[data.city, data.state, data.country, data.workMode && label('workMode', WORK_MODE_LABEL)].filter(Boolean).join(' · ') || 'No location provided'}</p><p>{value('eligibility')}</p><p>Study levels: {studyLevels}</p><p>International students: {label('international', INTERNATIONAL_LABEL)}</p></>}
-      {index === 2 && <><p>{value('applyUrl')}</p><p>{data.closes ? `Applications close ${value('closes')}` : 'Rolling applications'}</p><p>{value('description')}</p><p>Featured: {data.featured ? 'Yes' : 'No'}</p><p>Tags: {value('tags')}</p><p>Listed date: {value('added')}</p>{data.pay ? <p>Pay: {value('pay')}</p> : null}{data.internalNotes ? <p className="masca-career-private-note">Private notes: {value('internalNotes')}</p> : null}</>}
-    </div><button type="button" className="masca-wizard-text-button" onClick={() => setStep(index)} aria-label={`Edit ${title.toLowerCase()}`}>Edit</button></section>)}
+    <div className="masca-career-review__identity"><h3>{value('title') || 'Untitled opportunity'}</h3><p>{value('company')}</p></div>
+    {CAREER_STEPS.slice(0, 3).map(({ title }, index) => <section className="masca-career-review__section" key={title}>
+      <header><h4>{title}</h4><button type="button" className="masca-wizard-text-button" onClick={() => setStep(index)} aria-label={`Edit ${title.toLowerCase()}`}>Edit</button></header>
+      <dl>{groups[index].filter(([, text]) => text).map(([name, text]) => <div key={name}><dt>{name}</dt><dd>{text}</dd></div>)}</dl>
+    </section>)}
   </div>;
+
 }
 export function CareerEditorFooter() {
   const { step, setStep, setError, nextRef, setAttemptedSave } = useCareerEditor();
