@@ -66,3 +66,17 @@ it('highlights the real creation link and only permits its explicit navigation a
   expect(navigate).toHaveBeenCalledWith(expect.stringContaining('/admin/collections/careers/create'), 'create');
   bounds.mockRestore();
 });
+it('keeps the guide hidden until smooth scrolling settles', async () => {
+  window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+  const anchor = document.createElement('a');
+  anchor.href = '/admin/collections/careers/create';
+  anchor.getBoundingClientRect = () => ({ top: 180, left: 20, width: 120, height: 40, bottom: 220, right: 140, x: 20, y: 180, toJSON() {} });
+  document.body.appendChild(anchor);
+  try {
+    render(<ListingTutorial collection="careers" accountId={50} />);
+    const dialog = await screen.findByRole('dialog');
+    await waitFor(() => expect(HTMLElement.prototype.scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'smooth' }));
+    expect(dialog.getAttribute('data-fading')).toBe('true');
+    await waitFor(() => expect(dialog.getAttribute('data-fading')).toBe('false'));
+  } finally { anchor.remove(); }
+});

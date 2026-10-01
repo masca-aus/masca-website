@@ -41,3 +41,9 @@
 .masca-spotlight[data-ready="false"] .masca-spotlight__card,
 .masca-spotlight[data-ready="false"] .masca-spotlight__ring { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) { .masca-spotlight__card { transition: none; } }
+
+@media (max-width: 600px) {
+ .masca-spotlight__card { max-height: min(65dvh, calc(100dvh - 32px)); }
+ .masca-spotlight__card footer { gap: .5rem; }
+ .masca-spotlight__card button { min-height: 44px; }
+}

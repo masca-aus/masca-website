@@ -27,7 +27,7 @@ export function CareerEditorView(props: DocumentViewClientProps) {
       if (step < 3) {
         event.preventDefault(); event.stopPropagation(); nextRef.current?.();
       } else setAttemptedSave(true);
-    }}>{hasSavePermission === false && <p className="masca-read-only-notice" role="status">Read only — you can view this record, but cannot change it.</p>}<DefaultEditView {...props} /></div>
+    }}>{hasSavePermission === false && <p className="masca-read-only-notice" role="status">View only — your account does not have editing access to this section or team. Contact a MASCA administrator if you need access.</p>}<DefaultEditView {...props} /></div>
   </Context.Provider>;
 }
 export function CareerSaveControl() { return null; }
@@ -35,6 +35,15 @@ export function CareerPublishControl() { return null; }
 
 export function CareerEditorHeader() {
   const { step, setStep, error, setError, nextRef, attemptedSave, setAttemptedSave } = useCareerEditor();
+  const fieldValues = useFormFields(([fields]) => JSON.stringify(Object.fromEntries(Object.entries(fields).map(([key, field]) => [key, field.value]))));
+  useEffect(() => {
+    if (['Complete the highlighted fields before continuing.', 'Complete the highlighted fields before publishing.'].includes(error) && !Object.keys(careerStepErrors(JSON.parse(fieldValues), step)).length) setError('');
+  }, [fieldValues, step, error, setError]);
+  useEffect(() => {
+    if (!error) return;
+    const frame = requestAnimationFrame(() => document.querySelector<HTMLElement>('.masca-career-editor [aria-invalid="true"]')?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [error, step]);
   const busy = useFormProcessing();
   const submitted = useFormSubmitted();
   const firstError = useFormFields(([fields]) => Object.keys(fields).find(key => fields[key].valid === false));
@@ -42,7 +51,7 @@ export function CareerEditorHeader() {
   const heading = useRef<HTMLHeadingElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const listID = useId();
-  useEffect(() => { heading.current?.focus(); }, [step]);
+  useEffect(() => { heading.current?.focus({ preventScroll: true }); }, [step]);
   useEffect(() => {
     if (attemptedSave && submitted && firstError && !busy) { setStep(careerFieldStep(firstError)); setError('Check the highlighted field before saving.'); setAttemptedSave(false); }
   }, [attemptedSave, firstError, submitted, busy, setStep, setError, setAttemptedSave]);
@@ -62,7 +71,7 @@ export function CareerEditorHeader() {
     }
     setOpen(false);
     setAttemptedSave(false);
-    setError(''); setStep(target); heading.current?.focus();
+    setError(''); setStep(target); heading.current?.focus({ preventScroll: true });
   };
   useEffect(() => {
     nextRef.current = () => moveTo(Math.min(step + 1, 3));
