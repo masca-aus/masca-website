@@ -9,6 +9,18 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
   onPreviewStep?: (step: number) => void; onNavigate: (href: string, action: 'create' | 'review') => void;
 }) {
   const [index, setIndex] = useState(0);
+  const [fading, setFading] = useState(false);
+  const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (transitionTimer.current) clearTimeout(transitionTimer.current); }, []);
+  function changeStep(next: number) {
+    if (fading) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) { setIndex(next); return; }
+    setFading(true);
+    transitionTimer.current = setTimeout(() => {
+      setIndex(next);
+      transitionTimer.current = setTimeout(() => setFading(false), 40);
+    }, 140);
+  }
   const [box, setBox] = useState<Box | null>(null);
   const [position, setPosition] = useState({ top: 16, left: 16 });
   const dialog = useRef<HTMLDialogElement>(null);
@@ -59,7 +71,7 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
     const el = target.current;
     if (step.action && el instanceof HTMLAnchorElement) onNavigate(el.href, step.action);
   }
-  return createPortal(<dialog ref={dialog} className="masca-spotlight" aria-labelledby={id} onCancel={e => { e.preventDefault(); onClose(); }} onKeyDown={e => e.stopPropagation()}>
+  return createPortal(<dialog ref={dialog} className="masca-spotlight" data-fading={fading} aria-labelledby={id} onCancel={e => { e.preventDefault(); onClose(); }} onKeyDown={e => e.stopPropagation()}>
     <svg className="masca-spotlight__shade" aria-hidden="true" width="100%" height="100%"><defs><mask id={`${id}-mask`}><rect width="100%" height="100%" fill="white" />{box && <rect {...box} x={box.left} y={box.top} rx="10" fill="black" />}</mask></defs><rect width="100%" height="100%" fill="rgba(8,8,25,.65)" mask={`url(#${id}-mask)`} /></svg>
     {box && <div className="masca-spotlight__ring" style={box}>{step.action && <button type="button" aria-label={step.action === 'create' ? 'Open creation form and continue tutorial' : 'Open submissions to review'} onClick={navigate} />}</div>}
     <div ref={card} className="masca-listing-tutorial masca-spotlight__card" style={position}>
@@ -69,7 +81,7 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
       {!box && <aside>This control is not available in the current view or with your account’s access. You can continue the tour.</aside>}
       {step.tip && <aside>{step.tip}</aside>}
       {step.action && box && <p className="masca-spotlight__hint">Click the highlighted control to {step.action === 'create' ? 'open the form and continue the tour' : 'open the review queue'}.</p>}
-      <footer><button type="button" className="masca-action masca-action--secondary" onClick={onClose}>Skip tutorial</button><div><button type="button" className="masca-action masca-action--secondary" disabled={index === 0} onClick={() => setIndex(i => i - 1)}>Back</button><button type="button" className="masca-action masca-action--primary" onClick={() => index === steps.length - 1 ? onClose() : setIndex(i => i + 1)}>{index === steps.length - 1 ? 'Done' : 'Next'}</button></div></footer>
+      <footer><button type="button" className="masca-action masca-action--secondary" onClick={onClose}>Skip tutorial</button><div><button type="button" className="masca-action masca-action--secondary" disabled={index === 0} onClick={() => changeStep(index - 1)}>Back</button><button type="button" className="masca-action masca-action--primary" onClick={() => index === steps.length - 1 ? onClose() : changeStep(index + 1)}>{index === steps.length - 1 ? 'Done' : 'Next'}</button></div></footer>
     </div>
   </dialog>, document.body);
 }
