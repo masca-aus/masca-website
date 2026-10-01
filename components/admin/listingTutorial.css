@@ -33,3 +33,13 @@
 .masca-spotlight__card p { line-height: 1.5; }
 .masca-spotlight__card aside { padding: .75rem; }
 .masca-spotlight__hint { font-weight: 600; }
+/* Keep the card and spotlight in place between steps, then glide to the next control. */
+.masca-spotlight[open] { animation: masca-spotlight-enter 220ms ease-out; }
+.masca-spotlight__card { transition: top 280ms cubic-bezier(.22, 1, .36, 1), left 280ms cubic-bezier(.22, 1, .36, 1); }
+.masca-spotlight__ring { transition: top 280ms cubic-bezier(.22, 1, .36, 1), left 280ms cubic-bezier(.22, 1, .36, 1), width 280ms cubic-bezier(.22, 1, .36, 1), height 280ms cubic-bezier(.22, 1, .36, 1); }
+.masca-spotlight__shade mask rect { transition: x 280ms cubic-bezier(.22, 1, .36, 1), y 280ms cubic-bezier(.22, 1, .36, 1), width 280ms cubic-bezier(.22, 1, .36, 1), height 280ms cubic-bezier(.22, 1, .36, 1); }
+@keyframes masca-spotlight-enter { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .masca-spotlight[open] { animation: none; }
+  .masca-spotlight__card, .masca-spotlight__ring, .masca-spotlight__shade mask rect { transition: none; }
+}
