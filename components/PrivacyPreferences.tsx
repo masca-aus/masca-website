@@ -3,6 +3,7 @@
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Link from "next/link";
+import styles from "./PrivacyPreferences.module.css";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import {
@@ -49,7 +50,7 @@ export function ConsentBanner({
   return (
     <section
       aria-labelledby="privacy-banner-title"
-      className="fixed inset-x-4 bottom-4 z-[90] mx-auto max-w-6xl rounded-2xl border border-blue-100 bg-white p-5 text-blue-700 shadow-[0_20px_70px_rgba(7,20,80,0.28)] sm:inset-x-6 sm:p-6"
+      className={`${styles.banner} fixed inset-x-4 z-[90] mx-auto max-w-6xl rounded-2xl border border-blue-100 bg-white p-5 text-blue-700 sm:inset-x-6 sm:p-6`}
     >
       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-3xl">
@@ -152,7 +153,7 @@ export function PreferencesDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center bg-blue-950/60 p-0 backdrop-blur-sm sm:items-center sm:p-6"
+      className={`${styles.backdrop} fixed inset-0 z-[100] flex items-end justify-center bg-blue-950/60 p-0 backdrop-blur-sm sm:items-center sm:p-6`}
       onMouseDown={(event) => {
         if (event.currentTarget === event.target) onClose();
       }}
@@ -163,7 +164,7 @@ export function PreferencesDialog({
         aria-modal="true"
         aria-labelledby="privacy-dialog-title"
         aria-describedby="privacy-dialog-description"
-        className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-white p-6 text-blue-700 shadow-2xl sm:rounded-3xl sm:p-8"
+        className={`${styles.dialog} w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-white p-6 text-blue-700 sm:rounded-3xl sm:p-8`}
       >
         <div className="flex items-start justify-between gap-4">
           <div>

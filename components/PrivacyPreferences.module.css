@@ -1,0 +1,40 @@
+.banner {
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  max-height: calc(100dvh - 2rem - env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: privacy-fade-in 280ms ease-out both;
+}
+
+.backdrop {
+  animation: privacy-fade-in 240ms ease-out both;
+}
+
+.dialog {
+  max-height: 92dvh;
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  overscroll-behavior: contain;
+}
+
+@media (min-width: 640px) {
+  .banner,
+  .dialog {
+    box-shadow: 0 4px 20px rgb(7 20 80 / 10%);
+  }
+
+  .dialog {
+    padding-bottom: 2rem;
+  }
+}
+
+@keyframes privacy-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner,
+  .backdrop {
+    animation: none;
+  }
+}
