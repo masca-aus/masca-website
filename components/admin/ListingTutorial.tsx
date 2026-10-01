@@ -1,5 +1,6 @@
 'use client';
 
+import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { TutorialSpotlight, type SpotlightStep } from './TutorialSpotlight';
 import './listingTutorial.css';
@@ -30,6 +31,23 @@ export function ListingTutorial({ collection, accountId, editor = false, current
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const originalStep = useRef(currentStep);
+  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!editor) return;
+    const slot = document.createElement('li');
+    slot.className = 'masca-tutorial-header-slot';
+    const attach = () => {
+      const tabs = document.querySelector('.doc-tabs__tabs');
+      if (tabs && slot.parentElement !== tabs) {
+        tabs.prepend(slot);
+        setHeaderSlot(slot);
+      }
+    };
+    attach();
+    const observer = new MutationObserver(attach);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => { observer.disconnect(); slot.remove(); };
+  }, [editor]);
   const storageKey = accountId == null ? null : `masca:tutorial:v2:${accountId}:${collection}`;
   const continuationKey = `masca:tutorial:continue:${collection}`;
   const steps = useMemo<SpotlightStep[]>(() => {
@@ -63,8 +81,9 @@ export function ListingTutorial({ collection, accountId, editor = false, current
     setOpen(false);
     trigger.current?.focus();
   }
+  const tutorialButton = <button ref={trigger} type="button" className="masca-action masca-action--secondary" onClick={() => { originalStep.current = currentStep; setOpen(true); }}>Show tutorial</button>;
   return <>
-    <button ref={trigger} type="button" className="masca-action masca-action--secondary" onClick={() => { originalStep.current = currentStep; setOpen(true); }}>Show tutorial</button>
+    {headerSlot ? createPortal(tutorialButton, headerSlot) : tutorialButton}
     {open && <TutorialSpotlight steps={steps} label={collection === 'careers' ? 'Careers' : 'Events'} onClose={close} onPreviewStep={onPreviewStep} onNavigate={(href, action) => {
       if (action === 'create') { try { sessionStorage.setItem(continuationKey, 'true'); } catch { /* Replay inside the form is still available. */ } }
       close(); window.location.assign(href);
