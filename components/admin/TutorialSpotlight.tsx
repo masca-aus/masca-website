@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 export type SpotlightStep = { title: string; body: string; tip?: string; target: string; editorStep?: number; action?: 'create' | 'review' };
@@ -21,6 +21,7 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
       transitionTimer.current = setTimeout(() => setFading(false), 40);
     }, 140);
   }
+  const [ready, setReady] = useState(false);
   const [box, setBox] = useState<Box | null>(null);
   const [position, setPosition] = useState({ top: 16, left: 16 });
   const dialog = useRef<HTMLDialogElement>(null);
@@ -29,8 +30,8 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
   const target = useRef<HTMLElement | null>(null);
   const id = useId();
   const step = steps[index];
-  useEffect(() => { const element = dialog.current; element?.showModal(); return () => element?.close(); }, []);
-  useEffect(() => {
+  useLayoutEffect(() => { const element = dialog.current; element?.showModal(); return () => element?.close(); }, []);
+  useLayoutEffect(() => {
     if (step.editorStep !== undefined) onPreviewStep?.(step.editorStep);
     let frame = 0;
     let disposed = false;
@@ -52,8 +53,12 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
       }
       setBox(next && next.width > 0 && next.height > 0 ? next : null);
       setPosition({ top: Math.max(8, y), left: Math.max(8, x) });
+      setReady(true);
     }
     const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(measure); };
+    target.current = find();
+    target.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
+    measure();
     frame = requestAnimationFrame(() => {
       target.current = find();
       target.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
@@ -71,7 +76,7 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
     const el = target.current;
     if (step.action && el instanceof HTMLAnchorElement) onNavigate(el.href, step.action);
   }
-  return createPortal(<dialog ref={dialog} className="masca-spotlight" data-fading={fading} aria-labelledby={id} onCancel={e => { e.preventDefault(); onClose(); }} onKeyDown={e => e.stopPropagation()}>
+  return createPortal(<dialog ref={dialog} className="masca-spotlight" data-fading={fading} data-ready={ready} aria-labelledby={id} onCancel={e => { e.preventDefault(); onClose(); }} onKeyDown={e => e.stopPropagation()}>
     <svg className="masca-spotlight__shade" aria-hidden="true" width="100%" height="100%"><defs><mask id={`${id}-mask`}><rect width="100%" height="100%" fill="white" />{box && <rect {...box} x={box.left} y={box.top} rx="10" fill="black" />}</mask></defs><rect width="100%" height="100%" fill="rgba(8,8,25,.65)" mask={`url(#${id}-mask)`} /></svg>
     {box && <div className="masca-spotlight__ring" style={box}>{step.action && <button type="button" aria-label={step.action === 'create' ? 'Open creation form and continue tutorial' : 'Open submissions to review'} onClick={navigate} />}</div>}
     <div ref={card} className="masca-listing-tutorial masca-spotlight__card" style={position}>
