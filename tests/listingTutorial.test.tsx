@@ -4,10 +4,13 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { ListingTutorial, reviewQueueHref } from '@/components/admin/ListingTutorial';
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
+  vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
+  HTMLElement.prototype.scrollIntoView = vi.fn();
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute('open', ''); };
   HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };
 });
-afterEach(cleanup);
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 it('shows first-visit guidance per person and collection and remembers dismissal', async () => {
   const view = render(<ListingTutorial collection="careers" accountId={1} />);
   await screen.findByRole('dialog');
@@ -23,17 +26,24 @@ it('shows first-visit guidance per person and collection and remembers dismissal
   expect(await screen.findByRole('dialog')).toBeTruthy();
 });
 it.each(['careers', 'events'] as const)('explains the public review flow for %s and links the queue', collection => {
-  render(<ListingTutorial collection={collection} editor />);
+  render(<ListingTutorial collection={collection} />);
   fireEvent.click(screen.getByRole('button', { name: 'Show tutorial' }));
-  for (let i = 0; i < 5; i++) fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Next' }));
   expect(screen.getByRole('heading', { name: 'Public submissions need your review' })).toBeTruthy();
-  expect(screen.getByRole('list', { name: 'Submission review flow' })).toBeTruthy();
-  expect(screen.getByRole('link', { name: /View public/ }).getAttribute('href')).toBe(`/submit/${collection === 'events' ? 'event' : 'career'}`);
-  fireEvent.click(screen.getByRole('button', { name: 'Back' }));
-  expect(screen.getByRole('heading', { name: collection === 'careers' ? 'Review and publish' : 'Preview and publish' })).toBeTruthy();
+  expect(screen.getByText('Public form → To be reviewed → Check details → Publish')).toBeTruthy();
   const query = new URL(reviewQueueHref(collection), 'https://example.com').searchParams;
   expect(query.get('where[submittedForReview][equals]')).toBe('true');
   expect(query.get('where[_status][equals]')).toBe('draft');
+});
+it('previews editor steps without saving and restores the original section', async () => {
+  const preview = vi.fn();
+  render(<ListingTutorial collection="careers" editor currentStep={2} onPreviewStep={preview} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Show tutorial' }));
+  await waitFor(() => expect(preview).toHaveBeenLastCalledWith(0));
+  fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+  await waitFor(() => expect(preview).toHaveBeenLastCalledWith(1));
+  fireEvent.click(screen.getByRole('button', { name: 'Close tutorial' }));
+  expect(preview).toHaveBeenLastCalledWith(2);
 });
 it('does not submit the surrounding editor and restores focus when closed', async () => {
   const submit = vi.fn(e => e.preventDefault());
@@ -45,4 +55,13 @@ it('does not submit the surrounding editor and restores focus when closed', asyn
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   expect(document.activeElement).toBe(trigger);
   expect(submit).not.toHaveBeenCalled();
+});
+it('highlights the real creation link and only permits its explicit navigation action', async () => {
+  const { TutorialSpotlight } = await import('@/components/admin/TutorialSpotlight');
+  const navigate = vi.fn();
+  const bounds = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ top: 70, left: 30, width: 140, height: 40, bottom: 110, right: 170, x: 30, y: 70, toJSON: () => ({}) });
+  render(<><a id="create-test" href="/admin/collections/careers/create">Create</a><TutorialSpotlight label="Careers" steps={[{title:'Create',body:'Start here',target:'#create-test',action:'create'}]} onClose={vi.fn()} onNavigate={navigate} /></>);
+  fireEvent.click(await screen.findByRole('button', { name: 'Open creation form and continue tutorial' }));
+  expect(navigate).toHaveBeenCalledWith(expect.stringContaining('/admin/collections/careers/create'), 'create');
+  bounds.mockRestore();
 });

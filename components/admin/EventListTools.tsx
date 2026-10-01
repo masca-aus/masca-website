@@ -45,12 +45,12 @@ export function EventListTools() {
             <Link
               key={key}
               href={`/admin/collections/events?eventView=${key}`}
-              aria-current={!reviewing && view === key ? "page" : undefined}
+              data-tutorial={key === "archived" ? "archived" : undefined} aria-current={!reviewing && view === key ? "page" : undefined}
             >
               {label}
             </Link>
           ))}
-          <Link href={reviewQueueHref("events")} aria-current={reviewing ? "page" : undefined}>To be reviewed</Link>
+          <Link data-tutorial="review-queue" href={reviewQueueHref("events")} aria-current={reviewing ? "page" : undefined}>To be reviewed</Link>
         </nav>
       </SectionToolbar>
 
