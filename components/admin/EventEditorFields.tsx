@@ -1,4 +1,6 @@
 'use client';
+import './listingReview.css';
+import { ListingTools } from './ListingTools';
 import { ListingTutorial } from './ListingTutorial';
 import { CMSStatusBadge } from './CMSStatusBadge';
 
@@ -23,6 +25,15 @@ const hints = [
 export function EventEditorHeader() {
   const { step, setStep, error, setError, save, saveState, dateSelectionValidationRef } = useEventEditor();
   const { dispatchFields, setSubmitted, getData } = useForm();
+  const fieldValues = useFormFields(([fields]) => JSON.stringify(Object.fromEntries(Object.entries(fields).map(([key, field]) => [key, field.value]))));
+  useEffect(() => {
+    if (error === 'Please complete the highlighted details before continuing.' && !Object.keys(validateEventStep(JSON.parse(fieldValues), step)).length && !Object.keys(dateSelectionValidationRef?.current?.() ?? {}).length) setError('');
+  }, [fieldValues, step, error, setError, dateSelectionValidationRef]);
+  useEffect(() => {
+    if (!error) return;
+    const frame = requestAnimationFrame(() => document.querySelector<HTMLElement>('.masca-events-editor [aria-invalid="true"]')?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [error, step]);
   const state = useFormFields(([fields]) => fields.state?.value);
   const poster = useEventPoster(step);
   const { hasPublishedDoc } = useDocumentInfo();
@@ -33,14 +44,14 @@ export function EventEditorHeader() {
   const mounted = useRef(false);
   useEffect(() => {
     if (mounted.current) {
-      heading.current?.focus();
+      heading.current?.focus({ preventScroll: true });
     }
     mounted.current = true;
   }, [step]);
   const moveTo = (next: number) => {
     const data = getData();
     setStepsOpen(false);
-    heading.current?.focus();
+    heading.current?.focus({ preventScroll: true });
     if (next > step) {
       const errors: Record<string, string> = Object.assign({}, ...Array.from({ length: next }, (_, index) => validateEventStep(data, index)), next > 1 ? dateSelectionValidationRef?.current?.() : {});
       if (Object.keys(errors).length) {
@@ -95,32 +106,42 @@ function EventOverview({ poster }: { poster: EventPoster | null }) {
     return new Intl.DateTimeFormat('en-AU', { dateStyle: 'medium', timeStyle: 'short', timeZone: EVENT_TIME_ZONES[data.state as keyof typeof EVENT_TIME_ZONES] ?? 'Australia/Sydney' }).format(new Date(String(data[key])));
   };
   const registration = typeof data.ticketURL === 'string' && data.ticketURL.startsWith('https://') ? data.ticketURL : null;
-  return <div className="masca-event-overview">
-    <article className="masca-event-preview" aria-label="Public event preview">
-      <span className="masca-wizard-eyebrow">Public event preview</span>
-      <div className="masca-event-preview__main">
-        <div className="masca-event-preview__poster">
-          {image ? /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={image} alt={poster?.alt || text('title')} width={144} height={180} decoding="async" /> : <div className="masca-event-preview__placeholder">{data.poster ? 'Poster selected · preview unavailable' : 'No poster selected'}</div>}
-          <button type="button" className="masca-wizard-text-button" onClick={() => setStep(2)} aria-label="Edit poster and links">Edit poster & links</button>
-        </div>
-        <div className="masca-event-preview__body">
-          <div className="masca-overview-heading"><div><h3>{text('title')}</h3><p>{text('organisation')}</p></div><button type="button" className="masca-wizard-text-button" onClick={() => setStep(0)} aria-label="Edit basics">Edit details</button></div>
-          <p className="masca-event-preview__description">{text('description')}</p>
-          <section className="masca-overview-section">
-            <div><h4>Date and location</h4><p>{date('startDate')}{data.endDate ? ` – ${date('endDate')}` : ''}</p><p>{text('venue')} · {text('state')}</p>{data.streetAddress ? <p>{text('streetAddress')}</p> : null}{data.venueDetails ? <p className="masca-event-preview__description">{text('venueDetails')}</p> : null}<small>{EVENT_TIME_ZONES[data.state as keyof typeof EVENT_TIME_ZONES]}</small></div>
-            <button type="button" className="masca-wizard-text-button" onClick={() => setStep(1)} aria-label="Edit date and location">Edit</button>
-          </section>
-          <p className="masca-event-preview__registration">{registration ? <a href={registration} target="_blank" rel="noopener noreferrer">Registration link ↗</a> : 'No registration link'}</p>
-        </div>
-      </div>
+  const row = (label: string, value: React.ReactNode) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>;
+  const heading = (title: string, step: number, label: string) => <header><h4>{title}</h4><button type="button" className="masca-wizard-text-button" onClick={() => setStep(step)} aria-label={label}>Edit</button></header>;
+  return <div className="masca-listing-review">
+    <article className="masca-event-review" aria-label="Public event preview">
+      <div className="masca-listing-review__identity"><h3>{text('title')}</h3><p>{text('organisation')}</p></div>
+      <section className="masca-listing-review__section">
+        {heading('Event details', 0, 'Edit basics')}
+        <dl>{row('Description', text('description'))}</dl>
+      </section>
+      <section className="masca-listing-review__section">
+        {heading('Date and location', 1, 'Edit date and location')}
+        <dl>
+          {row('Starts', date('startDate'))}
+          {data.endDate ? row('Ends', date('endDate')) : null}
+          {row('Timezone', EVENT_TIME_ZONES[data.state as keyof typeof EVENT_TIME_ZONES] ?? 'Australia/Sydney')}
+          {row('Venue', text('venue'))}
+          {row('State or territory', text('state'))}
+          {data.streetAddress ? row('Street address', text('streetAddress')) : null}
+          {data.venueDetails ? row('Venue details', text('venueDetails')) : null}
+        </dl>
+      </section>
+      <section className="masca-listing-review__section">
+        {heading('Poster and links', 2, 'Edit poster and links')}
+        <dl>
+          {row('Poster', image ? /* eslint-disable-next-line @next/next/no-img-element */
+            <img className="masca-listing-review__poster" src={image} alt={poster?.alt || text('title')} width={100} height={125} decoding="async" /> : data.poster ? 'Poster selected · preview unavailable' : 'No poster selected')}
+          {row('Registration', registration ? <a href={registration} target="_blank" rel="noopener noreferrer">Registration link ↗</a> : 'No registration link')}
+        </dl>
+      </section>
     </article>
-    <h3 className="masca-overview-review-heading">Before publishing</h3>
-    <section className="masca-overview-section masca-overview-section--private">
-      <div><h3>Contact details · committee only</h3><p>{text('contactName')} · {text('contactEmail')}</p>
-        {data.internalNotes ? <details><summary>Internal notes</summary><p>{text('internalNotes')}</p></details> : null}
-      </div>
-      <button type="button" className="masca-wizard-text-button" onClick={() => setStep(3)} aria-label="Edit contact details · committee only">Edit</button>
+    <section className="masca-listing-review__section masca-listing-review__private">
+      {heading('Contact details · committee only', 3, 'Edit contact details · committee only')}
+      <p className="masca-listing-review__hint">These details are not shown on the public website.</p>
+      <dl>{row('Contact name', text('contactName'))}{row('Contact email', text('contactEmail'))}
+        {data.internalNotes ? row('Internal notes', text('internalNotes')) : null}
+      </dl>
     </section>
   </div>;
 }
@@ -141,10 +162,10 @@ export function EventEditorFooter() {
     setStep(value => Math.min(value + 1, 4));
   };
   const busy = disabled || saveState === 'saving' || uploadStatus === 'uploading';
-  return <div className="masca-wizard-footer">
+  return <>{step === 4 && <ListingTools collection="events" review />}<div className="masca-wizard-footer">
     <div className="masca-wizard-save-actions"><button data-tutorial="save" type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => void save.current?.('exit')}>Save and exit</button><span ref={setSaveStatusTarget} /></div>
     <div>{step > 0 && <button type="button" className="masca-wizard-secondary" onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}
       {step < 4 ? <button type="button" className="masca-wizard-primary" onClick={next} disabled={disabled}>Continue</button> : <button data-tutorial="publish" type="button" className="masca-wizard-primary" disabled={busy} onClick={() => void save.current?.('publish')}>{hasPublishedDoc ? 'Publish changes' : 'Publish event'}</button>}
     </div>
-  </div>;
+  </div></>;
 }

@@ -12,7 +12,9 @@ const h = vi.hoisted(() => ({
   save: vi.fn(), setSubmitted: vi.fn(), dispatchFields: vi.fn(),
   context: null as null | Context<{ step: number; setStep: Dispatch<SetStateAction<number>>; error: string; setError: Dispatch<SetStateAction<string>>; saveState: string; dateSelectionValidationRef: { current: () => Record<string, string> }; save: { current: (intent: string) => Promise<boolean> } } | null>,
 }));
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock('@payloadcms/ui', () => ({
+  useFormModified: () => false,
   useConfig: () => ({ config: { routes: { api: '/api' } } }),
   useDocumentInfo: () => ({ hasPublishedDoc: h.published }),
   useFormFields: (selector: (state: [Record<string, { value: unknown }>]) => unknown) => selector([Object.fromEntries(Object.entries(h.data).map(([key, value]) => [key, { value }]))]),
@@ -53,7 +55,7 @@ describe('event editor navigation and preview', () => {
     expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Date and location');
     expect(h.dispatchFields).toHaveBeenCalledWith(expect.objectContaining({ errors: expect.arrayContaining([expect.objectContaining({ path: 'endDate' })]) }));
     fireEvent.click(screen.getByRole('button', { name: 'View steps' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Preview and publish' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Review and publish' }));
     expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Date and location');
   });
 
@@ -95,7 +97,7 @@ describe('event editor navigation and preview', () => {
     h.data = { ...h.data, startDate: '', venue: '' };
     render(<Editor />);
     fireEvent.click(screen.getByRole('button', { name: 'View steps' }));
-    fireEvent.click(screen.getByRole('button', { name: /Preview and publish/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Review and publish/ }));
     expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Date and location');
     expect(h.setSubmitted).toHaveBeenCalledWith(true);
     expect(h.dispatchFields).toHaveBeenCalledWith(expect.objectContaining({ errors: expect.arrayContaining([expect.objectContaining({ path: 'startDate' }), expect.objectContaining({ path: 'venue' })]) }));
@@ -117,11 +119,11 @@ describe('event editor navigation and preview', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole('button', { name: 'Edit basics' }));
     fireEvent.click(screen.getByRole('button', { name: 'View steps' }));
-    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Preview and publish' })));
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Review and publish' })));
     expect(fetch).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole('button', { name: 'Edit poster and links' }));
     fireEvent.click(screen.getByRole('button', { name: 'View steps' }));
-    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Preview and publish' })));
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Review and publish' })));
     expect(fetch).toHaveBeenCalledTimes(2);
   });
 

@@ -1,3 +1,4 @@
+import { careerLifecycleIDs } from "@/features/careers/careerLifecycle";
 import { DashboardTutorial } from "./DashboardTutorial";
 import {
   mayManagePeople,
@@ -95,14 +96,23 @@ export async function MascaDashboard({
   const overview = showEvents
     ? await loadEventDashboard(req.payload, req)
     : { pending: 0, published: 0, drafts: 0, pendingEvents: [] };
-  return <DashboardContent overview={overview} account={account} />;
+  const showCareers = !account || mayView(account, "careers");
+  let careerPending: number | undefined;
+  if (showCareers) {
+    const archived = await careerLifecycleIDs(req.payload, ['archived', 'closed'], req);
+    const result = await req.payload.find({ collection: 'careers', req, overrideAccess: false, draft: true, limit: 1, depth: 0, select: { title: true }, where: { id: { not_in: archived.length ? archived : [-1] }, submittedForReview: { equals: true }, _status: { equals: 'draft' } } });
+    careerPending = result.totalDocs;
+  }
+  return <DashboardContent overview={overview} account={account} careerPending={careerPending} />;
 }
 
 export function DashboardContent({
   overview,
   account,
+  careerPending,
 }: {
   overview: EventDashboardOverview;
+  careerPending?: number;
   account?: ApprovedAccount;
 }) {
   const isAdmin = !account || mayManagePeople(account);
@@ -116,6 +126,8 @@ export function DashboardContent({
           <h1>Your workspace</h1>
           <p>Manage your content and keep the website up to date.</p>
         </div>
+        <div className="masca-dashboard__header-actions">
+      <DashboardTutorial areas={contentAreas.filter(area => !account || mayView(account, area.href.split("/").pop() as PermissionArea)).map(area => area.name.toLowerCase())} showEvents={showEvents} isAdmin={isAdmin} />
         <Link
           className="masca-action masca-action--quiet"
           href="/"
@@ -124,12 +136,12 @@ export function DashboardContent({
         >
           View website ↗
         </Link>
+        </div>
       </header>
-      <DashboardTutorial areas={contentAreas.filter(area => !account || mayView(account, area.href.split("/").pop() as PermissionArea)).map(area => area.name.toLowerCase())} showEvents={showEvents} isAdmin={isAdmin} />
       {showEvents && (
         <section aria-labelledby="events-overview">
           <div className="masca-dashboard__section-heading">
-            <h2 id="events-overview">Overview</h2>
+            <h2 id="events-overview">Events overview</h2>
           </div>
           <div className="masca-dashboard__shortcuts">
             <Link href="/admin/collections/events?where[_status][equals]=draft">
@@ -150,6 +162,7 @@ export function DashboardContent({
           </div>
         </section>
       )}
+      {careerPending !== undefined && <section aria-label="Careers review queue"><div className="masca-dashboard__section-heading"><h2>Careers submissions</h2></div><div className="masca-dashboard__shortcuts masca-dashboard__shortcuts--single"><Link href="/admin/collections/careers?where[submittedForReview][equals]=true&where[_status][equals]=draft"><strong>{careerPending}</strong><span>Awaiting review</span><span aria-hidden="true">→</span></Link></div></section>}
       {(
         [
           { id: "content", title: "Content" },

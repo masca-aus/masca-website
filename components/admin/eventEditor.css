@@ -101,3 +101,14 @@
 @media (prefers-reduced-motion: reduce) { .masca-wizard-step-disclosure, .masca-wizard-step-chevron { transition: none; } }
 
 .masca-events-editor .masca-wizard-progress > span { background: #ef476f; }
+
+/* Reserve feedback space so saving does not move the actions. */
+.masca-save-indicator { display: inline-block; min-inline-size: 9rem; min-block-size: 1.5em; }
+@media (max-width: 600px) {
+ .masca-wizard-footer { flex-direction: column; align-items: stretch; gap: 1rem; }
+ .masca-wizard-footer > div { display: flex; flex-wrap: wrap; gap: .75rem; }
+ .masca-wizard-footer button, .masca-wizard-footer a { min-height: 44px; }
+ .masca-wizard-save-actions { flex-wrap: wrap; }
+ .masca-save-indicator { flex-basis: 100%; }
+}
+

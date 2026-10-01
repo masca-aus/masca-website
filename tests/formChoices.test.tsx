@@ -25,3 +25,13 @@ it('preserves pre-existing values outside the suggested categories',()=>{
  const {container}=render(<form><PublicChoice label="Country" name="country" defaultValue="Singapore" options={COUNTRIES}/></form>);
  expect(new FormData(container.querySelector('form')!).get('country')).toBe('Singapore');
 });
+it('opens upward near the bottom and constrains the complete panel',()=>{
+ const {container}=render(<PublicChoice label="Industry" options={INDUSTRIES}/>);
+ const button=screen.getByRole('combobox',{name:'Industry'});
+ button.getBoundingClientRect=()=>({top:window.innerHeight-70,bottom:window.innerHeight-20,left:20,right:320,width:300,height:50,x:20,y:window.innerHeight-70,toJSON(){}});
+ fireEvent.click(button);
+ const panel=container.querySelector<HTMLElement>('.masca-choice__panel')!;
+ expect(panel.dataset.above).toBe('true');
+ expect(parseFloat(panel.style.maxHeight)).toBeLessThanOrEqual(340);
+ expect(panel.style.top).toBe('auto');
+});

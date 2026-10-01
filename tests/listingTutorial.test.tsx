@@ -66,3 +66,29 @@ it('highlights the real creation link and only permits its explicit navigation a
   expect(navigate).toHaveBeenCalledWith(expect.stringContaining('/admin/collections/careers/create'), 'create');
   bounds.mockRestore();
 });
+it('keeps the guide hidden until smooth scrolling settles', async () => {
+  window.matchMedia = vi.fn().mockReturnValue({ matches: false });
+  const anchor = document.createElement('a');
+  anchor.href = '/admin/collections/careers/create';
+  anchor.getBoundingClientRect = () => ({ top: 180, left: 20, width: 120, height: 40, bottom: 220, right: 140, x: 20, y: 180, toJSON() {} });
+  document.body.appendChild(anchor);
+  try {
+    render(<ListingTutorial collection="careers" accountId={50} />);
+    const dialog = await screen.findByRole('dialog');
+    await waitFor(() => expect(HTMLElement.prototype.scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'smooth' }));
+    expect(dialog.getAttribute('data-fading')).toBe('true');
+    await waitFor(() => expect(dialog.getAttribute('data-fading')).toBe('false'));
+  } finally { anchor.remove(); }
+});
+
+it('places the editor tutorial before Edit and Change history in the header', async () => {
+  const header = document.createElement('div');
+  header.innerHTML = '<ul class="doc-tabs__tabs"><li>Edit</li><li>Change history</li></ul>';
+  document.body.appendChild(header);
+  const view = render(<ListingTutorial collection="events" editor />);
+  await waitFor(() => expect(header.querySelector('li')?.textContent).toBe('Show tutorial'));
+  expect(view.container.querySelector('button')).toBeNull();
+  view.unmount();
+  expect(header.textContent).toBe('EditChange history');
+  header.remove();
+});

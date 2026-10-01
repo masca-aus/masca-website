@@ -1,5 +1,6 @@
 'use client';
 
+import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { TutorialSpotlight, type SpotlightStep } from './TutorialSpotlight';
 import './listingTutorial.css';
@@ -19,7 +20,7 @@ const guides: Record<Collection, Step[]> = {
     { title: 'Basics', body: 'Add a clear title, choose the student association using the organisation search, and describe the event. You can enter another organiser if it is not in the directory.' },
     { title: 'Date and location', body: 'Choose One day for a single-day event or Date range for a longer event. Check the start time, optional end time, venue and state.', tip: 'Times follow the selected state’s timezone. An end time must not be before the start.' },
     { title: 'Poster, links and contact details', body: 'Add a poster and registration link, then check the contact name and email. Contact details and internal notes are private to the committee.' },
-    { title: 'Preview and publish', body: 'Review the event preview and check the poster, dates and links. Save and exit keeps a new event as a draft. Publish event approves it for the public website.', tip: 'For an existing published event, use Publish changes when your updates are ready.' },
+    { title: 'Review and publish', body: 'Review the event preview and check the poster, dates and links. Save and exit keeps a new event as a draft. Publish event approves it for the public website.', tip: 'For an existing published event, use Publish changes when your updates are ready.' },
   ],
 };
 export function reviewQueueHref(collection: Collection) {
@@ -30,6 +31,23 @@ export function ListingTutorial({ collection, accountId, editor = false, current
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const originalStep = useRef(currentStep);
+  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!editor) return;
+    const slot = document.createElement('li');
+    slot.className = 'masca-tutorial-header-slot';
+    const attach = () => {
+      const tabs = document.querySelector('.doc-tabs__tabs');
+      if (tabs && slot.parentElement !== tabs) {
+        tabs.prepend(slot);
+        setHeaderSlot(slot);
+      }
+    };
+    attach();
+    const observer = new MutationObserver(attach);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => { observer.disconnect(); slot.remove(); };
+  }, [editor]);
   const storageKey = accountId == null ? null : `masca:tutorial:v2:${accountId}:${collection}`;
   const continuationKey = `masca:tutorial:continue:${collection}`;
   const steps = useMemo<SpotlightStep[]>(() => {
@@ -63,8 +81,9 @@ export function ListingTutorial({ collection, accountId, editor = false, current
     setOpen(false);
     trigger.current?.focus();
   }
+  const tutorialButton = <button ref={trigger} type="button" className="masca-action masca-action--secondary" onClick={() => { originalStep.current = currentStep; setOpen(true); }}>Show tutorial</button>;
   return <>
-    <button ref={trigger} type="button" className="masca-action masca-action--secondary" onClick={() => { originalStep.current = currentStep; setOpen(true); }}>Show tutorial</button>
+    {headerSlot ? createPortal(tutorialButton, headerSlot) : tutorialButton}
     {open && <TutorialSpotlight steps={steps} label={collection === 'careers' ? 'Careers' : 'Events'} onClose={close} onPreviewStep={onPreviewStep} onNavigate={(href, action) => {
       if (action === 'create') { try { sessionStorage.setItem(continuationKey, 'true'); } catch { /* Replay inside the form is still available. */ } }
       close(); window.location.assign(href);

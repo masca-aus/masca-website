@@ -1,6 +1,8 @@
 "use client";
+import { ListingTools } from "./ListingTools";
 
 import Link from "next/link";
+import { useDocumentTitle, useDocumentInfo } from "@payloadcms/ui";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
@@ -8,6 +10,11 @@ import { SectionToolbar } from './SectionToolbar';
 import { adminBackTarget } from './adminBackTarget';
 
 export function DocumentBackLink() {
+  const { title, setDocumentTitle } = useDocumentTitle();
+  const { data } = useDocumentInfo();
+  useEffect(() => {
+    if (title === '[Untitled]' && !data?.title) setDocumentTitle('Untitled');
+  }, [title, data?.title, setDocumentTitle]);
   const pathname = usePathname();
   const linkRef = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
@@ -29,10 +36,10 @@ export function DocumentBackLink() {
   if (!target) return null;
 
   return (
-    <Link ref={linkRef} className="masca-document-back-link" href={target.href}>
+    <><Link ref={linkRef} className="masca-document-back-link" href={target.href}>
       <span aria-hidden="true">←</span>
       {target.label}
-    </Link>
+    </Link>{["events","careers"].includes(pathname.split("/")[3]) && <ListingTools collection={pathname.split("/")[3] as "events"|"careers"} />}</>
   );
 }
 

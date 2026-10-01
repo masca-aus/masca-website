@@ -5,7 +5,7 @@ export const EVENT_EDITOR_STEPS: { title: string; fields: string[] }[] = [
   { title: 'Date and location', fields: ['startDate', 'endDate', 'venue', 'streetAddress', 'venueDetails', 'state'] },
   { title: 'Poster and links', fields: ['poster', 'ticketURL'] },
   { title: 'Contact details', fields: ['contactName', 'contactEmail', 'internalNotes'] },
-  { title: 'Preview and publish', fields: ['reviewStatus', 'reviewedAt'] },
+  { title: 'Review and publish', fields: ['reviewStatus', 'reviewedAt'] },
 ];
 
 function text(value: unknown): string {

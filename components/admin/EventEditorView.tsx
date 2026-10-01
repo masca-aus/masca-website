@@ -46,7 +46,7 @@ export function EventEditorView(props: DocumentViewClientProps) {
         event.stopPropagation();
         void save.current?.('draft');
       }}>
-        {hasSavePermission === false && <p className="masca-read-only-notice" role="status">Read only — you can view this record, but cannot change it.</p>}<DefaultEditView {...props} />
+        {hasSavePermission === false && <p className="masca-read-only-notice" role="status">View only — your account does not have editing access to this section or team. Contact a MASCA administrator if you need access.</p>}<DefaultEditView {...props} />
       </div>
     </Context.Provider>
   );
