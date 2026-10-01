@@ -1,0 +1,22 @@
+.masca-listing-tutorial { width: min(38rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); padding: 1.5rem; border: 1px solid var(--theme-elevation-200); border-radius: 1.5rem; background: var(--theme-elevation-0); color: var(--theme-text); box-shadow: 0 24px 80px #0003; overflow: auto; }
+.masca-listing-tutorial::backdrop { background: #08082280; backdrop-filter: blur(4px); }
+.masca-listing-tutorial[open], .masca-listing-tutorial__page { animation: masca-guide-enter 180ms ease-out; }
+.masca-listing-tutorial header, .masca-listing-tutorial footer, .masca-listing-tutorial footer > div { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
+.masca-listing-tutorial header { font-weight: 600; }
+.masca-listing-tutorial header button { border: 0; background: transparent; color: inherit; font-size: 1.8rem; cursor: pointer; min-width: 2.75rem; min-height: 2.75rem; }
+.masca-listing-tutorial__progress { height: 4px; background: var(--theme-elevation-150); border-radius: 4px; overflow: hidden; margin: .75rem 0 1.5rem; }
+.masca-listing-tutorial__progress span { display: block; height: 100%; background: var(--theme-text); transition: width 180ms ease; }
+.masca-listing-tutorial__count { color: var(--theme-elevation-600); font-size: .85rem; }
+.masca-listing-tutorial h2 { font-size: 1.65rem; margin: .75rem 0; line-height: 1.2; }
+.masca-listing-tutorial p { line-height: 1.65; }
+.masca-listing-tutorial aside { background: var(--theme-elevation-100); padding: 1rem; border-radius: .8rem; line-height: 1.5; margin: 1rem 0; }
+.masca-listing-tutorial footer { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--theme-elevation-150); }
+.masca-listing-tutorial a { color: inherit; text-underline-offset: .2rem; }
+.masca-listing-tutorial__flow { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; margin: 1.5rem 0; }
+.masca-listing-tutorial__flow li { font-size: .8rem; display: grid; gap: .5rem; }
+.masca-listing-tutorial__flow span { display: grid; place-items: center; border: 1px solid var(--theme-elevation-300); border-radius: 50%; width: 2rem; height: 2rem; }
+.masca-tutorial-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
+.masca-listing-tutorial button:focus-visible, .masca-listing-tutorial a:focus-visible { outline: 2px solid var(--theme-text); outline-offset: 3px; }
+@keyframes masca-guide-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .masca-listing-tutorial[open], .masca-listing-tutorial__page { animation: none; } .masca-listing-tutorial__progress span { transition: none; } }
+@media (max-width: 480px) { .masca-listing-tutorial { padding: 1rem; } .masca-listing-tutorial__flow { grid-template-columns: repeat(2, 1fr); } }

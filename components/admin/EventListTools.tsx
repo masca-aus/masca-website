@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { useAuth } from "@payloadcms/ui";
+import { ListingTutorial, reviewQueueHref } from "./ListingTutorial";
 import { AdminSearchHelp } from "./AdminSearchHelp";
 import { EnsureStatusColumn } from "./EnsureStatusColumn";
 import { useSearchParams } from "next/navigation";
@@ -9,7 +11,9 @@ import { SectionToolbar } from "./SectionToolbar";
 import { EventReportPanel } from "./EventReportPanel";
 
 export function EventListTools() {
+  const { user } = useAuth();
   const params = useSearchParams();
+  const reviewing = params.get('where[submittedForReview][equals]') === 'true';
   const requested = params.get("eventView");
   const view =
     requested === "archived"
@@ -23,14 +27,14 @@ export function EventListTools() {
       <SectionToolbar
         collection="events"
         actions={
-          <button
+          <div className="masca-tutorial-actions"><ListingTutorial collection="events" accountId={user?.id} /><button
             className="masca-action masca-action--secondary"
             aria-expanded={reports}
             aria-controls="masca-event-reports"
             onClick={() => setReports(!reports)}
           >
             Reports
-          </button>
+          </button></div>
         }
       >
         <nav aria-label="Event lists">
@@ -41,11 +45,12 @@ export function EventListTools() {
             <Link
               key={key}
               href={`/admin/collections/events?eventView=${key}`}
-              aria-current={view === key ? "page" : undefined}
+              aria-current={!reviewing && view === key ? "page" : undefined}
             >
               {label}
             </Link>
           ))}
+          <Link href={reviewQueueHref("events")} aria-current={reviewing ? "page" : undefined}>To be reviewed</Link>
         </nav>
       </SectionToolbar>
 
