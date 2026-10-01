@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type CSSProperties } from "react";
 import { BriefcaseBusiness, CalendarDays, Handshake, House, Images, Building2, Users, UserRound, PanelLeftClose, PanelLeftOpen, ShieldCheck, LogOut } from "lucide-react";
 
+import { version } from "@/package.json";
+
 import { MascaMark } from "./MascaBrand";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -70,6 +72,7 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
             <Link href="/admin/logout" prefetch={false} className="masca-nav__link"><LogOut size={19} />Log out</Link>
           </div>
         </nav>
+        <p className="masca-nav__version" aria-label={`MASCA CMS version ${version}`}>MASCA CMS <span>v{version}</span></p>
       </div>
     </aside>
     </>
