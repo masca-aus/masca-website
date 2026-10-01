@@ -14,7 +14,6 @@ import AboutSection from "./sections/about";
 import SponsorsSection from "./sections/sponsors";
 import FollowUsSection from "./sections/followUs";
 import PostOnOurPageSection from "./sections/postOnOurPage";
-import JoinUsSection from "./sections/joinUs";
 import { getSponsors } from "@/utils/sponsors";
 
 // Refresh time-based event expiry between editor-triggered revalidations.
@@ -55,7 +54,6 @@ export default async function Home() {
       <SponsorsSection sponsors={sponsors} />
       <MascaVoiceSection />
       <FollowUsSection />
-      <JoinUsSection />
       <PostOnOurPageSection />
     </main>
   );
