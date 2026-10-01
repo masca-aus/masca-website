@@ -5,10 +5,7 @@ const nextConfig: NextConfig = {
   // The careers board lived at /career while under construction; keep the
   // old address working for anyone who bookmarked or shared it.
   async redirects() {
-    return [
-      { source: "/career", destination: "/careers", permanent: true },
-      { source: "/welfare", destination: "/care", permanent: true },
-    ];
+    return [{ source: "/career", destination: "/careers", permanent: true }];
   },
 };
 
