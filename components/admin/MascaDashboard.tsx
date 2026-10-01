@@ -126,6 +126,8 @@ export function DashboardContent({
           <h1>Your workspace</h1>
           <p>Manage your content and keep the website up to date.</p>
         </div>
+        <div className="masca-dashboard__header-actions">
+      <DashboardTutorial areas={contentAreas.filter(area => !account || mayView(account, area.href.split("/").pop() as PermissionArea)).map(area => area.name.toLowerCase())} showEvents={showEvents} isAdmin={isAdmin} />
         <Link
           className="masca-action masca-action--quiet"
           href="/"
@@ -134,8 +136,8 @@ export function DashboardContent({
         >
           View website ↗
         </Link>
+        </div>
       </header>
-      <DashboardTutorial areas={contentAreas.filter(area => !account || mayView(account, area.href.split("/").pop() as PermissionArea)).map(area => area.name.toLowerCase())} showEvents={showEvents} isAdmin={isAdmin} />
       {showEvents && (
         <section aria-labelledby="events-overview">
           <div className="masca-dashboard__section-heading">

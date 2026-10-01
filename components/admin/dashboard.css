@@ -43,3 +43,7 @@
 .masca-dashboard__shortcuts a:hover { border-color: var(--theme-elevation-400); }
 @media (max-width: 1000px) { .masca-dashboard__shortcuts--single { max-width: none; } }
 @media (prefers-reduced-motion: reduce) { .masca-dashboard__shortcuts a { transition: none; } }
+
+.masca-dashboard__header-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.masca-dashboard__header-actions .masca-action { font-size: .85rem; padding: .45rem .75rem; min-height: 36px; white-space: nowrap; }
+@media (pointer: coarse) { .masca-dashboard__header-actions .masca-action { min-height: 44px; } }
