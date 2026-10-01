@@ -16,3 +16,10 @@
 .masca-choice__error{color:var(--theme-error-500,#bd1212);font-size:.85rem;margin-top:6px}
 @keyframes choice-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.masca-choice *{animation:none!important;transition:none!important}}
+
+/* Fit the entire panel, including search, inside the visible viewport. */
+.masca-choice__panel { box-sizing:border-box; display:flex; flex-direction:column; overflow:hidden; }
+.masca-choice__panel[data-above=true] { margin-top:0; }
+.masca-choice__search,.masca-choice__clear { flex-shrink:0; }
+.masca-choice [role=listbox] { min-height:0; flex:1 1 auto; }
+.masca-choice [role=option] { overflow-wrap:anywhere; }
