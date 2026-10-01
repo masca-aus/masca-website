@@ -20,3 +20,5 @@
 @keyframes masca-guide-enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .masca-listing-tutorial[open], .masca-listing-tutorial__page { animation: none; } .masca-listing-tutorial__progress span { transition: none; } }
 @media (max-width: 480px) { .masca-listing-tutorial { padding: 1rem; } .masca-listing-tutorial__flow { grid-template-columns: repeat(2, 1fr); } }
+/* The heading receives focus for announcement, but is not an interactive control. */
+.masca-listing-tutorial h2:focus { outline: none; }
