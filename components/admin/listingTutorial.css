@@ -34,13 +34,12 @@
 .masca-spotlight__card aside { padding: .75rem; }
 .masca-spotlight__hint { font-weight: 600; }
 /* Fade between positions instead of moving the spotlight across the page. */
-.masca-spotlight[open] { animation: masca-spotlight-enter 180ms ease-out; }
-.masca-spotlight__card, .masca-spotlight__ring, .masca-spotlight__shade { transition: opacity 140ms ease-in-out; }
+ .masca-spotlight[data-ready="false"] .masca-spotlight__card,
+.masca-spotlight[data-ready="false"] .masca-spotlight__ring { visibility: hidden; }
+.masca-spotlight__card, .masca-spotlight__ring { transition: opacity 140ms ease-in-out; }
 .masca-spotlight[data-fading="true"] .masca-spotlight__card,
-.masca-spotlight[data-fading="true"] .masca-spotlight__ring,
-.masca-spotlight[data-fading="true"] .masca-spotlight__shade { opacity: 0; pointer-events: none; }
-@keyframes masca-spotlight-enter { from { opacity: 0; } to { opacity: 1; } }
+.masca-spotlight[data-fading="true"] .masca-spotlight__ring { opacity: 0; pointer-events: none; }
 @media (prefers-reduced-motion: reduce) {
   .masca-spotlight[open] { animation: none; }
-  .masca-spotlight__card, .masca-spotlight__ring, .masca-spotlight__shade { transition: none; }
+  .masca-spotlight__card, .masca-spotlight__ring { transition: none; }
 }
