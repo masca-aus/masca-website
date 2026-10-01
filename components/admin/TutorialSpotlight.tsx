@@ -18,12 +18,11 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
     setFading(true);
     transitionTimer.current = setTimeout(() => {
       setIndex(next);
-      transitionTimer.current = setTimeout(() => setFading(false), 40);
+
     }, 140);
   }
   const [ready, setReady] = useState(false);
   const [box, setBox] = useState<Box | null>(null);
-  const [position, setPosition] = useState({ top: 16, left: 16 });
   const dialog = useRef<HTMLDialogElement>(null);
   const card = useRef<HTMLDivElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
@@ -42,51 +41,44 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
       const rect = target.current?.getBoundingClientRect();
       const w = window.innerWidth, h = window.innerHeight;
       const next = rect ? { top: Math.max(8, rect.top - 6), left: Math.max(8, rect.left - 6), width: Math.min(rect.width + 12, w - Math.max(8, rect.left - 6) - 8), height: Math.min(rect.height + 12, h - Math.max(8, rect.top - 6) - 8) } : null;
-      const cw = card.current?.offsetWidth || Math.min(390, w - 32), ch = card.current?.offsetHeight || 300;
-      let x = (w - cw) / 2, y = (h - ch) / 2;
-      if (next) {
-        x = Math.min(Math.max(16, next.left), w - cw - 16);
-        if (next.top + next.height + ch + 28 < h) y = next.top + next.height + 14;
-        else if (next.top - ch - 14 > 16) y = next.top - ch - 14;
-        else if (next.left + next.width + cw + 28 < w) { x = next.left + next.width + 14; y = Math.max(16, Math.min(next.top, h - ch - 16)); }
-        else y = h - ch - 16;
-      }
       setBox(next && next.width > 0 && next.height > 0 ? next : null);
-      setPosition({ top: Math.max(8, y), left: Math.max(8, x) });
       setReady(true);
     }
     const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(measure); };
     target.current = find();
-    target.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
+    target.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
     measure();
-    frame = requestAnimationFrame(() => {
+    const initialFrame = requestAnimationFrame(() => {
       target.current = find();
-      target.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
+      target.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
       title.current?.focus({ preventScroll: true });
       measure();
+      setFading(false);
     });
     const observer = new ResizeObserver(schedule);
     if (card.current) observer.observe(card.current);
     observer.observe(document.body);
     window.addEventListener('resize', schedule);
     window.addEventListener('scroll', schedule, true);
-    return () => { disposed = true; cancelAnimationFrame(frame); observer.disconnect(); window.removeEventListener('resize', schedule); window.removeEventListener('scroll', schedule, true); };
+    return () => { disposed = true; cancelAnimationFrame(initialFrame); cancelAnimationFrame(frame); observer.disconnect(); window.removeEventListener('resize', schedule); window.removeEventListener('scroll', schedule, true); };
   }, [step, onPreviewStep]);
   function navigate() {
     const el = target.current;
     if (step.action && el instanceof HTMLAnchorElement) onNavigate(el.href, step.action);
   }
   return createPortal(<dialog ref={dialog} className="masca-spotlight" data-fading={fading} data-ready={ready} aria-labelledby={id} onCancel={e => { e.preventDefault(); onClose(); }} onKeyDown={e => e.stopPropagation()}>
-    <svg className="masca-spotlight__shade" aria-hidden="true" width="100%" height="100%"><defs><mask id={`${id}-mask`}><rect width="100%" height="100%" fill="white" />{box && <rect {...box} x={box.left} y={box.top} rx="10" fill="black" />}</mask></defs><rect width="100%" height="100%" fill="rgba(8,8,25,.65)" mask={`url(#${id}-mask)`} /></svg>
-    {box && <div className="masca-spotlight__ring" style={box}>{step.action && <button type="button" aria-label={step.action === 'create' ? 'Open creation form and continue tutorial' : 'Open submissions to review'} onClick={navigate} />}</div>}
-    <div ref={card} className="masca-listing-tutorial masca-spotlight__card" style={position}>
+    <svg className="masca-spotlight__shade" aria-hidden="true" width="100%" height="100%"><defs><mask id={`${id}-mask`}><rect width="100%" height="100%" fill="white" />{box && !fading && <rect {...box} x={box.left} y={box.top} rx="10" fill="black" />}</mask></defs><rect width="100%" height="100%" fill="rgba(8,8,25,.65)" mask={`url(#${id}-mask)`} /></svg>
+    {box && !fading && <div className="masca-spotlight__ring" style={box}>{step.action && <button type="button" aria-label={step.action === 'create' ? 'Open creation form and continue tutorial' : 'Open submissions to review'} onClick={navigate} />}</div>}
+    <div ref={card} className="masca-listing-tutorial masca-spotlight__card">
       <header><span>{label} · Guided tour</span><button type="button" aria-label="Close tutorial" onClick={onClose}>×</button></header>
+      <div className="masca-spotlight__instructions">
       <p className="masca-listing-tutorial__count" aria-live="polite">Step {index + 1} of {steps.length}</p>
       <h2 id={id} ref={title} tabIndex={-1}>{step.title}</h2><p>{step.body}</p>
       {!box && <aside>This control is not available in the current view or with your account’s access. You can continue the tour.</aside>}
       {step.tip && <aside>{step.tip}</aside>}
       {step.action && box && <p className="masca-spotlight__hint">Click the highlighted control to {step.action === 'create' ? 'open the form and continue the tour' : 'open the review queue'}.</p>}
-      <footer><button type="button" className="masca-action masca-action--secondary" onClick={onClose}>Skip tutorial</button><div><button type="button" className="masca-action masca-action--secondary" disabled={index === 0} onClick={() => changeStep(index - 1)}>Back</button><button type="button" className="masca-action masca-action--primary" onClick={() => index === steps.length - 1 ? onClose() : changeStep(index + 1)}>{index === steps.length - 1 ? 'Done' : 'Next'}</button></div></footer>
+      </div>
+      <footer><button type="button" className="masca-action masca-action--secondary" onClick={onClose}>Skip tutorial</button><div><button type="button" className="masca-action masca-action--secondary" disabled={index === 0 || fading} onClick={() => changeStep(index - 1)}>Back</button><button type="button" className="masca-action masca-action--primary" disabled={fading} onClick={() => index === steps.length - 1 ? onClose() : changeStep(index + 1)}>{index === steps.length - 1 ? 'Done' : 'Next'}</button></div></footer>
     </div>
   </dialog>, document.body);
 }
