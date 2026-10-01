@@ -237,7 +237,6 @@ export function configureWorkspace(
                 : permissionsFor(accountOf(user))[area]?.scopes?.[0],
             options: [...ownershipScopes],
             admin: {
-              position: "sidebar",
               hidden: true,
               description:
                 "The team responsible for this record. Independent of the public event/job location.",
