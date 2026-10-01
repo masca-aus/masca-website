@@ -18,7 +18,7 @@ const footerSections: { heading: string; links: FooterLink[] }[] = [
       { label: "MASCA NSW", href: "https://www.mascansw.com.au/", external: true },
       { label: "Welfare", href: "/welfare" },
       { label: "MASCAvoice", href: "https://mascavoice.kit.com/posts", external: true },
-      { label: "Muafakat", href: "https://muafakatgames.com/?preview=home", external: true },
+      { label: "Muafakat Games", href: "https://muafakatgames.com/?preview=home", external: true },
     ],
   },
   {
