@@ -33,12 +33,11 @@
 .masca-spotlight__card p { line-height: 1.5; }
 .masca-spotlight__card aside { padding: .75rem; }
 .masca-spotlight__hint { font-weight: 600; }
-/* Keep the shell and navigation still; only instructions fade. */
-.masca-spotlight__card { right: 16px; bottom: 16px; height: min(440px, calc(100dvh - 32px)); display: flex; flex-direction: column; overflow: hidden; }
+/* Reposition the guide while invisible; keep the backdrop steady. */
+.masca-spotlight__card { display: flex; flex-direction: column; overflow: hidden; transition: opacity 140ms ease-in-out; }
 .masca-spotlight__card header, .masca-spotlight__card footer { flex-shrink: 0; }
-.masca-spotlight__instructions { flex: 1; min-height: 0; overflow: auto; transition: opacity 140ms ease-in-out; }
-.masca-spotlight[data-fading="true"] .masca-spotlight__instructions { opacity: 0; }
+.masca-spotlight__instructions { min-height: 0; overflow: auto; }
+.masca-spotlight[data-fading="true"] .masca-spotlight__card { opacity: 0; pointer-events: none; }
 .masca-spotlight[data-ready="false"] .masca-spotlight__card,
 .masca-spotlight[data-ready="false"] .masca-spotlight__ring { visibility: hidden; }
-@media (max-width: 600px) { .masca-spotlight__card { height: min(440px, 58dvh); } }
-@media (prefers-reduced-motion: reduce) { .masca-spotlight__instructions { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .masca-spotlight__card { transition: none; } }
