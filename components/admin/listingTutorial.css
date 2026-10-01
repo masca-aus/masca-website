@@ -50,3 +50,5 @@
 
 .masca-tutorial-header-slot { display: flex; align-items: center; margin-right: .5rem; list-style: none; }
 .masca-tutorial-header-slot .masca-action { min-height: 34px; padding: .4rem .7rem; font-size: .85rem; white-space: nowrap; }
+
+.doc-header__header > .masca-tutorial-header-slot { margin-left: auto; margin-right: 0; flex-shrink: 0; }

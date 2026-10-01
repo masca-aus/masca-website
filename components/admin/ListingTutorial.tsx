@@ -36,10 +36,12 @@ export function ListingTutorial({ collection, accountId, editor = false, current
     if (!editor) return;
     const slot = document.createElement('li');
     slot.className = 'masca-tutorial-header-slot';
+    slot.setAttribute('role', 'presentation');
     const attach = () => {
-      const tabs = document.querySelector('.doc-tabs__tabs');
+      const tabs = document.querySelector('.doc-tabs__tabs') || document.querySelector('.doc-header__header');
       if (tabs && slot.parentElement !== tabs) {
-        tabs.prepend(slot);
+        if (tabs.matches('.doc-tabs__tabs')) tabs.prepend(slot);
+        else tabs.append(slot);
         setHeaderSlot(slot);
       }
     };
