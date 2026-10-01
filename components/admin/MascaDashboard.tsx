@@ -160,7 +160,7 @@ export function DashboardContent({
           </div>
         </section>
       )}
-      {careerPending !== undefined && <section aria-label="Careers review queue"><h2>Careers submissions</h2><div className="masca-dashboard__shortcuts"><Link href="/admin/collections/careers?where[submittedForReview][equals]=true&where[_status][equals]=draft"><strong>{careerPending}</strong><span>Awaiting review</span><span aria-hidden="true">→</span></Link></div></section>}
+      {careerPending !== undefined && <section aria-label="Careers review queue"><div className="masca-dashboard__section-heading"><h2>Careers submissions</h2></div><div className="masca-dashboard__shortcuts masca-dashboard__shortcuts--single"><Link href="/admin/collections/careers?where[submittedForReview][equals]=true&where[_status][equals]=draft"><strong>{careerPending}</strong><span>Awaiting review</span><span aria-hidden="true">→</span></Link></div></section>}
       {(
         [
           { id: "content", title: "Content" },
