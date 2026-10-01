@@ -18,7 +18,7 @@
 .masca-dashboard__content-row p { font-size: .9rem; }
 .masca-dashboard__actions { display: flex; gap: .5rem; flex-shrink: 0; }
 .masca-dashboard footer { padding-top: 0; border-bottom: 0; }
-@media (max-width: 1000px) { .masca-dashboard__shortcuts { grid-template-columns: 1fr; } .masca-dashboard__shortcuts a + a { border-left: 0; border-top: 1px solid var(--theme-elevation-150); } }
+@media (max-width: 1000px) { .masca-dashboard__shortcuts { grid-template-columns: 1fr; } }
 
 .masca-dashboard__content-label { display: flex; align-items: center; gap: 1.1rem; }
 .masca-dashboard__content-label > svg { flex-shrink: 0; color: var(--theme-elevation-600); }
