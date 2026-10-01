@@ -34,7 +34,7 @@
 .masca-spotlight__card aside { padding: .75rem; }
 .masca-spotlight__hint { font-weight: 600; }
 /* Keep the shell and navigation still; only instructions fade. */
-.masca-spotlight__card { right: 16px; bottom: 16px; height: min(540px, calc(100dvh - 32px)); display: flex; flex-direction: column; overflow: hidden; }
+.masca-spotlight__card { right: 16px; bottom: 16px; height: min(440px, calc(100dvh - 32px)); display: flex; flex-direction: column; overflow: hidden; }
 .masca-spotlight__card header, .masca-spotlight__card footer { flex-shrink: 0; }
 .masca-spotlight__instructions { flex: 1; min-height: 0; overflow: auto; transition: opacity 140ms ease-in-out; }
 .masca-spotlight[data-fading="true"] .masca-spotlight__instructions { opacity: 0; }
