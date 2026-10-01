@@ -35,7 +35,14 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
     if (step.editorStep !== undefined) onPreviewStep?.(step.editorStep);
     let frame = 0;
     let disposed = false;
-    const find = () => step.target.split(',').flatMap(selector => Array.from(document.querySelectorAll<HTMLElement>(selector.trim()))).find(el => el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height > 0 && !el.closest('dialog')) ?? null;
+    const find = () => {
+      const element = step.target.split(',').flatMap(selector => Array.from(document.querySelectorAll<HTMLElement>(selector.trim()))).find(el => el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height > 0 && !el.closest('dialog'));
+      if (!element) return null;
+      // Payload input IDs point at the control; its field wrapper also contains the label.
+      return element.matches('input, select, textarea')
+        ? element.closest<HTMLElement>('.field-type') ?? element
+        : element;
+    };
     function revealTarget() {
       const element = target.current;
       if (!element) return;
