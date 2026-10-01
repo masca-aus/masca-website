@@ -23,6 +23,15 @@ const hints = [
 export function EventEditorHeader() {
   const { step, setStep, error, setError, save, saveState, dateSelectionValidationRef } = useEventEditor();
   const { dispatchFields, setSubmitted, getData } = useForm();
+  const fieldValues = useFormFields(([fields]) => JSON.stringify(Object.fromEntries(Object.entries(fields).map(([key, field]) => [key, field.value]))));
+  useEffect(() => {
+    if (error === 'Please complete the highlighted details before continuing.' && !Object.keys(validateEventStep(JSON.parse(fieldValues), step)).length && !Object.keys(dateSelectionValidationRef?.current?.() ?? {}).length) setError('');
+  }, [fieldValues, step, error, setError, dateSelectionValidationRef]);
+  useEffect(() => {
+    if (!error) return;
+    const frame = requestAnimationFrame(() => document.querySelector<HTMLElement>('.masca-events-editor [aria-invalid="true"]')?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [error, step]);
   const state = useFormFields(([fields]) => fields.state?.value);
   const poster = useEventPoster(step);
   const { hasPublishedDoc } = useDocumentInfo();
@@ -33,14 +42,14 @@ export function EventEditorHeader() {
   const mounted = useRef(false);
   useEffect(() => {
     if (mounted.current) {
-      heading.current?.focus();
+      heading.current?.focus({ preventScroll: true });
     }
     mounted.current = true;
   }, [step]);
   const moveTo = (next: number) => {
     const data = getData();
     setStepsOpen(false);
-    heading.current?.focus();
+    heading.current?.focus({ preventScroll: true });
     if (next > step) {
       const errors: Record<string, string> = Object.assign({}, ...Array.from({ length: next }, (_, index) => validateEventStep(data, index)), next > 1 ? dateSelectionValidationRef?.current?.() : {});
       if (Object.keys(errors).length) {

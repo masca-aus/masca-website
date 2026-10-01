@@ -43,14 +43,16 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
         ? element.closest<HTMLElement>('.field-type') ?? element
         : element;
     };
+    let settleFrame = 0;
+    let restoreMargin = () => {};
     function revealTarget() {
       const element = target.current;
       if (!element) return;
       // Leave room for the CMS's sticky header and document controls.
       const previous = element.style.scrollMarginTop;
       element.style.scrollMarginTop = '160px';
-      element.scrollIntoView({ block: 'start', behavior: 'instant' });
-      element.style.scrollMarginTop = previous;
+      element.scrollIntoView({ block: 'start', behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+      restoreMargin = () => { element.style.scrollMarginTop = previous; };
     }
     function measure() {
       if (disposed) return;
@@ -79,22 +81,36 @@ export function TutorialSpotlight({ steps, label, onClose, onPreviewStep, onNavi
       setReady(true);
     }
     const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(measure); };
-    target.current = find();
-    revealTarget();
-    measure();
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    // Keep visibility in sync with measured DOM before paint.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (reducedMotion) { target.current = find(); revealTarget(); measure(); setFading(false); }
+    else setFading(true);
     const initialFrame = requestAnimationFrame(() => {
       target.current = find();
       revealTarget();
-      title.current?.focus({ preventScroll: true });
-      measure();
-      setFading(false);
+      const started = performance.now();
+      let lastTop = Number.NaN, stable = 0;
+      const settle = () => {
+        if (disposed) return;
+        const top = target.current?.getBoundingClientRect().top ?? 0;
+        stable = Math.abs(top - lastTop) < 0.5 ? stable + 1 : 0;
+        lastTop = top;
+        if ((stable >= 4 && performance.now() - started > 120) || performance.now() - started > 1600 || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+          restoreMargin();
+          measure();
+          title.current?.focus({ preventScroll: true });
+          setFading(false);
+        } else settleFrame = requestAnimationFrame(settle);
+      };
+      settleFrame = requestAnimationFrame(settle);
     });
     const observer = new ResizeObserver(schedule);
     if (card.current) observer.observe(card.current);
     observer.observe(document.body);
     window.addEventListener('resize', schedule);
     window.addEventListener('scroll', schedule, true);
-    return () => { disposed = true; cancelAnimationFrame(initialFrame); cancelAnimationFrame(frame); observer.disconnect(); window.removeEventListener('resize', schedule); window.removeEventListener('scroll', schedule, true); };
+    return () => { disposed = true; restoreMargin(); cancelAnimationFrame(settleFrame); cancelAnimationFrame(initialFrame); cancelAnimationFrame(frame); observer.disconnect(); window.removeEventListener('resize', schedule); window.removeEventListener('scroll', schedule, true); };
   }, [step, onPreviewStep]);
   function navigate() {
     const el = target.current;
