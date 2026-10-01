@@ -1,4 +1,5 @@
 'use client';
+import { ListingTutorial } from './ListingTutorial';
 import { CMSStatusBadge } from './CMSStatusBadge';
 
 import React, { useEffect, useId, useRef, useState } from 'react';
@@ -54,6 +55,7 @@ export function EventEditorHeader() {
     setStep(next);
   };
   return <section className="masca-wizard-header" aria-label="Event editor">
+    <ListingTutorial collection="events" editor />
     <div className="masca-wizard-heading-row">
       <div className="masca-wizard-progress-label"><CMSStatusBadge /><span className="masca-wizard-count">Step {step + 1} of 5 · {EVENT_EDITOR_STEPS[step].title}</span></div>
       <button ref={stepToggle} type="button" className="masca-wizard-text-button" aria-expanded={stepsOpen} aria-controls={stepListID} onClick={() => setStepsOpen(open => !open)}>View steps <span className="masca-wizard-step-chevron" aria-hidden="true">⌄</span></button>

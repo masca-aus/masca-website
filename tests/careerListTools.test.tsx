@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, expect, it, vi } from 'vitest';
 import { CareerLifecycleCell } from '@/components/admin/CareerLifecycleCell';
 import { CareerListTools } from '@/components/admin/CareerListTools';
+vi.mock('@payloadcms/ui', () => ({ useAuth: () => ({ user: null }) }));
 vi.mock('@/components/admin/EnsureStatusColumn', () => ({ EnsureStatusColumn: () => null }));
 const h = vi.hoisted(() => ({ refresh: vi.fn(), view: 'closed' }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: h.refresh }), useSearchParams: () => new URLSearchParams({ careerView: h.view }), usePathname: () => '/admin/collections/careers' }));
