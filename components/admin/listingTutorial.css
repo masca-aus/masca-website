@@ -33,13 +33,12 @@
 .masca-spotlight__card p { line-height: 1.5; }
 .masca-spotlight__card aside { padding: .75rem; }
 .masca-spotlight__hint { font-weight: 600; }
-/* Fade between positions instead of moving the spotlight across the page. */
- .masca-spotlight[data-ready="false"] .masca-spotlight__card,
+/* Keep the shell and navigation still; only instructions fade. */
+.masca-spotlight__card { right: 16px; bottom: 16px; height: min(540px, calc(100dvh - 32px)); display: flex; flex-direction: column; overflow: hidden; }
+.masca-spotlight__card header, .masca-spotlight__card footer { flex-shrink: 0; }
+.masca-spotlight__instructions { flex: 1; min-height: 0; overflow: auto; transition: opacity 140ms ease-in-out; }
+.masca-spotlight[data-fading="true"] .masca-spotlight__instructions { opacity: 0; }
+.masca-spotlight[data-ready="false"] .masca-spotlight__card,
 .masca-spotlight[data-ready="false"] .masca-spotlight__ring { visibility: hidden; }
-.masca-spotlight__card, .masca-spotlight__ring { transition: opacity 140ms ease-in-out; }
-.masca-spotlight[data-fading="true"] .masca-spotlight__card,
-.masca-spotlight[data-fading="true"] .masca-spotlight__ring { opacity: 0; pointer-events: none; }
-@media (prefers-reduced-motion: reduce) {
-  .masca-spotlight[open] { animation: none; }
-  .masca-spotlight__card, .masca-spotlight__ring { transition: none; }
-}
+@media (max-width: 600px) { .masca-spotlight__card { height: min(440px, 58dvh); } }
+@media (prefers-reduced-motion: reduce) { .masca-spotlight__instructions { transition: none; } }
