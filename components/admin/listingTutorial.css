@@ -47,3 +47,6 @@
  .masca-spotlight__card footer { gap: .5rem; }
  .masca-spotlight__card button { min-height: 44px; }
 }
+
+.masca-tutorial-header-slot { display: flex; align-items: center; margin-right: .5rem; list-style: none; }
+.masca-tutorial-header-slot .masca-action { min-height: 34px; padding: .4rem .7rem; font-size: .85rem; white-space: nowrap; }

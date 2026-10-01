@@ -80,3 +80,15 @@ it('keeps the guide hidden until smooth scrolling settles', async () => {
     await waitFor(() => expect(dialog.getAttribute('data-fading')).toBe('false'));
   } finally { anchor.remove(); }
 });
+
+it('places the editor tutorial before Edit and Change history in the header', async () => {
+  const header = document.createElement('div');
+  header.innerHTML = '<ul class="doc-tabs__tabs"><li>Edit</li><li>Change history</li></ul>';
+  document.body.appendChild(header);
+  const view = render(<ListingTutorial collection="events" editor />);
+  await waitFor(() => expect(header.querySelector('li')?.textContent).toBe('Show tutorial'));
+  expect(view.container.querySelector('button')).toBeNull();
+  view.unmount();
+  expect(header.textContent).toBe('EditChange history');
+  header.remove();
+});
