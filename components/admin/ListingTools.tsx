@@ -11,6 +11,7 @@ export function ListingTools({ collection, review = false }: {collection:'events
  const {getData}=useForm();
  const modified=useFormModified();
  const dialog=useRef<HTMLDialogElement>(null);
+ const dialogHeading=useRef<HTMLHeadingElement>(null);
  const [active,setActive]=useState(false);
  const [mode,setMode]=useState<'preview'|'review'>('preview');
  const [snapshot,setSnapshot]=useState<Record<string,unknown>>({});
@@ -18,7 +19,7 @@ export function ListingTools({ collection, review = false }: {collection:'events
  const [error,setError]=useState('');
  const [busy,setBusy]=useState(false);
  const trigger=useRef<HTMLButtonElement>(null);
- function open(next:'preview'|'review') {setActive(true);setSnapshot(getData());setMode(next);setNote(String(data?.reviewNotes||''));setError('');dialog.current?.showModal();}
+ function open(next:'preview'|'review') {setActive(true);setSnapshot(getData());setMode(next);setNote(String(data?.reviewNotes||''));setError('');dialog.current?.showModal();dialogHeading.current?.focus({preventScroll:true});}
  function close(){setActive(false);dialog.current?.close();trigger.current?.focus();}
  async function action(action:string) {
   setBusy(true);setError('');
@@ -36,7 +37,7 @@ export function ListingTools({ collection, review = false }: {collection:'events
   </> : id && hasSavePermission!==false && <details><summary aria-label="Listing actions">•••</summary><button type="button" disabled={busy||modified} onClick={()=>action('duplicate')}>Duplicate as draft</button><small>{modified?'Save changes before duplicating.':'Copies saved content. Dates and private submitter details are cleared.'}</small></details>}
   {error && <p role="alert">{error}</p>}
   <dialog ref={dialog} className="masca-listing-dialog" onCancel={e=>{e.preventDefault();close();}} aria-label={mode==='preview'?'Private listing preview':'Request changes'}>
-   <header><strong>{mode==='preview'?'Draft preview · Not published':'Needs changes'}</strong><button type="button" onClick={close} aria-label="Close">×</button></header>
+   <header><h2 ref={dialogHeading} tabIndex={-1} className="masca-listing-dialog__heading">{mode==='preview'?'Draft preview · Not published':'Needs changes'}</h2><button type="button" onClick={close} aria-label="Close">×</button></header>
    {active && (mode==='preview'?collection==='events'?<PublicEventPreview snapshot={snapshot}/>:<PublicCareerPreview snapshot={snapshot}/>:<><p>Explain what needs fixing. This note stays internal and the submission remains private.</p><label htmlFor={`${collection}-review-note`}>Review note *</label><textarea id={`${collection}-review-note`} maxLength={2000} value={note} onChange={e=>setNote(e.target.value)} /><button type="button" disabled={busy||!note.trim()} onClick={()=>action('needs-changes')}>{busy?'Saving…':'Save review note'}</button>{error&&<p role="alert">{error}</p>}</>)}
   </dialog>
  </div>;
