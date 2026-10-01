@@ -1,4 +1,5 @@
-import { submittedForReviewField, completeSubmissionReview } from "../features/submissions/review.ts";
+import { listingAction } from '../features/submissions/listingActions.ts';
+import { submittedForReviewField, completeSubmissionReview, reviewFields } from "../features/submissions/review.ts";
 import { adminSearchFields, adminSearchHooks, withAdminSearch } from '../features/admin/adminSearch.ts';
 import { cmsStatusField } from '../features/admin/cmsStatusField.ts';
 import { revalidatePath } from "next/cache.js";
@@ -56,6 +57,7 @@ const revalidatePublishedEvent: CollectionAfterChangeHook = ({ doc, previousDoc,
 
 export const Events: CollectionConfig = {
   slug: "events",
+  disableDuplicate: true,
   admin: {
     useAsTitle: "title",
     listSearchableFields: adminSearchFields.events, baseFilter: withAdminSearch('events', eventListFilter),
@@ -98,10 +100,11 @@ export const Events: CollectionConfig = {
     maxPerDoc: 0,
   },
   lockDocuments: false,
-  endpoints: [{ path: '/report', method: 'get', handler: eventReport }, { path: '/:id/lifecycle', method: 'post', handler: eventLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: eventQuickAction }],
+  endpoints: [{ path: '/:id/listing-action', method: 'post', handler: listingAction('events') }, { path: '/report', method: 'get', handler: eventReport }, { path: '/:id/lifecycle', method: 'post', handler: eventLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: eventQuickAction }],
   fields: [
     cmsStatusField('events'),
     submittedForReviewField,
+    ...reviewFields,
     { name: 'lifecycle', type: 'text', virtual: true, label: 'Event stage',
       admin: { disableListColumn: true, components: { Field: false, Cell: '/components/admin/EventLifecycleCell#EventLifecycleCell' }, disableBulkEdit: true },
       hooks: { afterRead: [async ({ data, req }: Parameters<FieldHook>[0]) => {

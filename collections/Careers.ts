@@ -1,4 +1,5 @@
-import { submittedForReviewField, completeSubmissionReview } from "../features/submissions/review.ts";
+import { listingAction } from '../features/submissions/listingActions.ts';
+import { submittedForReviewField, completeSubmissionReview, reviewFields } from "../features/submissions/review.ts";
 import { adminSearchFields, adminSearchHooks, withAdminSearch } from '../features/admin/adminSearch.ts';
 import { cmsStatusField } from '../features/admin/cmsStatusField.ts';
 import { randomUUID } from 'node:crypto';
@@ -23,6 +24,7 @@ const optionList = <T extends string>(values: readonly T[], labels: Record<T, st
 
 export const Careers: CollectionConfig = {
   slug: 'careers', labels: { singular: 'Opportunity', plural: 'Careers' },
+  disableDuplicate: true,
   admin: {
     useAsTitle: 'title', defaultColumns: ['title', 'company', 'type', 'cmsStatus', 'closes'],
     description: 'Manage opportunities for students. Save private drafts, review details and publish when ready. Rolling roles expire after 60 days; update the listed date after reconfirming availability.',
@@ -38,10 +40,11 @@ export const Careers: CollectionConfig = {
   access: { read: publicCareerAccess, readVersions: authenticated, create: authenticated, update: authenticated, delete: careerDeleteAccess },
   versions: { drafts: true, maxPerDoc: 0 },
   lockDocuments: { duration: 300 }, defaultSort: '-added',
-  endpoints: [{ path: '/:id/lifecycle', method: 'post', handler: careerLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: careerQuickAction }],
+  endpoints: [{ path: '/:id/listing-action', method: 'post', handler: listingAction('careers') }, { path: '/:id/lifecycle', method: 'post', handler: careerLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: careerQuickAction }],
   fields: ([
     cmsStatusField('careers'),
     submittedForReviewField,
+    ...reviewFields,
     {name:'contactName',type:'text',label:'Submitter name',access:{read:({req})=>Boolean(req.user)},admin:{readOnly:true,description:'Private contact for this public submission.'}},
     {name:'contactEmail',type:'email',label:'Submitter email',access:{read:({req})=>Boolean(req.user)},admin:{readOnly:true}},
     { name: '_status', label: 'Publication', type: 'select', options: [], admin: { disableListColumn: true, components: { Field: false, Cell: '/components/admin/CareerStatusCell#CareerPublicationStatusCell' }, disableBulkEdit: true } },

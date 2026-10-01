@@ -11,7 +11,7 @@ export function cmsStatusField(collection: CMSCollection): Field {
       const readContext = { ...context, cmsStatusRead: true };
       const [live, latest, stages] = await Promise.all([
         req.payload.findByID({ collection, id: data.id, draft: false, disableErrors: true, select: collection === 'events' ? { _status: true, reviewStatus: true } : { _status: true, closes: true, added: true }, depth: 0, req: { ...req, context: readContext }, context: readContext, overrideAccess: false }),
-        req.payload.findByID({ collection, id: data.id, draft: true, disableErrors: true, select: { _status: true, closes: true, added: true, submittedForReview: true }, depth: 0, req: { ...req, context: readContext }, context: readContext, overrideAccess: false }),
+        req.payload.findByID({ collection, id: data.id, draft: true, disableErrors: true, select: { _status: true, closes: true, added: true, submittedForReview: true, needsChanges: true }, depth: 0, req: { ...req, context: readContext }, context: readContext, overrideAccess: false }),
         collection === 'events'
           ? req.payload.find({ collection: 'event-lifecycle', where: { event: { equals: data.id } }, limit: 1, depth: 0, req, overrideAccess: true })
           : req.payload.find({ collection: 'career-lifecycle', where: { career: { equals: data.id } }, limit: 1, depth: 0, req, overrideAccess: true }),

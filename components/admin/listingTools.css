@@ -1,0 +1,14 @@
+.masca-listing-tools { display:flex; flex-wrap:wrap; align-items:center; gap:.75rem; margin-block:1rem; }
+.masca-listing-tools details { position:relative; padding:.6rem; border:1px solid var(--theme-elevation-200); border-radius:8px; }
+.masca-listing-tools summary { cursor:pointer; list-style:none; }
+.masca-listing-tools small { display:block; max-width:30ch; margin-top:.5rem; }
+.masca-listing-tools aside { flex-basis:100%; padding:1rem; background:var(--theme-elevation-100); border-radius:12px; }
+.masca-listing-dialog { width:min(680px,calc(100vw - 32px)); max-height:calc(100dvh - 32px); overflow:auto; border:1px solid var(--theme-elevation-200); border-radius:18px; padding:1.5rem; background:var(--theme-elevation-0); color:var(--theme-text); }
+.masca-listing-dialog::backdrop { background:#08082299; }
+.masca-listing-dialog header { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+.masca-listing-dialog button { min-height:44px; cursor:pointer; }
+.masca-listing-dialog textarea { display:block; width:100%; min-height:140px; margin-block:.75rem; }
+.masca-private-preview { background:#fff; color:#090544; border:1px solid #e6e5ee; border-radius:16px; padding:1.5rem; margin-top:1rem; }
+.masca-private-preview h2 { font-size:1.8rem; overflow-wrap:anywhere; }
+.masca-private-preview__description { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.65; }
+.masca-private-preview__cta { display:inline-block; padding:.75rem 1.25rem; background:#ffcc00; border-radius:10px; font-weight:700; }
