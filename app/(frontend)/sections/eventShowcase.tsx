@@ -23,6 +23,13 @@ export default async function EventShowcaseSection() {
           <br /> Pick something, bring a friend, jom!
         </p>
 
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-5">
+          <Button href="/submit/event" variant="accent">
+            Post an event <span aria-hidden>&rarr;</span>
+          </Button>
+          <p className="text-body-sm text-gray-500">Hosting something? Share it with Malaysian students across Australia.</p>
+        </div>
+
         {events.length === 0 ? (
           <p className="text-gray-500">No upcoming events right now — check back soon!</p>
         ) : (
