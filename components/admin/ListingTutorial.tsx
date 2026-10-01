@@ -20,7 +20,7 @@ const guides: Record<Collection, Step[]> = {
     { title: 'Basics', body: 'Add a clear title, choose the student association using the organisation search, and describe the event. You can enter another organiser if it is not in the directory.' },
     { title: 'Date and location', body: 'Choose One day for a single-day event or Date range for a longer event. Check the start time, optional end time, venue and state.', tip: 'Times follow the selected state’s timezone. An end time must not be before the start.' },
     { title: 'Poster, links and contact details', body: 'Add a poster and registration link, then check the contact name and email. Contact details and internal notes are private to the committee.' },
-    { title: 'Preview and publish', body: 'Review the event preview and check the poster, dates and links. Save and exit keeps a new event as a draft. Publish event approves it for the public website.', tip: 'For an existing published event, use Publish changes when your updates are ready.' },
+    { title: 'Review and publish', body: 'Review the event preview and check the poster, dates and links. Save and exit keeps a new event as a draft. Publish event approves it for the public website.', tip: 'For an existing published event, use Publish changes when your updates are ready.' },
   ],
 };
 export function reviewQueueHref(collection: Collection) {

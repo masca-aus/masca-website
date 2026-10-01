@@ -1,4 +1,5 @@
 'use client';
+import './listingReview.css';
 import { ListingTools } from './ListingTools';
 import { ListingTutorial } from './ListingTutorial';
 import { CMSStatusBadge } from './CMSStatusBadge';
@@ -85,7 +86,7 @@ export function CareerEditorHeader() {
     <nav id={listID} className="masca-wizard-step-disclosure" data-open={open} aria-label="Career steps" aria-hidden={!open} inert={!open} onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); setOpen(false); toggle.current?.focus(); } }}><div className="masca-wizard-step-disclosure__inner"><ol className="masca-wizard-steps">{CAREER_STEPS.map(({ title }, index) => <li key={title}><button type="button" disabled={busy} tabIndex={open ? 0 : -1} aria-current={index === step ? 'step' : undefined} onClick={() => moveTo(index)}><span className="masca-wizard-step-number" aria-hidden="true">{index < step ? '✓' : index + 1}</span>{title}</button></li>)}</ol></div></nav>
     <div key={step} className="masca-wizard-intro"><h2 ref={heading} tabIndex={-1}>{CAREER_STEPS[step].title}</h2><p>{CAREER_STEPS[step].description}</p></div>
     {error && <div className="masca-wizard-error" role="alert">{error}</div>}
-    {step === 3 && <><ListingTools collection="careers" review /><CareerReview /></>}
+    {step === 3 && <CareerReview />}
   </section>;
 }
 function CareerReview() {
@@ -103,14 +104,19 @@ function CareerReview() {
   const groups: [string, string][][] = [
     [['Job type', label('type', JOB_TYPE_LABEL)], ['Industry', value('industry')], ['Company website', value('companyWebsite')]],
     [['Location', [data.city, data.state, data.country].filter(Boolean).join(', ')], ['Work arrangement', label('workMode', WORK_MODE_LABEL)], ['Eligibility', value('eligibility')], ['Study levels', studyLevels], ['International students', label('international', INTERNATIONAL_LABEL)]],
-    [['Apply at', value('applyUrl')], ['Closing date', date('closes') || 'Rolling applications'], ['Description', value('description')], ['Pay', value('pay')], ['Listed', date('added')], ['Tags', value('tags')], ['Featured', data.featured ? 'Yes' : ''], ['Private notes', value('internalNotes')]],
+    [['Apply at', value('applyUrl')], ['Closing date', date('closes') || 'Rolling applications'], ['Description', value('description')], ['Pay', value('pay')], ['Listed', date('added')], ['Tags', value('tags')], ['Featured', data.featured ? 'Yes' : '']],
   ];
-  return <div className="masca-career-review">
-    <div className="masca-career-review__identity"><h3>{value('title') || 'Untitled opportunity'}</h3><p>{value('company')}</p></div>
-    {CAREER_STEPS.slice(0, 3).map(({ title }, index) => <section className="masca-career-review__section" key={title}>
+  return <div className="masca-listing-review">
+    <div className="masca-listing-review__identity"><h3>{value('title') || 'Untitled opportunity'}</h3><p>{value('company')}</p></div>
+    {CAREER_STEPS.slice(0, 3).map(({ title }, index) => <section className="masca-listing-review__section" key={title}>
       <header><h4>{title}</h4><button type="button" className="masca-wizard-text-button" onClick={() => setStep(index)} aria-label={`Edit ${title.toLowerCase()}`}>Edit</button></header>
       <dl>{groups[index].filter(([, text]) => text).map(([name, text]) => <div key={name}><dt>{name}</dt><dd>{text}</dd></div>)}</dl>
     </section>)}
+    {value('internalNotes') && <section className="masca-listing-review__section masca-listing-review__private">
+      <header><h4>Internal notes · committee only</h4><button type="button" className="masca-wizard-text-button" onClick={() => setStep(2)}>Edit</button></header>
+      <p className="masca-listing-review__hint">These details are not shown on the public website.</p>
+      <dl><div><dt>Internal notes</dt><dd>{value('internalNotes')}</dd></div></dl>
+    </section>}
   </div>;
 
 }
@@ -131,8 +137,8 @@ export function CareerEditorFooter() {
     }
     setAttemptedSave(true);
   }
-  return <footer className="masca-wizard-footer">
+  return <>{step === 3 && <ListingTools collection="careers" review />}<footer className="masca-wizard-footer">
     <div className="masca-wizard-save-actions"><Link href="/admin/collections/careers" className="masca-action masca-action--secondary">Cancel</Link><div onClickCapture={() => setAttemptedSave(false)}><span data-tutorial="save"><SaveDraftButton /></span></div><span className="masca-save-indicator" role="status">{busy ? 'Saving…' : id && !modified ? 'Saved' : 'Drafts stay private until published'}</span></div>
     <div>{step > 0 && <button type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}{step < 3 ? <button type="button" className="masca-wizard-primary" disabled={busy} onClick={() => nextRef.current?.()}>Continue</button> : <div data-tutorial="publish" onClickCapture={validatePublication}><PublishButton label="Publish opportunity" /></div>}</div>
-  </footer>;
+  </footer></>;
 }
