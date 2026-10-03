@@ -11,21 +11,6 @@ import { getCMSCareerBoard } from "@/features/careers/publicCareers"
 
 const PREVIEW_COUNT = 3
 
-const PROMISES = [
-  {
-    heading: "Working rights, spelled out",
-    body: "Every role says up front whether international students can apply.",
-  },
-  {
-    heading: "Closing dates, up front",
-    body: "See what closes this week before you spend an evening on a cover letter.",
-  },
-  {
-    heading: "Curated, not scraped",
-    body: "Hand-picked by the MASCA Careers team — internships, grad programs and part-time gigs.",
-  },
-]
-
 export default async function CareerSpotlightSection() {
   const board = await getCMSCareerBoard()
   const jobs = board.status === "ok" ? board.jobs : []
@@ -35,32 +20,26 @@ export default async function CareerSpotlightSection() {
     <section className="bg-blue-600">
       <div className="container section-pad grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
 
-        {/* Left: the pitch */}
+        {/* Left: board introduction */}
         <div className="flex flex-col gap-6">
           <header className="flex flex-col gap-4">
-            <span className="eyebrow text-yellow-500">the jobs board</span>
+            <span className="eyebrow text-yellow-500">Careers</span>
             <h2 className="title text-white">
-              Find your next <span className="text-yellow-500">Job</span>
+              Jobs and <span className="text-yellow-500">internships</span>
             </h2>
           </header>
 
           <p className="text-gray-300">
-            One board for Malaysian students in Australia: internships, graduate programs,
-            part-time work and roles back home — refreshed through the semester.
+            Browse internships, graduate roles and part-time jobs in Australia and Malaysia.
           </p>
 
-          <ul className="grid grid-cols-1 gap-6 border-t border-white/15 pt-8 sm:grid-cols-3">
-            {PROMISES.map((item) => (
-              <li key={item.heading} className="flex flex-col gap-1.5">
-                <span className="eyebrow text-yellow-500">{item.heading}</span>
-                <p className="text-body-sm text-gray-300">{item.body}</p>
-              </li>
-            ))}
-          </ul>
+          <p className="border-t border-white/15 pt-6 text-gray-300">
+            Check each listing for location, closing dates and working rights.
+          </p>
 
           <div className="mt-2 flex flex-wrap gap-4">
             <Button href="/careers" variant="accent">
-              Browse the board <span aria-hidden>&rarr;</span>
+              Browse roles <span aria-hidden>&rarr;</span>
             </Button>
             <Button href="/contact" variant="outlineLight">
               Post a role
