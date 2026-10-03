@@ -27,7 +27,7 @@ export default function HeroSection({ chapterMap }: { chapterMap: ReactNode }) {
 
         <div id="states" className="flex w-full justify-center scroll-mt-24 lg:flex-1">
           <div className="w-full lg:max-w-[440px] 2xl:max-w-[500px]">
-            <p className="eyebrow mb-3 text-yellow-500">Find your state, find your people</p>
+            <h2 className="sr-only">Find your MASCA chapter</h2>
             {chapterMap}
           </div>
         </div>
@@ -39,9 +39,6 @@ export default function HeroSection({ chapterMap }: { chapterMap: ReactNode }) {
 function MainContent() {
   return (
     <header className="flex flex-col gap-6 justify-center">
-      <span className="eyebrow text-yellow-500">
-        founded 2001 &middot; 6 states &middot; 1 territory
-      </span>
       <h1 className="text-white text-5xl md:text-6xl lg:text-7xl">
         <span className="sr-only">
           Malaysian Students&apos; Council of Australia (MASCA)
