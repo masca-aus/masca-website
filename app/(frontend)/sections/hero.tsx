@@ -11,7 +11,7 @@ import { Briefcase } from "lucide-react";
 import HeroSilhouettes from "./heroSilhouttes";
 
 
-export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNode }) {
+export default function HeroSection({ chapterMap }: { chapterMap: ReactNode }) {
   const sectionRef = useRef<HTMLElement>(null)
 
   useGSAP(() => {
@@ -22,13 +22,16 @@ export default function HeroSection({ upcomingEvent }: { upcomingEvent: ReactNod
   return (
     <section ref={sectionRef} className="relative isolate overflow-hidden bg-blue-600">
       <HeroSilhouettes className="-z-10" />
-      <div className="container flex items-center gap-12 md:gap-16 min-h-svh pt-24 pb-16 md:pt-28 z-10">
-        <div className="flex-1">
+      <div className="container flex min-h-svh flex-col items-center gap-12 pt-24 pb-16 md:pt-28 lg:flex-row lg:gap-16 z-10">
+        <div className="w-full lg:flex-1">
             <MainContent />
         </div>
 
-        <div className="hidden lg:flex flex-1 justify-center">
-            {upcomingEvent}
+        <div id="states" className="flex w-full justify-center scroll-mt-24 lg:flex-1">
+          <div className="w-full max-w-[520px]">
+            <p className="eyebrow mb-3 text-yellow-500">Find your state, find your people</p>
+            {chapterMap}
+          </div>
         </div>
       </div>
     </section>
