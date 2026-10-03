@@ -42,8 +42,10 @@ export default async function Home() {
 
   return (
    <main id="main">
-      <HeroSection chapterMap={<AustraliaChapterMap />} />
-      <StatisticSection />
+      <div className="flex min-h-svh flex-col bg-blue-600">
+        <HeroSection chapterMap={<AustraliaChapterMap />} />
+        <StatisticSection />
+      </div>
       <AboutSection />
       <YearbookSection />
       <EventShowcaseSection />

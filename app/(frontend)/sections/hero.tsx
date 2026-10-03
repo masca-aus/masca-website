@@ -19,8 +19,8 @@ export default function HeroSection({ chapterMap }: { chapterMap: ReactNode }) {
   }, { scope: sectionRef })
 
   return (
-    <section ref={sectionRef} className="relative isolate overflow-hidden bg-blue-600">
-      <div className="relative z-10 mx-auto flex min-h-svh w-full max-w-[1760px] flex-col items-center gap-12 px-8 pt-24 pb-16 md:px-16 md:pt-28 lg:min-h-0 lg:flex-row lg:gap-20 lg:px-20 lg:pt-32 lg:pb-16 2xl:gap-24 2xl:px-24">
+    <section ref={sectionRef} className="relative isolate flex flex-1 overflow-hidden bg-blue-600">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1760px] flex-1 flex-col items-center gap-12 px-8 pt-24 pb-16 md:px-16 md:pt-28 lg:flex-row lg:gap-20 lg:px-20 lg:pt-32 lg:pb-16 2xl:gap-24 2xl:px-24">
         <div className="w-full lg:flex-1">
             <MainContent />
         </div>
