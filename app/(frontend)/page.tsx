@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 
 import { SITE_NAME_FULL, SITE_DESCRIPTION } from "@/utils/seo";
 import HeroSection from "./sections/hero";
-import UpcomingEvent from "./sections/upcomingEvent";
 import StatisticSection from "./sections/statistic";
-import StatesSection from "./sections/states";
+import AustraliaChapterMap from "./_components/AustraliaChapterMap";
 import EventShowcaseSection from "./sections/eventShowcase";
 import MascaCareSection from "./sections/mascaCare";
 import CareerSpotlightSection from "./sections/careerSpotlight";
@@ -43,11 +42,12 @@ export default async function Home() {
 
   return (
    <main id="main">
-      <HeroSection upcomingEvent={<UpcomingEvent />} />
-      <StatisticSection />
+      <div className="flex min-h-svh flex-col bg-blue-600">
+        <HeroSection chapterMap={<AustraliaChapterMap />} />
+        <StatisticSection />
+      </div>
       <AboutSection />
       <YearbookSection />
-      <StatesSection />
       <EventShowcaseSection />
       <CareerSpotlightSection />
       <MascaCareSection />

@@ -1,0 +1,104 @@
+.module { width: 100%; margin: auto; }
+.mapFrame { position: relative; padding: 6px; }
+.mapCanvas { position: relative; width: 100%; aspect-ratio: 460 / 420; }
+.mapImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 15px 20px rgba(0, 0, 36, .15));
+}
+.pin {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 42px;
+  min-height: 42px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition: transform .2s ease;
+}
+.pin:hover, .pin:focus-visible, .pinSelected { z-index: 3; transform: translate(-50%, -50%) scale(1.1); }
+.pin:focus-visible { outline: 2px solid #ffcc00; outline-offset: 2px; border-radius: 20px; }
+.pinDot {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #cc0001;
+  box-shadow: 0 0 0 3px rgba(1, 0, 70, .4);
+}
+.pinSelected .pinDot { background: #ffcc00; box-shadow: 0 0 0 5px rgba(255, 204, 0, .25); }
+.pinLabel {
+  padding: 4px 7px;
+  border-radius: 100px;
+  background: #010066;
+  font-size: 10px;
+}
+.pinSelected .pinLabel { background: #ffcc00; color: #010066; }
+.selectedCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  margin-top: 8px;
+  padding: 12px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, .22);
+  color: #fff;
+}
+.selectedDetails { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
+.selectedDetails strong { font-size: 15px; font-weight: 600; line-height: 1.2; white-space: nowrap; }
+.selectedDetails small { color: rgba(255, 255, 255, .66); font-size: 11px; }
+.actions { display: flex; gap: 6px; align-items: center; flex: none; }
+.selectedCard a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, .3);
+  border-radius: 100px;
+  background: transparent;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.selectedCard a svg:last-child { display: none; }
+.selectedCard a:hover { border-color: #ffcc00; }
+.selectedCard a:focus-visible, .chapterList button:focus-visible { outline: 2px solid #ffcc00; outline-offset: 3px; }
+.chapterList { display: none; }
+.pendingLink { color: rgba(255, 255, 255, .66); font-size: 11px; }
+@media (max-width: 600px) {
+  .mapFrame { padding: 0; }
+  .pin { min-width: 34px; min-height: 34px; }
+  .pinLabel { display: none; }
+  .selectedCard { min-height: 58px; margin-top: 8px; padding: 10px 0 0; }
+  .selectedDetails strong { font-size: 15px; }
+  .selectedCard a { justify-content: center; width: 36px; height: 36px; min-height: 36px; padding: 0; }
+  .selectedCard a span { display: none; }
+  .chapterList { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 14px; }
+  .chapterList button {
+    min-width: 39px;
+    min-height: 35px;
+    padding: 5px 7px;
+    border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: 100px;
+    background: transparent;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .chapterList button[aria-pressed=true] { border-color: #ffcc00; background: #ffcc00; color: #010066; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pin { transition: none; }
+}

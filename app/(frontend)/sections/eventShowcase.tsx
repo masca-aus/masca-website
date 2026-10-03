@@ -9,9 +9,9 @@ export default async function EventShowcaseSection() {
   const events = (await getApprovedUpcomingEvents().catch(() => [])).slice(0, 3)
 
   return (
-    // Soft blue tint so the band reads as its own section after the white
-    // states grid; the white event cards sit on it with their shadows.
-    <section className="bg-blue-50">
+    // The map now lives in the hero, so this white band separates Events
+    // from the Yearbook's original light grey background.
+    <section className="bg-white">
       <div className="flex flex-col gap-8 container section-pad">
         <header className="flex flex-col gap-4">
           <span className="eyebrow text-red-600">What&apos;s on kawan-kawan</span>
