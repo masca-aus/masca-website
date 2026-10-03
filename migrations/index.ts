@@ -10,6 +10,7 @@ import * as migration_20260930_221300_workspace_access from './20260930_221300_w
 import * as migration_20261001_120000_public_submissions from './20261001_120000_public_submissions';
 import * as migration_20261001_160000_listing_review from './20261001_160000_listing_review';
 import * as migration_20261003_041014_committee_drafts from './20261003_041014_committee_drafts';
+import * as migration_20261003_041050_committee_scope_defaults from './20261003_041050_committee_scope_defaults';
 import * as migration_20261003_041100_seed_national_council from './20261003_041100_seed_national_council';
 
 export const migrations = [
@@ -72,6 +73,11 @@ export const migrations = [
     up: migration_20261003_041014_committee_drafts.up,
     down: migration_20261003_041014_committee_drafts.down,
     name: '20261003_041014_committee_drafts'
+  },
+  {
+    up: migration_20261003_041050_committee_scope_defaults.up,
+    down: migration_20261003_041050_committee_scope_defaults.down,
+    name: '20261003_041050_committee_scope_defaults'
   },
   {
     up: migration_20261003_041100_seed_national_council.up,
