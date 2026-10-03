@@ -1,0 +1,84 @@
+.page {
+  background: var(--color-white);
+  color: var(--color-blue-600);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 0.7fr 1.3fr;
+  align-items: center;
+  gap: clamp(2rem, 5vw, 5rem);
+  padding-top: 9rem;
+  padding-bottom: 4rem;
+}
+
+.errorNumber {
+  text-align: center;
+  font-size: clamp(6rem, 12vw, 10rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+.eyebrow { color: var(--color-red-600); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 1.25rem; }
+.heroCopy h1 { font-size: clamp(1.8rem, 3vw, 2.8rem); line-height: 1.15; letter-spacing: -0.035em; font-weight: 750; }
+.intro { color: var(--color-gray-700); font-size: 0.95rem; max-width: 34rem; margin-top: 1rem; }
+.actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1.25rem; margin-top: 1.5rem; }
+.detourLink { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; font-weight: 650; text-underline-offset: 5px; }
+.detourLink:hover { text-decoration: underline; }
+.page a:focus-visible { outline: 2px solid var(--color-blue-600); outline-offset: 5px; border-radius: 3px; }
+.discover { background: var(--color-white); border-top: 1px solid #01006614; padding-block: 3.5rem 3rem; scroll-margin-top: 6rem; }
+.sectionHeading { display: flex; justify-content: space-between; align-items: end; gap: 2rem; margin-bottom: 2rem; }
+.sectionHeading .eyebrow { margin-bottom: 0.65rem; }
+.sectionHeading h2 { font-size: clamp(1.6rem, 2.4vw, 2.25rem); letter-spacing: -0.045em; }
+.sectionHeading h2 span { font-family: var(--font-secondary); font-style: italic; font-weight: 600; }
+.sectionHeading > p { font-size: 0.78rem; line-height: 1.7; color: var(--color-gray-700); }
+.postcards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.postcard { display: flex; flex-direction: column; background: #fffdf7; border: 1px solid #01006621; border-radius: 3px; overflow: hidden; }
+.illustration { position: relative; background: #f1eddf; padding: 0.65rem 0.5rem 0; border-bottom: 1px solid #01006612; }
+.illustration[data-subject="towers"] { background: #e7eaf2; }
+.illustration[data-subject="opera"] { background: #f5e7da; }
+.illustration[data-subject="reef"] { background: #e2efed; }
+.illustration svg { display: block; width: 100%; height: auto; }
+.cardNumber { position: absolute; top: 0.85rem; left: 1rem; color: var(--color-blue-600); font-size: 0.65rem; letter-spacing: 0.12em; font-weight: 700; }
+.cardCopy { display: flex; flex: 1; flex-direction: column; padding: 1.35rem 1.2rem 1.2rem; }
+.cardLabel { color: var(--color-red-600); font-size: 0.6rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+.cardCopy h3 { font-family: var(--font-secondary); font-size: 1.7rem; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 0.85rem; }
+.description { color: var(--color-gray-700); font-size: 0.8rem; line-height: 1.75; margin-bottom: 1.3rem; }
+.aside { color: var(--color-blue-600); font: italic 1rem/1.35 var(--font-secondary); border-top: 1px dashed #01006630; padding-top: 0.8rem; margin-top: auto; }
+.tourismLinks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+.tourismLink { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.35rem 1.5rem; border: 1px solid #01006630; border-radius: 3px; background: #fffdf7; transition: background-color 150ms ease; }
+.tourismLink:hover { background: var(--color-yellow-100); }
+.tourismLink > span { display: flex; flex-direction: column; gap: 0.4rem; }
+.tourismLink > svg { flex-shrink: 0; }
+.tourismLink strong { font-size: 0.95rem; line-height: 1.45; }
+.tourismEyebrow { color: var(--color-red-600); font-size: 0.6rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.tourismDomain { color: var(--color-gray-700); font-size: 0.7rem; }
+.onward { display: flex; justify-content: space-between; align-items: center; gap: 1rem; border-bottom: 1px solid #01006620; padding-block: 2rem; }
+.onward p { color: var(--color-blue-600); font: italic 1.45rem var(--font-secondary); }
+.onward a { display: inline-flex; align-items: center; gap: 0.8rem; font-size: 0.8rem; font-weight: 700; text-underline-offset: 5px; }
+.onward a:hover { text-decoration: underline; }
+.brokenLink { margin-top: 1.5rem; text-align: center; font-size: 0.72rem; color: var(--color-gray-700); }
+.brokenLink a { display: inline-flex; align-items: center; gap: 0.2rem; color: var(--color-blue-600); text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 74rem) {
+  .postcards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .illustration svg { max-height: 190px; }
+  .sectionHeading { align-items: start; flex-direction: column; gap: 1rem; }
+}
+
+@media (max-width: 47.99rem) {
+  .tourismLinks { grid-template-columns: 1fr; }
+  .hero { grid-template-columns: 1fr; gap: 1.5rem; padding-top: 7.5rem; padding-bottom: 3rem; }
+  .errorNumber { font-size: 5.5rem; text-align: left; }
+  .discover { padding-block: 2.5rem; }
+  .onward { flex-direction: column; align-items: start; gap: 0.75rem; }
+}
+
+@media (max-width: 35rem) {
+  .postcards { grid-template-columns: 1fr; gap: 1.25rem; }
+  .cardCopy { padding: 1.35rem 1.5rem; }
+  .cardLabel { font-size: 0.65rem; }
+  .description { font-size: 0.9rem; }
+  .aside { font-size: 1.1rem; }
+  .onward a { font-size: 0.75rem; }
+}
