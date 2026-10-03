@@ -54,7 +54,7 @@
   color: #fff;
 }
 .selectedDetails { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
-.selectedDetails strong { font-size: 15px; font-weight: 600; line-height: 1.2; }
+.selectedDetails strong { font-size: 15px; font-weight: 600; line-height: 1.2; white-space: nowrap; }
 .selectedDetails small { color: rgba(255, 255, 255, .66); font-size: 11px; }
 .actions { display: flex; gap: 6px; align-items: center; flex: none; }
 .selectedCard a {
@@ -71,6 +71,7 @@
   font-weight: 600;
   white-space: nowrap;
 }
+.selectedCard a svg:last-child { display: none; }
 .selectedCard a:hover { border-color: #ffcc00; }
 .selectedCard a:focus-visible, .chapterList button:focus-visible { outline: 2px solid #ffcc00; outline-offset: 3px; }
 .chapterList { display: none; }
@@ -82,7 +83,7 @@
   .selectedCard { min-height: 58px; margin-top: 8px; padding: 10px 0 0; }
   .selectedDetails strong { font-size: 15px; }
   .selectedCard a { justify-content: center; width: 36px; height: 36px; min-height: 36px; padding: 0; }
-  .selectedCard a span, .selectedCard a svg:last-child { display: none; }
+  .selectedCard a span { display: none; }
   .chapterList { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 14px; }
   .chapterList button {
     min-width: 39px;
