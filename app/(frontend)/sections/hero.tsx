@@ -21,14 +21,14 @@ export default function HeroSection({ chapterMap }: { chapterMap: ReactNode }) {
 
   return (
     <section ref={sectionRef} className="relative isolate overflow-hidden bg-blue-600">
-      <HeroSilhouettes className="-z-10" />
-      <div className="container flex min-h-svh flex-col items-center gap-12 pt-24 pb-16 md:pt-28 lg:flex-row lg:gap-16 z-10">
+      <HeroSilhouettes className="-z-10" opacity={0.18} />
+      <div className="relative z-10 mx-auto flex min-h-svh w-full max-w-[1760px] flex-col items-center gap-12 px-8 pt-24 pb-16 md:px-16 md:pt-28 lg:min-h-[720px] lg:flex-row lg:gap-20 lg:px-20 lg:py-24 xl:min-h-[760px] 2xl:min-h-[820px] 2xl:gap-24 2xl:px-24">
         <div className="w-full lg:flex-1">
             <MainContent />
         </div>
 
         <div id="states" className="flex w-full justify-center scroll-mt-24 lg:flex-1">
-          <div className="w-full max-w-[520px]">
+          <div className="w-full max-w-[520px] 2xl:max-w-[620px]">
             <p className="eyebrow mb-3 text-yellow-500">Find your state, find your people</p>
             {chapterMap}
           </div>
