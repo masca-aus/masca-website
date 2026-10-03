@@ -404,7 +404,7 @@ export interface Media {
   };
 }
 /**
- * Create and update committee profiles step by step. Changes appear on the website when you Save.
+ * Create committee profiles as drafts, then publish them when they are ready to appear on the website.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "committee".
@@ -438,9 +438,9 @@ export interface Committee {
    */
   year: string;
   /**
-   * Choose an existing portrait or upload an image up to 5 MB. Include the member’s name in its alt text.
+   * Optional. Until a portrait is added, a MASCA placeholder is shown.
    */
-  portrait: number | Media;
+  portrait?: (number | null) | Media;
   /**
    * Shown in the expanded modal on the committee page. Optional — the modal simply omits it when empty.
    */
@@ -448,6 +448,7 @@ export interface Committee {
   linkedin_url?: string | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Add sponsor details, choose a logo and review before saving. Changes appear on the homepage when saved.
@@ -718,6 +719,7 @@ export interface CommitteeSelect<T extends boolean = true> {
   linkedin_url?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -307,27 +307,29 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
     },
     {
       slug: "committee",
-      versions: { maxPerDoc: 0 },
+      versions: { drafts: true, maxPerDoc: 0 },
       admin: {
         useAsTitle: "name",
         listSearchableFields: adminSearchFields.committee, baseFilter: withAdminSearch("committee"),
         hideAPIURL: true,
-        defaultColumns: ["name", "role", "department", "year"],
+        defaultColumns: ["name", "role", "department", "year", "_status"],
         description:
-          "Create and update committee profiles step by step. Changes appear on the website when you Save.",
+          "Create committee profiles as drafts, then publish them when they are ready to appear on the website.",
         components: {
           beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink", "/components/admin/AdminSearchHelp#AdminSearchHelp"],
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
             SaveButton: "/components/admin/CommitteeEditor#CommitteeSaveControl",
+            SaveDraftButton: "/components/admin/CommitteeEditor#CommitteeDraftControl",
+            PublishButton: "/components/admin/CommitteeEditor#CommitteePublishControl",
+            UnpublishButton: "/components/admin/CommitteeEditor#CommitteeUnpublishControl",
           },
           views: { edit: { default: { Component: "/components/admin/CommitteeEditor#CommitteeEditorView" }, versions: { tab: { label: "Change history" } } } },
         },
       },
-      // Anyone may read (the public site renders from this collection); only
-      // the logged-in admin can create/update/delete.
+      // Public requests only see published profiles. Editors can see drafts.
       access: {
-        read: () => true,
+        read: ({ req }) => req.user ? true : { _status: { equals: "published" } },
         readVersions: ({ req }) => Boolean(req.user),
       },
       defaultSort: "name",
@@ -403,10 +405,9 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
           name: "portrait",
           type: "upload",
           relationTo: "media",
-          required: true,
           displayPreview: true,
           admin: {
-            description: "Choose an existing portrait or upload an image up to 5 MB. Include the member’s name in its alt text.",
+            description: "Optional. Until a portrait is added, a MASCA placeholder is shown.",
           },
         },
         {
@@ -440,7 +441,12 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
       }) as Field[],
       hooks: {
         ...adminSearchHooks,
-        afterChange: [revalidateCommitteePages],
+        afterChange: [({ doc, previousDoc, req }) => {
+          const draftWrite = req?.query?.draft === "true" || req?.query?.draft === true;
+          const unpublish = req?.query?.unpublishAllLocales === "true" || req?.query?.unpublishAllLocales === true;
+          if (!draftWrite && (unpublish || doc?._status === "published" || previousDoc?._status === "published")) revalidateCommitteePages();
+          return doc;
+        }],
         afterDelete: [revalidateCommitteePages],
       },
     },

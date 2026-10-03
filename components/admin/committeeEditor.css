@@ -1,4 +1,6 @@
 .masca-committee-editor .masca-editor-section { display: none; }
+.masca-committee-publication-actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+.masca-committee-publication-actions .btn { min-height: 44px; }
 .masca-committee-editor[data-step="0"] .masca-committee-step:not(.masca-committee-step-0),
 .masca-committee-editor[data-step="1"] .masca-committee-step:not(.masca-committee-step-1),
 .masca-committee-editor[data-step="2"] .masca-committee-step:not(.masca-committee-step-2),
