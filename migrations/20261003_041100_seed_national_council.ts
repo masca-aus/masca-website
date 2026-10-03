@@ -1,5 +1,5 @@
 import { type MigrateUpArgs, type MigrateDownArgs } from '@payloadcms/db-postgres'
-import { nationalCouncil2026_2027 } from './data/20261003_national_council_2026_2027'
+import { nationalCouncil2026_2027 } from './data/20261003_national_council_2026_2027.ts'
 
 const year = '2026/2027'
 
