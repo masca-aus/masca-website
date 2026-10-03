@@ -46,41 +46,40 @@
 .selectedCard {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 67px;
-  margin-top: 3px;
-  padding: 12px 15px;
-  border-radius: 12px;
-  background: #fff;
-  color: #010066;
+  gap: 10px;
+  min-height: 52px;
+  margin-top: 8px;
+  padding: 12px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, .22);
+  color: #fff;
 }
 .selectedDetails { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
-.selectedDetails strong { font-size: 17px; font-weight: 700; line-height: 1.2; }
-.selectedDetails small { color: #697088; font-size: 11px; }
-.actions { display: flex; gap: 7px; align-items: center; flex: none; }
+.selectedDetails strong { font-size: 15px; font-weight: 600; line-height: 1.2; }
+.selectedDetails small { color: rgba(255, 255, 255, .66); font-size: 11px; }
+.actions { display: flex; gap: 6px; align-items: center; flex: none; }
 .selectedCard a {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 36px;
-  padding: 0 11px;
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, .3);
   border-radius: 100px;
-  background: #010066;
+  background: transparent;
   color: #fff;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
 }
-.selectedCard .websiteLink { border: 1px solid #d9dcea; background: #fff; color: #010066; }
-.selectedCard a:hover { opacity: .8; }
+.selectedCard a:hover { border-color: #ffcc00; }
 .selectedCard a:focus-visible, .chapterList button:focus-visible { outline: 2px solid #ffcc00; outline-offset: 3px; }
 .chapterList { display: none; }
-.pendingLink { color: #697088; font-size: 11px; }
+.pendingLink { color: rgba(255, 255, 255, .66); font-size: 11px; }
 @media (max-width: 600px) {
   .mapFrame { padding: 0; }
   .pin { min-width: 34px; min-height: 34px; }
   .pinLabel { display: none; }
-  .selectedCard { min-height: 58px; margin-top: 0; padding: 10px 12px; }
+  .selectedCard { min-height: 58px; margin-top: 8px; padding: 10px 0 0; }
   .selectedDetails strong { font-size: 15px; }
   .selectedCard a { justify-content: center; width: 36px; height: 36px; min-height: 36px; padding: 0; }
   .selectedCard a span, .selectedCard a svg:last-child { display: none; }
