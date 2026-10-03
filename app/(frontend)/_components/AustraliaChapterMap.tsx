@@ -21,7 +21,7 @@ const chapterMarkers = [
 // Chapter accounts supplied by MASCA or checked against chapter sources.
 const chapterInstagram: Record<string, string> = {
   NSW: "masca_nsw",
-  VIC: "mascavic",
+  VIC: "masca_victoria",
   QLD: "masca_qld",
   WA: "masca_westernaustralia",
   SA: "masca_sa",
