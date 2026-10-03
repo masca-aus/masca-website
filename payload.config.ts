@@ -14,6 +14,8 @@ import sharp from "sharp";
 
 import { SPONSOR_STEPS } from './features/sponsors/sponsorEditor.ts';
 import { COMMITTEE_STEPS } from "./features/committee/committeeEditor.ts";
+import { committeeStatusField } from "./features/committee/committeeStatusField.ts";
+import { committeeQuickAction } from "./features/committee/committeeQuickActions.ts";
 import { Organisations } from "./collections/Organisations.ts";
 import { EventLifecycle } from "./collections/EventLifecycle.ts";
 import { Careers } from "./collections/Careers.ts";
@@ -312,7 +314,7 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
         useAsTitle: "name",
         listSearchableFields: adminSearchFields.committee, baseFilter: withAdminSearch("committee"),
         hideAPIURL: true,
-        defaultColumns: ["name", "role", "department", "year", "_status"],
+        defaultColumns: ["name", "role", "department", "year", "committeePublicationStatus"],
         description:
           "Create committee profiles as drafts, then publish them when they are ready to appear on the website.",
         components: {
@@ -333,9 +335,11 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
         readVersions: ({ req }) => Boolean(req.user),
       },
       defaultSort: "name",
+      endpoints: [{ path: '/:id/quick-status', method: 'post', handler: committeeQuickAction }],
       // Fields mirror the shape the committee page has always rendered, and
       // are validated here so bad entries are rejected at save time.
       fields: [
+        committeeStatusField,
         // Retain stored ordering for existing public pages without exposing reordering.
         { name: "_order", type: "text", index: true, admin: { hidden: true, readOnly: true, disableListColumn: true, disableListFilter: true, disableBulkEdit: true } },
         { name: "committeeWizardHeader", type: "ui", admin: { components: { Field: "/components/admin/CommitteeEditor#CommitteeEditorHeader" }, disableListColumn: true, disableBulkEdit: true } },
@@ -436,7 +440,8 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
         },
         { name: "committeeWizardFooter", type: "ui", admin: { components: { Field: "/components/admin/CommitteeEditor#CommitteeEditorFooter" }, disableListColumn: true, disableBulkEdit: true } },
       ].map((field) => {
-        const step = COMMITTEE_STEPS.findIndex(section => (section.fields as readonly string[]).includes(field.name ?? ""));
+        const name = 'name' in field ? field.name : '';
+        const step = COMMITTEE_STEPS.findIndex(section => (section.fields as readonly string[]).includes(name ?? ""));
         return step < 0 ? field : { ...field, admin: { ...field.admin, className: `masca-committee-step masca-committee-step-${step}` } };
       }) as Field[],
       hooks: {

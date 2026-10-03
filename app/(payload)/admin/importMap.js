@@ -14,11 +14,15 @@ import { CareerSaveControl as CareerSaveControl_57c74453f1f49818c0cb8c1e92524236
 import { CareerEditorView as CareerEditorView_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
 import { CollectionBackLink as CollectionBackLink_b7eb021eac5b101e7ce71970147e89df } from '../../../components/admin/DocumentBackLink'
 import { ContentPermissionsField as ContentPermissionsField_d1257e98ee6e87bc3a795e8f49bc774e } from '../../../components/admin/ContentPermissionsField'
+import { CommitteeStatusCell as CommitteeStatusCell_d4990eeb700ec5019d3bae61e18f2a3a } from '../../../components/admin/CommitteeStatusCell'
 import { CommitteeEditorHeader as CommitteeEditorHeader_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
 import { EditorSection as EditorSection_671b0a745dc229cca2346e4a81fc980a } from '../../../components/admin/EditorSection'
 import { CommitteeEditorFooter as CommitteeEditorFooter_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
 import { AdminSearchHelp as AdminSearchHelp_f2782f10529accf607236d8cfb6a767e } from '../../../components/admin/AdminSearchHelp'
+import { CommitteePublishControl as CommitteePublishControl_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
 import { CommitteeSaveControl as CommitteeSaveControl_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
+import { CommitteeDraftControl as CommitteeDraftControl_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
+import { CommitteeUnpublishControl as CommitteeUnpublishControl_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
 import { CommitteeEditorView as CommitteeEditorView_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
 import { SponsorEditorHeader as SponsorEditorHeader_ee68ebb54eea085f9d8083407db3bdb1 } from '../../../components/admin/SponsorEditor'
 import { SponsorEditorFooter as SponsorEditorFooter_ee68ebb54eea085f9d8083407db3bdb1 } from '../../../components/admin/SponsorEditor'
@@ -68,11 +72,15 @@ export const importMap = {
   "/components/admin/CareerEditor#CareerEditorView": CareerEditorView_57c74453f1f49818c0cb8c1e92524236,
   "/components/admin/DocumentBackLink#CollectionBackLink": CollectionBackLink_b7eb021eac5b101e7ce71970147e89df,
   "/components/admin/ContentPermissionsField#ContentPermissionsField": ContentPermissionsField_d1257e98ee6e87bc3a795e8f49bc774e,
+  "/components/admin/CommitteeStatusCell#CommitteeStatusCell": CommitteeStatusCell_d4990eeb700ec5019d3bae61e18f2a3a,
   "/components/admin/CommitteeEditor#CommitteeEditorHeader": CommitteeEditorHeader_134396005f96c581663d9f2ff7dee8de,
   "/components/admin/EditorSection#EditorSection": EditorSection_671b0a745dc229cca2346e4a81fc980a,
   "/components/admin/CommitteeEditor#CommitteeEditorFooter": CommitteeEditorFooter_134396005f96c581663d9f2ff7dee8de,
   "/components/admin/AdminSearchHelp#AdminSearchHelp": AdminSearchHelp_f2782f10529accf607236d8cfb6a767e,
+  "/components/admin/CommitteeEditor#CommitteePublishControl": CommitteePublishControl_134396005f96c581663d9f2ff7dee8de,
   "/components/admin/CommitteeEditor#CommitteeSaveControl": CommitteeSaveControl_134396005f96c581663d9f2ff7dee8de,
+  "/components/admin/CommitteeEditor#CommitteeDraftControl": CommitteeDraftControl_134396005f96c581663d9f2ff7dee8de,
+  "/components/admin/CommitteeEditor#CommitteeUnpublishControl": CommitteeUnpublishControl_134396005f96c581663d9f2ff7dee8de,
   "/components/admin/CommitteeEditor#CommitteeEditorView": CommitteeEditorView_134396005f96c581663d9f2ff7dee8de,
   "/components/admin/SponsorEditor#SponsorEditorHeader": SponsorEditorHeader_ee68ebb54eea085f9d8083407db3bdb1,
   "/components/admin/SponsorEditor#SponsorEditorFooter": SponsorEditorFooter_ee68ebb54eea085f9d8083407db3bdb1,

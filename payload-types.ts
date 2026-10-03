@@ -415,6 +415,15 @@ export interface Committee {
    * The team responsible for this record. Independent of the public event/job location.
    */
   owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
+  committeePublicationStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   _order?: string | null;
   name: string;
   /**
@@ -707,6 +716,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface CommitteeSelect<T extends boolean = true> {
   owningScope?: T;
+  committeePublicationStatus?: T;
   _order?: T;
   name?: T;
   university?: T;
