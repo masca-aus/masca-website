@@ -95,7 +95,7 @@ export default function AustraliaChapterMap() {
               aria-label={`Open MASCA ${selected.name} on Instagram, @${instagramHandle}`}
             >
               <Camera size={17} aria-hidden="true" />
-              <span>@{instagramHandle}</span>
+              <span>Instagram</span>
               <ArrowUpRight size={16} aria-hidden="true" />
             </a>
           ) : <span className={styles.pendingLink}>Instagram link pending</span>}
