@@ -4,8 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import AustraliaChapterMap from '@/app/(frontend)/_components/AustraliaChapterMap';
 
 // Plain image stub keeps these interaction tests independent of Next's image loader.
-// eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
-vi.mock('next/image', () => ({ default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => <img {...props} /> }));
+// eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text, @typescript-eslint/no-unused-vars
+vi.mock('next/image', () => ({ default: ({ unoptimized: _unoptimized, ...props }: React.ImgHTMLAttributes<HTMLImageElement> & { unoptimized?: boolean }) => <img {...props} /> }));
 let reducedMotion = false;
 let onMotionChange: ((event: { matches: boolean }) => void) | undefined;
 const tick = (ms: number) => act(() => { vi.advanceTimersByTime(ms); });
@@ -30,6 +30,25 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe('homepage map tour', () => {
+  it('crossfades to the loaded state photo on automatic and manual selection', () => {
+    render(<AustraliaChapterMap />);
+    const photo = (code: string) => document.querySelector(`img[data-landmark="${code}"]`)!;
+    fireEvent.load(photo('NSW'));
+    expect(photo('NSW').getAttribute('data-visible')).toBe('true');
+    tick(3000);
+    // Slow images leave the current backdrop intact until ready.
+    expect(photo('NSW').getAttribute('data-visible')).toBe('true');
+    fireEvent.load(photo('QLD'));
+    expect(photo('QLD').getAttribute('data-visible')).toBe('true');
+    expect(photo('NSW').getAttribute('data-visible')).toBe('false');
+    fireEvent.load(photo('TAS'));
+    expect(photo('TAS').getAttribute('data-visible')).toBe('false');
+    fireEvent.click(pin('Tasmania'));
+    tick(9000);
+    expect(photo('TAS').getAttribute('data-visible')).toBe('true');
+    expect(photo('QLD').getAttribute('data-visible')).toBe('false');
+  });
+
   it('advances every three seconds and loops through all seven states', () => {
     render(<AustraliaChapterMap />);
     expect(pin('New South Wales').getAttribute('aria-pressed')).toBe('true');

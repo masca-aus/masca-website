@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ArrowUpRight, Camera, Globe, Pause, Play } from "lucide-react";
 import { STATES } from "@/utils/states";
 import styles from "./AustraliaChapterMap.module.css";
+import { stateLandmarks } from "./stateLandmarks";
 
 // Coordinates are in the source map's 460 × 420 viewBox. Markers indicate
 // each listed capital. CSS anchors the dot (not the label) at this point.
@@ -42,6 +43,13 @@ export default function AustraliaChapterMap() {
   const [isHovered, setIsHovered] = useState(false);
   const [hasFocus, setHasFocus] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
+  const [loadedPhotos, setLoadedPhotos] = useState<string[]>([]);
+  const [backdropCode, setBackdropCode] = useState<string | null>(null);
+
+  // Keep the previous photograph visible until the selected one has loaded.
+  if (backdropCode !== selectedCode && loadedPhotos.includes(selectedCode)) {
+    setBackdropCode(selectedCode);
+  }
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -90,6 +98,23 @@ export default function AustraliaChapterMap() {
       }}
     >
       <div className={styles.mapFrame}>
+        <div className={styles.landmarkBackdrop} aria-hidden="true">
+          {stateLandmarks.map((photo) => (
+            <Image
+              key={photo.code}
+              src={photo.src}
+              alt=""
+              width={960}
+              height={720}
+              unoptimized
+              loading="eager"
+              className={`${styles.landmarkPhoto} ${backdropCode === photo.code ? styles.landmarkVisible : ""}`}
+              data-landmark={photo.code}
+              data-visible={backdropCode === photo.code}
+              onLoad={() => setLoadedPhotos((loaded) => loaded.includes(photo.code) ? loaded : [...loaded, photo.code])}
+            />
+          ))}
+        </div>
         <div className={styles.mapCanvas}>
           <Image
             src="/australia-states.svg"
@@ -169,6 +194,19 @@ export default function AustraliaChapterMap() {
         {isRotating ? <Pause size={12} aria-hidden="true" /> : <Play size={12} aria-hidden="true" />}
         <span>{isRotating ? "Pause tour" : "Resume tour"}</span>
       </button>
+      <details className={styles.photoCredits}>
+        <summary>Photo credits</summary>
+        <ul>
+          {stateLandmarks.map((photo) => (
+            <li key={photo.code}>
+              <a href={photo.source} target="_blank" rel="noopener noreferrer">{photo.name}</a>
+              {` — ${photo.author} · `}
+              <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer">{photo.license}</a>
+            </li>
+          ))}
+        </ul>
+        <p>Via Wikimedia Commons. Resized and converted to WebP; displayed with a faded colour treatment and responsive cropping. Each photograph retains its linked licence.</p>
+      </details>
       <div className={styles.chapterList} aria-label="Choose a state or territory">
         {STATES.map((state) => <button key={state.code} type="button" onClick={() => selectState(state.code)} aria-pressed={selectedCode === state.code}>{state.code}</button>)}
       </div>
