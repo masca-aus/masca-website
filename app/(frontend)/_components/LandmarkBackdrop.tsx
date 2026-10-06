@@ -23,7 +23,8 @@ export default function LandmarkBackdrop({ selectedCode, variant }: { selectedCo
         if (photo.variant !== variant && !loadedPhotos.includes(id)) return null;
         return (
           <picture key={id}>
-            <source media="(max-width: 767px)" srcSet={photo.mobileSrc} />
+            {/* A local blank source prevents hidden photos downloading on mobile. */}
+            <source media="(max-width: 1023px)" srcSet="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" />
             <Image
               src={photo.src}
               alt=""

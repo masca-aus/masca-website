@@ -207,4 +207,5 @@ export const stateLandmarks: readonly StatePhoto[] = [
   }
 ];
 
-export const photoCredits = stateLandmarks.flatMap((photo) => [photo, ...(photo.mobileCredit ? [photo.mobileCredit] : [])]);
+// Only desktop photographs are displayed; portrait assets remain available for future use.
+export const photoCredits = stateLandmarks;

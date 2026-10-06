@@ -191,3 +191,7 @@
   .selectedDetails, .photoCredits[open] .creditContent { animation: none; }
   .photoCredits::details-content { transition: none; }
 }
+
+@media (max-width: 1023px) {
+  .photoCredits { display: none; }
+}
