@@ -1,3 +1,4 @@
+import * as migration_20261006_140000_optional_media_alt from './20261006_140000_optional_media_alt';
 import * as migration_20260802_071222_restructure_committee from './20260802_071222_restructure_committee';
 import * as migration_20260907_142655_add_committee_departments from './20260907_142655_add_committee_departments';
 import * as migration_20260916_010000_add_events_submission_workflow from './20260916_010000_add_events_submission_workflow';
@@ -84,4 +85,5 @@ export const migrations = [
     down: migration_20261003_041100_seed_national_council.down,
     name: '20261003_041100_seed_national_council'
   },
+  { up: migration_20261006_140000_optional_media_alt.up, down: migration_20261006_140000_optional_media_alt.down, name: '20261006_140000_optional_media_alt' },
 ];

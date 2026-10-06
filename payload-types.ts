@@ -370,17 +370,14 @@ export interface Event {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.
+ * Upload images only. Large JPEG and PNG photos are automatically compressed to fit.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
-  /**
-   * Describe the image’s useful content in a short sentence. For a portrait, include the person’s name; for a logo, use the organisation’s name. Avoid filenames or ‘image of’.
-   */
-  alt: string;
+  alt?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -480,7 +477,7 @@ export interface Sponsor {
    */
   date: string;
   /**
-   * Choose an existing logo or upload an image up to 5 MB. A transparent background works best.
+   * Choose an existing logo or upload an image. Large JPEG and PNG images are automatically compressed. A transparent background works best.
    */
   logo: number | Media;
   updatedAt: string;

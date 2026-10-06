@@ -252,7 +252,7 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
       slug: "media",
       admin: {
         useAsTitle: "filename",
-        description: "Upload images only. Large JPEG and PNG photos are automatically compressed to fit. Add useful alt text so everyone can understand the image.",
+        description: "Upload images only. Large JPEG and PNG photos are automatically compressed to fit.",
         components: {
           beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
           edit: {
@@ -270,10 +270,8 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
           name: "alt",
           label: "Alt text",
           type: "text",
-          required: true,
-          admin: {
-            description: "Describe the image’s useful content in a short sentence. For a portrait, include the person’s name; for a logo, use the organisation’s name. Avoid filenames or ‘image of’.",
-          },
+          // Keep existing descriptions; public images use their member, event or sponsor name.
+          admin: { hidden: true },
         },
       ],
       upload: {
