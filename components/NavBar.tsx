@@ -14,9 +14,13 @@ import styles from "./NavBar.module.css";
 const subscribeToScroll = (notify: () => void) => {
   window.addEventListener("scroll", notify, { passive: true });
   window.addEventListener("pageshow", notify);
+  // ScrollTrigger temporarily changes scroll position while measuring the page.
+  // Read again after it restores the final position, even without a scroll event.
+  ScrollTrigger.addEventListener("refresh", notify);
   return () => {
     window.removeEventListener("scroll", notify);
     window.removeEventListener("pageshow", notify);
+    ScrollTrigger.removeEventListener("refresh", notify);
   };
 };
 const hasScrolled = () => window.scrollY >= 60;

@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import NavBar from '@/components/NavBar';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 let pathname = '/';
 vi.mock('next/navigation', () => ({ usePathname: () => pathname }));
 vi.mock('@gsap/react', () => ({ useGSAP: () => {} }));
@@ -10,8 +11,19 @@ vi.mock('next/image', () => ({ default: ({ priority: _priority, ...props }: Reac
 const scrollTo = (y: number) => { vi.stubGlobal('scrollY', y); fireEvent.scroll(window); };
 const transparent = () => screen.getByRole('banner').getAttribute('data-transparent');
 beforeEach(() => { pathname = '/'; vi.stubGlobal('scrollY', 0); });
-afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 describe('homepage navigation appearance', () => {
+  it('resyncs after animation layout measurements restore the scroll position', () => {
+    const subscribe = vi.spyOn(ScrollTrigger, 'addEventListener');
+    render(<NavBar />);
+    scrollTo(200);
+    expect(transparent()).toBe('false');
+    vi.stubGlobal('scrollY', 0);
+    const refresh = subscribe.mock.calls.find(([event]) => event === 'refresh')?.[1];
+    expect(refresh).toBeDefined();
+    act(() => { refresh?.(); });
+    expect(transparent()).toBe('true');
+  });
   it('starts transparent and becomes solid at 60px, then restores at the top', () => {
     render(<NavBar />);
     expect(transparent()).toBe('true');
