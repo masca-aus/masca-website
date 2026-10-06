@@ -12,10 +12,13 @@
   z-index: 2;
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  width: 42px;
+  padding: 0;
   min-width: 42px;
   min-height: 42px;
   border: 0;
+  border-radius: 50%;
   background: transparent;
   color: #fff;
   font-size: 11px;
@@ -24,8 +27,8 @@
   transform: translate(-50%, -50%);
   transition: transform .2s ease;
 }
-.pin:hover, .pin:focus-visible, .pinSelected { z-index: 3; transform: translate(-50%, -50%) scale(1.1); }
-.pin:focus-visible { outline: 2px solid #ffcc00; outline-offset: 2px; border-radius: 20px; }
+.pin:hover, .pin:focus-visible, .pinSelected { z-index: 3; transform: translate(-50%, -50%); }
+.pin:focus-visible { outline: 2px solid #ffcc00; outline-offset: 2px; }
 .pinDot {
   width: 13px;
   height: 13px;
@@ -37,6 +40,9 @@
 }
 .pinSelected .pinDot { background: #ffcc00; box-shadow: 0 0 0 5px rgba(255, 204, 0, .25); }
 .pinLabel {
+  position: absolute;
+  left: calc(50% + 11px);
+  pointer-events: none;
   padding: 4px 7px;
   border-radius: 100px;
   background: #010066;
@@ -78,7 +84,7 @@
 .pendingLink { color: rgba(255, 255, 255, .66); font-size: 11px; }
 @media (max-width: 600px) {
   .mapFrame { padding: 0; }
-  .pin { min-width: 34px; min-height: 34px; }
+  .pin { width: 34px; min-width: 34px; min-height: 34px; }
   .pinLabel { display: none; }
   .selectedCard { min-height: 58px; margin-top: 8px; padding: 10px 0 0; }
   .selectedDetails strong { font-size: 15px; }

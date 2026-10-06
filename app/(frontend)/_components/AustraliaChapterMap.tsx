@@ -7,15 +7,15 @@ import { STATES } from "@/utils/states";
 import styles from "./AustraliaChapterMap.module.css";
 
 // Coordinates are in the source map's 460 × 420 viewBox. Markers indicate
-// the chapter's listed capital, rather than the geographical centre of a state.
+// each listed capital. CSS anchors the dot (not the label) at this point.
 const chapterMarkers = [
-  { code: "WA", x: 74, y: 272 },
-  { code: "SA", x: 299, y: 312 },
-  { code: "VIC", x: 346, y: 345 },
-  { code: "ACT", x: 390, y: 318 },
-  { code: "NSW", x: 420, y: 295 },
-  { code: "QLD", x: 411, y: 219 },
-  { code: "TAS", x: 370, y: 390 },
+  { code: "WA", x: 33, y: 256 },
+  { code: "SA", x: 286, y: 296 },
+  { code: "VIC", x: 350, y: 338 },
+  { code: "ACT", x: 399, y: 301 },
+  { code: "NSW", x: 423, y: 281 },
+  { code: "QLD", x: 443, y: 198 },
+  { code: "TAS", x: 380, y: 405 },
 ] as const;
 
 // Chapter accounts supplied by MASCA or checked against chapter sources.
@@ -24,15 +24,23 @@ const chapterInstagram: Record<string, string> = {
   VIC: "masca_victoria",
   QLD: "masca_qld",
   WA: "masca_westernaustralia",
-  SA: "masca_sa",
-  ACT: "masca_act",
-  TAS: "masca.tasmania",
+  SA: "aumsa_adelaide",
+  ACT: "mso_anu",
+  TAS: "mss.tasmania",
+};
+
+// Single-MSO states link directly to their student organisation.
+const localOrganisations: Record<string, string> = {
+  SA: "AUMSA",
+  ACT: "MSO ACT",
+  TAS: "MSST",
 };
 
 export default function AustraliaChapterMap() {
   const [selectedCode, setSelectedCode] = useState<string>("NSW");
   const selected = STATES.find((state) => state.code === selectedCode) ?? STATES[0];
   const instagramHandle = chapterInstagram[selected.code];
+  const organisation = localOrganisations[selected.code] ?? `MASCA ${selected.name}`;
 
   return (
     <div className={styles.module}>
@@ -55,7 +63,7 @@ export default function AustraliaChapterMap() {
                 type="button"
                 className={`${styles.pin} ${selectedCode === code ? styles.pinSelected : ""}`}
                 style={{ left: `${(x / 460) * 100}%`, top: `${(y / 420) * 100}%` }}
-                aria-label={`Show ${chapter.name} chapter, ${chapter.capital}`}
+                aria-label={`Show ${chapter.name}, ${chapter.capital}`}
                 aria-pressed={selectedCode === code}
                 title={`${chapter.name} · ${chapter.capital}`}
                 onClick={() => setSelectedCode(code)}
@@ -71,7 +79,7 @@ export default function AustraliaChapterMap() {
       <div className={styles.selectedCard} aria-live="polite">
         <div className={styles.selectedDetails}>
           <strong>{selected.name}</strong>
-          <small>{selected.capital}</small>
+          <small>{localOrganisations[selected.code] ? `${organisation} · ` : ""}{selected.capital}</small>
         </div>
         <div className={styles.actions}>
           {selected.code === "NSW" && (
@@ -92,7 +100,7 @@ export default function AustraliaChapterMap() {
               href={`https://www.instagram.com/${instagramHandle}/`}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`Open MASCA ${selected.name} on Instagram, @${instagramHandle}`}
+              aria-label={`Open ${organisation} on Instagram, @${instagramHandle}`}
             >
               <Camera size={17} aria-hidden="true" />
               <span>Instagram</span>
@@ -101,7 +109,7 @@ export default function AustraliaChapterMap() {
           ) : <span className={styles.pendingLink}>Instagram link pending</span>}
         </div>
       </div>
-      <div className={styles.chapterList} aria-label="Choose a chapter">
+      <div className={styles.chapterList} aria-label="Choose a state or territory">
         {STATES.map((state) => <button key={state.code} type="button" onClick={() => setSelectedCode(state.code)} aria-pressed={selectedCode === state.code}>{state.code}</button>)}
       </div>
     </div>
