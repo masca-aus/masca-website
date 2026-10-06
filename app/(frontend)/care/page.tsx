@@ -7,7 +7,7 @@ import CarePathways from "./CarePathways";
 export const metadata: Metadata = pageMetadata({
   title: "Cares",
   description:
-    "A welcoming starting point for student welfare, rights and advocacy across the MASCA community.",
+    "Resources, support and community for Malaysian students settling into life in Australia.",
   path: "/care",
 });
 
@@ -21,13 +21,12 @@ export default function MascaCaresPage() {
 
         <div className="container relative">
           <div className="max-w-4xl">
-            <span className="eyebrow text-yellow-500">welfare &middot; rights &middot; advocacy</span>
+            <span className="eyebrow text-yellow-500">MASCA CARES &middot; WELFARE &middot; SUPPORT &middot; COMMUNITY</span>
             <h1 className="mt-6 text-5xl leading-[0.98] text-white sm:text-6xl lg:text-7xl">
-              You don&apos;t have to figure it out{" "}
-              <span className="font-accent font-normal text-yellow-500">alone.</span>
+              Life in Australia, made a little <span className="font-accent font-normal text-yellow-500">easier.</span>
             </h1>
             <p className="mt-8 max-w-2xl text-lg leading-relaxed text-blue-100 md:text-xl">
-              Start with what feels closest to your situation. We&apos;ll help you find a clear next step.
+              From wellbeing and finances to academics and settling into life in Australia, find the resources, support and contacts you need &mdash; with your Malaysian student community behind you.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
               <Button href="#choose-a-path" variant="accent">

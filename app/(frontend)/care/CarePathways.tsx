@@ -102,12 +102,6 @@ const communityLinks = [
   },
 ] as const;
 
-const advocacySteps = [
-  ["01", "Listen", "Students share what they are experiencing."],
-  ["02", "Represent", "MASCA turns recurring needs into a clear position."],
-  ["03", "Act", "Progress and outcomes come back to the community."],
-] as const;
-
 export default function CarePathways() {
   const [active, setActive] = useState<PathwayKey>("wellbeing");
   const [state, setState] = useState("VIC");
@@ -261,28 +255,6 @@ export default function CarePathways() {
         </div>
       </section>
 
-      <section className="container section-pad">
-        <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
-          <div className="lg:sticky lg:top-32">
-            <span className="eyebrow text-red-600">from listening to action</span>
-            <h2 className="mt-4 max-w-xl text-blue-600">Make advocacy feel visible.</h2>
-            <p className="mt-5 max-w-xl text-gray-700">
-              Follow how student experiences become a shared position and lead to action.
-            </p>
-          </div>
-
-          <ol className="relative border-l-2 border-blue-100 pl-7 md:pl-10">
-            {advocacySteps.map(([number, title, description], index) => (
-              <li key={title} className={`${index < 2 ? "pb-10" : ""} relative`}>
-                <span className="absolute -left-[2.35rem] top-1 h-4 w-4 rounded-full border-4 border-white bg-red-600 md:-left-[3.1rem]" />
-                <span className="eyebrow text-red-600">{number}</span>
-                <h3 className="mt-2 font-secondary text-3xl font-bold text-blue-600">{title}</h3>
-                <p className="mt-3 text-gray-700">{description}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
     </>
   );
 }
