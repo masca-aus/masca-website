@@ -17,6 +17,15 @@ const transparent = () => screen.getByRole('banner').getAttribute('data-transpar
 beforeEach(() => { pathname = '/'; vi.stubGlobal('scrollY', 0); frames = new Map(); vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { frames.set(++frameId, callback); return frameId; }); vi.stubGlobal('cancelAnimationFrame', (id: number) => frames.delete(id)); });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 describe('homepage navigation appearance', () => {
+  it('recognises the deployed /index homepage alias on direct loads', () => {
+    pathname = '/index';
+    renderNav();
+    expect(transparent()).toBe('true');
+    scrollTo(100);
+    expect(transparent()).toBe('false');
+    scrollTo(0);
+    expect(transparent()).toBe('true');
+  });
   it('ignores temporary scroll values used during layout measurement', () => {
     const subscribe = vi.spyOn(ScrollTrigger, 'addEventListener');
     renderNav();

@@ -161,7 +161,9 @@ export default function NavBar() {
       ScrollTrigger.removeEventListener("refresh", scheduleScrollRead);
     };
   }, [pathname])
-  const transparent = pathname === "/" && !scrolled && !open
+  // Direct homepage loads may use Next's /index alias before client navigation.
+  const isHomepage = pathname === "/" || pathname === "/index"
+  const transparent = isHomepage && !scrolled && !open
   const isActive: IsActive = (href) => href === "/" ? pathname === "/" : pathname.startsWith(href)
   const [prevPathname, setPrevPathname] = useState(pathname)
   if (pathname !== prevPathname) {
@@ -219,7 +221,7 @@ export default function NavBar() {
   }, { scope: headerRef })
 
   return (
-    <header ref={headerRef} data-nav-path={pathname} data-nav-scrolled={scrolled} data-nav-open={open} data-transparent={transparent} className={`${styles.header} fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] items-center py-2 md:py-4 px-6 md:px-16 bg-white backface-hidden will-change-transform`}>
+    <header ref={headerRef} data-transparent={transparent} className={`${styles.header} fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] items-center py-2 md:py-4 px-6 md:px-16 bg-white backface-hidden will-change-transform`}>
       <Logo />
       <MenuToggle open={open} onToggle={() => setOpen((v) => !v)} />
       <DesktopNav isActive={isActive} />
