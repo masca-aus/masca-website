@@ -19,7 +19,7 @@ export default function MascaCaresPage() {
         <div className="pointer-events-none absolute -right-12 top-20 h-64 w-64 rounded-full border border-yellow-500/25" />
         <div className="pointer-events-none absolute -bottom-44 -left-24 h-96 w-96 rounded-full bg-blue-500/35 blur-3xl" />
 
-        <div className="container relative grid items-end gap-14 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.65fr)]">
+        <div className="container relative">
           <div className="max-w-4xl">
             <span className="eyebrow text-yellow-500">welfare &middot; rights &middot; advocacy</span>
             <h1 className="mt-6 text-5xl leading-[0.98] text-white sm:text-6xl lg:text-7xl">
@@ -38,19 +38,6 @@ export default function MascaCaresPage() {
               </Button>
             </div>
           </div>
-
-          <aside className="rounded-xl border border-white/15 bg-white/10 p-6 backdrop-blur-sm md:p-8">
-            <span className="eyebrow text-yellow-500">need help now?</span>
-            <p className="mt-4 font-secondary text-2xl font-semibold leading-snug text-white">
-              If something feels urgent, start here and we&apos;ll point you toward immediate help.
-            </p>
-            <a
-              href="#quick-support"
-              className="mt-6 inline-flex min-h-11 items-center gap-2 font-bold text-white underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-yellow-500"
-            >
-              View immediate help <span aria-hidden>&darr;</span>
-            </a>
-          </aside>
         </div>
       </section>
 

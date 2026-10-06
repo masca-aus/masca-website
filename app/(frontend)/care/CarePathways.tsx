@@ -6,22 +6,23 @@ import {
   BriefcaseBusiness,
   HeartHandshake,
   Home,
+  GraduationCap,
   MapPin,
-  Megaphone,
   Scale,
   ShieldCheck,
   Sparkles,
+  WalletCards,
 } from "lucide-react";
 
-type PathwayKey = "support" | "rights" | "advocacy";
+type PathwayKey = "wellbeing" | "finance" | "academic" | "settling";
 
 const pathways = [
   {
-    key: "support" as const,
-    eyebrow: "I need a hand",
-    title: "Get support",
-    description: "A calm route from what is happening now to the right kind of help.",
-    icon: HeartHandshake,
+    key: "wellbeing" as const,
+    eyebrow: "Start here",
+    title: "Wellbeing",
+    description: "Make space for your wellbeing and find a supportive next step.",
+    icon: Sparkles,
     accent: "bg-red-600",
     soft: "bg-red-50",
     text: "text-red-600",
@@ -32,33 +33,48 @@ const pathways = [
     ],
   },
   {
-    key: "rights" as const,
-    eyebrow: "I need clarity",
-    title: "Know your rights",
-    description: "Turn a complicated situation into clear, practical choices.",
-    icon: Scale,
+    key: "finance" as const,
+    eyebrow: "Plan ahead",
+    title: "Finance",
+    description: "Get a clearer view of costs, options, and practical support.",
+    icon: WalletCards,
     accent: "bg-yellow-500",
     soft: "bg-yellow-50",
     text: "text-yellow-800",
     items: [
-      { title: "Study and visa", detail: "Understand where to begin", icon: ShieldCheck },
-      { title: "Workplace", detail: "Recognise your options", icon: BriefcaseBusiness },
-      { title: "Safety", detail: "Find the right support route", icon: HeartHandshake },
+      { title: "Budgeting", detail: "Make your money go further", icon: WalletCards },
+      { title: "Work and income", detail: "Explore practical options", icon: BriefcaseBusiness },
+      { title: "Financial support", detail: "Find a place to begin", icon: ShieldCheck },
     ],
   },
   {
-    key: "advocacy" as const,
-    eyebrow: "I want change",
-    title: "Advocacy",
-    description: "See how student experiences become a stronger collective voice.",
-    icon: Megaphone,
+    key: "academic" as const,
+    eyebrow: "Keep moving",
+    title: "Academic",
+    description: "Find support that helps you stay connected to your study goals.",
+    icon: GraduationCap,
     accent: "bg-blue-600",
     soft: "bg-blue-50",
     text: "text-blue-600",
     items: [
-      { title: "Current priorities", detail: "What MASCA is working on", icon: Megaphone },
-      { title: "Share your voice", detail: "Add your lived experience", icon: HeartHandshake },
-      { title: "Progress and outcomes", detail: "Follow what happens next", icon: ArrowRight },
+      { title: "Study support", detail: "Get back into your rhythm", icon: GraduationCap },
+      { title: "Your options", detail: "Understand the next step", icon: Scale },
+      { title: "Campus connection", detail: "Find help close to you", icon: MapPin },
+    ],
+  },
+  {
+    key: "settling" as const,
+    eyebrow: "Find your footing",
+    title: "Settling in",
+    description: "Build confidence in your new place, community, and daily life.",
+    icon: Home,
+    accent: "bg-red-600",
+    soft: "bg-red-50",
+    text: "text-red-600",
+    items: [
+      { title: "Accommodation", detail: "Find a safer next step", icon: Home },
+      { title: "Local support", detail: "Connect with your state", icon: MapPin },
+      { title: "Community", detail: "Meet people who understand", icon: HeartHandshake },
     ],
   },
 ] as const;
@@ -72,7 +88,7 @@ const advocacySteps = [
 ] as const;
 
 export default function CarePathways() {
-  const [active, setActive] = useState<PathwayKey>("support");
+  const [active, setActive] = useState<PathwayKey>("wellbeing");
   const [state, setState] = useState("VIC");
   const selected = pathways.find((pathway) => pathway.key === active) ?? pathways[0];
 
@@ -87,7 +103,7 @@ export default function CarePathways() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-5 lg:grid-cols-3" aria-label="Care pathways">
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-4" aria-label="Care pathways">
           {pathways.map((pathway) => {
             const Icon = pathway.icon;
             const isActive = pathway.key === active;
