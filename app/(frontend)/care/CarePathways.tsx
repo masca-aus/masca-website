@@ -15,6 +15,7 @@ import {
   Sparkles,
   WalletCards,
 } from "lucide-react";
+import { STATES } from "@/utils/states";
 
 type PathwayKey = "wellbeing" | "finance" | "academic" | "settling";
 
@@ -23,11 +24,16 @@ const pathways = [
     key: "wellbeing" as const,
     eyebrow: "Start here",
     title: "Wellbeing",
+    emphasis: undefined,
     description: "Make space for your wellbeing and find a supportive next step.",
     icon: Sparkles,
-    accent: "bg-red-600",
-    soft: "bg-red-50",
-    text: "text-red-600",
+    accent: "bg-blue-600",
+    soft: "bg-blue-50",
+    text: "text-blue-600",
+    activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2",
+    activeIcon: "bg-yellow-500 text-blue-900",
+    activeEyebrow: "text-yellow-500",
+    activeDescription: "text-blue-100",
     items: [
       { title: "Wellbeing", detail: "Start with how you are feeling", icon: Sparkles },
       { title: "Accommodation", detail: "Find a safer next step", icon: Home },
@@ -38,11 +44,16 @@ const pathways = [
     key: "finance" as const,
     eyebrow: "Plan ahead",
     title: "Finance",
+    emphasis: undefined,
     description: "Get a clearer view of costs, options, and practical support.",
     icon: WalletCards,
-    accent: "bg-yellow-500",
-    soft: "bg-yellow-50",
-    text: "text-yellow-800",
+    accent: "bg-red-600",
+    soft: "bg-red-50",
+    text: "text-red-600",
+    activeCard: "border-red-600 bg-red-600 text-white shadow-brand lg:-translate-y-2",
+    activeIcon: "bg-yellow-500 text-blue-900",
+    activeEyebrow: "text-yellow-300",
+    activeDescription: "text-red-100",
     items: [
       { title: "Budgeting", detail: "Make your money go further", icon: WalletCards },
       { title: "Work and income", detail: "Explore practical options", icon: BriefcaseBusiness },
@@ -53,11 +64,16 @@ const pathways = [
     key: "academic" as const,
     eyebrow: "Keep moving",
     title: "Academic",
+    emphasis: undefined,
     description: "Find support that helps you stay connected to your study goals.",
     icon: GraduationCap,
-    accent: "bg-blue-600",
-    soft: "bg-blue-50",
-    text: "text-blue-600",
+    accent: "bg-yellow-500",
+    soft: "bg-yellow-50",
+    text: "text-yellow-800",
+    activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2",
+    activeIcon: "bg-blue-600 text-white",
+    activeEyebrow: "text-blue-800",
+    activeDescription: "text-blue-900",
     items: [
       { title: "Study support", detail: "Get back into your rhythm", icon: GraduationCap },
       { title: "Your options", detail: "Understand the next step", icon: Scale },
@@ -68,11 +84,16 @@ const pathways = [
     key: "settling" as const,
     eyebrow: "Find your footing",
     title: "Settling in",
-    description: "Build confidence in your new place, community, and daily life.",
+    emphasis: "Just landed in Australia?",
+    description: "Get the essentials you need to settle in, find your feet, and survive those first few weeks away from home.",
     icon: Home,
-    accent: "bg-red-600",
-    soft: "bg-red-50",
-    text: "text-red-600",
+    accent: "bg-blue-600",
+    soft: "bg-blue-50",
+    text: "text-blue-600",
+    activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2",
+    activeIcon: "bg-yellow-500 text-blue-900",
+    activeEyebrow: "text-yellow-500",
+    activeDescription: "text-blue-100",
     items: [
       { title: "Accommodation", detail: "Find a safer next step", icon: Home },
       { title: "Local support", detail: "Connect with your state", icon: MapPin },
@@ -81,7 +102,7 @@ const pathways = [
   },
 ] as const;
 
-const states = ["VIC", "NSW", "QLD", "WA", "SA", "ACT", "TAS"];
+const states = STATES.filter((state) => state.code !== "NZ");
 
 const communityLinks = [
   {
@@ -130,19 +151,21 @@ export default function CarePathways() {
                 onClick={() => setActive(pathway.key)}
                 className={`group min-h-72 rounded-xl border-2 p-7 text-left transition duration-200 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-yellow-500 md:p-8 ${
                   isActive
-                    ? "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2"
+                    ? pathway.activeCard
                     : "border-blue-100 bg-white text-blue-600 shadow-sm hover:-translate-y-1 hover:border-blue-600 hover:shadow-lg"
                 }`}
               >
-                <span className={`flex h-12 w-12 items-center justify-center rounded-lg ${isActive ? "bg-yellow-500 text-blue-900" : pathway.soft + " " + pathway.text}`}>
+                <span className={`flex h-12 w-12 items-center justify-center rounded-lg ${isActive ? pathway.activeIcon : pathway.soft + " " + pathway.text}`}>
                   <Icon size={24} strokeWidth={2} aria-hidden="true" />
                 </span>
-                <span className={`eyebrow mt-8 block ${isActive ? "text-yellow-500" : pathway.text}`}>
+                <span className={`eyebrow mt-8 block ${isActive ? pathway.activeEyebrow : pathway.text}`}>
                   {pathway.eyebrow}
                 </span>
                 <span className="mt-3 block font-secondary text-3xl font-bold leading-tight">{pathway.title}</span>
-                <span className={`mt-4 block leading-relaxed ${isActive ? "text-blue-100" : "text-gray-700"}`}>
-                  {pathway.description}
+                <span className={`mt-4 block leading-relaxed ${isActive ? pathway.activeDescription : "text-gray-700"}`}>
+                  {pathway.emphasis ? (
+                    <><strong>{pathway.emphasis}</strong>{" "}{pathway.description}</>
+                  ) : pathway.description}
                 </span>
                 <span className="mt-7 inline-flex items-center gap-2 text-sm font-bold">
                   Explore this path <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />
@@ -196,7 +219,7 @@ export default function CarePathways() {
             <span className="eyebrow text-red-600">get connected with your state counterparts</span>
             <h2 className="mt-4 max-w-xl text-blue-600">Find your state. Find your people.</h2>
             <p className="mt-5 max-w-xl text-gray-700">
-              Connect national guidance with people who understand your local student community.
+              Looking for support closer to home? Connect with your state counterparts for local events, updates, resources and a community of Malaysians who know the area.
             </p>
           </div>
 
@@ -204,15 +227,16 @@ export default function CarePathways() {
             <div className="flex flex-wrap gap-2" aria-label="Choose a state or territory">
               {states.map((item) => (
                 <button
-                  key={item}
+                  key={item.code}
                   type="button"
-                  aria-pressed={state === item}
-                  onClick={() => setState(item)}
-                  className={`min-h-11 rounded-lg px-4 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
-                    state === item ? "bg-blue-600 text-white" : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                  aria-pressed={state === item.code}
+                  onClick={() => setState(item.code)}
+                  style={{ backgroundColor: item.bg, color: item.fg }}
+                  className={`min-h-11 rounded-lg px-4 text-sm font-bold transition hover:-translate-y-0.5 hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
+                    state === item.code ? "ring-2 ring-blue-900 ring-offset-2" : "opacity-85 hover:opacity-100"
                   }`}
                 >
-                  {item}
+                  {item.code}
                 </button>
               ))}
             </div>
