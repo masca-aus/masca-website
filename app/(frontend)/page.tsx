@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import { SITE_NAME_FULL, SITE_DESCRIPTION } from "@/utils/seo";
 import HeroSection from "./sections/hero";
@@ -15,6 +15,13 @@ import { getSponsors } from "@/utils/sponsors";
 
 // Refresh time-based event expiry between editor-triggered revalidations.
 export const revalidate = 60;
+
+// Let Safari render the page beneath its floating browser controls.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: { absolute: SITE_NAME_FULL },
