@@ -53,7 +53,7 @@ describe('homepage map tour', () => {
   it('places the photographs across the hero outside the map controls', () => {
     const { container } = renderLoadedHero();
     const photo = container.querySelector('img[data-landmark]')!;
-    expect(photo.parentElement?.parentElement?.tagName).toBe('SECTION');
+    expect(photo.closest('[data-homepage-hero]')?.tagName).toBe('SECTION');
   });
   it('crossfades to the loaded state photo on automatic and manual selection', () => {
     renderLoadedHero();
@@ -72,6 +72,24 @@ describe('homepage map tour', () => {
     tick(9000);
     expect(photo('TAS').getAttribute('data-visible')).toBe('true');
     expect(photo('QLD').getAttribute('data-visible')).toBe('false');
+  });
+
+  it('alternates landmarks and universities on successive laps and holds a manual choice', () => {
+    renderLoadedHero();
+    for (let i = 0; i < 7; i++) tick(3000);
+    const university = document.querySelector('img[data-photo="NSW-university"]');
+    expect(university).not.toBeNull();
+    fireEvent.load(university!);
+    expect(university!.getAttribute('data-visible')).toBe('true');
+    fireEvent.click(pin('New South Wales'));
+    tick(30000);
+    expect(university!.getAttribute('data-visible')).toBe('true');
+    fireEvent.click(screen.getByRole('button', { name: 'Resume automatic state rotation' }));
+    for (let i = 0; i < 7; i++) tick(3000);
+    const landmark = document.querySelector('img[data-photo="NSW-landmark"]')!;
+    fireEvent.load(landmark);
+    expect(landmark.getAttribute('data-visible')).toBe('true');
+    expect(university!.getAttribute('data-visible')).toBe('false');
   });
 
   it('advances every three seconds and loops through all seven states', () => {

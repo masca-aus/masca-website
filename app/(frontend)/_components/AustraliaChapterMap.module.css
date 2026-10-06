@@ -13,7 +13,7 @@
 @keyframes entranceFade { from { opacity: 0; } to { opacity: 1; } }
 /* Keyboard focus makes controls immediately visible during the entrance. */
 .module[data-ready=true]:focus-within,
-.module[data-ready=true]:focus-within * { opacity: 1 !important; }
+.module[data-ready=true]:focus-within *:not(.creditContent) { opacity: 1 !important; }
 .mapFrame { position: relative; padding: 6px; isolation: isolate; }
 .mapCanvas { position: relative; width: 100%; aspect-ratio: 460 / 420; }
 .mapImage {
@@ -132,7 +132,14 @@
 .rotationToggle:hover { color: #ffcc00; }
 .rotationToggle:focus-visible { outline: 2px solid #ffcc00; outline-offset: 2px; }
 .photoCredits { color: rgba(255, 255, 255, .7); font-size: 10px; line-height: 1.6; }
-.photoCredits summary { width: fit-content; cursor: pointer; }
+.photoCredits summary { display: flex; align-items: center; gap: 6px; width: fit-content; min-height: 28px; cursor: pointer; list-style: none; transition: color .3s ease; }
+.photoCredits summary::-webkit-details-marker { display: none; }
+.photoCredits summary::before { content: ""; width: 5px; height: 5px; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; transform: rotate(-45deg); transition: transform .3s ease; }
+.photoCredits[open] summary::before { transform: rotate(45deg); }
+.photoCredits summary:hover, .photoCredits[open] summary { color: #ffdc55; }
+.photoCredits[open] .creditContent { animation: creditsReveal .35s ease both; }
+.creditContent { max-height: 240px; overflow-y: auto; padding-right: 8px; scrollbar-width: thin; }
+@keyframes creditsReveal { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
 .photoCredits summary:focus-visible, .photoCredits a:focus-visible { outline: 2px solid #ffcc00; outline-offset: 3px; }
 .photoCredits ul { margin: 8px 0; padding-left: 16px; }
 .photoCredits a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
@@ -165,6 +172,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .module[data-ready=true], .module[data-ready=true] * { animation: none; opacity: 1; }
-  .pin, .pinLabel, .activeMarker { transition: none; }
-  .selectedDetails { animation: none; }
+  .pin, .pinLabel, .activeMarker, .photoCredits summary, .photoCredits summary::before { transition: none; }
+  .selectedDetails, .photoCredits[open] .creditContent { animation: none; }
 }

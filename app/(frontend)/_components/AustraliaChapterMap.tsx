@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ArrowUpRight, Camera, Globe, Pause, Play } from "lucide-react";
 import { STATES } from "@/utils/states";
 import styles from "./AustraliaChapterMap.module.css";
-import { stateLandmarks } from "./stateLandmarks";
+import { photoCredits } from "./stateLandmarks";
 
 // Coordinates are in the source map's 460 × 420 viewBox. Markers indicate
 // each listed capital. CSS anchors the dot (not the label) at this point.
@@ -37,7 +37,7 @@ const localOrganisations: Record<string, string> = {
   TAS: "MSST",
 };
 
-export default function AustraliaChapterMap({ selectedCode, onSelectedCodeChange }: { selectedCode: string; onSelectedCodeChange: (code: string) => void }) {
+export default function AustraliaChapterMap({ selectedCode, onSelectedCodeChange }: { selectedCode: string; onSelectedCodeChange: (code: string, automatic?: boolean) => void }) {
   const [isMapReady, setIsMapReady] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
   const [isRotating, setIsRotating] = useState(true);
@@ -70,7 +70,7 @@ export default function AustraliaChapterMap({ selectedCode, onSelectedCodeChange
     if (!hasEntered || !isRotating || isHovered || hasFocus || !isPageVisible) return;
     const timer = window.setTimeout(() => {
       const currentIndex = chapterMarkers.findIndex(({ code }) => code === selectedCode);
-      onSelectedCodeChange(chapterMarkers[(currentIndex + 1) % chapterMarkers.length].code);
+      onSelectedCodeChange(chapterMarkers[(currentIndex + 1) % chapterMarkers.length].code, true);
     }, 3000);
     return () => window.clearTimeout(timer);
   }, [selectedCode, hasEntered, isRotating, isHovered, hasFocus, isPageVisible, onSelectedCodeChange]);
@@ -182,9 +182,10 @@ export default function AustraliaChapterMap({ selectedCode, onSelectedCodeChange
       </button>
       <details className={styles.photoCredits}>
         <summary>Photo credits</summary>
+        <div className={styles.creditContent}>
         <ul>
-          {stateLandmarks.map((photo) => (
-            <li key={photo.code}>
+          {photoCredits.map((photo) => (
+            <li key={photo.source}>
               <a href={photo.source} target="_blank" rel="noopener noreferrer">{photo.name}</a>
               {` — ${photo.author} · `}
               <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer">{photo.license}</a>
@@ -192,6 +193,7 @@ export default function AustraliaChapterMap({ selectedCode, onSelectedCodeChange
           ))}
         </ul>
         <p>Via Wikimedia Commons. Resized and converted to WebP; displayed with a faded colour treatment and responsive cropping. Each photograph retains its linked licence.</p>
+        </div>
       </details>
       <div className={styles.chapterList} aria-label="Choose a state or territory">
         {STATES.map((state) => <button key={state.code} type="button" onClick={() => selectState(state.code)} aria-pressed={selectedCode === state.code}>{state.code}</button>)}
