@@ -4,17 +4,20 @@
   --nav-transition: .6s cubic-bezier(.4, 0, .2, 1);
   transition: background-color var(--nav-transition), box-shadow var(--nav-transition);
 }
-.header[data-transparent=true] { background-color: transparent; box-shadow: none; }
 .brandTitle, .brandSubtitle, .desktopNav a, .menuToggle { transition: color var(--nav-transition); }
 .brandMark { filter: brightness(1) invert(0); transition: filter var(--nav-transition); }
-.header[data-transparent=true] .brandMark { filter: brightness(0) invert(1); }
-.header[data-transparent=true] .brandTitle,
-.header[data-transparent=true] .desktopNav a,
-.header[data-transparent=true] .menuToggle { color: #fff; }
-.header[data-transparent=true] .brandSubtitle { color: rgba(255, 255, 255, .8); }
-.header[data-transparent=true] .menuToggle:hover { background: rgba(255, 255, 255, .12); }
-.header[data-transparent=true] a:focus-visible,
-.header[data-transparent=true] button:focus-visible { outline-color: #ffcc00; }
+/* Keep the compact navigation white; only desktop overlays the hero. */
+@media (min-width: 1024px) {
+  .header[data-transparent=true] { background-color: transparent; box-shadow: none; }
+  .header[data-transparent=true] .brandMark { filter: brightness(0) invert(1); }
+  .header[data-transparent=true] .brandTitle,
+  .header[data-transparent=true] .desktopNav a,
+  .header[data-transparent=true] .menuToggle { color: #fff; }
+  .header[data-transparent=true] .brandSubtitle { color: rgba(255, 255, 255, .8); }
+  .header[data-transparent=true] .menuToggle:hover { background: rgba(255, 255, 255, .12); }
+  .header[data-transparent=true] a:focus-visible,
+  .header[data-transparent=true] button:focus-visible { outline-color: #ffcc00; }
+}
 @media (prefers-reduced-motion: reduce) {
   .header, .brandTitle, .brandSubtitle, .brandMark, .desktopNav a, .menuToggle { transition: none; }
 }
