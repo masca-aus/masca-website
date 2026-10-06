@@ -219,7 +219,7 @@ export default function NavBar() {
   }, { scope: headerRef })
 
   return (
-    <header ref={headerRef} data-transparent={transparent} className={`${styles.header} fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] items-center py-2 md:py-4 px-6 md:px-16 bg-white backface-hidden will-change-transform`}>
+    <header ref={headerRef} data-nav-path={pathname} data-nav-scrolled={scrolled} data-nav-open={open} data-transparent={transparent} className={`${styles.header} fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] items-center py-2 md:py-4 px-6 md:px-16 bg-white backface-hidden will-change-transform`}>
       <Logo />
       <MenuToggle open={open} onToggle={() => setOpen((v) => !v)} />
       <DesktopNav isActive={isActive} />
