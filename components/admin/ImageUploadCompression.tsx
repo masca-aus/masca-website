@@ -13,7 +13,7 @@ export function ImageUploadCompression({ children }: { children?: ReactNode }) {
     const intercept = (event: Event) => {
       if (replayed.has(event)) return;
       const target = event.target;
-      if (!(target instanceof Element)) return;
+      if (!(target instanceof Element) || target.closest('[data-masca-inline-upload]')) return;
       const input = target instanceof HTMLInputElement && target.type === 'file' ? target : null;
       const zone = target.closest('.dropzone');
       const transfer = event.type === 'drop' ? (event as DragEvent).dataTransfer : event.type === 'paste' ? (event as ClipboardEvent).clipboardData : null;
