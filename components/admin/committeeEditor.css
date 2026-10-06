@@ -23,3 +23,22 @@ html[data-theme="dark"] .masca-committee-editor .masca-wizard-footer .btn--style
 html[data-theme="dark"] .masca-committee-editor .masca-wizard-footer .btn--style-primary:hover { background: #383694; }
 
 .masca-committee-editor .masca-wizard-progress > span { background: #9bdd9b; }
+
+/* Payload's UnpublishButton is a popup-list item; normalize it for this footer. */
+.masca-committee-editor .masca-committee-footer-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: .75rem; }
+.masca-committee-editor .masca-committee-publication-actions { display: contents; }
+.masca-committee-editor .masca-committee-unpublish { display: flex; min-width: 0; padding: 0; margin: 0; border: 0; }
+.masca-committee-editor .masca-committee-footer-actions > button,
+.masca-committee-editor .masca-committee-footer-actions .btn,
+.masca-committee-editor .masca-committee-unpublish > button { box-sizing: border-box; margin: 0; min-height: 44px; padding: .75rem 1rem; line-height: 1.25; border-radius: 8px; white-space: nowrap; }
+.masca-committee-editor .masca-committee-unpublish > button { display: inline-flex; justify-content: center; align-items: center; width: auto; font: inherit; font-weight: 500; color: var(--theme-error-650, #a32222); background: transparent; border: 1px solid var(--theme-elevation-250); cursor: pointer; }
+.masca-committee-editor .masca-committee-unpublish > button:hover { background: var(--theme-error-50, #fff1f0); border-color: var(--theme-error-300, #e7a6a0); }
+.masca-committee-editor .masca-committee-unpublish > button:focus-visible { outline: 3px solid #b38f00; outline-offset: 3px; }
+.masca-committee-editor .masca-committee-unpublish:disabled > button { opacity: .5; cursor: not-allowed; }
+@media (max-width: 600px) {
+  .masca-committee-editor .masca-committee-footer-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .masca-committee-editor .masca-committee-footer-actions .btn,
+  .masca-committee-editor .masca-committee-footer-actions > button,
+  .masca-committee-editor .masca-committee-unpublish,
+  .masca-committee-editor .masca-committee-unpublish > button { width: 100%; white-space: normal; height: 100%; }
+}
