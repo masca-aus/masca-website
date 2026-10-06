@@ -6,25 +6,10 @@ import { usePathname } from "next/navigation"
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Button from "./Button";
 import styles from "./NavBar.module.css";
-
-const subscribeToScroll = (notify: () => void) => {
-  window.addEventListener("scroll", notify, { passive: true });
-  window.addEventListener("pageshow", notify);
-  // ScrollTrigger temporarily changes scroll position while measuring the page.
-  // Read again after it restores the final position, even without a scroll event.
-  ScrollTrigger.addEventListener("refresh", notify);
-  return () => {
-    window.removeEventListener("scroll", notify);
-    window.removeEventListener("pageshow", notify);
-    ScrollTrigger.removeEventListener("refresh", notify);
-  };
-};
-const hasScrolled = () => window.scrollY >= 60;
-const initialScroll = () => false;
 
 const navLinks = [
   // { name: "Home", href: "/"},
@@ -152,7 +137,30 @@ export default function NavBar() {
   const headerRef = useRef<HTMLElement>(null)
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
-  const scrolled = useSyncExternalStore(subscribeToScroll, hasScrolled, initialScroll)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    let frame: number | null = null;
+    const scheduleScrollRead = () => {
+      if (frame !== null) return;
+      // GSAP can temporarily scroll while measuring and restore it after refresh
+      // listeners run. Read once on the next frame, never during that measurement.
+      frame = window.requestAnimationFrame(() => {
+        frame = null;
+        setScrolled(window.scrollY >= 60);
+      });
+    };
+    window.addEventListener("scroll", scheduleScrollRead, { passive: true });
+    window.addEventListener("pageshow", scheduleScrollRead);
+    ScrollTrigger.addEventListener("refresh", scheduleScrollRead);
+    scheduleScrollRead();
+    return () => {
+      if (frame !== null) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", scheduleScrollRead);
+      window.removeEventListener("pageshow", scheduleScrollRead);
+      ScrollTrigger.removeEventListener("refresh", scheduleScrollRead);
+    };
+  }, [pathname])
   const transparent = pathname === "/" && !scrolled && !open
   const isActive: IsActive = (href) => href === "/" ? pathname === "/" : pathname.startsWith(href)
   const [prevPathname, setPrevPathname] = useState(pathname)
