@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import AustraliaChapterMap from '@/app/(frontend)/_components/AustraliaChapterMap';
+import HeroSection from '@/app/(frontend)/sections/hero';
+vi.mock('@gsap/react', () => ({ useGSAP: () => {} }));
 
 // Plain image stub keeps these interaction tests independent of Next's image loader.
 // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text, @typescript-eslint/no-unused-vars
@@ -30,8 +31,13 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe('homepage map tour', () => {
+  it('places the photographs across the hero outside the map controls', () => {
+    const { container } = render(<HeroSection />);
+    const photo = container.querySelector('img[data-landmark]')!;
+    expect(photo.parentElement?.parentElement?.tagName).toBe('SECTION');
+  });
   it('crossfades to the loaded state photo on automatic and manual selection', () => {
-    render(<AustraliaChapterMap />);
+    render(<HeroSection />);
     const photo = (code: string) => document.querySelector(`img[data-landmark="${code}"]`)!;
     fireEvent.load(photo('NSW'));
     expect(photo('NSW').getAttribute('data-visible')).toBe('true');
@@ -50,7 +56,7 @@ describe('homepage map tour', () => {
   });
 
   it('advances every three seconds and loops through all seven states', () => {
-    render(<AustraliaChapterMap />);
+    render(<HeroSection />);
     expect(pin('New South Wales').getAttribute('aria-pressed')).toBe('true');
     tick(2999);
     expect(pin('New South Wales').getAttribute('aria-pressed')).toBe('true');
@@ -66,7 +72,7 @@ describe('homepage map tour', () => {
   });
 
   it.each(['pin', 'list'])('keeps a manually selected state until the tour is explicitly resumed (%s)', (control) => {
-    render(<AustraliaChapterMap />);
+    render(<HeroSection />);
     fireEvent.click(control === 'pin' ? pin('Tasmania') : screen.getByRole('button', { name: 'TAS' }));
     tick(30000);
     expect(pin('Tasmania').getAttribute('aria-pressed')).toBe('true');
@@ -79,7 +85,7 @@ describe('homepage map tour', () => {
   });
 
   it('pauses while hovered or keyboard focused so links cannot change during interaction', () => {
-    render(<AustraliaChapterMap />);
+    render(<HeroSection />);
     const map = screen.getByRole('button', { name: 'Pause automatic state rotation' }).parentElement!;
     fireEvent.pointerEnter(map, { pointerType: 'mouse' });
     tick(9000);
@@ -95,7 +101,7 @@ describe('homepage map tour', () => {
 
   it('starts stationary for reduced motion and stops if that preference changes', () => {
     reducedMotion = true;
-    render(<AustraliaChapterMap />);
+    render(<HeroSection />);
     tick(9000);
     expect(pin('New South Wales').getAttribute('aria-pressed')).toBe('true');
     const resume = screen.getByRole('button', { name: 'Resume automatic state rotation' });
@@ -109,7 +115,7 @@ describe('homepage map tour', () => {
   });
 
   it('does not leave the tour hover-paused after a touch interaction', () => {
-    render(<AustraliaChapterMap />);
+    render(<HeroSection />);
     const toggle = screen.getByRole('button', { name: 'Pause automatic state rotation' });
     fireEvent.pointerEnter(toggle.parentElement!, { pointerType: 'touch' });
     fireEvent.focus(toggle);
@@ -120,7 +126,7 @@ describe('homepage map tour', () => {
   });
 
   it('stops automatic changes while the page is hidden' , () => {
-    render(<AustraliaChapterMap />);
+    render(<HeroSection />);
     vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
     fireEvent(document, new Event('visibilitychange'));
     tick(9000);
@@ -133,7 +139,7 @@ describe('homepage map tour', () => {
   });
 
   it('cleans up its timer when unmounted', () => {
-    const { unmount } = render(<AustraliaChapterMap />);
+    const { unmount } = render(<HeroSection />);
     unmount();
     expect(vi.getTimerCount()).toBe(0);
   });

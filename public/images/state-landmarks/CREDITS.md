@@ -1,45 +1,45 @@
-# State landmark photographs
+# Hero landmark photographs
 
-Downloaded from Wikimedia Commons on 2026-10-06. Images resized to 960px wide and converted to WebP. Website presentation applies a faded colour treatment and responsive cropping. Photographs remain under their respective licences; ShareAlike licences apply to adaptations of those photographs, not the surrounding website code.
+Downloaded from Wikimedia Commons on 2026-10-06. Images resized to 1920px wide and converted to WebP. Website presentation applies a shaded colour treatment and responsive cropping. Photographs and adaptations retain their respective licences; ShareAlike applies to adaptations of the photographs, not surrounding website code.
 
-## NSW — Sydney Opera House
+## NSW — Sydney Harbour and Opera House at dusk
 
-File:The Sydney Opera House. Australia.jpg
+File:Sydney skyline at dusk - Dec 2008.jpg
 
-Photo by Bernard Spragg. NZ. [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en). [Original and licence record](https://commons.wikimedia.org/wiki/File:The_Sydney_Opera_House._Australia.jpg).
+Photo by DAVID ILIFF. [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0). [Original and licence record](https://commons.wikimedia.org/wiki/File:Sydney_skyline_at_dusk_-_Dec_2008.jpg).
 
-## VIC — Flinders Street Station
+## VIC — Melbourne and the Yarra River at dusk
 
-File:Melbourne (AU), Flinders Street Railway Station -- 2019 -- 202623.jpg
+File:Dusk over City of Melbourne (9534781183) (2).jpg
 
-Photo by Dietmar Rabich. [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0). [Original and licence record](https://commons.wikimedia.org/wiki/File:Melbourne_(AU),_Flinders_Street_Railway_Station_--_2019_--_202623.jpg).
+Photo by Chris Phutully from Australia. [CC BY 2.0](https://creativecommons.org/licenses/by/2.0). [Original and licence record](https://commons.wikimedia.org/wiki/File:Dusk_over_City_of_Melbourne_(9534781183)_(2).jpg).
 
-## QLD — Story Bridge
+## QLD — Story Bridge and Brisbane skyline at dusk
 
-File:Story Bridge, Brisbane CBD Skyline July 2014. 01.JPG
+File:Brisbane Story Bridge at dusk-2= (25827125674).jpg
 
-Photo by Kgbo. [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0). [Original and licence record](https://commons.wikimedia.org/wiki/File:Story_Bridge,_Brisbane_CBD_Skyline_July_2014._01.JPG).
+Photo by John from Redcliffe, Australia. [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0). [Original and licence record](https://commons.wikimedia.org/wiki/File:Brisbane_Story_Bridge_at_dusk-2%3D_(25827125674).jpg).
 
-## WA — Elizabeth Quay Bridge
+## WA — Elizabeth Quay and Perth skyline
 
-File:Perth (AU), Elizabeth Quay Bridge -- 2019 -- 0375-9.jpg
+File:Perth (33598468020).jpg
 
-Photo by Dietmar Rabich. [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0). [Original and licence record](https://commons.wikimedia.org/wiki/File:Perth_(AU),_Elizabeth_Quay_Bridge_--_2019_--_0375-9.jpg).
+Photo by Pedro Szekely from Los Angeles, USA. [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0). [Original and licence record](https://commons.wikimedia.org/wiki/File:Perth_(33598468020).jpg).
 
-## SA — River Torrens, Adelaide
+## SA — Adelaide skyline across the River Torrens
 
-File:Adelaide - Torrens River - panoramio.jpg
+File:Skyline Adelaide at Night (27381876472).jpg
 
-Photo by Pavel Špindler. [CC BY 3.0](https://creativecommons.org/licenses/by/3.0). [Original and licence record](https://commons.wikimedia.org/wiki/File:Adelaide_-_Torrens_River_-_panoramio.jpg).
+Photo by Lasse B. from Deutschland. [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0). [Original and licence record](https://commons.wikimedia.org/wiki/File:Skyline_Adelaide_at_Night_(27381876472).jpg).
 
-## ACT — Parliament House, Canberra
+## ACT — Parliament House at dusk
 
-File:Australian Parliament House front view-1 (37861423264).jpg
+File:Parliament House at dusk, Canberra ACT.jpg
 
-Photo by Sheba_Also 43,000 photos. [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0). [Original and licence record](https://commons.wikimedia.org/wiki/File:Australian_Parliament_House_front_view-1_(37861423264).jpg).
+Photo by Thennicke. [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0). [Original and licence record](https://commons.wikimedia.org/wiki/File:Parliament_House_at_dusk,_Canberra_ACT.jpg).
 
-## TAS — Hobart waterfront
+## TAS — Hobart and the Derwent from kunanyi / Mount Wellington
 
-File:Hobart waterfront near Salamanca Place.jpg
+File:Hobart moonrise from Mt Wellington.jpg
 
-Photo by Lautreca11. [CC0](https://creativecommons.org/publicdomain/zero/1.0/deed.en). [Original and licence record](https://commons.wikimedia.org/wiki/File:Hobart_waterfront_near_Salamanca_Place.jpg).
+Photo by Christopher Neugebaeur. [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0). [Original and licence record](https://commons.wikimedia.org/wiki/File:Hobart_moonrise_from_Mt_Wellington.jpg).

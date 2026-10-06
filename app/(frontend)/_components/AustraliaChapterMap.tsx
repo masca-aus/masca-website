@@ -37,20 +37,11 @@ const localOrganisations: Record<string, string> = {
   TAS: "MSST",
 };
 
-export default function AustraliaChapterMap() {
-  const [selectedCode, setSelectedCode] = useState<string>("NSW");
+export default function AustraliaChapterMap({ selectedCode, onSelectedCodeChange }: { selectedCode: string; onSelectedCodeChange: (code: string) => void }) {
   const [isRotating, setIsRotating] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [hasFocus, setHasFocus] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
-  const [loadedPhotos, setLoadedPhotos] = useState<string[]>([]);
-  const [backdropCode, setBackdropCode] = useState<string | null>(null);
-
-  // Keep the previous photograph visible until the selected one has loaded.
-  if (backdropCode !== selectedCode && loadedPhotos.includes(selectedCode)) {
-    setBackdropCode(selectedCode);
-  }
-
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     const respectMotionPreference = () => {
@@ -71,14 +62,14 @@ export default function AustraliaChapterMap() {
     if (!isRotating || isHovered || hasFocus || !isPageVisible) return;
     const timer = window.setTimeout(() => {
       const currentIndex = chapterMarkers.findIndex(({ code }) => code === selectedCode);
-      setSelectedCode(chapterMarkers[(currentIndex + 1) % chapterMarkers.length].code);
+      onSelectedCodeChange(chapterMarkers[(currentIndex + 1) % chapterMarkers.length].code);
     }, 3000);
     return () => window.clearTimeout(timer);
-  }, [selectedCode, isRotating, isHovered, hasFocus, isPageVisible]);
+  }, [selectedCode, isRotating, isHovered, hasFocus, isPageVisible, onSelectedCodeChange]);
 
   const selectState = (code: string) => {
     setIsRotating(false);
-    setSelectedCode(code);
+    onSelectedCodeChange(code);
   };
   const activeMarker = chapterMarkers.find(({ code }) => code === selectedCode) ?? chapterMarkers[0];
   const selected = STATES.find((state) => state.code === selectedCode) ?? STATES[0];
@@ -98,23 +89,6 @@ export default function AustraliaChapterMap() {
       }}
     >
       <div className={styles.mapFrame}>
-        <div className={styles.landmarkBackdrop} aria-hidden="true">
-          {stateLandmarks.map((photo) => (
-            <Image
-              key={photo.code}
-              src={photo.src}
-              alt=""
-              width={960}
-              height={720}
-              unoptimized
-              loading="eager"
-              className={`${styles.landmarkPhoto} ${backdropCode === photo.code ? styles.landmarkVisible : ""}`}
-              data-landmark={photo.code}
-              data-visible={backdropCode === photo.code}
-              onLoad={() => setLoadedPhotos((loaded) => loaded.includes(photo.code) ? loaded : [...loaded, photo.code])}
-            />
-          ))}
-        </div>
         <div className={styles.mapCanvas}>
           <Image
             src="/australia-states.svg"

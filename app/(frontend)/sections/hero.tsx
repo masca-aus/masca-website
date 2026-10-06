@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, type ReactNode } from "react";
+import { useRef, useState } from "react";
 
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -8,9 +8,12 @@ import { useGSAP } from "@gsap/react";
 import { InAustralia }  from "@/components/TextSVG";
 import Button from "@/components/Button";
 import { Briefcase } from "lucide-react";
+import AustraliaChapterMap from "../_components/AustraliaChapterMap";
+import LandmarkBackdrop from "../_components/LandmarkBackdrop";
 
 
-export default function HeroSection({ chapterMap }: { chapterMap: ReactNode }) {
+export default function HeroSection() {
+  const [selectedCode, setSelectedCode] = useState("NSW");
   const sectionRef = useRef<HTMLElement>(null)
 
   useGSAP(() => {
@@ -20,6 +23,7 @@ export default function HeroSection({ chapterMap }: { chapterMap: ReactNode }) {
 
   return (
     <section ref={sectionRef} className="relative isolate flex flex-1 overflow-hidden bg-blue-600">
+      <LandmarkBackdrop selectedCode={selectedCode} />
       <div className="relative z-10 mx-auto flex w-full max-w-[1760px] flex-1 flex-col items-center gap-12 px-8 pt-24 pb-16 md:px-16 md:pt-28 lg:flex-row lg:gap-20 lg:px-20 lg:pt-32 lg:pb-16 2xl:gap-24 2xl:px-24">
         <div className="w-full lg:flex-1">
             <MainContent />
@@ -28,7 +32,7 @@ export default function HeroSection({ chapterMap }: { chapterMap: ReactNode }) {
         <div id="states" className="flex w-full justify-center scroll-mt-24 lg:flex-1">
           <div className="w-full lg:max-w-[440px] 2xl:max-w-[500px]">
             <h2 className="sr-only">Find your MASCA chapter</h2>
-            {chapterMap}
+            <AustraliaChapterMap selectedCode={selectedCode} onSelectedCodeChange={setSelectedCode} />
           </div>
         </div>
       </div>
