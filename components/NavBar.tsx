@@ -6,9 +6,21 @@ import { usePathname } from "next/navigation"
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import Button from "./Button";
+import styles from "./NavBar.module.css";
+
+const subscribeToScroll = (notify: () => void) => {
+  window.addEventListener("scroll", notify, { passive: true });
+  window.addEventListener("pageshow", notify);
+  return () => {
+    window.removeEventListener("scroll", notify);
+    window.removeEventListener("pageshow", notify);
+  };
+};
+const hasScrolled = () => window.scrollY >= 60;
+const initialScroll = () => false;
 
 const navLinks = [
   // { name: "Home", href: "/"},
@@ -28,10 +40,10 @@ function Logo() {
   return (
     <Link href="/" className="col-1 justify-self-start relative z-20">
       <div className="flex items-center gap-4">
-        <Image src="/logo/logo.png" alt="Masca logo" width={36} height={40} priority sizes="40px" className="h-10 w-auto" />
+        <Image src="/logo/logo.png" alt="Masca logo" width={36} height={40} priority sizes="40px" className={`h-10 w-auto ${styles.brandMark}`} />
         <div className="flex flex-col leading-none">
-          <span className="text-xl font-bold tracking-wider text-blue-600">MASCA</span>
-          <span className="text-xs font-semibold text-gray-700/80 uppercase">malaysian students&apos; council</span>
+          <span className={`text-xl font-bold tracking-wider text-blue-600 ${styles.brandTitle}`}>MASCA</span>
+          <span className={`text-xs font-semibold text-gray-700/80 uppercase ${styles.brandSubtitle}`}>malaysian students&apos; council</span>
         </div>
       </div>
     </Link>
@@ -48,7 +60,7 @@ function MenuToggle({ open, onToggle }: { open: boolean; onToggle: () => void })
       aria-expanded={open}
       aria-controls="mobile-menu"
       aria-label={open ? "Close menu" : "Open menu"}
-      className="col-3 relative z-20 -mr-2 flex size-11 items-center justify-center justify-self-end rounded-lg text-blue-600 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 lg:hidden"
+      className={`${styles.menuToggle} col-3 relative z-20 -mr-2 flex size-11 items-center justify-center justify-self-end rounded-lg text-blue-600 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 lg:hidden`}
     >
       <span className="relative block h-5 w-6" aria-hidden="true">
         <span className={`${line} ${open ? "top-[9px] rotate-45" : "top-0"}`} />
@@ -62,7 +74,7 @@ function MenuToggle({ open, onToggle }: { open: boolean; onToggle: () => void })
 // Centered primary navigation (desktop only).
 function DesktopNav({ isActive }: { isActive: IsActive }) {
   return (
-    <nav className="col-2 justify-self-center hidden lg:flex gap-2 xl:gap-6">
+    <nav className={`${styles.desktopNav} col-2 justify-self-center hidden lg:flex gap-2 xl:gap-6`}>
       {navLinks.map((link) => {
         const active = isActive(link.href)
         return (
@@ -107,7 +119,7 @@ function MobileMenu({ open, isActive, pathname }: { open: boolean; isActive: IsA
     <div
       id="mobile-menu"
       ref={panelRef}
-      className="fixed inset-x-0 top-0 z-10 lg:hidden overflow-hidden bg-white/95 backdrop-blur-md"
+      className="fixed inset-x-0 top-0 z-10 lg:hidden overflow-hidden bg-white"
       style={{ height: 0, opacity: 0 }}
     >
       <nav key={ pathname } className="flex flex-col items-center justify-center gap-6 h-dvh px-6 text-center">
@@ -136,6 +148,8 @@ export default function NavBar() {
   const headerRef = useRef<HTMLElement>(null)
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const scrolled = useSyncExternalStore(subscribeToScroll, hasScrolled, initialScroll)
+  const transparent = pathname === "/" && !scrolled && !open
   const isActive: IsActive = (href) => href === "/" ? pathname === "/" : pathname.startsWith(href)
   const [prevPathname, setPrevPathname] = useState(pathname)
   if (pathname !== prevPathname) {
@@ -157,23 +171,6 @@ export default function NavBar() {
     document.body.style.overflow = open ? "hidden" : ""
     return () => { document.body.style.overflow = "" }
   }, [open])
-
-  // Frost the header background once the page scrolls past the hero.
-  useGSAP(() => {
-    gsap.to(headerRef.current, {
-      backgroundColor: 'rgba(255,255,255,0.8)',
-      // GSAP auto-applies the -webkit- prefix; setting WebkitBackdropFilter
-      // explicitly trips its "unknown property" warning, so only set the
-      // standard one (broadly supported in current browsers).
-      backdropFilter: 'blur(10px)',
-      ease: 'entranceEase',
-      scrollTrigger: {
-        start: 80,
-        end: 80,
-        toggleActions: 'play none none reverse',
-      },
-    })
-  }, { scope: headerRef })
 
   // Hide on scroll-down, reveal on scroll-up — mobile only (below the lg
   // breakpoint, where the mobile menu replaces the desktop nav). A paused tween
@@ -210,7 +207,7 @@ export default function NavBar() {
   }, { scope: headerRef })
 
   return (
-    <header ref={headerRef} className="fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] items-center py-2 md:py-4 px-6 md:px-16 bg-white backface-hidden will-change-[transform,backdrop-filter]">
+    <header ref={headerRef} data-transparent={transparent} className={`${styles.header} fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] items-center py-2 md:py-4 px-6 md:px-16 bg-white backface-hidden will-change-transform`}>
       <Logo />
       <MenuToggle open={open} onToggle={() => setOpen((v) => !v)} />
       <DesktopNav isActive={isActive} />
