@@ -10,6 +10,7 @@ import Button from "@/components/Button";
 import { Briefcase } from "lucide-react";
 import AustraliaChapterMap from "../_components/AustraliaChapterMap";
 import LandmarkBackdrop from "../_components/LandmarkBackdrop";
+import StatisticSection from "./statistic";
 
 
 export default function HeroSection() {
@@ -22,7 +23,7 @@ export default function HeroSection() {
   }, { scope: sectionRef })
 
   return (
-    <section ref={sectionRef} className="relative isolate flex flex-1 overflow-hidden bg-blue-600">
+    <section ref={sectionRef} className="relative isolate flex flex-1 flex-col overflow-hidden bg-blue-600">
       <LandmarkBackdrop selectedCode={selectedCode} />
       <div className="relative z-10 mx-auto flex w-full max-w-[1760px] flex-1 flex-col items-center gap-12 px-8 pt-24 pb-16 md:px-16 md:pt-28 lg:flex-row lg:gap-20 lg:px-20 lg:pt-32 lg:pb-16 2xl:gap-24 2xl:px-24">
         <div className="w-full lg:flex-1">
@@ -36,6 +37,7 @@ export default function HeroSection() {
           </div>
         </div>
       </div>
+      <StatisticSection />
     </section>
   );
 }

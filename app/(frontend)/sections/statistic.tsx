@@ -6,7 +6,7 @@ const stats = [
 
 export default function StatisticSection() {
   return (
-    <section className="bg-blue-600">
+    <section className="relative z-10">
       <div className="container pb-12 md:pb-16">
         <div className="grid grid-cols-3 gap-4 border-t border-blue-500 pt-7 md:pt-8">
           {stats.map(({ value, label }) => (

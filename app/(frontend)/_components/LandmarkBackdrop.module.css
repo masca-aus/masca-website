@@ -12,9 +12,9 @@
 .shade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(1, 0, 55, .91) 0%, rgba(1, 0, 55, .76) 42%, rgba(1, 0, 55, .4) 100%), linear-gradient(0deg, #010066 0%, transparent 28%);
+  background: linear-gradient(90deg, rgba(1, 0, 55, .91) 0%, rgba(1, 0, 55, .76) 42%, rgba(1, 0, 55, .4) 100%), linear-gradient(0deg, rgba(1, 0, 55, .45) 0%, transparent 28%);
 }
 @media (max-width: 767px) {
-  .shade { background: linear-gradient(180deg, rgba(1, 0, 55, .83), rgba(1, 0, 55, .68) 60%, #010066); }
+  .shade { background: linear-gradient(180deg, rgba(1, 0, 55, .83), rgba(1, 0, 55, .68) 60%, rgba(1, 0, 55, .85)); }
 }
 @media (prefers-reduced-motion: reduce) { .photo { transition: none; } }

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 
 import { SITE_NAME_FULL, SITE_DESCRIPTION } from "@/utils/seo";
 import HeroSection from "./sections/hero";
-import StatisticSection from "./sections/statistic";
 import EventShowcaseSection from "./sections/eventShowcase";
 import MascaCareSection from "./sections/mascaCare";
 import CareerSpotlightSection from "./sections/careerSpotlight";
@@ -43,7 +42,6 @@ export default async function Home() {
    <main id="main">
       <div className="flex min-h-svh flex-col bg-blue-600">
         <HeroSection />
-        <StatisticSection />
       </div>
       <AboutSection />
       <YearbookSection />
