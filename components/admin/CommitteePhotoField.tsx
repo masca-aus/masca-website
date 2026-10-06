@@ -5,6 +5,7 @@ import { useAuth, useConfig, useField, useForm } from '@payloadcms/ui';
 import type { UploadFieldClientProps } from 'payload';
 import { uploadCommitteePhoto, type PhotoMedia } from '@/utils/uploadCommitteePhoto';
 import { PhotoLibrary } from './PhotoLibrary';
+import { PortraitAdjuster } from './PortraitAdjuster';
 import './committeePhoto.css';
 
 export function CommitteePhotoField({ path, field, readOnly }: UploadFieldClientProps) {
@@ -19,6 +20,8 @@ export function CommitteePhotoField({ path, field, readOnly }: UploadFieldClient
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [library, setLibrary] = useState(false);
+  const [adjusting, setAdjusting] = useState(false);
+  const [original, setOriginal] = useState<{ id: number | string; file: File; framing?: { zoom: number; x: number; y: number } } | null>(null);
   const input = useRef<HTMLInputElement>(null);
   const request = useRef<AbortController | null>(null);
   const locked = !!(readOnly || disabled || pending);
@@ -35,19 +38,21 @@ export function CommitteePhotoField({ path, field, readOnly }: UploadFieldClient
     return () => controller.abort();
   }, [api, id, photo?.id]);
   useEffect(() => () => { if (request.current) { request.current.abort(); setProcessing(false); } }, [setProcessing]);
-  const upload = async (file?: File) => {
-    if (!file || locked || !canUpload || request.current) return;
+  const upload = async (file?: File, originalFile?: File, framing?: { zoom: number; x: number; y: number }): Promise<boolean> => {
+    if (!file || locked || !canUpload || request.current) return false;
     const controller = new AbortController();
     request.current = controller;
     const url = URL.createObjectURL(file);
     setPending({ url, name: file.name }); setError(''); setProcessing(true);
     try {
       const doc = await uploadCommitteePhoto(file, api, controller.signal, setStatus);
-      if (controller.signal.aborted) return;
-      setPhoto(doc); setValue(doc.id);
+      if (controller.signal.aborted) return false;
+      setPhoto(doc); setValue(doc.id); setOriginal({ id: doc.id, file: originalFile || file, framing });
       setStatus('Photo added. Save the member to keep your changes.');
+      return true;
     } catch (reason) {
       if (!controller.signal.aborted) { setStatus(''); setError(reason instanceof Error ? reason.message : 'Upload failed. Please try again.'); }
+      return false;
     } finally {
       URL.revokeObjectURL(url);
       if (!controller.signal.aborted) { setPending(null); setProcessing(false); }
@@ -64,6 +69,7 @@ export function CommitteePhotoField({ path, field, readOnly }: UploadFieldClient
         <input ref={input} type="file" accept="image/*" hidden disabled={locked || !canUpload} aria-label="Choose portrait file" onChange={e => { const file = e.target.files?.[0]; e.target.value = ''; void upload(file); }} />
         <div className="masca-photo-field__actions">
           {canUpload && <button type="button" className="masca-photo-primary" disabled={locked} onClick={() => input.current?.click()}>{id ? 'Replace photo' : 'Upload photo'}</button>}
+          {canUpload && !!id && <button type="button" disabled={locked || !current?.url} onClick={() => setAdjusting(true)}>Adjust photo</button>}
           <button type="button" disabled={locked} onClick={() => setLibrary(true)}>Choose existing</button>
           {!!id && <button type="button" disabled={locked} onClick={() => { setValue(null); setPhoto(null); setStatus('Photo removed from this member. Save to keep your changes.'); setError(''); }}>Remove</button>}
         </div>
@@ -72,6 +78,7 @@ export function CommitteePhotoField({ path, field, readOnly }: UploadFieldClient
         {(error || showError) && <p className="masca-photo-field__error" role="alert">{error || errorMessage}</p>}
       </div>
     </div>
+    {adjusting && current?.url && <PortraitAdjuster source={original?.id === id ? original.file : current.url} filename={current.filename} initial={original?.id === id ? original.framing : undefined} onClose={() => setAdjusting(false)} onApply={upload} />}
     {library && <PhotoLibrary api={api} onClose={() => setLibrary(false)} onSelect={doc => { setPhoto(doc); setValue(doc.id); setStatus('Photo selected. Save the member to keep your changes.'); setError(''); setLibrary(false); }} />}
   </div>;
 }
