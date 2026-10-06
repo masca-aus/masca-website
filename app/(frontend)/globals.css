@@ -68,6 +68,13 @@ html, body {
   line-height: 1.5;                   /* Balanced vertical alignment spacing */
 }
 
+/* Match the homepage hero when elastic scrolling exposes the page canvas.
+   The selector follows route changes without waiting for client-side effects. */
+html:has([data-homepage-hero]),
+body:has([data-homepage-hero]) {
+  background-color: #010037;
+}
+
 /* Text-selection highlight */
 ::selection {
   background-color: var(--color-red-600);

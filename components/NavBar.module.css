@@ -1,11 +1,12 @@
 .header {
   background-color: #fff;
   box-shadow: 0 3px 18px rgba(1, 0, 55, .08);
-  transition: background-color .3s ease, box-shadow .3s ease;
+  --nav-transition: .6s cubic-bezier(.4, 0, .2, 1);
+  transition: background-color var(--nav-transition), box-shadow var(--nav-transition);
 }
 .header[data-transparent=true] { background-color: transparent; box-shadow: none; }
-.brandTitle, .brandSubtitle, .desktopNav a, .menuToggle { transition: color .3s ease; }
-.brandMark { transition: filter .3s ease; }
+.brandTitle, .brandSubtitle, .desktopNav a, .menuToggle { transition: color var(--nav-transition); }
+.brandMark { filter: brightness(1) invert(0); transition: filter var(--nav-transition); }
 .header[data-transparent=true] .brandMark { filter: brightness(0) invert(1); }
 .header[data-transparent=true] .brandTitle,
 .header[data-transparent=true] .desktopNav a,
