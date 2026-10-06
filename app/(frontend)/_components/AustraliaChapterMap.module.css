@@ -38,11 +38,25 @@
   background: #cc0001;
   box-shadow: 0 0 0 3px rgba(1, 0, 70, .4);
 }
-.pinSelected .pinDot { background: #ffcc00; box-shadow: 0 0 0 5px rgba(255, 204, 0, .25); }
+/* One persistent highlight travels between the fixed city dots. */
+.activeMarker {
+  position: absolute;
+  z-index: 4;
+  width: 13px;
+  height: 13px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #ffcc00;
+  box-shadow: 0 0 0 5px rgba(255, 204, 0, .25);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: left .9s cubic-bezier(.4, 0, .2, 1), top .9s cubic-bezier(.4, 0, .2, 1);
+}
 .pinLabel {
   position: absolute;
   left: calc(50% + 11px);
   pointer-events: none;
+  transition: background-color .45s ease, color .45s ease;
   padding: 4px 7px;
   border-radius: 100px;
   background: #010066;
@@ -59,7 +73,7 @@
   border-top: 1px solid rgba(255, 255, 255, .22);
   color: #fff;
 }
-.selectedDetails { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
+.selectedDetails { animation: detailsIn .45s ease; display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
 .selectedDetails strong { font-size: 15px; font-weight: 600; line-height: 1.2; white-space: nowrap; }
 .selectedDetails small { color: rgba(255, 255, 255, .66); font-size: 11px; }
 .actions { display: flex; gap: 6px; align-items: center; flex: none; }
@@ -80,6 +94,27 @@
 .selectedCard a svg:last-child { display: none; }
 .selectedCard a:hover { border-color: #ffcc00; }
 .selectedCard a:focus-visible, .chapterList button:focus-visible { outline: 2px solid #ffcc00; outline-offset: 3px; }
+@keyframes detailsIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rotationToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 32px;
+  margin: 8px 0 0 auto;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 100px;
+  background: transparent;
+  color: rgba(255, 255, 255, .75);
+  font-size: 11px;
+  cursor: pointer;
+}
+.rotationToggle:hover { color: #ffcc00; }
+.rotationToggle:focus-visible { outline: 2px solid #ffcc00; outline-offset: 2px; }
 .chapterList { display: none; }
 .pendingLink { color: rgba(255, 255, 255, .66); font-size: 11px; }
 @media (max-width: 600px) {
@@ -106,5 +141,6 @@
   .chapterList button[aria-pressed=true] { border-color: #ffcc00; background: #ffcc00; color: #010066; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pin { transition: none; }
+  .pin, .pinLabel, .activeMarker { transition: none; }
+  .selectedDetails { animation: none; }
 }
