@@ -4,10 +4,12 @@ import { useState } from "react";
 import {
   ArrowRight,
   BriefcaseBusiness,
+  Camera,
   HeartHandshake,
   Home,
   GraduationCap,
   MapPin,
+  MessageCircle,
   Scale,
   ShieldCheck,
   Sparkles,
@@ -80,6 +82,25 @@ const pathways = [
 ] as const;
 
 const states = ["VIC", "NSW", "QLD", "WA", "SA", "ACT", "TAS"];
+
+const communityLinks = [
+  {
+    key: "instagram",
+    label: "Instagram",
+    description: "Stay in the loop! Get latest updates on events, gatherings, and everything happening in our community.",
+    icon: Camera,
+    href: "#state-instagram",
+    colour: "bg-red-50 text-red-600",
+  },
+  {
+    key: "whatsapp",
+    label: "WhatsApp group chat",
+    description: "Meet, connect & support! Join the group to make new friends, ask questions, share tips, and find your people in the community.",
+    icon: MessageCircle,
+    href: "#state-whatsapp",
+    colour: "bg-blue-50 text-blue-600",
+  },
+] as const;
 
 const advocacySteps = [
   ["01", "Listen", "Students share what they are experiencing."],
@@ -178,7 +199,7 @@ export default function CarePathways() {
       <section className="bg-yellow-50">
         <div className="container section-pad grid items-center gap-12 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
-            <span className="eyebrow text-red-600">near you</span>
+            <span className="eyebrow text-red-600">get connected with your state counterparts</span>
             <h2 className="mt-4 max-w-xl text-blue-600">Find your state. Find your people.</h2>
             <p className="mt-5 max-w-xl text-gray-700">
               Connect national guidance with people who understand your local student community.
@@ -202,7 +223,7 @@ export default function CarePathways() {
               ))}
             </div>
 
-            <div className="mt-7 flex flex-col gap-6 border-t border-blue-100 pt-7 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-7 border-t border-blue-100 pt-7">
               <div className="flex items-start gap-4">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600">
                   <MapPin size={22} aria-hidden="true" />
@@ -212,9 +233,29 @@ export default function CarePathways() {
                   <p className="mt-1 font-secondary text-2xl font-bold text-blue-600">MASCA {state}</p>
                 </div>
               </div>
-              <a href="#quick-support" className="inline-flex min-h-11 items-center gap-2 font-bold text-blue-600 hover:text-blue-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-                View local pathway <ArrowRight size={18} aria-hidden="true" />
-              </a>
+
+              <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                {communityLinks.map((link) => {
+                  const Icon = link.icon;
+                  return (
+                    <a
+                      key={link.key}
+                      href={link.href}
+                      aria-label={`${link.label} for MASCA ${state} (link placeholder)`}
+                      className="group flex min-h-56 flex-col rounded-lg border border-blue-100 bg-white p-5 transition hover:-translate-y-1 hover:border-blue-600 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    >
+                      <span className={`flex h-11 w-11 items-center justify-center rounded-lg ${link.colour}`}>
+                        <Icon size={22} aria-hidden="true" />
+                      </span>
+                      <strong className="mt-6 text-lg text-blue-600">{link.label}</strong>
+                      <span className="mt-2 text-sm leading-relaxed text-gray-700">{link.description}</span>
+                      <span className="mt-auto flex items-center gap-2 pt-5 text-sm font-bold text-blue-600">
+                        MASCA {state} <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                      </span>
+                    </a>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
