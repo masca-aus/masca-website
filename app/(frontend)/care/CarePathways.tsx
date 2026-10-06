@@ -15,7 +15,6 @@ import {
   Sparkles,
   WalletCards,
 } from "lucide-react";
-import { STATES } from "@/utils/states";
 
 type PathwayKey = "wellbeing" | "finance" | "academic" | "settling";
 
@@ -102,7 +101,7 @@ const pathways = [
   },
 ] as const;
 
-const states = STATES.filter((state) => state.code !== "NZ");
+const states = ["VIC", "NSW", "QLD", "WA", "SA", "ACT", "TAS"];
 
 const communityLinks = [
   {
@@ -227,16 +226,15 @@ export default function CarePathways() {
             <div className="flex flex-wrap gap-2" aria-label="Choose a state or territory">
               {states.map((item) => (
                 <button
-                  key={item.code}
+                  key={item}
                   type="button"
-                  aria-pressed={state === item.code}
-                  onClick={() => setState(item.code)}
-                  style={{ backgroundColor: item.bg, color: item.fg }}
-                  className={`min-h-11 rounded-lg px-4 text-sm font-bold transition hover:-translate-y-0.5 hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
-                    state === item.code ? "ring-2 ring-blue-900 ring-offset-2" : "opacity-85 hover:opacity-100"
+                  aria-pressed={state === item}
+                  onClick={() => setState(item)}
+                  className={`min-h-11 rounded-lg px-4 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
+                    state === item ? "bg-blue-600 text-white" : "bg-blue-50 text-blue-600 hover:bg-blue-100"
                   }`}
                 >
-                  {item.code}
+                  {item}
                 </button>
               ))}
             </div>
