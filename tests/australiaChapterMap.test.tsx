@@ -12,6 +12,13 @@ let onMotionChange: ((event: { matches: boolean }) => void) | undefined;
 const tick = (ms: number) => act(() => { vi.advanceTimersByTime(ms); });
 const pin = (name: string) => screen.getByRole('button', { name: new RegExp(`^Show ${name},`) });
 
+const renderLoadedHero = () => {
+  const result = render(<HeroSection />);
+  fireEvent.load(result.container.querySelector('img[src="/australia-states.svg"]')!);
+  tick(1000);
+  return result;
+};
+
 beforeEach(() => {
   vi.useFakeTimers();
   vi.stubGlobal('PointerEvent', class extends MouseEvent {
@@ -31,13 +38,25 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe('homepage map tour', () => {
-  it('places the photographs across the hero outside the map controls', () => {
+  it.each(['load', 'error'])('waits for the map entrance before starting the tour (%s)', (event) => {
     const { container } = render(<HeroSection />);
+    tick(9000);
+    expect(pin('New South Wales').getAttribute('aria-pressed')).toBe('true');
+    const mapImage = container.querySelector('img[src="/australia-states.svg"]')!;
+    fireEvent(mapImage, new Event(event));
+    tick(1000);
+    tick(2999);
+    expect(pin('New South Wales').getAttribute('aria-pressed')).toBe('true');
+    tick(1);
+    expect(pin('Queensland').getAttribute('aria-pressed')).toBe('true');
+  });
+  it('places the photographs across the hero outside the map controls', () => {
+    const { container } = renderLoadedHero();
     const photo = container.querySelector('img[data-landmark]')!;
     expect(photo.parentElement?.parentElement?.tagName).toBe('SECTION');
   });
   it('crossfades to the loaded state photo on automatic and manual selection', () => {
-    render(<HeroSection />);
+    renderLoadedHero();
     const photo = (code: string) => document.querySelector(`img[data-landmark="${code}"]`)!;
     fireEvent.load(photo('NSW'));
     expect(photo('NSW').getAttribute('data-visible')).toBe('true');
@@ -56,7 +75,7 @@ describe('homepage map tour', () => {
   });
 
   it('advances every three seconds and loops through all seven states', () => {
-    render(<HeroSection />);
+    renderLoadedHero();
     expect(pin('New South Wales').getAttribute('aria-pressed')).toBe('true');
     tick(2999);
     expect(pin('New South Wales').getAttribute('aria-pressed')).toBe('true');
@@ -72,7 +91,7 @@ describe('homepage map tour', () => {
   });
 
   it.each(['pin', 'list'])('keeps a manually selected state until the tour is explicitly resumed (%s)', (control) => {
-    render(<HeroSection />);
+    renderLoadedHero();
     fireEvent.click(control === 'pin' ? pin('Tasmania') : screen.getByRole('button', { name: 'TAS' }));
     tick(30000);
     expect(pin('Tasmania').getAttribute('aria-pressed')).toBe('true');
@@ -85,7 +104,7 @@ describe('homepage map tour', () => {
   });
 
   it('pauses while hovered or keyboard focused so links cannot change during interaction', () => {
-    render(<HeroSection />);
+    renderLoadedHero();
     const map = screen.getByRole('button', { name: 'Pause automatic state rotation' }).parentElement!;
     fireEvent.pointerEnter(map, { pointerType: 'mouse' });
     tick(9000);
@@ -101,7 +120,7 @@ describe('homepage map tour', () => {
 
   it('starts stationary for reduced motion and stops if that preference changes', () => {
     reducedMotion = true;
-    render(<HeroSection />);
+    renderLoadedHero();
     tick(9000);
     expect(pin('New South Wales').getAttribute('aria-pressed')).toBe('true');
     const resume = screen.getByRole('button', { name: 'Resume automatic state rotation' });
@@ -115,7 +134,7 @@ describe('homepage map tour', () => {
   });
 
   it('does not leave the tour hover-paused after a touch interaction', () => {
-    render(<HeroSection />);
+    renderLoadedHero();
     const toggle = screen.getByRole('button', { name: 'Pause automatic state rotation' });
     fireEvent.pointerEnter(toggle.parentElement!, { pointerType: 'touch' });
     fireEvent.focus(toggle);
@@ -126,7 +145,7 @@ describe('homepage map tour', () => {
   });
 
   it('stops automatic changes while the page is hidden' , () => {
-    render(<HeroSection />);
+    renderLoadedHero();
     vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
     fireEvent(document, new Event('visibilitychange'));
     tick(9000);
@@ -139,7 +158,7 @@ describe('homepage map tour', () => {
   });
 
   it('cleans up its timer when unmounted', () => {
-    const { unmount } = render(<HeroSection />);
+    const { unmount } = renderLoadedHero();
     unmount();
     expect(vi.getTimerCount()).toBe(0);
   });

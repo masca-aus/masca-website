@@ -1,4 +1,19 @@
-.module { width: 100%; margin: auto; }
+.module { width: 100%; margin: auto; opacity: 0; visibility: hidden; }
+.module[data-ready=true] { visibility: visible; animation: mapEntrance 1s cubic-bezier(.22, 1, .36, 1) both; }
+.module[data-ready=true] .pin,
+.module[data-ready=true] .activeMarker { animation: entranceFade .65s ease .25s both; }
+.module[data-ready=true] .selectedCard,
+.module[data-ready=true] .rotationToggle,
+.module[data-ready=true] .photoCredits,
+.module[data-ready=true] .chapterList { animation: entranceFade .6s ease .4s both; }
+@keyframes mapEntrance {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes entranceFade { from { opacity: 0; } to { opacity: 1; } }
+/* Keyboard focus makes controls immediately visible during the entrance. */
+.module[data-ready=true]:focus-within,
+.module[data-ready=true]:focus-within * { opacity: 1 !important; }
 .mapFrame { position: relative; padding: 6px; isolation: isolate; }
 .mapCanvas { position: relative; width: 100%; aspect-ratio: 460 / 420; }
 .mapImage {
@@ -149,6 +164,7 @@
   .chapterList button[aria-pressed=true] { border-color: #ffcc00; background: #ffcc00; color: #010066; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .module[data-ready=true], .module[data-ready=true] * { animation: none; opacity: 1; }
   .pin, .pinLabel, .activeMarker { transition: none; }
   .selectedDetails { animation: none; }
 }

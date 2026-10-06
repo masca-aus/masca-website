@@ -38,10 +38,18 @@ const localOrganisations: Record<string, string> = {
 };
 
 export default function AustraliaChapterMap({ selectedCode, onSelectedCodeChange }: { selectedCode: string; onSelectedCodeChange: (code: string) => void }) {
+  const [isMapReady, setIsMapReady] = useState(false);
+  const [hasEntered, setHasEntered] = useState(false);
   const [isRotating, setIsRotating] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [hasFocus, setHasFocus] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
+  useEffect(() => {
+    if (!isMapReady) return;
+    const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1000;
+    const timer = window.setTimeout(() => setHasEntered(true), duration);
+    return () => window.clearTimeout(timer);
+  }, [isMapReady]);
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     const respectMotionPreference = () => {
@@ -59,13 +67,13 @@ export default function AustraliaChapterMap({ selectedCode, onSelectedCodeChange
   }, []);
 
   useEffect(() => {
-    if (!isRotating || isHovered || hasFocus || !isPageVisible) return;
+    if (!hasEntered || !isRotating || isHovered || hasFocus || !isPageVisible) return;
     const timer = window.setTimeout(() => {
       const currentIndex = chapterMarkers.findIndex(({ code }) => code === selectedCode);
       onSelectedCodeChange(chapterMarkers[(currentIndex + 1) % chapterMarkers.length].code);
     }, 3000);
     return () => window.clearTimeout(timer);
-  }, [selectedCode, isRotating, isHovered, hasFocus, isPageVisible, onSelectedCodeChange]);
+  }, [selectedCode, hasEntered, isRotating, isHovered, hasFocus, isPageVisible, onSelectedCodeChange]);
 
   const selectState = (code: string) => {
     setIsRotating(false);
@@ -79,6 +87,7 @@ export default function AustraliaChapterMap({ selectedCode, onSelectedCodeChange
   return (
     <div
       className={styles.module}
+      data-ready={isMapReady}
       onPointerEnter={(event) => {
         if (event.pointerType === "mouse") setIsHovered(true);
       }}
@@ -97,6 +106,9 @@ export default function AustraliaChapterMap({ selectedCode, onSelectedCodeChange
             width={460}
             height={420}
             className={styles.mapImage}
+            loading="eager"
+            onLoad={() => setIsMapReady(true)}
+            onError={() => setIsMapReady(true)}
           />
           <span
             className={styles.activeMarker}
