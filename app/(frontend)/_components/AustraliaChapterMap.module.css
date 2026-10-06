@@ -139,7 +139,22 @@
 .photoCredits summary:hover, .photoCredits[open] summary { color: #ffdc55; }
 .photoCredits[open] .creditContent { animation: creditsReveal .35s ease both; }
 .creditContent { max-height: 240px; overflow-y: auto; padding-right: 8px; scrollbar-width: thin; }
-@keyframes creditsReveal { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes creditsReveal {
+  from { max-height: 0; opacity: 0; transform: translateY(-3px); }
+  to { max-height: 240px; opacity: 1; transform: translateY(0); }
+}
+/* Animate the disclosure itself so surrounding content moves with the reveal. */
+@supports (interpolate-size: allow-keywords) {
+  .photoCredits::details-content {
+    interpolate-size: allow-keywords;
+    block-size: 0;
+    overflow: clip;
+    opacity: 0;
+    transition: block-size .4s cubic-bezier(.22, 1, .36, 1), opacity .3s ease, content-visibility .4s allow-discrete;
+  }
+  .photoCredits[open]::details-content { block-size: auto; opacity: 1; }
+  .photoCredits[open] .creditContent { animation: none; }
+}
 .photoCredits summary:focus-visible, .photoCredits a:focus-visible { outline: 2px solid #ffcc00; outline-offset: 3px; }
 .photoCredits ul { margin: 8px 0; padding-left: 16px; }
 .photoCredits a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
@@ -174,4 +189,5 @@
   .module[data-ready=true], .module[data-ready=true] * { animation: none; opacity: 1; }
   .pin, .pinLabel, .activeMarker, .photoCredits summary, .photoCredits summary::before { transition: none; }
   .selectedDetails, .photoCredits[open] .creditContent { animation: none; }
+  .photoCredits::details-content { transition: none; }
 }
