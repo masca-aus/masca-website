@@ -403,7 +403,7 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
         },
         editorSection({
           title: "Portrait and profile",
-          description: "Choose the member portrait and add an optional LinkedIn profile.",
+          description: "Choose the member portrait and add their required LinkedIn profile.",
         }),
         {
           name: "portrait",
@@ -426,16 +426,14 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
           name: "linkedin_url",
           label: "LinkedIn profile",
           type: "text",
+          required: true,
+          admin: { description: "Required before publishing. Use the member’s LinkedIn profile URL." },
           validate: (value: string | null | undefined) => {
-            if (!value) return true;
+            if (!value?.trim()) return "Add a LinkedIn profile before publishing.";
             try {
-              return (
-                new URL(value).protocol === "https:" ||
-                "LinkedIn URL must start with https://"
-              );
-            } catch {
-              return "Must be a full URL, e.g. https://www.linkedin.com/in/…";
-            }
+              const url = new URL(value);
+              return (url.protocol === "https:" && /(^|\.)linkedin\.com$/i.test(url.hostname) && /^\/in\/[^/]+/.test(url.pathname)) || "Use a LinkedIn profile URL, e.g. https://www.linkedin.com/in/name";
+            } catch { return "Use a full LinkedIn profile URL starting with https://"; }
           },
         },
         { name: "committeeWizardFooter", type: "ui", admin: { components: { Field: "/components/admin/CommitteeEditor#CommitteeEditorFooter" }, disableListColumn: true, disableBulkEdit: true } },

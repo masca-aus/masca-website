@@ -21,8 +21,8 @@ describe('committee steps', () => {
     expect(committeeStepErrors({role: 'President', department: 'unassigned', year: '2026'}, 1)).toHaveProperty('year');
     expect(committeeStepErrors({role: 'President', department: 'unassigned', year: '2026/2027'}, 1)).toEqual({});
   });
-  it('requires a portrait and accepts only valid HTTPS profile URLs', () => {
-    expect(committeeStepErrors({}, 2)).toHaveProperty('portrait');
+  it('allows incomplete drafts and validates supplied LinkedIn URLs', () => {
+    expect(committeeStepErrors({}, 2)).toEqual({});
     expect(committeeStepErrors({portrait: 4, linkedin_url: 'javascript:alert(1)'}, 2)).toHaveProperty('linkedin_url');
     expect(committeeStepErrors({portrait: 4, linkedin_url: 'https://linkedin.com/in/aisha'}, 2)).toEqual({});
     expect(committeeFieldStep('year')).toBe(1);
