@@ -79,3 +79,10 @@ it('shares selection generations across chooser and drop on the same widget', as
   expect(receive).toHaveBeenCalledTimes(1);
   expect(screen.queryByRole('status')).toBeNull();
 });
+it('leaves dedicated inline uploaders in control of their own compression', () => {
+  const receive = vi.fn();
+  render(<ImageUploadCompression><div data-masca-inline-upload><input aria-label="Inline photo" type="file" onChange={receive} /></div></ImageUploadCompression>);
+  fireEvent.change(screen.getByLabelText('Inline photo'), { target: { files: [large()] } });
+  expect(receive).toHaveBeenCalledTimes(1);
+  expect(h.compress).not.toHaveBeenCalled();
+});

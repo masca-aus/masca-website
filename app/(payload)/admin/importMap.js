@@ -17,6 +17,7 @@ import { ContentPermissionsField as ContentPermissionsField_d1257e98ee6e87bc3a79
 import { CommitteeStatusCell as CommitteeStatusCell_d4990eeb700ec5019d3bae61e18f2a3a } from '../../../components/admin/CommitteeStatusCell'
 import { CommitteeEditorHeader as CommitteeEditorHeader_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
 import { EditorSection as EditorSection_671b0a745dc229cca2346e4a81fc980a } from '../../../components/admin/EditorSection'
+import { CommitteePhotoField as CommitteePhotoField_c727683eda3cb907243ad4c838dc9c32 } from '../../../components/admin/CommitteePhotoField'
 import { CommitteeEditorFooter as CommitteeEditorFooter_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
 import { AdminSearchHelp as AdminSearchHelp_f2782f10529accf607236d8cfb6a767e } from '../../../components/admin/AdminSearchHelp'
 import { CommitteePublishControl as CommitteePublishControl_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
@@ -76,6 +77,7 @@ export const importMap = {
   "/components/admin/CommitteeStatusCell#CommitteeStatusCell": CommitteeStatusCell_d4990eeb700ec5019d3bae61e18f2a3a,
   "/components/admin/CommitteeEditor#CommitteeEditorHeader": CommitteeEditorHeader_134396005f96c581663d9f2ff7dee8de,
   "/components/admin/EditorSection#EditorSection": EditorSection_671b0a745dc229cca2346e4a81fc980a,
+  "/components/admin/CommitteePhotoField#CommitteePhotoField": CommitteePhotoField_c727683eda3cb907243ad4c838dc9c32,
   "/components/admin/CommitteeEditor#CommitteeEditorFooter": CommitteeEditorFooter_134396005f96c581663d9f2ff7dee8de,
   "/components/admin/AdminSearchHelp#AdminSearchHelp": AdminSearchHelp_f2782f10529accf607236d8cfb6a767e,
   "/components/admin/CommitteeEditor#CommitteePublishControl": CommitteePublishControl_134396005f96c581663d9f2ff7dee8de,

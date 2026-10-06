@@ -409,6 +409,7 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
           relationTo: "media",
           displayPreview: true,
           admin: {
+            components: { Field: "/components/admin/CommitteePhotoField#CommitteePhotoField" },
             description: "Optional. Until a portrait is added, a MASCA placeholder is shown.",
           },
         },
