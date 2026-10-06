@@ -147,7 +147,7 @@ export default buildConfig({
       beforeLogin: ["/components/admin/LoginWelcome#LoginWelcome"],
       afterLogin: ["/components/admin/LoginWelcome#LoginHelp"],
       Nav: "/components/admin/MascaNav#MascaNav",
-      providers: ["/components/admin/AdminNavigationEnhancements#AdminNavigationEnhancements"],
+      providers: ["/components/admin/AdminNavigationEnhancements#AdminNavigationEnhancements", "/components/admin/ImageUploadCompression#ImageUploadCompression"],
       actions: ["/components/admin/ThemeToggle#ThemeToggle"],
       graphics: {
         Logo: "/components/admin/MascaBrand#MascaLogo",
@@ -252,7 +252,7 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
       slug: "media",
       admin: {
         useAsTitle: "filename",
-        description: "Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.",
+        description: "Upload images only. Large JPEG and PNG photos are automatically compressed to fit. Add useful alt text so everyone can understand the image.",
         components: {
           beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
           edit: {
@@ -513,7 +513,7 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
           required: true,
           displayPreview: true,
           admin: {
-            description: "Choose an existing logo or upload an image up to 5 MB. A transparent background works best.",
+            description: "Choose an existing logo or upload an image. Large JPEG and PNG images are automatically compressed. A transparent background works best.",
           },
         },
         { name: "sponsorEditorFooter", type: "ui", admin: { components: { Field: "/components/admin/SponsorEditor#SponsorEditorFooter" }, disableListColumn: true, disableBulkEdit: true } },
