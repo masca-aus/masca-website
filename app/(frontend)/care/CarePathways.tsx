@@ -23,7 +23,6 @@ const pathways = [
     key: "wellbeing" as const,
     eyebrow: "Start here",
     title: "Wellbeing",
-    emphasis: undefined,
     description: "Make space for your wellbeing and find a supportive next step.",
     icon: Sparkles,
     accent: "bg-blue-600",
@@ -43,7 +42,6 @@ const pathways = [
     key: "finance" as const,
     eyebrow: "Plan ahead",
     title: "Finance",
-    emphasis: undefined,
     description: "Get a clearer view of costs, options, and practical support.",
     icon: WalletCards,
     accent: "bg-red-600",
@@ -63,7 +61,6 @@ const pathways = [
     key: "academic" as const,
     eyebrow: "Keep moving",
     title: "Academic",
-    emphasis: undefined,
     description: "Find support that helps you stay connected to your study goals.",
     icon: GraduationCap,
     accent: "bg-yellow-500",
@@ -83,8 +80,7 @@ const pathways = [
     key: "settling" as const,
     eyebrow: "Find your footing",
     title: "Settling in",
-    emphasis: "Just landed in Australia?",
-    description: "Get the essentials you need to settle in, find your feet, and survive those first few weeks away from home.",
+    description: "Just landed in Australia? Get the essentials you need to settle in, find your feet, and survive those first few weeks away from home.",
     icon: Home,
     accent: "bg-blue-600",
     soft: "bg-blue-50",
@@ -162,9 +158,7 @@ export default function CarePathways() {
                 </span>
                 <span className="mt-3 block font-secondary text-3xl font-bold leading-tight">{pathway.title}</span>
                 <span className={`mt-4 block leading-relaxed ${isActive ? pathway.activeDescription : "text-gray-700"}`}>
-                  {pathway.emphasis ? (
-                    <><strong>{pathway.emphasis}</strong>{" "}{pathway.description}</>
-                  ) : pathway.description}
+                  {pathway.description}
                 </span>
                 <span className="mt-7 inline-flex items-center gap-2 text-sm font-bold">
                   Explore this path <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />
