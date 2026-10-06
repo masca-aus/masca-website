@@ -39,7 +39,7 @@ export default async function Home() {
   const sponsors = await getSponsors();
 
   return (
-   <main id="main">
+   <main id="main" className="bg-white">
       <div className="flex min-h-svh flex-col bg-blue-600">
         <HeroSection />
       </div>
