@@ -94,7 +94,7 @@ export default function JobDetails({
         </p>
       )}
 
-      <WorkingRightsCallout value={job.international} />
+      {job.country?.key !== "malaysia" && <WorkingRightsCallout value={job.international} />}
 
       <dl className="grid grid-cols-[auto_1fr] items-start gap-x-3 gap-y-3 text-body-sm text-gray-700">
         {/* City, State with the work mode; a country-only role shows just the Country row. */}
