@@ -1,10 +1,26 @@
-.module { width: 100%; margin: auto; }
-.mapFrame { position: relative; padding: 6px; }
+.module { width: 100%; margin: auto; opacity: 0; visibility: hidden; }
+.module[data-ready=true] { visibility: visible; animation: mapEntrance 1s cubic-bezier(.22, 1, .36, 1) both; }
+.module[data-ready=true] .pin,
+.module[data-ready=true] .activeMarker { animation: entranceFade .65s ease .25s both; }
+.module[data-ready=true] .selectedCard,
+.module[data-ready=true] .rotationToggle,
+.module[data-ready=true] .photoCredits,
+.module[data-ready=true] .chapterList { animation: entranceFade .6s ease .4s both; }
+@keyframes mapEntrance {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes entranceFade { from { opacity: 0; } to { opacity: 1; } }
+/* Keyboard focus makes controls immediately visible during the entrance. */
+.module[data-ready=true]:focus-within,
+.module[data-ready=true]:focus-within *:not(.creditContent) { opacity: 1 !important; }
+.mapFrame { position: relative; padding: 6px; isolation: isolate; }
 .mapCanvas { position: relative; width: 100%; aspect-ratio: 460 / 420; }
 .mapImage {
   display: block;
   width: 100%;
   height: 100%;
+  opacity: .9;
   filter: drop-shadow(0 15px 20px rgba(0, 0, 36, .15));
 }
 .pin {
@@ -38,11 +54,25 @@
   background: #cc0001;
   box-shadow: 0 0 0 3px rgba(1, 0, 70, .4);
 }
-.pinSelected .pinDot { background: #ffcc00; box-shadow: 0 0 0 5px rgba(255, 204, 0, .25); }
+/* One persistent highlight travels between the fixed city dots. */
+.activeMarker {
+  position: absolute;
+  z-index: 4;
+  width: 13px;
+  height: 13px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #ffcc00;
+  box-shadow: 0 0 0 5px rgba(255, 204, 0, .25);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: left .9s cubic-bezier(.4, 0, .2, 1), top .9s cubic-bezier(.4, 0, .2, 1);
+}
 .pinLabel {
   position: absolute;
   left: calc(50% + 11px);
   pointer-events: none;
+  transition: background-color .45s ease, color .45s ease;
   padding: 4px 7px;
   border-radius: 100px;
   background: #010066;
@@ -59,7 +89,7 @@
   border-top: 1px solid rgba(255, 255, 255, .22);
   color: #fff;
 }
-.selectedDetails { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
+.selectedDetails { animation: detailsIn .45s ease; display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
 .selectedDetails strong { font-size: 15px; font-weight: 600; line-height: 1.2; white-space: nowrap; }
 .selectedDetails small { color: rgba(255, 255, 255, .66); font-size: 11px; }
 .actions { display: flex; gap: 6px; align-items: center; flex: none; }
@@ -80,6 +110,56 @@
 .selectedCard a svg:last-child { display: none; }
 .selectedCard a:hover { border-color: #ffcc00; }
 .selectedCard a:focus-visible, .chapterList button:focus-visible { outline: 2px solid #ffcc00; outline-offset: 3px; }
+@keyframes detailsIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rotationToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 32px;
+  margin: 8px 0 0 auto;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 100px;
+  background: transparent;
+  color: rgba(255, 255, 255, .75);
+  font-size: 11px;
+  cursor: pointer;
+}
+.rotationToggle:hover { color: #ffcc00; }
+.rotationToggle:focus-visible { outline: 2px solid #ffcc00; outline-offset: 2px; }
+.photoCredits { color: rgba(255, 255, 255, .7); font-size: 10px; line-height: 1.6; }
+.photoCredits summary { display: flex; align-items: center; gap: 6px; width: fit-content; min-height: 28px; cursor: pointer; list-style: none; transition: color .3s ease; }
+.photoCredits summary::-webkit-details-marker { display: none; }
+.photoCredits summary::before { content: ""; width: 5px; height: 5px; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; transform: rotate(-45deg); transition: transform .3s ease; }
+.photoCredits[open] summary::before { transform: rotate(45deg); }
+.photoCredits summary:hover, .photoCredits[open] summary { color: #ffdc55; }
+.photoCredits[open] .creditContent { animation: creditsReveal .35s ease both; }
+.creditContent { max-height: 240px; overflow-y: auto; padding-right: 8px; scrollbar-width: thin; }
+@keyframes creditsReveal {
+  from { max-height: 0; opacity: 0; transform: translateY(-3px); }
+  to { max-height: 240px; opacity: 1; transform: translateY(0); }
+}
+/* Animate the disclosure itself so surrounding content moves with the reveal. */
+@supports (interpolate-size: allow-keywords) {
+  .photoCredits::details-content {
+    interpolate-size: allow-keywords;
+    block-size: 0;
+    overflow: clip;
+    opacity: 0;
+    transition: block-size .4s cubic-bezier(.22, 1, .36, 1), opacity .3s ease, content-visibility .4s allow-discrete;
+  }
+  .photoCredits[open]::details-content { block-size: auto; opacity: 1; }
+  .photoCredits[open] .creditContent { animation: none; }
+}
+.photoCredits summary:focus-visible, .photoCredits a:focus-visible { outline: 2px solid #ffcc00; outline-offset: 3px; }
+.photoCredits ul { margin: 8px 0; padding-left: 16px; }
+.photoCredits a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.photoCredits a:hover { color: #ffcc00; }
+.photoCredits p { margin: 8px 0 0; }
 .chapterList { display: none; }
 .pendingLink { color: rgba(255, 255, 255, .66); font-size: 11px; }
 @media (max-width: 600px) {
@@ -106,5 +186,12 @@
   .chapterList button[aria-pressed=true] { border-color: #ffcc00; background: #ffcc00; color: #010066; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pin { transition: none; }
+  .module[data-ready=true], .module[data-ready=true] * { animation: none; opacity: 1; }
+  .pin, .pinLabel, .activeMarker, .photoCredits summary, .photoCredits summary::before { transition: none; }
+  .selectedDetails, .photoCredits[open] .creditContent { animation: none; }
+  .photoCredits::details-content { transition: none; }
+}
+
+@media (max-width: 1023px) {
+  .photoCredits { display: none; }
 }

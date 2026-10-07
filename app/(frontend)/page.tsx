@@ -1,9 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import { SITE_NAME_FULL, SITE_DESCRIPTION } from "@/utils/seo";
 import HeroSection from "./sections/hero";
-import StatisticSection from "./sections/statistic";
-import AustraliaChapterMap from "./_components/AustraliaChapterMap";
 import EventShowcaseSection from "./sections/eventShowcase";
 import MascaCareSection from "./sections/mascaCare";
 import CareerSpotlightSection from "./sections/careerSpotlight";
@@ -17,6 +15,13 @@ import { getSponsors } from "@/utils/sponsors";
 
 // Refresh time-based event expiry between editor-triggered revalidations.
 export const revalidate = 60;
+
+// Let Safari render the page beneath its floating browser controls.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: { absolute: SITE_NAME_FULL },
@@ -41,10 +46,9 @@ export default async function Home() {
   const sponsors = await getSponsors();
 
   return (
-   <main id="main">
+   <main id="main" className="bg-white">
       <div className="flex min-h-svh flex-col bg-blue-600">
-        <HeroSection chapterMap={<AustraliaChapterMap />} />
-        <StatisticSection />
+        <HeroSection />
       </div>
       <AboutSection />
       <YearbookSection />
