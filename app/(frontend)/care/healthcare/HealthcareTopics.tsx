@@ -84,24 +84,12 @@ export default function HealthcareTopics() {
         </div>
       </section>
 
-      <section className="bg-yellow-50">
-        <div className="container flex flex-col items-start justify-between gap-5 py-12 md:flex-row md:items-center">
-          <div>
-            <span className="eyebrow text-red-600">need another kind of support?</span>
-            <h2 className="mt-3 text-blue-600">Explore other Cares pathways.</h2>
-          </div>
-          <a href="/care#choose-a-path" className="inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-            Back to Cares
-          </a>
-        </div>
-      </section>
-
       <section id="additional-links" aria-labelledby="healthcare-links-heading" className="bg-white">
         <div className="container section-pad">
           <div className="mx-auto max-w-6xl">
             <span className="eyebrow text-red-600">keep exploring</span>
             <h2 id="healthcare-links-heading" className="mt-4 text-blue-600">Additional links</h2>
-            <p className="mt-4 text-gray-700">Placeholder links for healthcare resources. These can be replaced with verified resources later.</p>
+            <p className="mt-4 text-gray-700">Explore more on these topics.</p>
             <div className="mt-7 grid gap-3 sm:grid-cols-3">
               {additionalLinks.map((link) => (
                 <a
