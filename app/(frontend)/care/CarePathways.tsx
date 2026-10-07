@@ -195,7 +195,9 @@ export default function CarePathways() {
                 return (
                   <a
                     key={item.title}
-                    href="#quick-support"
+                    href={item.title === "Healthcare" ? "/care/healthcare" : "#quick-support"}
+                    target={item.title === "Healthcare" ? "_blank" : undefined}
+                    rel={item.title === "Healthcare" ? "noopener noreferrer" : undefined}
                     className="group flex min-h-52 flex-col rounded-lg bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                   >
                     <span className="flex items-center justify-between text-blue-600">
