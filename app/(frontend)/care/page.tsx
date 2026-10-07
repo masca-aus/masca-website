@@ -89,9 +89,6 @@ export default function MascaCaresPage() {
               Download numbers PDF <span aria-hidden>&darr;</span>
             </Button>
           </div>
-          <p className="mt-4 text-center text-xs text-gray-600">
-            Details checked against <a className="underline" href="https://www.healthdirect.gov.au/" target="_blank" rel="noreferrer">healthdirect</a> and the <a className="underline" href="https://jpt.mohe.gov.my/index.php/ms/hubungi-kami/pejabat-education-malaysia" target="_blank" rel="noreferrer">Malaysian Ministry of Higher Education</a>.
-          </p>
         </div>
       </section>
 
