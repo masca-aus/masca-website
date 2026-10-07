@@ -3,9 +3,11 @@
 import { useState } from "react";
 import {
   ArrowRight,
+  Brain,
   BriefcaseBusiness,
   Camera,
   HeartHandshake,
+  HeartPulse,
   Home,
   GraduationCap,
   MapPin,
@@ -33,9 +35,9 @@ const pathways = [
     activeEyebrow: "text-yellow-500",
     activeDescription: "text-blue-100",
     items: [
-      { title: "Wellbeing", detail: "Start with how you are feeling", icon: Sparkles },
-      { title: "Accommodation", detail: "Find a safer next step", icon: Home },
-      { title: "Local support", detail: "Connect with your state", icon: MapPin },
+      { title: "Healthcare", detail: "Find a GP, doctor, hospital or other health service.", icon: HeartPulse },
+      { title: "Mental Health", detail: "Explore counselling, wellbeing support and professional care.", icon: Brain },
+      { title: "Personal Safety", detail: "Find support for safety concerns and unsafe situations.", icon: ShieldCheck },
     ],
   },
   {
