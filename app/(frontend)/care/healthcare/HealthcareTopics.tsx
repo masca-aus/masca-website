@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 const topics = [
   {
@@ -9,6 +10,7 @@ const topics = [
     detail:
       "A general practitioner (GP) is often a useful first contact for non-emergency health concerns. GPs can assess your needs and help you understand what care to seek next.",
     nextStep: "Look for a local clinic, check appointment options, and ask whether the clinic bulk bills or has fees before you book.",
+    image: { src: "/illustrations/healthcare-gp.svg", alt: "Illustration of a GP clinic and doctor" },
   },
   {
     id: "hospitals",
@@ -16,6 +18,7 @@ const topics = [
     detail:
       "Hospitals provide emergency and specialist care. For a life-threatening emergency in Australia, call Triple Zero (000). For non-emergency concerns, contact a GP or health advice service first.",
     nextStep: "If you are unsure where to go, contact a health advice service or your local clinic for guidance.",
+    image: { src: "/illustrations/healthcare-hospital.svg", alt: "Illustration of a hospital and ambulance" },
   },
   {
     id: "finding-care",
@@ -23,6 +26,7 @@ const topics = [
     detail:
       "Your university health service, a local GP clinic, or a community health centre can help you find care that suits your situation.",
     nextStep: "Before your appointment, check what identification and health cover details to bring, and ask about costs if you are unsure.",
+    image: null,
   },
 ] as const;
 
@@ -74,11 +78,30 @@ export default function HealthcareTopics() {
             >
               <span className="eyebrow text-red-600">healthcare in Australia</span>
               <h2 className="mt-4 text-blue-600">{activeTopic.label}</h2>
-              <p className="mt-5 max-w-2xl leading-relaxed text-gray-700">{activeTopic.detail}</p>
+              <div className={`mt-5 grid items-center gap-6 ${activeTopic.image ? "md:grid-cols-[minmax(0,1fr)_minmax(15rem,0.85fr)]" : ""}`}>
+                <p className="max-w-2xl leading-relaxed text-gray-700">{activeTopic.detail}</p>
+                {activeTopic.image ? (
+                  <Image
+                    src={activeTopic.image.src}
+                    alt={activeTopic.image.alt}
+                    width={640}
+                    height={360}
+                    className="h-auto w-full rounded-xl"
+                  />
+                ) : null}
+              </div>
               <div className="mt-8 rounded-lg border-l-4 border-yellow-500 bg-yellow-50 p-5">
                 <h3 className="font-secondary text-xl font-bold text-blue-600">A helpful next step</h3>
                 <p className="mt-2 leading-relaxed text-gray-700">{activeTopic.nextStep}</p>
               </div>
+              <button
+                type="button"
+                disabled
+                className="mt-6 inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-bold text-blue-400"
+                aria-label={`Download PDF for ${activeTopic.label} (sample button)`}
+              >
+                Download PDF <span aria-hidden="true">↓</span>
+              </button>
             </article>
           </div>
         </div>
