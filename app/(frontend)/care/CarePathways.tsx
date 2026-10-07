@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ArrowRight,
   Brain,
@@ -128,7 +128,15 @@ const communityLinks = [
 
 export default function CarePathways() {
   const [active, setActive] = useState<PathwayKey>("wellbeing");
+  const detailsRef = useRef<HTMLDivElement>(null);
   const selected = pathways.find((pathway) => pathway.key === active) ?? pathways[0];
+
+  function explorePathway(pathway: PathwayKey) {
+    setActive(pathway);
+    requestAnimationFrame(() => {
+      detailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
 
   return (
     <>
@@ -150,7 +158,7 @@ export default function CarePathways() {
                 key={pathway.key}
                 type="button"
                 aria-pressed={isActive}
-                onClick={() => setActive(pathway.key)}
+                onClick={() => explorePathway(pathway.key)}
                 className={`group min-h-72 rounded-xl border-2 p-7 text-left transition duration-200 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-yellow-500 md:p-8 ${
                   isActive
                     ? pathway.activeCard
@@ -175,7 +183,7 @@ export default function CarePathways() {
           })}
         </div>
 
-        <div className="mt-8 overflow-hidden rounded-xl border-2 border-blue-100 bg-blue-50" aria-live="polite">
+        <div ref={detailsRef} id="pathway-details" className="mt-8 scroll-mt-24 overflow-hidden rounded-xl border-2 border-blue-100 bg-blue-50" aria-live="polite">
           <div className="grid lg:grid-cols-[0.75fr_1.25fr]">
             <div className="flex flex-col justify-between bg-white p-7 md:p-10">
               <div>
