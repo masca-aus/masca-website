@@ -40,6 +40,63 @@ export default function MascaCaresPage() {
         </div>
       </section>
 
+      <section aria-labelledby="helplines-heading" className="bg-blue-50">
+        <div className="container section-pad">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="eyebrow text-red-600">save these contacts</span>
+            <h2 id="helplines-heading" className="mt-4 text-blue-600">Help is one call away.</h2>
+            <p className="mt-5 text-gray-700">
+              Keep these trusted contacts close. If someone is in immediate danger, call Triple Zero (000).
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            <article className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm md:p-7">
+              <span className="eyebrow text-blue-600">health advice</span>
+              <h3 className="mt-3 font-secondary text-2xl font-bold text-blue-600">healthdirect</h3>
+              <p className="mt-3 min-h-16 leading-relaxed text-gray-700">
+                Free, 24/7 advice from a registered nurse for non-emergency health concerns.
+              </p>
+              <a className="mt-5 inline-block text-2xl font-bold text-blue-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:1800022222">1800 022 222</a>
+            </article>
+
+            <article className="rounded-xl border border-red-100 bg-white p-6 shadow-sm md:p-7">
+              <span className="eyebrow text-red-600">immediate danger</span>
+              <h3 className="mt-3 font-secondary text-2xl font-bold text-blue-600">Triple Zero</h3>
+              <p className="mt-3 min-h-16 leading-relaxed text-gray-700">
+                Call for police, fire or ambulance in a life-threatening emergency.
+              </p>
+              <a className="mt-5 inline-block text-2xl font-bold text-red-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:000">000</a>
+            </article>
+
+            <article className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm md:p-7">
+              <span className="eyebrow text-blue-600">student support</span>
+              <h3 className="mt-3 font-secondary text-2xl font-bold text-blue-600">Education Malaysia Australia</h3>
+              <p className="mt-3 min-h-16 leading-relaxed text-gray-700">
+                Contact EMA for support and enquiries for Malaysian students in Australia.
+              </p>
+              <div className="mt-5 flex flex-col items-start gap-1">
+                <a className="text-xl font-bold text-blue-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:+61293277565">+61 2 9327 7565</a>
+                <a className="text-xl font-bold text-blue-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:+61293277596">+61 2 9327 7596</a>
+              </div>
+            </article>
+          </div>
+
+          <div className="mt-8 flex flex-col items-center gap-4 rounded-xl bg-blue-600 px-6 py-8 text-center text-white md:flex-row md:justify-between md:px-9 md:text-left">
+            <div>
+              <h3 className="font-secondary text-2xl font-bold text-white">Keep help close, even offline.</h3>
+              <p className="mt-2 max-w-2xl text-blue-100">Download the emergency numbers card so these contacts are there when you need them, even without internet.</p>
+            </div>
+            <Button href="/care-emergency-numbers.pdf" variant="accent" className="shrink-0" target="_blank" rel="noopener">
+              Download numbers PDF <span aria-hidden>&darr;</span>
+            </Button>
+          </div>
+          <p className="mt-4 text-center text-xs text-gray-600">
+            Details checked against <a className="underline" href="https://www.healthdirect.gov.au/" target="_blank" rel="noreferrer">healthdirect</a> and the <a className="underline" href="https://jpt.mohe.gov.my/index.php/ms/hubungi-kami/pejabat-education-malaysia" target="_blank" rel="noreferrer">Malaysian Ministry of Higher Education</a>.
+          </p>
+        </div>
+      </section>
+
       <CarePathways />
 
       <section id="quick-support" className="bg-blue-50">
