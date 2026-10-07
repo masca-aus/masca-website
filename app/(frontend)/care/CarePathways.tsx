@@ -4,12 +4,12 @@ import { useState } from "react";
 import {
   ArrowRight,
   BriefcaseBusiness,
-  Camera,
+  Facebook,
   HeartHandshake,
   Home,
   GraduationCap,
+  Instagram,
   MapPin,
-  MessageCircle,
   Scale,
   ShieldCheck,
   Sparkles,
@@ -63,13 +63,13 @@ const pathways = [
     title: "Academic",
     description: "Find support that helps you stay connected to your study goals.",
     icon: GraduationCap,
-    accent: "bg-yellow-500",
-    soft: "bg-yellow-50",
-    text: "text-yellow-800",
-    activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2",
-    activeIcon: "bg-blue-600 text-white",
-    activeEyebrow: "text-blue-800",
-    activeDescription: "text-blue-900",
+    accent: "bg-blue-600",
+    soft: "bg-blue-50",
+    text: "text-blue-600",
+    activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2",
+    activeIcon: "bg-yellow-500 text-blue-900",
+    activeEyebrow: "text-yellow-500",
+    activeDescription: "text-blue-100",
     items: [
       { title: "Study support", detail: "Get back into your rhythm", icon: GraduationCap },
       { title: "Your options", detail: "Understand the next step", icon: Scale },
@@ -82,13 +82,13 @@ const pathways = [
     title: "Settling in",
     description: "Just landed in Australia? Get the essentials you need to settle in, find your feet, and survive those first few weeks away from home.",
     icon: Home,
-    accent: "bg-blue-600",
-    soft: "bg-blue-50",
-    text: "text-blue-600",
-    activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2",
-    activeIcon: "bg-yellow-500 text-blue-900",
-    activeEyebrow: "text-yellow-500",
-    activeDescription: "text-blue-100",
+    accent: "bg-yellow-500",
+    soft: "bg-yellow-50",
+    text: "text-yellow-800",
+    activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2",
+    activeIcon: "bg-blue-600 text-white",
+    activeEyebrow: "text-blue-800",
+    activeDescription: "text-blue-900",
     items: [
       { title: "Accommodation", detail: "Find a safer next step", icon: Home },
       { title: "Local support", detail: "Connect with your state", icon: MapPin },
@@ -97,30 +97,35 @@ const pathways = [
   },
 ] as const;
 
-const states = ["VIC", "NSW", "QLD", "WA", "SA", "ACT", "TAS"];
+const states = [
+  { code: "VIC", instagram: "https://www.instagram.com/mascavic/" },
+  { code: "NSW", instagram: "https://www.instagram.com/masca_nsw/" },
+  { code: "QLD" },
+  { code: "WA" },
+  { code: "SA" },
+  { code: "ACT" },
+  { code: "TAS" },
+];
 
 const communityLinks = [
   {
     key: "instagram",
     label: "Instagram",
     description: "Stay in the loop! Get latest updates on events, gatherings, and everything happening in our community.",
-    icon: Camera,
-    href: "#state-instagram",
-    colour: "bg-red-50 text-red-600",
+    icon: Instagram,
+    colour: "bg-pink-50 text-pink-600",
   },
   {
-    key: "whatsapp",
-    label: "WhatsApp group chat",
+    key: "facebook",
+    label: "Facebook",
     description: "Meet, connect & support! Join the group to make new friends, ask questions, share tips, and find your people in the community.",
-    icon: MessageCircle,
-    href: "#state-whatsapp",
+    icon: Facebook,
     colour: "bg-blue-50 text-blue-600",
   },
 ] as const;
 
 export default function CarePathways() {
   const [active, setActive] = useState<PathwayKey>("wellbeing");
-  const [state, setState] = useState("VIC");
   const selected = pathways.find((pathway) => pathway.key === active) ?? pathways[0];
 
   return (
@@ -207,66 +212,47 @@ export default function CarePathways() {
       </section>
 
       <section className="bg-yellow-50">
-        <div className="container section-pad grid items-center gap-12 lg:grid-cols-[0.8fr_1.2fr]">
-          <div>
+        <div className="container section-pad">
+          <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow text-red-600">get connected with your state counterparts</span>
-            <h2 className="mt-4 max-w-xl text-blue-600">Find your state. Find your people.</h2>
-            <p className="mt-5 max-w-xl text-gray-700">
+            <h2 className="mt-4 text-blue-600">Find your state. Find your people.</h2>
+            <p className="mt-5 text-gray-700">
               Looking for support closer to home? Connect with your state counterparts for local events, updates, resources and a community of Malaysians who know the area.
             </p>
           </div>
 
-          <div className="rounded-xl bg-white p-6 shadow-lg md:p-9">
-            <div className="flex flex-wrap gap-2" aria-label="Choose a state or territory">
-              {states.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  aria-pressed={state === item}
-                  onClick={() => setState(item)}
-                  className={`min-h-11 rounded-lg px-4 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
-                    state === item ? "bg-blue-600 text-white" : "bg-blue-50 text-blue-600 hover:bg-blue-100"
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-7 border-t border-blue-100 pt-7">
-              <div className="flex items-start gap-4">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600">
-                  <MapPin size={22} aria-hidden="true" />
-                </span>
-                <div>
-                  <span className="eyebrow text-gray-700">selected chapter</span>
-                  <p className="mt-1 font-secondary text-2xl font-bold text-blue-600">MASCA {state}</p>
-                </div>
-              </div>
-
-              <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                {communityLinks.map((link) => {
-                  const Icon = link.icon;
-                  return (
-                    <a
-                      key={link.key}
-                      href={link.href}
-                      aria-label={`${link.label} for MASCA ${state} (link placeholder)`}
-                      className="group flex min-h-56 flex-col rounded-lg border border-blue-100 bg-white p-5 transition hover:-translate-y-1 hover:border-blue-600 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                    >
-                      <span className={`flex h-11 w-11 items-center justify-center rounded-lg ${link.colour}`}>
-                        <Icon size={22} aria-hidden="true" />
-                      </span>
-                      <strong className="mt-6 text-lg text-blue-600">{link.label}</strong>
-                      <span className="mt-2 text-sm leading-relaxed text-gray-700">{link.description}</span>
-                      <span className="mt-auto flex items-center gap-2 pt-5 text-sm font-bold text-blue-600">
-                        MASCA {state} <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />
-                      </span>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
+          <div className="mt-10 grid gap-5 lg:grid-cols-2">
+            {communityLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <article key={link.key} className="rounded-xl border border-blue-100 bg-white p-6 shadow-lg md:p-8">
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${link.colour}`}>
+                    <Icon size={24} aria-hidden="true" />
+                  </div>
+                  <h3 className="mt-5 font-secondary text-2xl font-bold text-blue-600">{link.label}</h3>
+                  <p className="mt-2 min-h-14 text-sm leading-relaxed text-gray-700">{link.description}</p>
+                  <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label={`${link.label} by state`}>
+                    {states.map((item) => {
+                      const query = encodeURIComponent(`MASCA ${item.code} Malaysian students Australia`);
+                      const href = link.key === "instagram"
+                        ? item.instagram ?? `https://www.instagram.com/explore/search/keyword/?q=${query}`
+                        : `https://www.facebook.com/search/top?q=${query}`;
+                      return (
+                        <a
+                          key={item.code}
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex min-h-11 items-center justify-between gap-2 rounded-lg bg-blue-50 px-3 text-sm font-bold text-blue-600 transition hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                        >
+                          MASCA {item.code}<ArrowRight size={15} aria-hidden="true" />
+                        </a>
+                      );
+                    })}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </div>
       </section>
