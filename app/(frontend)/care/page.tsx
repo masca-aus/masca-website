@@ -49,15 +49,6 @@ export default function MascaCaresPage() {
           </div>
 
           <div className="mt-10 grid gap-5 md:grid-cols-3">
-            <article className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm md:p-7">
-              <span className="eyebrow text-blue-600">health advice</span>
-              <h3 className="mt-3 font-secondary text-2xl font-bold text-blue-600">healthdirect</h3>
-              <p className="mt-3 min-h-16 leading-relaxed text-gray-700">
-                Free, 24/7 advice from a registered nurse for non-emergency health concerns.
-              </p>
-              <a className="mt-5 inline-block text-2xl font-bold text-blue-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:1800022222">1800 022 222</a>
-            </article>
-
             <article className="rounded-xl border border-red-100 bg-white p-6 shadow-sm md:p-7">
               <span className="eyebrow text-red-600">immediate danger</span>
               <h3 className="mt-3 font-secondary text-2xl font-bold text-blue-600">Triple Zero</h3>
@@ -65,6 +56,15 @@ export default function MascaCaresPage() {
                 Call for police, fire or ambulance in a life-threatening emergency.
               </p>
               <a className="mt-5 inline-block text-2xl font-bold text-red-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:000">000</a>
+            </article>
+
+            <article className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm md:p-7">
+              <span className="eyebrow text-blue-600">health advice</span>
+              <h3 className="mt-3 font-secondary text-2xl font-bold text-blue-600">healthdirect Australia</h3>
+              <p className="mt-3 min-h-16 leading-relaxed text-gray-700">
+                Free, 24/7 advice from a registered nurse for non-emergency health concerns.
+              </p>
+              <a className="mt-5 inline-block text-2xl font-bold text-blue-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:1800022222">1800 022 222</a>
             </article>
 
             <article className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm md:p-7">
