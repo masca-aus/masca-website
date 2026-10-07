@@ -45,9 +45,7 @@ export default function MascaCaresPage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow text-red-600">save these contacts</span>
             <h2 id="helplines-heading" className="mt-4 text-blue-600">Help is one call away.</h2>
-            <p className="mt-5 text-gray-700">
-              Keep these trusted contacts close. If someone is in immediate danger, call Triple Zero (000).
-            </p>
+            <p className="mt-5 text-gray-700">Keep these trusted contacts close.</p>
           </div>
 
           <div className="mt-10 grid gap-5 md:grid-cols-3">
