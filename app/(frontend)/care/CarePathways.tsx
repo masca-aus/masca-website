@@ -116,11 +116,11 @@ const communityLinks = [
     colour: "bg-pink-50 text-pink-600",
   },
   {
-    key: "facebook",
-    label: "Facebook",
+    key: "whatsapp",
+    label: "WhatsApp",
     description: "Meet, connect & support! Join the group to make new friends, ask questions, share tips, and find your people in the community.",
     icon: MessageCircle,
-    colour: "bg-blue-50 text-blue-600",
+    colour: "bg-green-50 text-green-700",
   },
 ] as const;
 
@@ -233,17 +233,23 @@ export default function CarePathways() {
                   <p className="mt-2 min-h-14 text-sm leading-relaxed text-gray-700">{link.description}</p>
                   <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label={`${link.label} by state`}>
                     {states.map((item) => {
+                      const tileClass = "inline-flex min-h-11 items-center justify-between gap-2 rounded-lg bg-blue-50 px-3 text-sm font-bold text-blue-600 transition hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600";
+                      if (link.key === "whatsapp") {
+                        return (
+                          <span key={item.code} aria-disabled="true" className={`${tileClass} cursor-default opacity-60 hover:bg-blue-50`}>
+                            {item.code}<ArrowRight size={15} aria-hidden="true" />
+                          </span>
+                        );
+                      }
                       const query = encodeURIComponent(`MASCA ${item.code} Malaysian students Australia`);
-                      const href = link.key === "instagram"
-                        ? item.instagram ?? `https://www.instagram.com/explore/search/keyword/?q=${query}`
-                        : `https://www.facebook.com/search/top?q=${query}`;
+                      const href = item.instagram ?? `https://www.instagram.com/explore/search/keyword/?q=${query}`;
                       return (
                         <a
                           key={item.code}
                           href={href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex min-h-11 items-center justify-between gap-2 rounded-lg bg-blue-50 px-3 text-sm font-bold text-blue-600 transition hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                          className={tileClass}
                         >
                           {item.code}<ArrowRight size={15} aria-hidden="true" />
                         </a>

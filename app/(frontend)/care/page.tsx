@@ -54,7 +54,7 @@ export default function MascaCaresPage() {
               <p className="mt-3 min-h-16 leading-relaxed text-gray-700">
                 Call for police, fire or ambulance in a life-threatening emergency.
               </p>
-              <div className="mt-5 flex flex-col items-start">
+              <div className="mt-5 flex flex-col items-center text-center">
                 <a className="text-2xl font-bold text-red-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:000">000</a>
                 <a href="/contacts/triple-zero.vcf" download className="mt-3 inline-flex min-h-10 items-center justify-center rounded-lg border border-blue-600 px-4 py-2 text-sm font-bold text-blue-600 transition hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Add To Contact</a>
               </div>
@@ -72,12 +72,12 @@ export default function MascaCaresPage() {
               <p className="mt-3 min-h-16 leading-relaxed text-gray-700">
                 Contact EMA for support and enquiries for Malaysian students in Australia.
               </p>
-              <div className="mt-5 flex flex-col items-start gap-4">
-                <div className="flex flex-col items-start">
+              <div className="mt-5 flex flex-col items-center gap-4 text-center">
+                <div className="flex flex-col items-center">
                   <a className="text-xl font-bold text-blue-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:+61293277565">+61 2 9327 7565</a>
                   <a href="/contacts/education-malaysia-australia-7565.vcf" download className="mt-3 inline-flex min-h-10 items-center justify-center rounded-lg border border-blue-600 px-4 py-2 text-sm font-bold text-blue-600 transition hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Add To Contact</a>
                 </div>
-                <div className="flex flex-col items-start">
+                <div className="flex flex-col items-center">
                   <a className="text-xl font-bold text-blue-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:+61293277596">+61 2 9327 7596</a>
                   <a href="/contacts/education-malaysia-australia-7596.vcf" download className="mt-3 inline-flex min-h-10 items-center justify-center rounded-lg border border-blue-600 px-4 py-2 text-sm font-bold text-blue-600 transition hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Add To Contact</a>
                 </div>
