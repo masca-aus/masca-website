@@ -245,7 +245,7 @@ export default function CarePathways() {
                           rel="noopener noreferrer"
                           className="inline-flex min-h-11 items-center justify-between gap-2 rounded-lg bg-blue-50 px-3 text-sm font-bold text-blue-600 transition hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                         >
-                          MASCA {item.code}<ArrowRight size={15} aria-hidden="true" />
+                          {item.code}<ArrowRight size={15} aria-hidden="true" />
                         </a>
                       );
                     })}
