@@ -96,9 +96,11 @@ function BoardPeek({ jobs, total }: { jobs: Job[]; total: number }) {
                     {job.company}
                     {job.location && <span className="text-gray-700/80"> · {job.location}</span>}
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <WorkingRightsBadge value={job.international} compact />
-                  </div>
+                  {job.country?.key !== "malaysia" && (
+                    <div className="flex flex-wrap gap-1.5">
+                      <WorkingRightsBadge value={job.international} compact />
+                    </div>
+                  )}
                 </div>
               </Link>
             </li>
