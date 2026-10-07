@@ -9,7 +9,6 @@ const topics = [
     label: "GPs and doctors",
     detail:
       "A general practitioner (GP) is often a useful first contact for non-emergency health concerns. GPs can assess your needs and help you understand what care to seek next.",
-    nextStep: "Look for a local clinic, check appointment options, and ask whether the clinic bulk bills or has fees before you book.",
     image: { src: "/illustrations/healthcare-gp.svg", alt: "Illustration of a GP clinic and doctor" },
   },
   {
@@ -17,15 +16,13 @@ const topics = [
     label: "Hospitals",
     detail:
       "Hospitals provide emergency and specialist care. For a life-threatening emergency in Australia, call Triple Zero (000). For non-emergency concerns, contact a GP or health advice service first.",
-    nextStep: "If you are unsure where to go, contact a health advice service or your local clinic for guidance.",
-    image: { src: "/illustrations/healthcare-hospital.svg", alt: "Illustration of a hospital and ambulance" },
+    image: null,
   },
   {
     id: "finding-care",
     label: "Finding the right care",
     detail:
       "Your university health service, a local GP clinic, or a community health centre can help you find care that suits your situation.",
-    nextStep: "Before your appointment, check what identification and health cover details to bring, and ask about costs if you are unsure.",
     image: null,
   },
 ] as const;
@@ -90,18 +87,16 @@ export default function HealthcareTopics() {
                   />
                 ) : null}
               </div>
-              <div className="mt-8 rounded-lg border-l-4 border-yellow-500 bg-yellow-50 p-5">
-                <h3 className="font-secondary text-xl font-bold text-blue-600">A helpful next step</h3>
-                <p className="mt-2 leading-relaxed text-gray-700">{activeTopic.nextStep}</p>
-              </div>
-              <button
-                type="button"
-                disabled
-                className="mt-6 inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-bold text-blue-400"
-                aria-label={`Download PDF for ${activeTopic.label} (sample button)`}
-              >
-                Download PDF <span aria-hidden="true">↓</span>
-              </button>
+              {activeTopic.id === "hospitals" ? (
+                <button
+                  type="button"
+                  disabled
+                  className="mt-6 inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-bold text-blue-400"
+                  aria-label="Download PDF for Hospitals (sample button)"
+                >
+                  Download PDF <span aria-hidden="true">↓</span>
+                </button>
+              ) : null}
             </article>
           </div>
         </div>
@@ -112,7 +107,6 @@ export default function HealthcareTopics() {
           <div className="mx-auto max-w-6xl">
             <span className="eyebrow text-red-600">keep exploring</span>
             <h2 id="healthcare-links-heading" className="mt-4 text-blue-600">Additional links</h2>
-            <p className="mt-4 text-gray-700">Explore more on these topics.</p>
             <div className="mt-7 grid gap-3 sm:grid-cols-3">
               {additionalLinks.map((link) => (
                 <a
