@@ -60,7 +60,7 @@ export default function MascaCaresPage() {
 
             <article className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm md:p-7">
               <span className="eyebrow text-blue-600">health advice</span>
-              <h3 className="mt-3 font-secondary text-2xl font-bold text-blue-600">healthdirect Australia</h3>
+              <h3 className="mt-3 font-secondary text-2xl font-bold text-blue-600">Healthcare Australia</h3>
               <p className="mt-3 min-h-16 leading-relaxed text-gray-700">
                 Free, 24/7 advice from a registered nurse for non-emergency health concerns.
               </p>
@@ -86,7 +86,7 @@ export default function MascaCaresPage() {
               <p className="mt-2 max-w-2xl text-blue-100">Download the emergency numbers card so these contacts are there when you need them, even without internet.</p>
             </div>
             <Button href="/care-emergency-numbers.pdf" variant="accent" className="shrink-0" target="_blank" rel="noopener">
-              Download numbers PDF <span aria-hidden>&darr;</span>
+              Download PDF
             </Button>
           </div>
         </div>
