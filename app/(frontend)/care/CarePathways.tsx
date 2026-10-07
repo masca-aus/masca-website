@@ -4,12 +4,12 @@ import { useState } from "react";
 import {
   ArrowRight,
   BriefcaseBusiness,
-  Facebook,
+  Camera,
   HeartHandshake,
   Home,
   GraduationCap,
-  Instagram,
   MapPin,
+  MessageCircle,
   Scale,
   ShieldCheck,
   Sparkles,
@@ -97,7 +97,7 @@ const pathways = [
   },
 ] as const;
 
-const states = [
+const states: { code: string; instagram?: string }[] = [
   { code: "VIC", instagram: "https://www.instagram.com/mascavic/" },
   { code: "NSW", instagram: "https://www.instagram.com/masca_nsw/" },
   { code: "QLD" },
@@ -112,14 +112,14 @@ const communityLinks = [
     key: "instagram",
     label: "Instagram",
     description: "Stay in the loop! Get latest updates on events, gatherings, and everything happening in our community.",
-    icon: Instagram,
+    icon: Camera,
     colour: "bg-pink-50 text-pink-600",
   },
   {
     key: "facebook",
     label: "Facebook",
     description: "Meet, connect & support! Join the group to make new friends, ask questions, share tips, and find your people in the community.",
-    icon: Facebook,
+    icon: MessageCircle,
     colour: "bg-blue-50 text-blue-600",
   },
 ] as const;
