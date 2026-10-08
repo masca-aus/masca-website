@@ -1,3 +1,4 @@
+import { transactionRead } from '../features/admin/transactionRead.ts';
 import { listingAction } from '../features/submissions/listingActions.ts';
 import { submittedForReviewField, completeSubmissionReview, reviewFields } from "../features/submissions/review.ts";
 import { adminSearchFields, adminSearchHooks, withAdminSearch } from '../features/admin/adminSearch.ts';
@@ -74,7 +75,7 @@ export const Careers: CollectionConfig = {
     { name: 'sourceKey', type: 'text', unique: true, access: { read: ({ req }) => Boolean(req.user), update: () => false }, admin: { hidden: true } },
     { name: 'lifecycle', type: 'text', virtual: true, label: 'Listing state', admin: { disableListColumn: true, components: { Field: false, Cell: '/components/admin/CareerLifecycleCell#CareerLifecycleCell' }, disableBulkEdit: true }, hooks: { afterRead: [async ({ data, req }: Parameters<FieldHook>[0]) => {
       if (!req.user || !data?.id) return undefined;
-      const record = (await req.payload.find({ collection: 'career-lifecycle', where: { career: { equals: data.id } }, limit: 1, depth: 0, req, overrideAccess: true })).docs[0];
+      const record = (await transactionRead(req, () => req.payload.find({ collection: 'career-lifecycle', where: { career: { equals: data.id } }, limit: 1, depth: 0, req, overrideAccess: true }))).docs[0];
       return record?.status ?? 'active';
     }] } },
     { name: 'careerWizardFooter', type: 'ui', admin: { components: { Field: '/components/admin/CareerEditor#CareerEditorFooter' }, disableListColumn: true, disableBulkEdit: true } },

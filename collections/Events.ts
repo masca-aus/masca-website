@@ -1,3 +1,4 @@
+import { transactionRead } from '../features/admin/transactionRead.ts';
 import { listingAction } from '../features/submissions/listingActions.ts';
 import { submittedForReviewField, completeSubmissionReview, reviewFields } from "../features/submissions/review.ts";
 import { adminSearchFields, adminSearchHooks, withAdminSearch } from '../features/admin/adminSearch.ts';
@@ -109,7 +110,7 @@ export const Events: CollectionConfig = {
       admin: { disableListColumn: true, components: { Field: false, Cell: '/components/admin/EventLifecycleCell#EventLifecycleCell' }, disableBulkEdit: true },
       hooks: { afterRead: [async ({ data, req }: Parameters<FieldHook>[0]) => {
         if (!req.user || !data?.id) return undefined;
-        const rows = await req.payload.find({ collection: 'event-lifecycle', where: { event: { equals: data.id } }, limit: 1, depth: 0, req, overrideAccess: true });
+        const rows = await transactionRead(req, () => req.payload.find({ collection: 'event-lifecycle', where: { event: { equals: data.id } }, limit: 1, depth: 0, req, overrideAccess: true }));
         return rows.docs[0]?.status ?? 'active';
       }] },
     },
