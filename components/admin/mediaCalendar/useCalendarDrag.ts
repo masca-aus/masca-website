@@ -99,9 +99,15 @@ export function useCalendarDrag(
           break;
         scroller = scroller.parentElement;
       }
-      const bounds = scroller?.getBoundingClientRect();
-      const top = bounds?.top ?? 0,
-        bottom = bounds?.bottom ?? window.innerHeight;
+      const bounds =
+        scroller && scroller !== document.body
+          ? scroller.getBoundingClientRect()
+          : null;
+      const top = Math.max(0, bounds?.top ?? 0),
+        bottom = Math.min(
+          window.innerHeight,
+          bounds?.bottom ?? window.innerHeight,
+        );
       const delta =
         pointer.y < top + 48 ? -12 : pointer.y > bottom - 48 ? 12 : 0;
       if (delta) {

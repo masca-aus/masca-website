@@ -1720,3 +1720,31 @@
     transform: none;
   }
 }
+.mc-deleted-notice {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  max-width: 800px;
+  overflow: auto;
+}
+.mc-deleted-notice label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.mc-deleted-notice textarea,
+.mc-local-recovery textarea {
+  width: 100%;
+}
+.mc-local-recovery {
+  padding: 16px 24px;
+  background: var(--mc-soft);
+  border-bottom: 1px solid var(--mc-line);
+}
+.mc-local-recovery p,
+.mc-local-recovery textarea {
+  margin: 12px 0;
+}

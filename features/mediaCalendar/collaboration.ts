@@ -38,10 +38,25 @@ export async function syncCollaboration(
       return { participants: [], post: null };
     }
     if (input.postId) {
-      const r = await c.query(`SELECT id FROM ${table("posts")} WHERE id=$1`, [
-        input.postId,
-      ]);
+      const r = await c.query(
+        `SELECT data FROM ${table("posts")} WHERE id=$1`,
+        [input.postId],
+      );
       if (!r.rows.length) throw new CalendarError("Post not found.", 404);
+      // Return a tombstone so an already-open editor can retain local work and close.
+      if (r.rows[0].data.deletedAt) {
+        await c.query(`DELETE FROM ${t} WHERE client_id=$1 AND user_id=$2`, [
+          input.clientId,
+          String(user.id),
+        ]);
+        return {
+          post: { ...r.rows[0].data, captionState: undefined } as Omit<
+            Post,
+            "captionState"
+          >,
+          participants: [],
+        };
+      }
     }
     const result = await c.query(
       `INSERT INTO ${t}(client_id,user_id,post_id,cursor,expires_at) VALUES($1,$2,$3,$4,now()+interval '15 seconds') ON CONFLICT(client_id) DO UPDATE SET post_id=$3,cursor=$4,expires_at=now()+interval '15 seconds' WHERE ${t}.user_id=$2 RETURNING client_id`,

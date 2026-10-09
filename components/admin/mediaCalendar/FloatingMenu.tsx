@@ -178,6 +178,6 @@ export function FloatingMenu({
         </div>
       ))}
     </div>,
-    document.body,
+    anchor.closest('[role="dialog"]') ?? document.body,
   );
 }

@@ -293,6 +293,16 @@ export function CaptionEditor({
             captionState:
               result.post.captionState ?? postRef.current.captionState,
           };
+          if (
+            snapshot.deletedAt &&
+            snapshot.version >= postRef.current.version
+          ) {
+            disabledRef.current = true;
+            if (pending) persistLocal();
+            callbacks.current.onCaption(d.getText("caption").toString());
+            callbacks.current.onPost(snapshot);
+            return;
+          }
           if (snapshot.version >= postRef.current.version) {
             postRef.current = snapshot;
             callbacks.current.onPost(snapshot);

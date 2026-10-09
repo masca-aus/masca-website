@@ -126,6 +126,15 @@ function LoadedPanel({
     [publishedURL, setPublishedURL] = useState(""),
     [copied, setCopied] = useState(false);
   const post = { ...savedPost, ...pendingPatch };
+  const localCopyKey = `masca-calendar-deleted-copy:${user.id}:${post.id}`;
+  const [localCopy, setLocalCopy] = useState(() => {
+    try {
+      return localStorage.getItem(localCopyKey) ?? "";
+    } catch {
+      return "";
+    }
+  });
+  const deletionCopy = `${title}\n\n${caption}\n\nReference links:\n${linksDraft}\n\nUnsaved details:\n${JSON.stringify(pendingPatch, null, 2)}`;
   const pendingDetails = useRef<Partial<Post>>({});
   const captionRef = useRef<CaptionHandle>(null),
     postRef = useRef(post),
@@ -142,10 +151,24 @@ function LoadedPanel({
     localLinks.current = linksDraft;
   });
   const editable = mayUseCalendar(user, "edit"),
-    locked = !editable || ["in_review", "posted"].includes(post.status),
+    locked =
+      !editable ||
+      !!post.deletedAt ||
+      ["in_review", "posted"].includes(post.status),
     canApprove = mayApprove(user, post);
+  const keepDeletedCopy = () => {
+    const text = `${localTitle.current}\n\n${captionRef.current?.text() ?? caption}\n\nReference links:\n${localLinks.current}\n\nUnsaved details:\n${JSON.stringify(pendingDetails.current, null, 2)}`;
+    try {
+      localStorage.setItem(localCopyKey, text);
+    } catch {
+      setError(
+        "Copy your changes before closing; this device could not keep a local copy.",
+      );
+    }
+  };
   const receive = (p: Post) => {
     if (p.version <= postRef.current.version) return;
+    if (p.deletedAt) keepDeletedCopy();
     const previous = postRef.current;
     postRef.current = p;
     setSavedPost(p);
@@ -256,6 +279,12 @@ function LoadedPanel({
   };
   useEffect(() => {
     close.current = () => {
+      if (postRef.current.deletedAt) {
+        keepDeletedCopy();
+        captionRef.current?.retainLocal();
+        onClose();
+        return;
+      }
       void (async () => {
         try {
           await flush();
@@ -331,6 +360,56 @@ function LoadedPanel({
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+  const copyLocal = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError("Select the local copy below to copy your changes.");
+    }
+  };
+  if (post.deletedAt)
+    return (
+      <div
+        ref={panel}
+        className="mc-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="deleted-post-title"
+      >
+        <header className="mc-panel-header">
+          <h2 id="deleted-post-title">This post was deleted</h2>
+          <button aria-label="Close post" onClick={() => close.current()}>
+            <X size={20} />
+          </button>
+        </header>
+        <section className="mc-deleted-notice">
+          <p>
+            A teammate deleted this post. Your unsaved changes are kept on this
+            device so you can reuse them if the post is restored.
+          </p>
+          {error && <p role="alert">{error}</p>}
+          <label>
+            Local copy
+            <textarea
+              aria-label="Local copy of deleted post"
+              readOnly
+              rows={10}
+              value={deletionCopy}
+            />
+          </label>
+          <button
+            className="mc-primary"
+            onClick={() => void copyLocal(deletionCopy)}
+          >
+            <Copy size={16} />
+            {copied ? "Copied" : "Copy my changes"}
+          </button>
+          <button onClick={() => close.current()}>Back to calendar</button>
+        </section>
+      </div>
+    );
   return (
     <div
       ref={panel}
@@ -353,6 +432,36 @@ function LoadedPanel({
           <X size={22} />
         </button>
       </header>
+      {localCopy && (
+        <section className="mc-local-recovery">
+          <details>
+            <summary>Local changes from before deletion</summary>
+            <p>
+              This copy is saved on this device. Copy any details you want to
+              reuse in this draft.
+            </p>
+            <textarea
+              aria-label="Recovered local copy"
+              readOnly
+              rows={5}
+              value={localCopy}
+            />
+            <button onClick={() => void copyLocal(localCopy)}>
+              {copied ? "Copied" : "Copy local changes"}
+            </button>
+            <button
+              onClick={() => {
+                try {
+                  localStorage.removeItem(localCopyKey);
+                } catch {}
+                setLocalCopy("");
+              }}
+            >
+              Dismiss copy
+            </button>
+          </details>
+        </section>
+      )}
       <div className="mc-panel-title">
         <input
           id="post-panel-title"
