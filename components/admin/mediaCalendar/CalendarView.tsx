@@ -1,7 +1,14 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
+import { PostPanel, PostPanelLoading } from "./PostPanel";
 import {
   Plus,
   ChevronLeft,
@@ -38,17 +45,6 @@ import { CalendarCard, statusLabels } from "./CalendarCard";
 import { RoomPresence } from "./RoomPresence";
 import { CategoryManager } from "./CategoryManager";
 import "./calendar.css";
-const PostPanel = dynamic(
-  () => import("./PostPanel").then((m) => m.PostPanel),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="mc-panel-loading" role="status">
-        Opening post…
-      </div>
-    ),
-  },
-);
 type Overview = {
   posts: Card[];
   categories: Category[];
@@ -70,6 +66,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       next: null,
     }),
     [loading, setLoading] = useState(true),
+    [creating, setCreating] = useState(false),
     [error, setError] = useState(""),
     [category, setCategory] = useState("all"),
     [status, setStatus] = useState("all"),
@@ -86,7 +83,8 @@ export function CalendarView({ user }: { user: CalendarUser }) {
         working?: boolean;
       }[]
     >([]);
-  const pending = useRef(false);
+  const pending = useRef(false),
+    creatingRef = useRef(false);
   const landingTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   );
@@ -176,18 +174,34 @@ export function CalendarView({ user }: { user: CalendarUser }) {
   const open = (id: string) =>
     router.push(`/admin/media-calendar?post=${id}`, { scroll: false });
   const create = async (date: string | null) => {
+    if (creatingRef.current) return;
+    creatingRef.current = true;
+    setCreating(true);
+    setError("");
     try {
       const result = await api<{ post: Post }>(calendarAPI, {
         action: "create",
-        patch: { plannedAt: date ? moveToDay(null, date) : null },
+        patch: {
+          plannedAt: date ? moveToDay(null, date) : null,
+          ...(category !== "all" ? { category } : {}),
+        },
       });
       cache.current.clear();
-      await load(true);
       open(result.post.id);
+      void load(true);
     } catch (e) {
       setError((e as Error).message);
+      creatingRef.current = false;
+      setCreating(false);
     }
   };
+  useEffect(() => {
+    if (postId)
+      queueMicrotask(() => {
+        creatingRef.current = false;
+        setCreating(false);
+      });
+  }, [postId]);
   const notify = (message: string, undo?: { id: string; version: number }) => {
     const id = crypto.randomUUID();
     setNotices((current) => [
@@ -380,7 +394,11 @@ export function CalendarView({ user }: { user: CalendarUser }) {
             {data.notifications.some((n) => !n.read) && <i />}
           </button>
           {editable && (
-            <button className="mc-primary" onClick={() => void create(null)}>
+            <button
+              className="mc-primary"
+              disabled={creating}
+              onClick={() => void create(null)}
+            >
               <Plus size={18} />
               New post
             </button>
@@ -451,17 +469,6 @@ export function CalendarView({ user }: { user: CalendarUser }) {
             />
           </label>
           <CalendarSelect
-            label="Filter category"
-            value={category}
-            onChange={setCategory}
-            options={[
-              { value: "all", label: "All categories" },
-              ...data.categories
-                .filter((c) => !c.archived)
-                .map((c) => ({ value: c.id, label: c.name, color: c.color })),
-            ]}
-          />
-          <CalendarSelect
             label="Filter status"
             value={status}
             onChange={setStatus}
@@ -474,17 +481,41 @@ export function CalendarView({ user }: { user: CalendarUser }) {
               { value: "hold", label: "On hold" },
             ]}
           />
+          <small>{TIMEZONE} · AEST</small>
+        </div>
+        <div className="mc-tag-bar" role="group" aria-label="Post tags">
+          <span className="mc-tag-label">Tags</span>
+          <button
+            aria-pressed={category === "all"}
+            onClick={() => setCategory("all")}
+          >
+            All posts
+          </button>
+          {data.categories
+            .filter((c) => !c.archived)
+            .map((c) => (
+              <button
+                key={c.id}
+                aria-label={`Filter by ${c.name}`}
+                aria-pressed={category === c.id}
+                style={{ "--tag-color": c.color } as CSSProperties}
+                onClick={() => setCategory(category === c.id ? "all" : c.id)}
+              >
+                <i className="mc-color-dot" style={{ background: c.color }} />
+                {c.name}
+              </button>
+            ))}
           {editable && (
             <button
-              onClick={() => setManage(!manage)}
-              aria-label="Manage categories"
+              className="mc-tag-manage"
+              aria-label="Manage tags"
               aria-expanded={manage}
+              onClick={() => setManage(!manage)}
             >
-              <SlidersHorizontal size={16} />
-              <span>Categories</span>
+              <SlidersHorizontal size={14} />
+              Edit tags
             </button>
           )}
-          <small>{TIMEZONE} · AEST</small>
         </div>
         {manage && (
           <CategoryManager
@@ -507,7 +538,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
             Loading your calendar…
           </div>
         ) : view === "list" ? (
-          <div className="mc-list">
+          <div className="mc-list" key={`list-${days[0]}`}>
             {scheduled.length ? (
               days
                 .filter((d) =>
@@ -560,7 +591,10 @@ export function CalendarView({ user }: { user: CalendarUser }) {
             )}
           </div>
         ) : (
-          <div className={`mc-grid mc-grid--${view}`}>
+          <div
+            className={`mc-grid mc-grid--${view}`}
+            key={`${view}-${days[0]}`}
+          >
             <div className="mc-weekdays">
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
                 <span key={d}>{d}</span>
@@ -674,6 +708,11 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           </div>
         ))}
       </div>
+      {creating && !postId && (
+        <div className="mc-overlay">
+          <PostPanelLoading />
+        </div>
+      )}
       {postId && (
         <PostPanel
           key={postId}

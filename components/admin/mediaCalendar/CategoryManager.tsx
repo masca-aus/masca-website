@@ -30,31 +30,60 @@ export function CategoryManager({
   return (
     <div className="mc-category-editor">
       <header>
-        <h3>Categories</h3>
-        <button aria-label="Close categories" onClick={onClose}>
+        <h3>Post tags</h3>
+        <button aria-label="Close tags" onClick={onClose}>
           <X size={18} />
         </button>
       </header>
       <p>
-        Use one category colour for each post. Everyone who prepares posts can
-        customise these.
+        Give each post a colour tag, such as MASA or Careers. Everyone who
+        prepares posts can customise these.
       </p>
       {items.map((c, i) => (
         <div className="mc-category-row" key={c.id}>
-          <input
-            type="color"
+          <div
+            className="mc-tag-colours"
+            role="group"
             aria-label={`${c.name} colour`}
-            value={c.color}
-            onChange={(e) =>
-              setItems(
-                items.map((v, n) =>
-                  n === i ? { ...v, color: e.target.value } : v,
-                ),
-              )
-            }
-          />
+          >
+            {[
+              "#5959c9",
+              "#337f9c",
+              "#ac587e",
+              "#398168",
+              "#aa813e",
+              "#cf5e48",
+            ].map((colour) => (
+              <button
+                key={colour}
+                aria-label={`Use ${colour} for ${c.name}`}
+                aria-pressed={c.color === colour}
+                style={{ background: colour }}
+                onClick={() =>
+                  setItems(
+                    items.map((v, n) =>
+                      n === i ? { ...v, color: colour } : v,
+                    ),
+                  )
+                }
+              />
+            ))}
+            <input
+              aria-label={`${c.name} custom colour`}
+              value={c.color}
+              maxLength={7}
+              placeholder="#5959c9"
+              onChange={(e) =>
+                setItems(
+                  items.map((v, n) =>
+                    n === i ? { ...v, color: e.target.value } : v,
+                  ),
+                )
+              }
+            />
+          </div>
           <input
-            aria-label="Category name"
+            aria-label="Tag name"
             value={c.name}
             maxLength={50}
             onChange={(e) =>
@@ -65,7 +94,10 @@ export function CategoryManager({
               )
             }
           />
-          <button disabled={busy} onClick={() => void save(c)}>
+          <button
+            disabled={busy || !/^#[0-9a-f]{6}$/i.test(c.color)}
+            onClick={() => void save(c)}
+          >
             Save
           </button>
           <button
@@ -86,7 +118,7 @@ export function CategoryManager({
             ...items,
             {
               id: crypto.randomUUID(),
-              name: "New category",
+              name: "New tag",
               color: "#5959c9",
               archived: false,
             },
@@ -94,7 +126,7 @@ export function CategoryManager({
         }
       >
         <Plus size={16} />
-        Add category
+        Add tag
       </button>
       {error && (
         <p role="alert" className="mc-error">

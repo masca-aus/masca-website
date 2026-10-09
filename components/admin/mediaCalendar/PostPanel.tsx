@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
@@ -21,7 +21,7 @@ import type {
   Category,
 } from "@/features/mediaCalendar/types";
 import { mayApprove, mayUseCalendar } from "@/features/mediaCalendar/policy";
-import { localInput, toInstant } from "@/features/mediaCalendar/dates";
+import { CalendarDatePicker } from "./CalendarDatePicker";
 import { api, calendarAPI } from "./api";
 import { CalendarSelect } from "./CalendarSelect";
 import { statusLabels } from "./CalendarCard";
@@ -54,7 +54,20 @@ export function PostPanel(props: {
   onChange: () => void;
 }) {
   const [detail, setDetail] = useState<Detail | null>(null),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [closing, setClosing] = useState(false);
+  const closingTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  useEffect(() => () => clearTimeout(closingTimer.current), []);
+  const finish = useCallback(() => {
+    if (closingTimer.current) return;
+    setClosing(true);
+    const reduced = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    closingTimer.current = setTimeout(props.onClose, reduced ? 0 : 150);
+  }, [props.onClose]);
   useEffect(() => {
     let alive = true;
     void api<Detail>(`${calendarAPI}?id=${props.id}`)
@@ -69,24 +82,54 @@ export function PostPanel(props: {
     };
   }, [props.id]);
   return (
-    <div className="mc-overlay">
+    <div className={`mc-overlay ${closing ? "mc-overlay--closing" : ""}`}>
       {detail ? (
-        <LoadedPanel {...props} initial={detail} />
+        <LoadedPanel {...props} onClose={finish} initial={detail} />
       ) : (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Opening post"
-          className="mc-panel mc-panel-loading"
-        >
-          <button aria-label="Close post" onClick={props.onClose}>
-            <X />
-          </button>
-          <p role={error ? "alert" : "status"}>
-            {error || "Opening your post…"}
-          </p>
-        </div>
+        <PostPanelLoading
+          message={error || "Opening your post…"}
+          error={!!error}
+          onClose={finish}
+        />
       )}
+    </div>
+  );
+}
+export function PostPanelLoading({
+  message = "Creating your draft…",
+  error = false,
+  onClose,
+}: {
+  message?: string;
+  error?: boolean;
+  onClose?: () => void;
+}) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={onClose ? "Opening post" : "Creating post"}
+      className="mc-panel mc-panel-loading"
+    >
+      <header className="mc-panel-header">
+        <span className="mc-eyebrow">INSTAGRAM · DRAFT</span>
+        {onClose && (
+          <button aria-label="Close post" onClick={onClose}>
+            <X size={22} />
+          </button>
+        )}
+      </header>
+      <div className="mc-composer-skeleton">
+        <p role={error ? "alert" : "status"}>{message}</p>
+        {!error && (
+          <>
+            <div className="mc-skeleton mc-skeleton-title" />
+            <div className="mc-skeleton mc-skeleton-meta" />
+            <div className="mc-skeleton mc-skeleton-media" />
+            <div className="mc-skeleton mc-skeleton-caption" />
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -128,6 +171,7 @@ function LoadedPanel({
     [localCopyExported, setLocalCopyExported] = useState(false),
     [storageFailed, setStorageFailed] = useState(false),
     [discarding, setDiscarding] = useState(false);
+  const exportedCopy = useRef(false);
   const post = { ...savedPost, ...pendingPatch };
   const localCopyKey = `masca-calendar-deleted-copy:${user.id}:${post.id}`;
   const [localCopy, setLocalCopy] = useState(() => {
@@ -159,6 +203,9 @@ function LoadedPanel({
       !!post.deletedAt ||
       ["in_review", "posted"].includes(post.status),
     canApprove = mayApprove(user, post);
+  const focusTitleOnOpen = useRef(
+    initial.post.title === "Untitled post" && !locked,
+  );
   const keepDeletedCopy = () => {
     const text = `${localTitle.current}\n\n${captionRef.current?.text() ?? caption}\n\nReference links:\n${localLinks.current}\n\nUnsaved details:\n${JSON.stringify(pendingDetails.current, null, 2)}`;
     try {
@@ -286,7 +333,7 @@ function LoadedPanel({
   useEffect(() => {
     close.current = () => {
       if (postRef.current.deletedAt) {
-        if (!keepDeletedCopy() && !localCopyExported) return;
+        if (!keepDeletedCopy() && !exportedCopy.current) return;
         captionRef.current?.retainLocal();
         onClose();
         return;
@@ -312,9 +359,14 @@ function LoadedPanel({
     const previous = document.activeElement as HTMLElement | null,
       scroll = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    panel.current?.querySelector<HTMLElement>("button")?.focus();
+    const titleInput =
+      panel.current?.querySelector<HTMLInputElement>("#post-panel-title");
+    if (focusTitleOnOpen.current && titleInput) {
+      titleInput.focus();
+      titleInput.select();
+    } else panel.current?.querySelector<HTMLElement>("button")?.focus();
     const handle = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && !e.defaultPrevented) {
         e.preventDefault();
         close.current();
       }
@@ -369,7 +421,10 @@ function LoadedPanel({
   const copyLocal = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      if (post.deletedAt) setLocalCopyExported(true);
+      if (post.deletedAt) {
+        exportedCopy.current = true;
+        setLocalCopyExported(true);
+      }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -497,29 +552,26 @@ function LoadedPanel({
         <div className="mc-post-meta">
           <label>
             Planned for
-            <input
-              aria-label="Planned publishing date and time"
-              type="datetime-local"
+            <CalendarDatePicker
+              label="Planned publishing date and time"
               disabled={!editable || post.status === "posted"}
-              value={localInput(post.plannedAt)}
-              onChange={(e) =>
-                void patch({ plannedAt: toInstant(e.target.value) }).catch(
-                  () => {},
-                )
+              value={post.plannedAt}
+              onChange={(value) =>
+                void patch({ plannedAt: value }).catch(() => {})
               }
             />
           </label>
           <label>
-            Category
+            Tag
             <CalendarSelect
-              label="Post category"
+              label="Post tag"
               disabled={!editable || post.status === "posted"}
               value={post.category ?? ""}
               onChange={(value) =>
                 void patch({ category: value || null }).catch(() => {})
               }
               options={[
-                { value: "", label: "No category" },
+                { value: "", label: "Add a tag" },
                 ...categories
                   .filter((c) => !c.archived || c.id === post.category)
                   .map((c) => ({
@@ -636,14 +688,13 @@ function LoadedPanel({
               </label>
               <label>
                 Preparation deadline
-                <input
-                  type="date"
+                <CalendarDatePicker
+                  label="Preparation deadline"
+                  dateOnly
                   disabled={!editable || post.status === "posted"}
-                  value={post.preparationDate ?? ""}
-                  onChange={(e) =>
-                    void patch({
-                      preparationDate: e.target.value || null,
-                    }).catch(() => {})
+                  value={post.preparationDate}
+                  onChange={(value) =>
+                    void patch({ preparationDate: value }).catch(() => {})
                   }
                 />
               </label>

@@ -6,11 +6,268 @@
   --mc-soft: var(--theme-elevation-50, #f7f8fb);
   --mc-primary: #09055f;
   color: var(--mc-text);
-  max-width: 1600px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 40px 36px 48px;
+  padding: 28px 26px 36px;
   font-size: 14px;
   line-height: 1.5;
+}
+.mc-tag-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 18px 14px;
+}
+.mc-tag-label {
+  font-size: 11px;
+  color: var(--mc-muted);
+  margin-right: 5px;
+}
+.mc-tag-colours { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; max-width: 220px; }
+.mc-workspace .mc-tag-colours button { width: 20px; min-height: 20px; height: 20px; padding: 0; border-radius: 50%; border: 2px solid var(--mc-bg); }
+.mc-tag-colours button[aria-pressed="true"] { outline: 2px solid var(--mc-muted); outline-offset: 1px; }
+.mc-workspace .mc-tag-colours input { width: 85px; flex: none; font-size: 11px; padding: 5px 7px; }
+.mc-category-row { flex-wrap: wrap; }
+.mc-workspace .mc-tag-bar button {
+  min-height: 28px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  border-color: transparent;
+  background: var(--mc-soft);
+  transition:
+    background 160ms,
+    border-color 160ms,
+    box-shadow 160ms;
+}
+.mc-workspace .mc-tag-bar button[aria-pressed="true"] {
+  border-color: var(--tag-color, var(--mc-primary));
+  background: color-mix(
+    in srgb,
+    var(--tag-color, var(--mc-primary)) 10%,
+    var(--mc-bg)
+  );
+  font-weight: 600;
+}
+.mc-workspace .mc-tag-bar .mc-tag-manage {
+  margin-left: auto;
+  background: transparent;
+  color: var(--mc-muted);
+}
+.mc-card-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.mc-card-tag .mc-color-dot {
+  width: 6px;
+  height: 6px;
+}
+.mc-grid,
+.mc-list {
+  animation: mc-content-in 180ms ease-out;
+}
+.mc-grid--week .mc-day {
+  min-height: 200px;
+}
+.mc-overlay--closing {
+  opacity: 0;
+  pointer-events: none;
+}
+.mc-panel-title,
+.mc-panel-body {
+  animation: mc-content-in 200ms ease-out;
+}
+.mc-composer-skeleton {
+  padding: 26px 28px;
+}
+.mc-composer-skeleton p {
+  color: var(--mc-muted);
+  margin-bottom: 24px;
+}
+.mc-skeleton {
+  border-radius: 10px;
+  background: var(--mc-soft);
+  margin-bottom: 18px;
+  animation: mc-skeleton-pulse 1.2s ease-in-out infinite alternate;
+}
+.mc-skeleton-title {
+  height: 30px;
+  width: 65%;
+}
+.mc-skeleton-meta {
+  height: 58px;
+}
+.mc-skeleton-media {
+  height: 160px;
+}
+.mc-skeleton-caption {
+  height: 130px;
+}
+.mc-workspace .mc-date-trigger {
+  width: 100%;
+  justify-content: flex-start;
+  min-height: 38px;
+  font-size: 12px;
+  color: var(--mc-text);
+  text-align: left;
+}
+.mc-date-trigger svg {
+  color: var(--mc-muted);
+  flex-shrink: 0;
+}
+.mc-date-popover {
+  position: fixed;
+  z-index: 1200;
+  width: 300px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  background: var(--mc-bg, var(--theme-bg, #fff));
+  color: var(--mc-text, var(--theme-text, #232838));
+  border: 1px solid var(--mc-line, var(--theme-elevation-150, #e6e8ee));
+  box-shadow: 0 12px 40px #11112025;
+  border-radius: 14px;
+  padding: 14px;
+  animation: mc-menu-in 140ms ease-out;
+  font-size: 12px;
+}
+.mc-date-popover header {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 12px;
+}
+.mc-date-popover header strong {
+  flex: 1;
+  font-size: 13px;
+}
+.mc-workspace .mc-date-popover header button {
+  min-height: 28px;
+  padding: 4px;
+  border: 0;
+}
+.mc-date-weekdays,
+.mc-date-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+.mc-date-weekdays span {
+  text-align: center;
+  color: var(--mc-muted);
+  padding: 3px 0 9px;
+  font-size: 10px;
+}
+.mc-workspace .mc-date-days button {
+  min-height: 32px;
+  padding: 3px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.mc-date-days button[data-outside="true"] {
+  color: var(--mc-muted);
+  opacity: 0.5;
+}
+.mc-date-days button[data-today="true"] {
+  box-shadow: inset 0 0 0 1px var(--mc-line);
+  font-weight: 700;
+}
+.mc-workspace .mc-date-days button[aria-pressed="true"] {
+  background: var(--mc-primary);
+  color: #fff;
+  opacity: 1;
+}
+.mc-date-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-top: 1px solid var(--mc-line);
+  margin-top: 12px;
+  padding-top: 12px;
+  color: var(--mc-muted);
+}
+.mc-workspace .mc-date-time input {
+  margin-left: auto;
+  width: 76px;
+  padding: 6px 8px;
+  font-size: 12px;
+  color: var(--mc-text);
+}
+.mc-date-popover > p {
+  color: #ba4863;
+  font-size: 11px;
+  padding-top: 7px;
+}
+.mc-date-popover footer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 12px;
+}
+.mc-workspace .mc-date-popover footer button {
+  font-size: 11px;
+  min-height: 30px;
+  padding: 5px 8px;
+}
+.mc-date-popover footer .mc-primary {
+  margin-left: auto;
+}
+@keyframes mc-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes mc-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes mc-skeleton-pulse {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (max-width: 767px) {
+  .mc-overlay {
+    padding: 12px;
+  }
+  .mc-panel {
+    height: calc(100dvh - 24px);
+    border-radius: 14px;
+  }
+  .mc-tag-bar {
+    padding-inline: 12px;
+  }
+  .mc-workspace .mc-card-footer > .mc-card-tag {
+    display: inline-flex;
+    font-size: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mc-overlay,
+  .mc-grid,
+  .mc-list,
+  .mc-panel-title,
+  .mc-panel-body,
+  .mc-skeleton,
+  .mc-date-popover {
+    animation: none;
+    transition: none;
+  }
 }
 .mc-workspace * {
   box-sizing: border-box;
@@ -89,7 +346,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 28px;
+  margin-bottom: 20px;
   gap: 20px;
 }
 .mc-eyebrow {
@@ -139,7 +396,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 22px;
+  padding: 14px 18px;
   gap: 16px;
 }
 .mc-month-navigation {
@@ -184,7 +441,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 22px 20px;
+  padding: 0 18px 12px;
   flex-wrap: wrap;
 }
 .mc-filters label {
@@ -230,7 +487,7 @@
   grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 .mc-day {
-  min-height: 148px;
+  min-height: 106px;
   padding: 9px 7px;
   border-right: 1px solid var(--mc-line);
   border-bottom: 1px solid var(--mc-line);
@@ -505,22 +762,25 @@
   z-index: 1050;
   background: #0c10264a;
   display: flex;
-  justify-content: flex-end;
-  backdrop-filter: blur(3px);
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  backdrop-filter: blur(4px);
+  animation: mc-backdrop-in 180ms ease-out;
+  transition: opacity 150ms ease-in;
 }
 .mc-panel {
-  width: min(1120px, calc(100vw - 70px));
+  width: min(1040px, 100%);
   background: var(--mc-bg);
-  height: 100dvh;
+  height: min(860px, calc(100dvh - 48px));
   overflow-y: auto;
-  box-shadow: -10px 0 50px #11112015;
-  animation: mc-open 0.18s ease-out;
+  border-radius: 18px;
+  border: 1px solid var(--mc-line);
+  box-shadow: 0 24px 90px #11112035;
 }
 .mc-panel-loading {
-  padding: 36px;
-  display: grid;
-  align-content: start;
-  gap: 20px;
+  padding: 0;
+  display: block;
 }
 .mc-panel-loading button {
   justify-self: end;
@@ -1148,7 +1408,7 @@
 }
 @media (min-width: 1600px) {
   .mc-day {
-    min-height: 170px;
+    min-height: 110px;
   }
   .mc-card-footer {
     flex-direction: row;
@@ -1168,7 +1428,7 @@
     margin: 0;
   }
   .mc-panel {
-    width: calc(100vw - 35px);
+    width: 100%;
   }
   .mc-panel-body {
     grid-template-columns: minmax(0, 1fr) 270px;
@@ -1266,7 +1526,7 @@
     grid-template-columns: 1fr;
   }
   .mc-day {
-    min-height: 120px;
+    min-height: 96px;
     padding: 5px 3px;
   }
   .mc-day header button {
@@ -1306,7 +1566,7 @@
     font-size: 10px;
   }
   .mc-panel {
-    width: 100vw;
+    width: 100%;
   }
   .mc-overlay {
     backdrop-filter: none;

@@ -78,5 +78,5 @@ it("keeps a deleted editor open after storage failure until the local changes ar
   );
   expect(exported).toContain("My local title");
   fireEvent.click(screen.getByRole("button", { name: "Close post" }));
-  expect(closed).toBe(true);
+  await waitFor(() => expect(closed).toBe(true));
 });

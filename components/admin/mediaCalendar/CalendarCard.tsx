@@ -105,7 +105,13 @@ export function CalendarCard({
           <strong>{post.title}</strong>
         </span>
         <span className="mc-card-footer">
-          <span>{category?.name ?? "No category"}</span>
+          <span className="mc-card-tag">
+            <i
+              className="mc-color-dot"
+              style={{ background: category?.color ?? "#8e93a2" }}
+            />
+            {category?.name ?? "No tag"}
+          </span>
           <span className="mc-status">
             {post.onHold ? "On hold · " : ""}
             {statusLabels[post.status]}
