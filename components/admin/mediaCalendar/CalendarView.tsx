@@ -386,6 +386,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
                     <h3>
                       {new Intl.DateTimeFormat("en-AU", {
                         weekday: "short",
+                        timeZone: TIMEZONE,
                         day: "numeric",
                         month: "short",
                       }).format(new Date(`${d}T12:00:00Z`))}

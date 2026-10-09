@@ -35,6 +35,7 @@ const CaptionEditor = dynamic(
 type Detail = {
   post: Post;
   assets: Asset[];
+  pendingUploads: Asset[];
   history: {
     id: string;
     author: string;
@@ -107,6 +108,10 @@ function LoadedPanel({
   const [savedPost, setSavedPost] = useState(initial.post),
     [pendingPatch, setPendingPatch] = useState<Partial<Post>>({}),
     [assets, setAssets] = useState(initial.assets),
+    [pendingUploads, setPendingUploads] = useState(
+      initial.pendingUploads ?? [],
+    ),
+    [linksDraft, setLinksDraft] = useState(initial.post.links.join("\n")),
     [history, setHistory] = useState(initial.history),
     [title, setTitle] = useState(initial.post.title),
     [caption, setCaption] = useState(initial.post.caption),
@@ -127,10 +132,13 @@ function LoadedPanel({
     close = useRef<() => void>(() => {}),
     queue = useRef(Promise.resolve()),
     titleVersion = useRef(post.version),
-    localTitle = useRef(title);
+    localTitle = useRef(title),
+    localLinks = useRef(linksDraft),
+    linksVersion = useRef(post.version);
   useEffect(() => {
     postRef.current = savedPost;
     localTitle.current = title;
+    localLinks.current = linksDraft;
   });
   const editable = mayUseCalendar(user, "edit"),
     locked = !editable || ["in_review", "posted"].includes(post.status),
@@ -145,7 +153,19 @@ function LoadedPanel({
       localTitle.current = p.title;
       titleVersion.current = p.version;
     }
+    if (localLinks.current === previous.links.join("\n")) {
+      setLinksDraft(p.links.join("\n"));
+      localLinks.current = p.links.join("\n");
+      linksVersion.current = p.version;
+    }
     onChange();
+    if (JSON.stringify(p.assets) !== JSON.stringify(previous.assets))
+      void api<Detail>(`${calendarAPI}?id=${p.id}`)
+        .then((d) => {
+          setAssets(d.assets);
+          setPendingUploads(d.pendingUploads ?? []);
+        })
+        .catch(() => {});
     if (p.checkpointAt !== previous.checkpointAt)
       void api<Detail>(`${calendarAPI}?id=${p.id}`)
         .then((d) => setHistory(d.history))
@@ -154,7 +174,10 @@ function LoadedPanel({
   const uploads = useUploads(post, (p) => {
     receive(p);
     void api<Detail>(`${calendarAPI}?id=${p.id}`)
-      .then((d) => setAssets(d.assets))
+      .then((d) => {
+        setAssets(d.assets);
+        setPendingUploads(d.pendingUploads ?? []);
+      })
       .catch(() => {});
   });
   const act = async (action: Record<string, unknown>) => {
@@ -208,9 +231,20 @@ function LoadedPanel({
       titleVersion.current = postRef.current.version;
     }
   };
+  const saveLinks = async () => {
+    const links = localLinks.current
+      .split("\n")
+      .map((v) => v.trim())
+      .filter(Boolean);
+    if (JSON.stringify(links) !== JSON.stringify(postRef.current.links)) {
+      await patch({ links }, linksVersion.current);
+      linksVersion.current = postRef.current.version;
+    }
+  };
   const flush = async () => {
     await queue.current;
     await saveTitle();
+    await saveLinks();
     if (Object.keys(pendingDetails.current).length)
       throw new Error(
         "Some post details have not saved. Load the latest post and retry your changes.",
@@ -226,7 +260,14 @@ function LoadedPanel({
           await flush();
           onClose();
         } catch (e) {
-          setError((e as Error).message);
+          if (
+            !Object.keys(pendingDetails.current).length &&
+            localTitle.current.trim() === postRef.current.title &&
+            localLinks.current === postRef.current.links.join("\n") &&
+            captionRef.current?.retainLocal()
+          )
+            onClose();
+          else setError((e as Error).message);
         }
       })();
     };
@@ -270,7 +311,7 @@ function LoadedPanel({
     extra: Record<string, unknown> = {},
   ) => {
     try {
-      await flush();
+      if (!["withdraw", "changes"].includes(action)) await flush();
       await act({
         action,
         expectedRevision: postRef.current.contentRevision,
@@ -392,6 +433,8 @@ function LoadedPanel({
                 receive(d.post);
                 setAssets(d.assets);
                 titleVersion.current = d.post.version;
+                linksVersion.current = d.post.version;
+                setPendingUploads(d.pendingUploads ?? []);
                 setError(
                   "Latest post loaded. Your local title and caption are kept; retry your edit when ready.",
                 );
@@ -418,6 +461,16 @@ function LoadedPanel({
             assets={assets}
             disabled={locked}
             uploads={uploads.uploads}
+            pendingUploads={pendingUploads.filter(
+              (a) => !uploads.uploads.some((u) => u.assetId === a.id),
+            )}
+            cancelPending={(id) =>
+              void api(`${calendarAPI}/assets`, { action: "cancel", id })
+                .then(() =>
+                  setPendingUploads((v) => v.filter((a) => a.id !== id)),
+                )
+                .catch((e) => setError(e.message))
+            }
             add={uploads.add}
             retry={uploads.retry}
             cancel={uploads.cancel}
@@ -495,18 +548,17 @@ function LoadedPanel({
               <label>
                 Reference links
                 <textarea
-                  key={`${post.id}-links-${post.links.join(",")}`}
-                  defaultValue={post.links.join("\n")}
+                  value={linksDraft}
                   placeholder="Paste a Canva, Drive or Miro link. One per line."
                   disabled={!editable || post.status === "posted"}
-                  onBlur={(e) => {
-                    const links = e.target.value
-                      .split("\n")
-                      .map((v) => v.trim())
-                      .filter(Boolean);
-                    if (links.join("\n") !== post.links.join("\n"))
-                      void patch({ links }).catch(() => {});
+                  onFocus={() => {
+                    linksVersion.current = postRef.current.version;
                   }}
+                  onChange={(e) => {
+                    localLinks.current = e.target.value;
+                    setLinksDraft(e.target.value);
+                  }}
+                  onBlur={() => void saveLinks().catch(() => {})}
                 />
               </label>
               <fieldset>

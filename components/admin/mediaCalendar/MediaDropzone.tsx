@@ -16,6 +16,8 @@ export function MediaDropzone({
   assets,
   disabled,
   uploads,
+  pendingUploads,
+  cancelPending,
   add,
   retry,
   cancel,
@@ -26,6 +28,8 @@ export function MediaDropzone({
   assets: Asset[];
   disabled: boolean;
   uploads: LocalUpload[];
+  pendingUploads: Asset[];
+  cancelPending: (id: string) => void;
   add: (files: File[]) => void;
   retry: (key: string) => void;
   cancel: (key: string) => void;
@@ -155,6 +159,25 @@ export function MediaDropzone({
           );
         })}
       </div>
+      {pendingUploads.map((asset) => (
+        <article key={asset.id} className="mc-upload">
+          <Upload size={16} />
+          <div>
+            <strong>{asset.name}</strong>
+            <span>
+              This upload was interrupted. Cancel it, then add the file again.
+            </span>
+          </div>
+          {!disabled && (
+            <button
+              onClick={() => cancelPending(asset.id)}
+              aria-label={`Cancel unfinished upload ${asset.name}`}
+            >
+              Cancel upload
+            </button>
+          )}
+        </article>
+      ))}
       {uploads
         .filter((u) => u.status !== "done" && u.status !== "cancelled")
         .map((u) => (

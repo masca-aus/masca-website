@@ -39,9 +39,10 @@ assert.equal(new URL(process.env.DATABASE_URI).hostname, "127.0.0.1");
 assert.equal(new URL(process.env.DATABASE_URI).pathname, "/calendarqa");
 const database = new pg.Client({ connectionString: process.env.DATABASE_URI });
 await database.connect();
-await database.query(
-  "TRUNCATE media_calendar_preview.posts, media_calendar_preview.assets, media_calendar_preview.revisions, media_calendar_preview.notifications, media_calendar_preview.presence",
-);
+if (process.env.CALENDAR_CHECK_PRESERVE !== "true")
+  await database.query(
+    "TRUNCATE media_calendar_preview.posts, media_calendar_preview.assets, media_calendar_preview.revisions, media_calendar_preview.notifications, media_calendar_preview.presence",
+  );
 await database.end();
 const browser = await chromium.launch({ headless: true });
 try {

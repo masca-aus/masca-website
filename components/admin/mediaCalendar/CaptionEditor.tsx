@@ -14,7 +14,11 @@ import { Awareness, applyAwarenessUpdate } from "y-protocols/awareness";
 import * as encoding from "lib0/encoding";
 import type { Post, CalendarUser } from "@/features/mediaCalendar/types";
 import { api, calendarAPI, RequestError } from "./api";
-export type CaptionHandle = { flush: () => Promise<void>; text: () => string };
+export type CaptionHandle = {
+  flush: () => Promise<void>;
+  text: () => string;
+  retainLocal: () => boolean;
+};
 type Participant = {
   clientId: string;
   userId: string;
@@ -56,6 +60,7 @@ export function CaptionEditor({
     doc = useRef<Y.Doc | null>(null),
     awareness = useRef<Awareness | null>(null),
     flush = useRef<() => Promise<void>>(async () => {}),
+    retainLocal = useRef<() => boolean>(() => true),
     postRef = useRef(post),
     callbacks = useRef({ onPost, onCaption }),
     disabledRef = useRef(disabled);
@@ -71,6 +76,7 @@ export function CaptionEditor({
     ref,
     () => ({
       flush: () => flush.current(),
+      retainLocal: () => retainLocal.current(),
       text: () =>
         doc.current?.getText("caption").toString() ?? postRef.current.caption,
     }),
@@ -86,6 +92,7 @@ export function CaptionEditor({
       key = `masca-caption:${user.id}:${post.id}`;
     let alive = true,
       pending = false,
+      deferred: Uint8Array | null = null,
       sending: Promise<void> | null = null,
       idle: ReturnType<typeof setTimeout> | undefined,
       max: ReturnType<typeof setTimeout> | undefined,
@@ -95,6 +102,7 @@ export function CaptionEditor({
       try {
         const data = JSON.parse(saved);
         if (["in_review", "posted"].includes(postRef.current.status)) {
+          deferred = decode(data.update);
           queueMicrotask(() => setRecovery(data.text ?? ""));
         } else {
           Y.applyUpdate(d, decode(data.update), "recovery");
@@ -113,15 +121,36 @@ export function CaptionEditor({
             update: encode(Y.encodeStateAsUpdate(d)),
           }),
         );
+        return true;
       } catch {
         setRecovery(d.getText("caption").toString());
+        return false;
       }
     };
+    retainLocal.current = () =>
+      deferred
+        ? localStorage.getItem(key) !== null
+        : pending
+          ? persistLocal()
+          : true;
     const save = async () => {
       if (sending) {
         await sending;
         if (pending) return save();
         return;
+      }
+      if (deferred) {
+        if (
+          disabledRef.current ||
+          ["in_review", "posted"].includes(postRef.current.status)
+        )
+          throw new Error(
+            "Withdraw review before restoring your local caption.",
+          );
+        Y.applyUpdate(d, deferred, "recovery");
+        deferred = null;
+        pending = true;
+        persistLocal();
       }
       if (!pending) return;
       if (
@@ -149,7 +178,10 @@ export function CaptionEditor({
           callbacks.current.onPost(result.post);
           if (!pending) {
             localStorage.removeItem(key);
-            if (alive) setSaving("Saved");
+            if (alive) {
+              setSaving("Saved");
+              setRecovery("");
+            }
           } else persistLocal();
         } catch (e) {
           pending = true;

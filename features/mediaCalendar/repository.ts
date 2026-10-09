@@ -62,7 +62,11 @@ export async function lockedPost(c: pg.PoolClient, id: string): Promise<Post> {
   if (!rows.length) throw new CalendarError("Post not found.", 404);
   return rows[0].data;
 }
-async function checkRelations(c: pg.PoolClient, p: Post) {
+export async function checkRelations(
+  c: pg.PoolClient,
+  p: Post,
+  validatePeople = true,
+) {
   if (p.category) {
     const r = await c.query(
       `SELECT data FROM ${table("categories")} WHERE id=$1`,
@@ -95,7 +99,7 @@ async function checkRelations(c: pg.PoolClient, p: Post) {
       throw new CalendarError("A Reel needs a video file.");
   }
   const people = Array.from(new Set([p.owner, ...p.collaborators]));
-  if (people.length) {
+  if (validatePeople && people.length) {
     const { rows } = await c.query(
       `SELECT id,email,status,role,calendar_access FROM "${workspaceSchema()}".users WHERE id::text=ANY($1::text[])`,
       [people],
@@ -228,7 +232,13 @@ export async function mutatePost(actor: CalendarUser, id: string, a: Action) {
         );
     }
     const changed = applyAction(p, user, a);
-    await checkRelations(c, p);
+    await checkRelations(
+      c,
+      p,
+      a.action === "patch" &&
+        (Object.hasOwn(a.patch, "owner") ||
+          Object.hasOwn(a.patch, "collaborators")),
+    );
     if (changed) {
       await checkpoint(c, p, user, a.action);
       await savePost(c, p);
@@ -244,6 +254,10 @@ export async function detail(actor: CalendarUser, id: string) {
       `SELECT data FROM ${table("assets")} WHERE post_id=$1 AND id=ANY($2::uuid[])`,
       [id, p.assets],
     );
+    const pending = await c.query(
+      `SELECT data FROM ${table("assets")} WHERE post_id=$1 AND data->>'ready'='false' AND COALESCE(data->>'cancelled','false')='false' AND (data->>'createdAt')::timestamptz>now()-interval '1 day'`,
+      [id],
+    );
     const history = await c.query(
       `SELECT id,author,action,created_at AS "createdAt",data->>'contentRevision' AS revision FROM ${table("revisions")} WHERE post_id=$1 ORDER BY created_at DESC LIMIT 30`,
       [id],
@@ -251,6 +265,7 @@ export async function detail(actor: CalendarUser, id: string) {
     return {
       post: p,
       assets: assets.rows.map((r) => r.data as Asset),
+      pendingUploads: pending.rows.map((r) => r.data as Asset),
       history: history.rows,
     };
   });

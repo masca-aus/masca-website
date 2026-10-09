@@ -46,3 +46,7 @@ skills-lock.json
 docs
 *.md
 .sandcastle
+
+# Local calendar QA artifacts
+.calendar-preview/
+.calendar-check/

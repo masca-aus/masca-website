@@ -6,7 +6,13 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "node:crypto";
-import { transaction, table, lockedPost, savePost } from "./repository.ts";
+import {
+  transaction,
+  table,
+  lockedPost,
+  savePost,
+  checkRelations,
+} from "./repository.ts";
 import { calendarSchema } from "./schema.ts";
 import type { CalendarUser, Asset } from "./types.ts";
 import { CalendarError } from "./validation.ts";
@@ -163,24 +169,7 @@ export async function finishUpload(
     });
     // Upload URLs only address staging keys. Completed objects cannot be rewritten by a still-valid PUT URL.
     const finalKey = `${a.key}/final/${randomUUID()}`;
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: bucket,
-        Key: finalKey,
-        ContentType: a.mime,
-        Body: bytes,
-      }),
-    );
     const thumbnailKey = thumbnail ? `${finalKey}/preview.webp` : undefined;
-    if (thumbnail)
-      await s3.send(
-        new PutObjectCommand({
-          Bucket: bucket,
-          Key: thumbnailKey,
-          ContentType: "image/webp",
-          Body: thumbnail,
-        }),
-      );
     await c.query(`UPDATE ${table("assets")} SET data=$2 WHERE id=$1`, [
       id,
       JSON.stringify({
@@ -191,6 +180,24 @@ export async function finishUpload(
         ready: true,
       }),
     ]);
+    await checkRelations(c, p, false);
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: finalKey,
+        ContentType: a.mime,
+        Body: bytes,
+      }),
+    );
+    if (thumbnail)
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: bucket,
+          Key: thumbnailKey,
+          ContentType: "image/webp",
+          Body: thumbnail,
+        }),
+      );
     await savePost(c, p);
     await c.query(
       `INSERT INTO ${table("revisions")}(post_id,author,action,data) VALUES($1,$2,'media',$3)`,
