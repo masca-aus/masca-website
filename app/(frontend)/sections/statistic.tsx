@@ -1,64 +1,22 @@
-'use client'
-
-import { useRef } from "react";
-
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+const stats = [
+  { value: "14k+", label: "students reached" },
+  { value: "7", label: "states and territories" },
+  { value: "2001", label: "founded" },
+] as const
 
 export default function StatisticSection() {
-  const stats = [
-    { from: 0, value: 14, suffix: "k+", label: "students reached" },
-    { from: 0, value: 7, suffix: "", label: "states and territories" },
-    { from: new Date().getFullYear(), value: 2001, suffix: "", label: "founded" },
-  ]
-  const rootRef = useRef<HTMLElement>(null);
-
-  useGSAP(() => {
-    const values = gsap.utils.toArray<HTMLElement>(".stat-value");
-    const mm = gsap.matchMedia();
-
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      values.forEach((e) => {
-        const target = Number(e.dataset.value);
-        const from = Number(e.dataset.from);
-        const suffix = e.dataset.suffix ?? "";
-        const proxy = { val: from };
-        gsap.to(proxy, {
-          val: target,
-          duration: 5,
-          ease: "power4.out",
-          onUpdate: () => { e.textContent = `${Math.round(proxy.val)}${suffix}`; },
-          scrollTrigger: { trigger: rootRef.current, start: "top 85%", once: true },
-        });
-      });
-    });
-
-    mm.add("(prefers-reduced-motion: reduce)", () => {
-      values.forEach((e) => {
-        e.textContent = `${e.dataset.value}${e.dataset.suffix ?? ""}`;
-      });
-    });
-  }, { scope: rootRef });
-
   return (
-    <section ref={rootRef} className="bg-blue-600">
-      <div className="container pb-16">
-        <div className="flex justify-between gap-4 border-t pt-8 border-blue-500">
-          {stats.map(({ from, value, suffix, label }) => (
-            <div key={label} className="flex flex-col">
-              <span
-                className="stat-value text-h2 font-bold text-yellow-500"
-                data-value={value}
-                data-from={from}
-                data-suffix={suffix}
-              >
-                {from}{suffix}
-              </span>
+    <section className="relative z-10">
+      <div className="container pb-12 md:pb-16">
+        <div className="grid grid-cols-3 gap-4 pt-7 md:pt-8">
+          {stats.map(({ value, label }) => (
+            <div key={label} className="flex min-w-0 flex-col items-center gap-1 text-center">
+              <span className="text-2xl font-semibold text-yellow-500 md:text-h2">{value}</span>
               <span className="eyebrow text-gray-300">{label}</span>
             </div>
           ))}
         </div>
       </div>
     </section>
-  );
+  )
 }

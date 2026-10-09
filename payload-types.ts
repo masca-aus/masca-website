@@ -421,17 +421,14 @@ export interface Event {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.
+ * Upload images only. Large JPEG and PNG photos are automatically compressed to fit.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
-  /**
-   * Describe the image’s useful content in a short sentence. For a portrait, include the person’s name; for a logo, use the organisation’s name. Avoid filenames or ‘image of’.
-   */
-  alt: string;
+  alt?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -455,7 +452,7 @@ export interface Media {
   };
 }
 /**
- * Create and update committee profiles step by step. Changes appear on the website when you Save.
+ * Create committee profiles as drafts, then publish them when they are ready to appear on the website.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "committee".
@@ -466,6 +463,15 @@ export interface Committee {
    * The team responsible for this record. Independent of the public event/job location.
    */
   owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
+  committeePublicationStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   _order?: string | null;
   name: string;
   /**
@@ -489,9 +495,9 @@ export interface Committee {
    */
   year: string;
   /**
-   * Choose an existing portrait or upload an image up to 5 MB. Include the member’s name in its alt text.
+   * Optional. Until a portrait is added, a MASCA placeholder is shown.
    */
-  portrait: number | Media;
+  portrait?: (number | null) | Media;
   /**
    * Shown in the expanded modal on the committee page. Optional — the modal simply omits it when empty.
    */
@@ -499,6 +505,7 @@ export interface Committee {
   linkedin_url?: string | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * Add sponsor details, choose a logo and review before saving. Changes appear on the homepage when saved.
@@ -521,7 +528,7 @@ export interface Sponsor {
    */
   date: string;
   /**
-   * Choose an existing logo or upload an image up to 5 MB. A transparent background works best.
+   * Choose an existing logo or upload an image. Large JPEG and PNG images are automatically compressed. A transparent background works best.
    */
   logo: number | Media;
   updatedAt: string;
@@ -792,6 +799,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface CommitteeSelect<T extends boolean = true> {
   owningScope?: T;
+  committeePublicationStatus?: T;
   _order?: T;
   name?: T;
   university?: T;
@@ -804,6 +812,7 @@ export interface CommitteeSelect<T extends boolean = true> {
   linkedin_url?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

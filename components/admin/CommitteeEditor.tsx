@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
-import { DefaultEditView, SaveButton, useDocumentInfo, useForm, useFormFields, useFormProcessing, useFormSubmitted, useFormModified } from '@payloadcms/ui';
+import { DefaultEditView, PublishButton, SaveDraftButton, UnpublishButton, useDocumentInfo, useForm, useFormFields, useFormProcessing, useFormSubmitted, useFormModified } from '@payloadcms/ui';
 import type { DocumentViewClientProps } from 'payload';
 import { COMMITTEE_STEPS, committeeFieldStep, committeeStepErrors } from '@/features/committee/committeeEditor';
 import { useMediaPreview } from './useEventPoster';
@@ -30,6 +30,9 @@ export function CommitteeEditorView(props: DocumentViewClientProps) {
   </Context.Provider>;
 }
 export function CommitteeSaveControl() { return null; }
+export function CommitteeDraftControl() { return null; }
+export function CommitteePublishControl() { return null; }
+export function CommitteeUnpublishControl() { return null; }
 
 export function CommitteeEditorHeader() {
   const { step, setStep, error, setError, nextRef, attemptedSave, setAttemptedSave } = useCommitteeEditor();
@@ -93,9 +96,9 @@ export function CommitteeEditorFooter() {
   const { step, setStep, setError, nextRef, setAttemptedSave } = useCommitteeEditor();
   const busy = useFormProcessing();
   const modified = useFormModified();
-  const { id } = useDocumentInfo();
+  const { id, hasPublishedDoc } = useDocumentInfo();
   return <footer className="masca-wizard-footer">
-    <div className="masca-wizard-save-actions"><Link href="/admin/collections/committee" className="masca-action masca-action--secondary">Cancel</Link><span className="masca-save-indicator" role="status">{busy ? 'Saving…' : id && !modified ? 'Saved' : 'Changes go live when saved'}</span></div>
-    <div>{step > 0 && <button type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}{step < 3 ? <button type="button" className="masca-wizard-primary" disabled={busy} onClick={() => nextRef.current?.()}>Continue</button> : <div onClickCapture={() => setAttemptedSave(true)}><SaveButton label="Save member" /></div>}</div>
+    <div className="masca-wizard-save-actions"><Link href="/admin/collections/committee" className="masca-action masca-action--secondary">Cancel</Link><span className="masca-save-indicator" role="status">{busy ? 'Saving…' : id && !modified ? 'Saved' : 'Save privately as a draft, or publish when ready'}</span></div>
+    <div className="masca-committee-footer-actions">{step > 0 && <button type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}{step < 3 ? <button type="button" className="masca-wizard-primary" disabled={busy} onClick={() => nextRef.current?.()}>Continue</button> : <div className="masca-committee-publication-actions" onClickCapture={() => setAttemptedSave(true)}><SaveDraftButton /><PublishButton label={hasPublishedDoc ? 'Publish changes' : 'Publish member'} />{hasPublishedDoc && <fieldset className="masca-committee-unpublish" disabled={busy}><UnpublishButton label="Unpublish member" /></fieldset>}</div>}</div>
   </footer>;
 }

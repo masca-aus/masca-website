@@ -1,0 +1,40 @@
+.masca-photo-field { margin-bottom: 2rem; color: var(--theme-text); }
+.masca-photo-field__heading { display: flex; align-items: center; gap: .75rem; margin-bottom: .8rem; font-weight: 600; }
+.masca-photo-field__heading span { font-size: .8rem; font-weight: 400; color: var(--theme-elevation-600); }
+.masca-photo-field__body { display: grid; grid-template-columns: 200px 1fr; gap: 2rem; padding: 1.5rem; border: 1px solid var(--theme-elevation-150); border-radius: 16px; background: var(--theme-elevation-0); }
+.masca-photo-field__preview { width: 200px; height: 250px; background: var(--theme-elevation-50); border: 1px dashed var(--theme-elevation-250); border-radius: 12px; display: grid; place-items: center; overflow: hidden; }
+.masca-photo-field__preview img { width: 100%; height: 100%; object-fit: contain; }
+.masca-photo-field__preview > span { font-size: 3rem; color: var(--theme-elevation-400); }
+.masca-photo-field__content { align-self: center; min-width: 0; }
+.masca-photo-field h3 { margin: 0 0 .65rem; font-size: 1.35rem; }
+.masca-photo-field p { line-height: 1.6; max-width: 38rem; color: var(--theme-elevation-650); }
+.masca-photo-field__actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.2rem; }
+.masca-photo-field button, .masca-photo-library button { font: inherit; cursor: pointer; border-radius: 8px; padding: .7rem 1rem; min-height: 44px; border: 1px solid var(--theme-elevation-200); color: var(--theme-text); background: var(--theme-elevation-0); }
+.masca-photo-field button.masca-photo-primary { color: #010066; background: #ffcc00; border-color: #ffcc00; font-weight: 700; }
+.masca-photo-field button:disabled, .masca-photo-library button:disabled { opacity: .5; cursor: default; }
+.masca-photo-field button:focus-visible, .masca-photo-library button:focus-visible { outline: 3px solid #b38f00; outline-offset: 3px; }
+.masca-photo-field p.masca-photo-field__error { color: var(--theme-error-600, #b42318); }
+.masca-photo-field__status { font-size: .9rem; }
+.masca-photo-library { background: var(--theme-elevation-0, white); color: var(--theme-text, #010066); border: 0; border-radius: 18px; padding: 1.75rem; width: min(850px, calc(100vw - 32px)); max-height: calc(100dvh - 48px); box-shadow: 0 24px 90px #01006633; }
+.masca-photo-library::backdrop { background: #01003370; backdrop-filter: blur(4px); }
+.masca-photo-library header { display: flex; align-items: start; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+.masca-photo-library h2 { margin: 0 0 .4rem; }
+.masca-photo-library header p { margin: 0; color: var(--theme-elevation-650); }
+.masca-photo-library__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; }
+.masca-photo-library__grid button { padding: .5rem; text-align: left; }
+.masca-photo-library__grid img { width: 100%; height: 140px; object-fit: contain; background: var(--theme-elevation-50); border-radius: 5px; }
+.masca-photo-library__grid span { display: block; font-size: .8rem; margin-top: .5rem; overflow-wrap: anywhere; }
+.masca-photo-library nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; }
+@media (max-width: 640px) { .masca-photo-field__body { grid-template-columns: 1fr; gap: 1rem; padding: 1rem; } .masca-photo-field__preview { width: 160px; height: 200px; } .masca-photo-library__grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.masca-portrait-adjuster { max-width: 620px; }
+.masca-portrait-adjuster__frame { position: relative; width: min(100%, 280px); aspect-ratio: 4 / 5; overflow: hidden; margin: 1rem auto; background: #eee; border-radius: 10px; touch-action: none; cursor: grab; outline-offset: 4px; }
+.masca-portrait-adjuster__frame:active { cursor: grabbing; }
+.masca-portrait-adjuster__frame:focus-visible { outline: 3px solid #b38f00; }
+.masca-portrait-adjuster__frame img { position: absolute; max-width: none; max-height: none; pointer-events: none; user-select: none; }
+.masca-portrait-adjuster__grid { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to right, transparent 33%, #ffffff70 33%, #ffffff70 33.4%, transparent 33.4%, transparent 66.6%, #ffffff70 66.6%, #ffffff70 67%, transparent 67%), linear-gradient(to bottom, transparent 33%, #ffffff70 33%, #ffffff70 33.4%, transparent 33.4%, transparent 66.6%, #ffffff70 66.6%, #ffffff70 67%, transparent 67%); }
+.masca-portrait-adjuster__zoom { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+.masca-portrait-adjuster__zoom input { flex: 1; min-width: 0; accent-color: #010066; }
+.masca-portrait-adjuster__zoom output { min-width: 3rem; }
+.masca-portrait-adjuster__hint { font-size: .8rem; color: var(--theme-elevation-650); }
+.masca-portrait-adjuster footer { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; }
+.masca-portrait-adjuster button.masca-photo-primary { background: #ffcc00; border-color: #ffcc00; color: #010066; font-weight: 700; }

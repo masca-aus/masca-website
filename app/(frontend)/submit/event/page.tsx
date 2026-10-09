@@ -26,13 +26,14 @@ export default function EventSubmitPage() {
       </section>
 
       <section className="container section-pad">
-        <div className="mb-10">
+        <div className="mb-10 flex flex-wrap gap-3">
+          <Button href="/submit" variant="ghost"><span aria-hidden>&larr;</span> Post on our page</Button>
           <Button
             href="/events"
             variant="ghost"
             className="motion-reduce:transform-none motion-reduce:transition-none"
           >
-            <span aria-hidden>&larr;</span> Back to Events
+            Browse events
           </Button>
         </div>
         <EventSubmissionForm />

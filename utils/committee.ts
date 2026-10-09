@@ -42,7 +42,12 @@ export async function getCommittee(year?: string): Promise<CommitteeMember[]> {
   const payload = await getPayload({ config })
   const { docs } = await payload.find({
     collection: "committee",
-    ...(year !== undefined ? { where: { year: { equals: year } } } : {}),
+    where: {
+      and: [
+        { _status: { equals: "published" } },
+        ...(year !== undefined ? [{ year: { equals: year } }] : []),
+      ],
+    },
     sort: "_order",
     // The committee is a couple dozen people a year — fetch them all.
     pagination: false,
@@ -59,8 +64,8 @@ export function getCommitteeYears(members: CommitteeMember[]): string[] {
 
 /** Maps a Payload doc to the shape the committee components render. */
 export function toCommitteeMember(doc: Committee): CommitteeMember {
-  // At depth 1 the portrait arrives populated; anything else (depth 0, a
-  // deleted relation) degrades to an empty img rather than a crash.
+  // At depth 1 the portrait arrives populated; profiles without an uploaded
+  // portrait use the shared placeholder illustration.
   const portrait = typeof doc.portrait === "object" ? doc.portrait : null
 
   return {
@@ -68,7 +73,7 @@ export function toCommitteeMember(doc: Committee): CommitteeMember {
     name: doc.name,
     role: doc.role,
     department: doc.department,
-    img: portrait?.url ?? "",
+    img: portrait?.url ?? "/casts/committee-placeholder.svg",
     year: doc.year,
     // Empty strings coalesce to undefined so the UI hides what's unset.
     university: doc.university || undefined,

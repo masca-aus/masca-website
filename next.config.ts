@@ -2,6 +2,8 @@ import { withPayload } from "@payloadcms/next/withPayload";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // The public site and Payload admin have separate root layouts.
+  experimental: { globalNotFound: true },
   // The careers board lived at /career while under construction; keep the
   // old address working for anyone who bookmarked or shared it.
   async redirects() {

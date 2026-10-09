@@ -16,6 +16,8 @@ import sharp from "sharp";
 
 import { SPONSOR_STEPS } from './features/sponsors/sponsorEditor.ts';
 import { COMMITTEE_STEPS } from "./features/committee/committeeEditor.ts";
+import { committeeStatusField } from "./features/committee/committeeStatusField.ts";
+import { committeeQuickAction } from "./features/committee/committeeQuickActions.ts";
 import { Organisations } from "./collections/Organisations.ts";
 import { EventLifecycle } from "./collections/EventLifecycle.ts";
 import { Careers } from "./collections/Careers.ts";
@@ -147,7 +149,7 @@ export default buildConfig({
       beforeLogin: ["/components/admin/LoginWelcome#LoginWelcome"],
       afterLogin: ["/components/admin/LoginWelcome#LoginHelp"],
       Nav: "/components/admin/MascaNav#MascaNav",
-      providers: ["/components/admin/AdminNavigationEnhancements#AdminNavigationEnhancements"],
+      providers: ["/components/admin/AdminNavigationEnhancements#AdminNavigationEnhancements", "/components/admin/ImageUploadCompression#ImageUploadCompression"],
       actions: ["/components/admin/ThemeToggle#ThemeToggle"],
       graphics: {
         Logo: "/components/admin/MascaBrand#MascaLogo",
@@ -254,7 +256,7 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
       slug: "media",
       admin: {
         useAsTitle: "filename",
-        description: "Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.",
+        description: "Upload images only. Large JPEG and PNG photos are automatically compressed to fit.",
         components: {
           beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
           edit: {
@@ -272,10 +274,8 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
           name: "alt",
           label: "Alt text",
           type: "text",
-          required: true,
-          admin: {
-            description: "Describe the image’s useful content in a short sentence. For a portrait, include the person’s name; for a logo, use the organisation’s name. Avoid filenames or ‘image of’.",
-          },
+          // Keep existing descriptions; public images use their member, event or sponsor name.
+          admin: { hidden: true },
         },
       ],
       upload: {
@@ -311,33 +311,37 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
     },
     {
       slug: "committee",
-      versions: { maxPerDoc: 0 },
+      versions: { drafts: true, maxPerDoc: 0 },
       admin: {
         useAsTitle: "name",
         listSearchableFields: adminSearchFields.committee, baseFilter: withAdminSearch("committee"),
         hideAPIURL: true,
-        defaultColumns: ["name", "role", "department", "year"],
+        defaultColumns: ["name", "role", "department", "year", "committeePublicationStatus"],
         description:
-          "Create and update committee profiles step by step. Changes appear on the website when you Save.",
+          "Create committee profiles as drafts, then publish them when they are ready to appear on the website.",
         components: {
           beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink", "/components/admin/AdminSearchHelp#AdminSearchHelp"],
           edit: {
             beforeDocumentControls: ["/components/admin/DocumentBackLink#DocumentBackLink"],
             SaveButton: "/components/admin/CommitteeEditor#CommitteeSaveControl",
+            SaveDraftButton: "/components/admin/CommitteeEditor#CommitteeDraftControl",
+            PublishButton: "/components/admin/CommitteeEditor#CommitteePublishControl",
+            UnpublishButton: "/components/admin/CommitteeEditor#CommitteeUnpublishControl",
           },
           views: { edit: { default: { Component: "/components/admin/CommitteeEditor#CommitteeEditorView" }, versions: { tab: { label: "Change history" } } } },
         },
       },
-      // Anyone may read (the public site renders from this collection); only
-      // the logged-in admin can create/update/delete.
+      // Public requests only see published profiles. Editors can see drafts.
       access: {
-        read: () => true,
+        read: ({ req }) => req.user ? true : { _status: { equals: "published" } },
         readVersions: ({ req }) => Boolean(req.user),
       },
       defaultSort: "name",
+      endpoints: [{ path: '/:id/quick-status', method: 'post', handler: committeeQuickAction }],
       // Fields mirror the shape the committee page has always rendered, and
       // are validated here so bad entries are rejected at save time.
       fields: [
+        committeeStatusField,
         // Retain stored ordering for existing public pages without exposing reordering.
         { name: "_order", type: "text", index: true, admin: { hidden: true, readOnly: true, disableListColumn: true, disableListFilter: true, disableBulkEdit: true } },
         { name: "committeeWizardHeader", type: "ui", admin: { components: { Field: "/components/admin/CommitteeEditor#CommitteeEditorHeader" }, disableListColumn: true, disableBulkEdit: true } },
@@ -401,16 +405,16 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
         },
         editorSection({
           title: "Portrait and profile",
-          description: "Choose the member portrait and add an optional LinkedIn profile.",
+          description: "Choose the member portrait and add their required LinkedIn profile.",
         }),
         {
           name: "portrait",
           type: "upload",
           relationTo: "media",
-          required: true,
           displayPreview: true,
           admin: {
-            description: "Choose an existing portrait or upload an image up to 5 MB. Include the member’s name in its alt text.",
+            components: { Field: "/components/admin/CommitteePhotoField#CommitteePhotoField" },
+            description: "Optional. Until a portrait is added, a MASCA placeholder is shown.",
           },
         },
         {
@@ -425,26 +429,30 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
           name: "linkedin_url",
           label: "LinkedIn profile",
           type: "text",
+          required: true,
+          admin: { description: "Required before publishing. Use the member’s LinkedIn profile URL." },
           validate: (value: string | null | undefined) => {
-            if (!value) return true;
+            if (!value?.trim()) return "Add a LinkedIn profile before publishing.";
             try {
-              return (
-                new URL(value).protocol === "https:" ||
-                "LinkedIn URL must start with https://"
-              );
-            } catch {
-              return "Must be a full URL, e.g. https://www.linkedin.com/in/…";
-            }
+              const url = new URL(value);
+              return (url.protocol === "https:" && /(^|\.)linkedin\.com$/i.test(url.hostname) && /^\/in\/[^/]+/.test(url.pathname)) || "Use a LinkedIn profile URL, e.g. https://www.linkedin.com/in/name";
+            } catch { return "Use a full LinkedIn profile URL starting with https://"; }
           },
         },
         { name: "committeeWizardFooter", type: "ui", admin: { components: { Field: "/components/admin/CommitteeEditor#CommitteeEditorFooter" }, disableListColumn: true, disableBulkEdit: true } },
       ].map((field) => {
-        const step = COMMITTEE_STEPS.findIndex(section => (section.fields as readonly string[]).includes(field.name ?? ""));
+        const name = 'name' in field ? field.name : '';
+        const step = COMMITTEE_STEPS.findIndex(section => (section.fields as readonly string[]).includes(name ?? ""));
         return step < 0 ? field : { ...field, admin: { ...field.admin, className: `masca-committee-step masca-committee-step-${step}` } };
       }) as Field[],
       hooks: {
         ...adminSearchHooks,
-        afterChange: [revalidateCommitteePages],
+        afterChange: [({ doc, previousDoc, req }) => {
+          const draftWrite = req?.query?.draft === "true" || req?.query?.draft === true;
+          const unpublish = req?.query?.unpublishAllLocales === "true" || req?.query?.unpublishAllLocales === true;
+          if (!draftWrite && (unpublish || doc?._status === "published" || previousDoc?._status === "published")) revalidateCommitteePages();
+          return doc;
+        }],
         afterDelete: [revalidateCommitteePages],
       },
     },
@@ -508,7 +516,7 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
           required: true,
           displayPreview: true,
           admin: {
-            description: "Choose an existing logo or upload an image up to 5 MB. A transparent background works best.",
+            description: "Choose an existing logo or upload an image. Large JPEG and PNG images are automatically compressed. A transparent background works best.",
           },
         },
         { name: "sponsorEditorFooter", type: "ui", admin: { components: { Field: "/components/admin/SponsorEditor#SponsorEditorFooter" }, disableListColumn: true, disableBulkEdit: true } },

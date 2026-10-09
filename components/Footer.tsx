@@ -18,7 +18,7 @@ const footerSections: { heading: string; links: FooterLink[] }[] = [
       { label: "MASCA NSW", href: "https://www.mascansw.com.au/", external: true },
       { label: "Welfare", href: "/welfare" },
       { label: "MASCAvoice", href: "https://mascavoice.kit.com/posts", external: true },
-      { label: "Muafakat", href: "https://muafakatgames.com/?preview=home", external: true },
+      { label: "Muafakat Games", href: "https://muafakatgames.com/?preview=home", external: true },
     ],
   },
   {
@@ -101,6 +101,17 @@ export default function Footer() {
             Terima <br/> Kasih
           </span>
         </div>
+
+        <section aria-labelledby="acknowledgement-heading" className="mt-12 border-t border-blue-100/20 pt-8">
+          <div className="mb-5 flex items-center gap-3">
+            <Image src="/flags/aboriginal.svg" alt="Australian Aboriginal flag" width={72} height={48} className="h-10 w-auto" />
+            <Image src="/flags/torres-strait-islander.svg" alt="Torres Strait Islander flag" width={80} height={40} className="h-10 w-auto" />
+          </div>
+          <h2 id="acknowledgement-heading" className="mb-3 text-body-sm font-bold text-white">Acknowledgement of Country</h2>
+          <p className="max-w-4xl text-body-sm leading-relaxed text-gray-300">
+            MASCA acknowledges Aboriginal and Torres Strait Islander peoples as the Traditional Custodians of the lands on which we study, live and gather across Australia. We honour their enduring connections to Country and pay our respects to Elders past and present.
+          </p>
+        </section>
 
         <div className="mt-12 border-t border-blue-100/20 pt-6 flex flex-row justify-between">
           <span className="text-caption text-gray-300">

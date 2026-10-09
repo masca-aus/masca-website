@@ -7,6 +7,7 @@ import BoardEmpty from "@/app/(frontend)/careers/BoardEmpty";
 import CareerBoard from "@/app/(frontend)/careers/CareerBoard";
 import CompanyMark, { initials } from "@/app/(frontend)/careers/CompanyMark";
 import FilterModal from "@/app/(frontend)/careers/FilterModal";
+import JobCard from "@/app/(frontend)/careers/JobCard";
 import JobDetails, { descriptionBlocks, jobShareUrl } from "@/app/(frontend)/careers/JobDetails";
 import Footer from "@/components/Footer";
 import {
@@ -185,6 +186,36 @@ describe("FilterModal (static render)", () => {
     expect(html).toContain("Show 1 role");
     expect(html).toContain("Clear all");
     expect(html).toContain('aria-pressed="true"');
+  });
+});
+
+describe("country-specific working-rights guidance", () => {
+  it.each(["yes", "no", "unsure"] as const)("hides badges and visa guidance for Malaysian roles with eligibility %s", (international) => {
+    const job = makeJob({ country: { key: "malaysia", label: "Malaysia" }, international });
+    const card = renderToStaticMarkup(<JobCard job={job} selected={false} tabIndex={0} onSelect={() => {}} />);
+    const details = renderToStaticMarkup(<JobDetails job={job} headingId="details" />);
+    const preview = renderToStaticMarkup(<JobDetails job={job} headingId="preview" showActions={false} />);
+    for (const html of [card, details, preview]) {
+      expect(html).not.toMatch(/Check working rights|Open to international students|Citizens \/ PR only|student.visa|student visas|work conditions/);
+      expect(html).toContain("Software Intern");
+      expect(html).toContain("Internship");
+    }
+    expect(details).toContain('href="https://acme.example/apply"');
+  });
+
+  it.each([
+    ["yes", "Open to international students", "student-visa holders"],
+    ["no", "Citizens / PR only", "student visas"],
+    ["unsure", "Check working rights", "student-visa work conditions"],
+  ] as const)("retains %s guidance outside Malaysia and when the country is missing", (international, badge, guidance) => {
+    for (const country of [{ key: "australia", label: "Australia" }, { key: "singapore", label: "Singapore" }, undefined]) {
+      const job = makeJob({ country, international });
+      const card = renderToStaticMarkup(<JobCard job={job} selected={false} tabIndex={0} onSelect={() => {}} />);
+      const details = renderToStaticMarkup(<JobDetails job={job} headingId="details" />);
+      expect(card).toContain(badge);
+      expect(details).toContain(badge);
+      expect(details).toContain(guidance);
+    }
   });
 });
 

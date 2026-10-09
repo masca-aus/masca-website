@@ -92,3 +92,16 @@ it('places the editor tutorial before Edit and Change history in the header', as
   expect(header.textContent).toBe('EditChange history');
   header.remove();
 });
+
+
+it('places a new event tutorial in the header when document tabs do not exist', async () => {
+  const header = document.createElement('div');
+  header.className = 'doc-header__header';
+  header.innerHTML = '<h1>Untitled</h1>';
+  document.body.append(header);
+  const view = render(<ListingTutorial collection="events" editor />);
+  await waitFor(() => expect(header.textContent).toContain('Show tutorial'));
+  expect(view.container.querySelector('button')).toBeNull();
+  view.unmount();
+  header.remove();
+});

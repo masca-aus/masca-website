@@ -9,15 +9,14 @@ import {
 } from "@/app/(frontend)/submit/event/EventSubmissionForm";
 
 describe("public submission pages", () => {
-  it("offers event submissions without advertising careers submissions as available", () => {
+  it("offers event and career submission pathways", () => {
     const html = renderToStaticMarkup(<SubmitPage />);
 
-    expect(html).toContain("Submit to MASCA");
+    expect(html).toContain("Post on our page");
     expect(html).toContain('href="/submit/event"');
-    expect(html).toContain("Submit an event");
-    expect(html).not.toContain('href="/submit/careers"');
-    expect(html).not.toContain("Submit a career");
-    expect(html).toContain('href="/events"');
+    expect(html).toContain("Post an event");
+    expect(html).toContain('href="/submit/career"');
+    expect(html).toContain("Post a job");
   });
 
   it("renders a labelled event form with upload limits, confirmation and privacy context", () => {
@@ -27,8 +26,10 @@ describe("public submission pages", () => {
       "Event title",
       "Organisation",
       "Event description",
-      "Start date and time",
-      "End date and time",
+      "Event dates",
+      "One day",
+      "Date range",
+      "Start time",
       "Venue",
       "State or territory",
       "Ticket or registration link",
@@ -52,7 +53,7 @@ describe("public submission pages", () => {
   it("exposes pending, success and focused error states accessibly", () => {
     const pendingHtml = renderToStaticMarkup(<EventSubmissionForm initialPending />);
     expect(pendingHtml).toContain("Submitting…");
-    expect(pendingHtml.match(/ disabled=""/g)).toHaveLength(1);
+    expect(pendingHtml).toMatch(/<button[^>]*disabled=""[^>]*>Submitting…<\/button>/);
 
     const successHtml = renderToStaticMarkup(
       <EventSubmissionForm

@@ -83,7 +83,7 @@ function JobCard({
           {/* Row 2: tags */}
           <div className="flex flex-wrap gap-3">
             {job.featured && <FeaturedBadge />}
-            <WorkingRightsBadge value={job.international} compact />
+            {job.country?.key !== "malaysia" && <WorkingRightsBadge value={job.international} compact />}
             <TypeBadge type={job.type} />
             <StudyLevelBadge levels={job.studyLevels} />
           </div>

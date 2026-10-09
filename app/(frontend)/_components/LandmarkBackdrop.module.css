@@ -1,0 +1,21 @@
+.backdrop { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.2s ease-in-out;
+}
+.visible { opacity: 1; }
+.shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(1, 0, 55, .91) 0%, rgba(1, 0, 55, .76) 42%, rgba(1, 0, 55, .4) 100%), linear-gradient(0deg, rgba(1, 0, 55, .45) 0%, transparent 28%);
+}
+@media (max-width: 1023px) {
+  .photo { display: none; }
+  .shade { background: radial-gradient(ellipse at 85% 35%, rgba(49, 48, 126, .28), transparent 65%), linear-gradient(160deg, #080735, #010037 75%); }
+}
+@media (prefers-reduced-motion: reduce) { .photo { transition: none; } }

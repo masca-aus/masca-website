@@ -1,10 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import { SITE_NAME_FULL, SITE_DESCRIPTION } from "@/utils/seo";
 import HeroSection from "./sections/hero";
-import UpcomingEvent from "./sections/upcomingEvent";
-import StatisticSection from "./sections/statistic";
-import StatesSection from "./sections/states";
 import EventShowcaseSection from "./sections/eventShowcase";
 import MascaCareSection from "./sections/mascaCare";
 import CareerSpotlightSection from "./sections/careerSpotlight";
@@ -13,11 +10,18 @@ import YearbookSection from "./sections/yearbook";
 import AboutSection from "./sections/about";
 import SponsorsSection from "./sections/sponsors";
 import FollowUsSection from "./sections/followUs";
-import JoinUsSection from "./sections/joinUs";
+import PostOnOurPageSection from "./sections/postOnOurPage";
 import { getSponsors } from "@/utils/sponsors";
 
 // Refresh time-based event expiry between editor-triggered revalidations.
 export const revalidate = 60;
+
+// Let Safari render the page beneath its floating browser controls.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: { absolute: SITE_NAME_FULL },
@@ -42,19 +46,19 @@ export default async function Home() {
   const sponsors = await getSponsors();
 
   return (
-   <main id="main">
-      <HeroSection upcomingEvent={<UpcomingEvent />} />
-      <StatisticSection />
+   <main id="main" className="bg-white">
+      <div className="flex min-h-svh flex-col bg-blue-600">
+        <HeroSection />
+      </div>
       <AboutSection />
       <YearbookSection />
-      <StatesSection />
       <EventShowcaseSection />
       <CareerSpotlightSection />
       <MascaCareSection />
       <SponsorsSection sponsors={sponsors} />
       <MascaVoiceSection />
       <FollowUsSection />
-      <JoinUsSection />
+      <PostOnOurPageSection />
     </main>
   );
 }

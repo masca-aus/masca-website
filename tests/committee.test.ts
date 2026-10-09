@@ -33,12 +33,12 @@ const getField = async (name: string) => {
 };
 
 describe("committee collection (Payload-served committee page)", () => {
-  it("mirrors the member shape: required name/role/department/year, optional bio/uni/course/linkedin", async () => {
-    for (const name of ["name", "role", "department", "year"]) {
+  it("mirrors the member shape: required name/role/department/year, required LinkedIn, optional bio/uni/course", async () => {
+    for (const name of ["name", "role", "department", "year", "linkedin_url"]) {
       const field = await getField(name);
       expect("required" in field && field.required, `${name} required`).toBe(true);
     }
-    for (const name of ["bio", "university", "course", "linkedin_url"]) {
+    for (const name of ["bio", "university", "course"]) {
       const field = await getField(name);
       expect("required" in field && field.required, `${name} optional`).toBeFalsy();
     }
@@ -66,11 +66,11 @@ describe("committee collection (Payload-served committee page)", () => {
     expect(order).toBeUndefined();
   });
 
-  it("relates the portrait to the Media collection and requires it", async () => {
+  it("relates the portrait to the Media collection and allows a placeholder", async () => {
     const portrait = await getField("portrait");
     expect(portrait.type).toBe("upload");
     expect("relationTo" in portrait && portrait.relationTo).toBe("media");
-    expect("required" in portrait && portrait.required).toBe(true);
+    expect("required" in portrait && portrait.required).toBeFalsy();
   });
 
   it("validates the year format so bad terms are rejected at save time", async () => {
@@ -83,15 +83,15 @@ describe("committee collection (Payload-served committee page)", () => {
     expect(year.validate("" as never, {} as never)).not.toBe(true);
   });
 
-  it("validates linkedin_url as an https URL but allows it to be empty", async () => {
+  it("validates linkedin_url as a required HTTPS LinkedIn profile URL", async () => {
     const linkedin = await getField("linkedin_url");
     if (!("validate" in linkedin) || typeof linkedin.validate !== "function")
       throw new Error("linkedin_url has no validate function");
     expect(
       linkedin.validate("https://www.linkedin.com/in/example" as never, {} as never),
     ).toBe(true);
-    expect(linkedin.validate(undefined as never, {} as never)).toBe(true);
-    expect(linkedin.validate("" as never, {} as never)).toBe(true);
+    expect(linkedin.validate(undefined as never, {} as never)).not.toBe(true);
+    expect(linkedin.validate("" as never, {} as never)).not.toBe(true);
     expect(linkedin.validate("not a url" as never, {} as never)).not.toBe(true);
     expect(linkedin.validate("http://insecure.example" as never, {} as never)).not.toBe(true);
   });
@@ -99,7 +99,7 @@ describe("committee collection (Payload-served committee page)", () => {
   it("is publicly readable", async () => {
     const committee = await getCommitteeCollection();
     const canRead = committee.access.read({ req: { user: null } } as never);
-    expect(canRead).toBe(true);
+    expect(canRead).toEqual({ _status: { equals: "published" } });
   });
 
   it("revalidates the committee page (and homepage teaser) on change and delete", async () => {
@@ -110,12 +110,12 @@ describe("committee collection (Payload-served committee page)", () => {
     expect(afterDelete.length).toBeGreaterThan(0);
 
     vi.mocked(revalidatePath).mockClear();
-    for (const hook of afterChange) await hook({} as never);
+    for (const hook of afterChange) await hook({ doc: { _status: "published" }, req: { query: {} } } as never);
     expect(vi.mocked(revalidatePath).mock.calls.map((c) => c[0])).toContain("/committee");
     expect(vi.mocked(revalidatePath).mock.calls.map((c) => c[0])).toContain("/");
 
     vi.mocked(revalidatePath).mockClear();
-    for (const hook of afterDelete) await hook({} as never);
+    for (const hook of afterDelete) await hook({ doc: { _status: "published" }, req: { query: {} } } as never);
     expect(vi.mocked(revalidatePath).mock.calls.map((c) => c[0])).toContain("/committee");
   });
 });
@@ -173,9 +173,9 @@ describe("toCommitteeMember (Payload doc → page shape)", () => {
     expect(member.bio).toBeUndefined();
   });
 
-  it("degrades to an empty img rather than crashing when the portrait is unpopulated", () => {
+  it("uses the placeholder rather than crashing when the portrait is unpopulated", () => {
     const member = toCommitteeMember({ ...doc, portrait: 1 });
-    expect(member.img).toBe("");
+    expect(member.img).toBe("/casts/committee-placeholder.svg");
   });
 });
 

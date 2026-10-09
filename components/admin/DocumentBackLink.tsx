@@ -16,6 +16,20 @@ export function DocumentBackLink() {
     if (title === '[Untitled]' && !data?.title) setDocumentTitle('Untitled');
   }, [title, data?.title, setDocumentTitle]);
   const pathname = usePathname();
+  useEffect(() => {
+    // Event's nested edit view has a separate title context from the page header.
+    const cleanPlaceholder = () => {
+      const heading = document.querySelector<HTMLElement>('.doc-header__title');
+      if (heading?.textContent?.trim() === '[Untitled]') {
+        heading.textContent = 'Untitled';
+        heading.setAttribute('title', 'Untitled');
+      }
+    };
+    cleanPlaceholder();
+    const observer = new MutationObserver(cleanPlaceholder);
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    return () => observer.disconnect();
+  }, [pathname]);
   const linkRef = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
     const controls = linkRef.current?.closest('.doc-controls');

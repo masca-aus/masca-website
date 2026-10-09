@@ -1,8 +1,6 @@
 import * as listingChanges from './20261008_140000_listing_changes';
 import * as listingEmails from './20261008_130000_listing_emails';
-import * as listingReview from './20261001_160000_listing_review';
-import * as publicSubmissions from './20261001_120000_public_submissions';
-import * as workspaceAccess from "./20260930_221300_workspace_access";
+import * as migration_20261006_140000_optional_media_alt from './20261006_140000_optional_media_alt';
 import * as migration_20260802_071222_restructure_committee from './20260802_071222_restructure_committee';
 import * as migration_20260907_142655_add_committee_departments from './20260907_142655_add_committee_departments';
 import * as migration_20260916_010000_add_events_submission_workflow from './20260916_010000_add_events_submission_workflow';
@@ -11,6 +9,12 @@ import * as migration_20260917_104410_organisations_event_locations from './2026
 import * as migration_20260917_114229_event_lifecycle from './20260917_114229_event_lifecycle';
 import * as migration_20260917_121119_committee_history from './20260917_121119_committee_history';
 import * as migration_20260917_124307_careers_cms from './20260917_124307_careers_cms';
+import * as migration_20260930_221300_workspace_access from './20260930_221300_workspace_access';
+import * as migration_20261001_120000_public_submissions from './20261001_120000_public_submissions';
+import * as migration_20261001_160000_listing_review from './20261001_160000_listing_review';
+import * as migration_20261003_041014_committee_drafts from './20261003_041014_committee_drafts';
+import * as migration_20261003_041050_committee_scope_defaults from './20261003_041050_committee_scope_defaults';
+import * as migration_20261003_041100_seed_national_council from './20261003_041100_seed_national_council';
 
 export const migrations = [
   {
@@ -51,11 +55,39 @@ export const migrations = [
   {
     up: migration_20260917_124307_careers_cms.up,
     down: migration_20260917_124307_careers_cms.down,
-    name: '20260917_124307_careers_cms'
+    name: '20260917_124307_careers_cms',
   },
-  {up: workspaceAccess.up, down: workspaceAccess.down, name: "20260930_221300_workspace_access"},
-  {up: publicSubmissions.up, down: publicSubmissions.down, name: "20261001_120000_public_submissions"},
-  {up:listingReview.up,down:listingReview.down,name:'20261001_160000_listing_review'},
+  {
+    up: migration_20260930_221300_workspace_access.up,
+    down: migration_20260930_221300_workspace_access.down,
+    name: '20260930_221300_workspace_access',
+  },
+  {
+    up: migration_20261001_120000_public_submissions.up,
+    down: migration_20261001_120000_public_submissions.down,
+    name: '20261001_120000_public_submissions',
+  },
+  {
+    up: migration_20261001_160000_listing_review.up,
+    down: migration_20261001_160000_listing_review.down,
+    name: '20261001_160000_listing_review',
+  },
+  {
+    up: migration_20261003_041014_committee_drafts.up,
+    down: migration_20261003_041014_committee_drafts.down,
+    name: '20261003_041014_committee_drafts'
+  },
+  {
+    up: migration_20261003_041050_committee_scope_defaults.up,
+    down: migration_20261003_041050_committee_scope_defaults.down,
+    name: '20261003_041050_committee_scope_defaults'
+  },
+  {
+    up: migration_20261003_041100_seed_national_council.up,
+    down: migration_20261003_041100_seed_national_council.down,
+    name: '20261003_041100_seed_national_council'
+  },
+  { up: migration_20261006_140000_optional_media_alt.up, down: migration_20261006_140000_optional_media_alt.down, name: '20261006_140000_optional_media_alt' },
   {up:listingEmails.up,down:listingEmails.down,name:'20261008_130000_listing_emails'},
   {up:listingChanges.up,down:listingChanges.down,name:'20261008_140000_listing_changes'},
 ];
