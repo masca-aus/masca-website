@@ -41,6 +41,18 @@ export const actionSchema = z.discriminatedUnion("action", [
       .max(180000)
       .regex(/^[A-Za-z0-9+/]*={0,2}$/),
   }),
+  z.object({
+    action: z.literal("draft"),
+    expectedVersion: z.number().int().positive(),
+  }),
+  z.object({
+    action: z.literal("delete"),
+    expectedVersion: z.number().int().positive(),
+  }),
+  z.object({
+    action: z.literal("restore"),
+    expectedVersion: z.number().int().positive(),
+  }),
   ...(
     ["review", "approve", "withdraw", "changes", "posted", "duplicate"] as const
   ).map((action) =>

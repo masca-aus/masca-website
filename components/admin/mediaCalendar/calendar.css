@@ -1426,3 +1426,297 @@
   object-fit: cover;
   border-radius: 5px;
 }
+
+/* Calendar interactions share the CMS surface palette, including portalled menus. */
+.mc-floating-menu {
+  --mc-bg: var(--theme-bg, #fff);
+  --mc-text: var(--theme-text, #232838);
+  --mc-line: var(--theme-elevation-150, #e6e8ee);
+  --mc-soft: var(--theme-elevation-50, #f7f8fb);
+  position: fixed;
+  z-index: 1200;
+  min-width: 210px;
+  max-width: calc(100vw - 20px);
+  max-height: min(360px, calc(100dvh - 20px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--mc-bg);
+  color: var(--mc-text);
+  border: 1px solid var(--mc-line);
+  padding: 5px;
+  border-radius: 12px;
+  box-shadow:
+    0 12px 40px #10153524,
+    0 2px 8px #10153512;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  animation: mc-menu-in 140ms ease-out;
+}
+.mc-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 11px;
+  border-radius: 7px;
+  min-height: 40px;
+  cursor: pointer;
+  transition: background 120ms;
+}
+.mc-menu-item span {
+  flex: 1;
+}
+.mc-menu-item--active {
+  background: var(--mc-soft);
+}
+.mc-menu-item[aria-selected="true"] {
+  font-weight: 600;
+}
+.mc-menu-item[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: default;
+}
+.mc-menu-item--danger {
+  color: var(--theme-error-500, #bd3345);
+  border-top: 1px solid var(--mc-line);
+  margin-top: 4px;
+}
+.mc-color-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+.mc-select {
+  min-width: 0;
+}
+.mc-workspace .mc-select-trigger {
+  width: 100%;
+  justify-content: space-between;
+  gap: 9px;
+  padding: 10px 12px;
+  text-align: left;
+  min-height: 41px;
+}
+.mc-select-trigger > span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mc-select-trigger > svg {
+  flex-shrink: 0;
+  transition: transform 160ms ease;
+}
+.mc-select-trigger[aria-expanded="true"] > svg {
+  transform: rotate(180deg);
+}
+.mc-filters .mc-select {
+  min-width: 150px;
+}
+.mc-workspace .mc-card {
+  position: relative;
+  transition:
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+.mc-card:hover {
+  box-shadow: 0 4px 12px #15172512;
+  transform: translateY(-1px);
+}
+.mc-workspace .mc-card-open,
+.mc-workspace .mc-card-open:hover {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+}
+.mc-card-meta {
+  padding-right: 46px;
+}
+.mc-card-tools {
+  display: flex;
+  position: absolute;
+  top: 5px;
+  right: 4px;
+  gap: 0;
+}
+.mc-workspace .mc-card-tools button {
+  border: 0;
+  min-height: 24px;
+  width: 23px;
+  padding: 2px;
+  background: transparent;
+  color: var(--mc-muted);
+}
+.mc-workspace .mc-card-tools button:hover {
+  background: var(--mc-soft);
+  color: var(--mc-text);
+}
+.mc-workspace button.mc-card-grip {
+  cursor: grab;
+  touch-action: none;
+}
+.mc-card[data-moving="true"] {
+  opacity: 0.45;
+}
+.mc-workspace[data-dragging="true"] .mc-card[data-moving="true"] {
+  opacity: 0.25;
+  border-style: dashed;
+}
+.mc-workspace[data-dragging="true"] .mc-day {
+  transition:
+    background 140ms ease,
+    box-shadow 140ms ease;
+}
+[data-drop-active="true"] {
+  background: color-mix(in srgb, var(--mc-primary) 7%, var(--mc-bg)) !important;
+  box-shadow: inset 0 0 0 2px #7977c9;
+  border-radius: 8px;
+}
+.mc-list section,
+.mc-unscheduled {
+  transition:
+    background 140ms ease,
+    box-shadow 140ms ease;
+}
+.mc-drag-overlay {
+  position: fixed;
+  z-index: 1100;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  will-change: transform;
+  filter: drop-shadow(0 12px 16px #11123530);
+}
+.mc-drag-overlay .mc-card {
+  opacity: 1;
+  margin: 0;
+  transform: none;
+  box-shadow: 0 0 0 1px #7977c9;
+}
+.mc-drag-overlay .mc-card-meta {
+  padding-right: 0;
+}
+.mc-drag-overlay--dropping {
+  transition:
+    transform 170ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 170ms;
+  opacity: 0.65;
+}
+.mc-drag-hint {
+  display: block;
+  background: var(--mc-primary);
+  color: white;
+  font-size: 11px;
+  border-radius: 6px;
+  padding: 5px 8px;
+  margin-top: 7px;
+  text-align: center;
+}
+.mc-card--landed {
+  animation: mc-card-land 500ms ease-out;
+}
+.mc-toast-stack {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1150;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  max-height: 40dvh;
+  overflow: auto;
+}
+.mc-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  color: var(--mc-text);
+  background: var(--mc-bg);
+  border: 1px solid var(--mc-line);
+  box-shadow: 0 8px 32px #10153520;
+  border-radius: 12px;
+  animation: mc-toast-in 180ms ease-out;
+}
+.mc-toast > span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.mc-toast > svg {
+  flex-shrink: 0;
+  color: #38856c;
+}
+.mc-workspace .mc-toast button {
+  padding: 5px 8px;
+  min-height: 30px;
+  flex-shrink: 0;
+}
+@keyframes mc-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes mc-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes mc-card-land {
+  from {
+    box-shadow: 0 0 0 3px #7977c955;
+    transform: scale(1.025);
+  }
+  to {
+    box-shadow: 0 2px 4px #15172504;
+    transform: none;
+  }
+}
+@media (max-width: 767px) {
+  .mc-filters .mc-select {
+    flex: 1;
+    min-width: 120px;
+  }
+  .mc-toast-stack {
+    bottom: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mc-floating-menu,
+  .mc-toast,
+  .mc-card--landed {
+    animation: none;
+  }
+  .mc-drag-overlay--dropping,
+  .mc-card,
+  .mc-select-trigger > svg,
+  .mc-day,
+  .mc-list section,
+  .mc-unscheduled {
+    transition: none !important;
+  }
+  .mc-card:hover {
+    transform: none;
+  }
+}

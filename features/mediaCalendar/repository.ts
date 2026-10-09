@@ -54,12 +54,18 @@ export async function savePost(c: pg.PoolClient, p: Post) {
     [p.id, p.plannedAt, p.status, p.category, JSON.stringify(p)],
   );
 }
-export async function lockedPost(c: pg.PoolClient, id: string): Promise<Post> {
+export async function lockedPost(
+  c: pg.PoolClient,
+  id: string,
+  includeDeleted = false,
+): Promise<Post> {
   const { rows } = await c.query(
     `SELECT data FROM ${table("posts")} WHERE id=$1 FOR UPDATE`,
     [id],
   );
   if (!rows.length) throw new CalendarError("Post not found.", 404);
+  if (rows[0].data.deletedAt && !includeDeleted)
+    throw new CalendarError("This post was deleted.", 404);
   return rows[0].data;
 }
 export async function checkRelations(
@@ -181,7 +187,7 @@ export async function createPost(actor: CalendarUser, input: unknown) {
 }
 export async function mutatePost(actor: CalendarUser, id: string, a: Action) {
   return transaction(actor, "view", async (c, user) => {
-    const p = await lockedPost(c, id);
+    const p = await lockedPost(c, id, a.action === "restore");
     if (a.action === "duplicate") {
       if (a.expectedRevision !== p.contentRevision)
         throw new CalendarError(
@@ -232,13 +238,14 @@ export async function mutatePost(actor: CalendarUser, id: string, a: Action) {
         );
     }
     const changed = applyAction(p, user, a);
-    await checkRelations(
-      c,
-      p,
-      a.action === "patch" &&
-        (Object.hasOwn(a.patch, "owner") ||
-          Object.hasOwn(a.patch, "collaborators")),
-    );
+    if (!["draft", "delete", "restore"].includes(a.action))
+      await checkRelations(
+        c,
+        p,
+        a.action === "patch" &&
+          (Object.hasOwn(a.patch, "owner") ||
+            Object.hasOwn(a.patch, "collaborators")),
+      );
     if (changed) {
       await checkpoint(c, p, user, a.action);
       await savePost(c, p);
@@ -278,7 +285,7 @@ export async function overview(
 ) {
   return transaction(actor, "view", async (c) => {
     const posts = await c.query(
-      `SELECT data FROM ${table("posts")} WHERE planned_at IS NULL OR (planned_at>=$1 AND planned_at<$2) ORDER BY planned_at NULLS LAST,id LIMIT 201 OFFSET $3`,
+      `SELECT data FROM ${table("posts")} WHERE data->>'deletedAt' IS NULL AND (planned_at IS NULL OR (planned_at>=$1 AND planned_at<$2)) ORDER BY planned_at NULLS LAST,id LIMIT 201 OFFSET $3`,
       [from, to, offset],
     );
     const thumbnails = await c.query(

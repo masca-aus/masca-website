@@ -39,6 +39,7 @@ export type Comment = {
   createdAt: string;
 };
 export type Post = {
+  deletedAt?: string | null;
   id: string;
   title: string;
   type: "feed" | "carousel" | "reel" | "story";

@@ -23,6 +23,7 @@ import type {
 import { mayApprove, mayUseCalendar } from "@/features/mediaCalendar/policy";
 import { localInput, toInstant } from "@/features/mediaCalendar/dates";
 import { api, calendarAPI } from "./api";
+import { CalendarSelect } from "./CalendarSelect";
 import { statusLabels } from "./CalendarCard";
 import { MediaDropzone } from "./MediaDropzone";
 import { InstagramPreview } from "./InstagramPreview";
@@ -382,42 +383,41 @@ function LoadedPanel({
           </label>
           <label>
             Category
-            <select
-              aria-label="Post category"
+            <CalendarSelect
+              label="Post category"
               disabled={!editable || post.status === "posted"}
               value={post.category ?? ""}
-              onChange={(e) =>
-                void patch({ category: e.target.value || null }).catch(() => {})
+              onChange={(value) =>
+                void patch({ category: value || null }).catch(() => {})
               }
-            >
-              <option value="">No category</option>
-              {categories
-                .filter((c) => !c.archived || c.id === post.category)
-                .map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                    {c.archived ? " (archived)" : ""}
-                  </option>
-                ))}
-            </select>
+              options={[
+                { value: "", label: "No category" },
+                ...categories
+                  .filter((c) => !c.archived || c.id === post.category)
+                  .map((c) => ({
+                    value: c.id,
+                    label: c.name + (c.archived ? " (archived)" : ""),
+                    color: c.color,
+                  })),
+              ]}
+            />
           </label>
           <label>
             Format
-            <select
-              aria-label="Post format"
+            <CalendarSelect
+              label="Post format"
               disabled={locked}
               value={post.type}
-              onChange={(e) =>
-                void patch({ type: e.target.value as Post["type"] }).catch(
-                  () => {},
-                )
+              onChange={(value) =>
+                void patch({ type: value as Post["type"] }).catch(() => {})
               }
-            >
-              <option value="feed">Feed post</option>
-              <option value="carousel">Carousel</option>
-              <option value="reel">Reel</option>
-              <option value="story">Story</option>
-            </select>
+              options={[
+                { value: "feed", label: "Feed post" },
+                { value: "carousel", label: "Carousel" },
+                { value: "reel", label: "Reel" },
+                { value: "story", label: "Story" },
+              ]}
+            />
           </label>
         </div>
         <small className="mc-muted">
@@ -496,19 +496,15 @@ function LoadedPanel({
             <div>
               <label>
                 Owner
-                <select
+                <CalendarSelect
+                  label="Post owner"
                   disabled={!editable || post.status === "posted"}
                   value={post.owner}
-                  onChange={(e) =>
-                    void patch({ owner: e.target.value }).catch(() => {})
+                  onChange={(value) =>
+                    void patch({ owner: value }).catch(() => {})
                   }
-                >
-                  {members.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
+                  options={members.map((m) => ({ value: m.id, label: m.name }))}
+                />
               </label>
               <label>
                 Preparation deadline

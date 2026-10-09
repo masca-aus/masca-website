@@ -71,7 +71,28 @@ export function applyAction(p: Post, user: CalendarUser, a: Action): boolean {
     throw new CalendarError("Calendar editing access is required.", 403);
   const now = new Date().toISOString();
   let changed = true;
-  if (a.action === "patch") {
+  if (p.deletedAt && a.action !== "restore")
+    throw new CalendarError(
+      "This post was deleted. Restore it before making changes.",
+      409,
+    );
+  if (a.action === "draft" || a.action === "delete" || a.action === "restore") {
+    if (p.version !== a.expectedVersion)
+      throw new CalendarError(
+        "This post changed. Reload it before trying again.",
+        409,
+      );
+    if (a.action === "draft") {
+      if (p.status === "posted") editable(p);
+      p.status = "draft";
+      p.approval = null;
+    } else if (a.action === "delete") p.deletedAt = now;
+    else {
+      if (!p.deletedAt)
+        throw new CalendarError("This post has already been restored.", 409);
+      p.deletedAt = null;
+    }
+  } else if (a.action === "patch") {
     if (p.status === "posted") editable(p);
     if (p.version !== a.expectedVersion)
       throw new CalendarError(

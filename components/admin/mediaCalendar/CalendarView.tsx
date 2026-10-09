@@ -11,6 +11,9 @@ import {
   SlidersHorizontal,
   Bell,
   Search,
+  Check,
+  X,
+  Undo2,
 } from "lucide-react";
 import type {
   Card,
@@ -29,6 +32,8 @@ import {
   TIMEZONE,
 } from "@/features/mediaCalendar/dates";
 import { api, calendarAPI } from "./api";
+import { CalendarSelect } from "./CalendarSelect";
+import { useCalendarDrag } from "./useCalendarDrag";
 import { CalendarCard, statusLabels } from "./CalendarCard";
 import { RoomPresence } from "./RoomPresence";
 import { CategoryManager } from "./CategoryManager";
@@ -70,7 +75,22 @@ export function CalendarView({ user }: { user: CalendarUser }) {
     [status, setStatus] = useState("all"),
     [search, setSearch] = useState(""),
     [manage, setManage] = useState(false),
-    [notifications, setNotifications] = useState(false);
+    [notifications, setNotifications] = useState(false),
+    [busy, setBusy] = useState<string | null>(null),
+    [landed, setLanded] = useState<string | null>(null),
+    [notices, setNotices] = useState<
+      {
+        id: string;
+        message: string;
+        undo?: { id: string; version: number };
+        working?: boolean;
+      }[]
+    >([]);
+  const pending = useRef(false);
+  const landingTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  useEffect(() => () => clearTimeout(landingTimer.current), []);
   const cache = useRef(new Map<string, Overview>()),
     epoch = useRef(0),
     dragging = useRef(false),
@@ -119,7 +139,8 @@ export function CalendarView({ user }: { user: CalendarUser }) {
   useEffect(() => {
     void load();
     const interval = setInterval(() => {
-      if (!document.hidden && !dragging.current) void load(true);
+      if (!document.hidden && !dragging.current && !pending.current)
+        void load(true);
     }, 30000);
     return () => {
       clearInterval(interval);
@@ -167,14 +188,103 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       setError((e as Error).message);
     }
   };
-  const move = async (id: string, date: string) => {
+  const notify = (message: string, undo?: { id: string; version: number }) => {
+    const id = crypto.randomUUID();
+    setNotices((current) => [
+      ...current.filter((n) => n.undo),
+      { id, message, undo },
+    ]);
+  };
+  const action = async (p: Card, action: "draft" | "delete") => {
+    if (pending.current) return;
+    pending.current = true;
+    setBusy(p.id);
+    setError("");
+    try {
+      const result = await api<{ post: Post }>(calendarAPI, {
+        id: p.id,
+        action,
+        expectedVersion: p.version,
+      });
+      cache.current.clear();
+      setData((current) => ({
+        ...current,
+        posts:
+          action === "delete"
+            ? current.posts.filter((v) => v.id !== p.id)
+            : current.posts.map((v) =>
+                v.id === p.id
+                  ? {
+                      ...v,
+                      status: result.post.status,
+                      version: result.post.version,
+                    }
+                  : v,
+              ),
+      }));
+      notify(
+        action === "delete"
+          ? `Deleted “${p.title}”`
+          : `“${p.title}” moved to draft`,
+        action === "delete"
+          ? { id: p.id, version: result.post.version }
+          : undefined,
+      );
+      await load(true);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      pending.current = false;
+      setBusy(null);
+    }
+  };
+  const undo = async (notice: (typeof notices)[number]) => {
+    if (!notice.undo || pending.current) return;
+    pending.current = true;
+    setNotices((current) =>
+      current.map((n) => (n.id === notice.id ? { ...n, working: true } : n)),
+    );
+    try {
+      await api(calendarAPI, {
+        id: notice.undo.id,
+        action: "restore",
+        expectedVersion: notice.undo.version,
+      });
+      cache.current.clear();
+      await load(true);
+      setNotices((current) => current.filter((n) => n.id !== notice.id));
+      notify("Post restored");
+    } catch (e) {
+      setError((e as Error).message);
+      setNotices((current) =>
+        current.map((n) => (n.id === notice.id ? { ...n, working: false } : n)),
+      );
+    } finally {
+      pending.current = false;
+    }
+  };
+  const move = async (id: string, date: string | null) => {
     const p = data.posts.find((p) => p.id === id);
-    if (!p || p.status === "posted") return;
+    if (
+      !p ||
+      p.status === "posted" ||
+      pending.current ||
+      (date ? p.plannedAt && dayKey(p.plannedAt) === date : !p.plannedAt)
+    )
+      return;
+    pending.current = true;
+    setBusy(id);
+    setError("");
+    setLanded(id);
+    clearTimeout(landingTimer.current);
+    landingTimer.current = setTimeout(() => setLanded(null), 550);
     const old = data;
     setData({
       ...data,
       posts: data.posts.map((v) =>
-        v.id === id ? { ...v, plannedAt: moveToDay(v.plannedAt, date) } : v,
+        v.id === id
+          ? { ...v, plannedAt: date ? moveToDay(v.plannedAt, date) : null }
+          : v,
       ),
     });
     dragging.current = true;
@@ -183,17 +293,30 @@ export function CalendarView({ user }: { user: CalendarUser }) {
         id,
         action: "patch",
         expectedVersion: p.version,
-        patch: { plannedAt: moveToDay(p.plannedAt, date) },
+        patch: { plannedAt: date ? moveToDay(p.plannedAt, date) : null },
       });
       cache.current.clear();
       await load(true);
+      notify(
+        date
+          ? `Moved to ${new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", timeZone: TIMEZONE }).format(new Date(`${date}T12:00:00Z`))}`
+          : "Moved to unscheduled",
+      );
     } catch (e) {
       setData(old);
       setError((e as Error).message);
     } finally {
       dragging.current = false;
+      pending.current = false;
+      setBusy(null);
     }
   };
+  const drag = useCalendarDrag(
+    (id, date) => void move(id, date),
+    (active) => {
+      dragging.current = active;
+    },
+  );
   const filtered = data.posts.filter(
     (p) =>
       (category === "all" || p.category === category) &&
@@ -222,11 +345,23 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       post={p}
       category={data.categories.find((c) => c.id === p.category)}
       editable={editable}
-      open={() => open(p.id)}
+      landed={landed === p.id}
+      moving={busy === p.id || drag.visual?.post.id === p.id}
+      onPickUp={(e, p) => {
+        if (!pending.current) drag.pickUp(e, p);
+      }}
+      onAction={(a) => void action(p, a)}
+      open={() => {
+        if (!drag.suppressClick()) open(p.id);
+      }}
     />
   );
   return (
-    <main className="mc-workspace">
+    <main
+      className="mc-workspace"
+      data-dragging={!!drag.visual}
+      data-landed={landed ?? undefined}
+    >
       <header className="mc-heading">
         <div>
           <span className="mc-eyebrow">MASCA NATIONAL · MEDIA TEAM</span>
@@ -315,33 +450,30 @@ export function CalendarView({ user }: { user: CalendarUser }) {
               onChange={(e) => setSearch(e.target.value)}
             />
           </label>
-          <select
-            aria-label="Filter category"
+          <CalendarSelect
+            label="Filter category"
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option value="all">All categories</option>
-            {data.categories
-              .filter((c) => !c.archived)
-              .map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-          </select>
-          <select
-            aria-label="Filter status"
+            onChange={setCategory}
+            options={[
+              { value: "all", label: "All categories" },
+              ...data.categories
+                .filter((c) => !c.archived)
+                .map((c) => ({ value: c.id, label: c.name, color: c.color })),
+            ]}
+          />
+          <CalendarSelect
+            label="Filter status"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
-          >
-            <option value="all">All statuses</option>
-            {Object.entries(statusLabels).map(([s, label]) => (
-              <option key={s} value={s}>
-                {label}
-              </option>
-            ))}
-            <option value="hold">On hold</option>
-          </select>
+            onChange={setStatus}
+            options={[
+              { value: "all", label: "All statuses" },
+              ...Object.entries(statusLabels).map(([value, label]) => ({
+                value,
+                label,
+              })),
+              { value: "hold", label: "On hold" },
+            ]}
+          />
           {editable && (
             <button
               onClick={() => setManage(!manage)}
@@ -382,7 +514,11 @@ export function CalendarView({ user }: { user: CalendarUser }) {
                   scheduled.some((p) => dayKey(p.plannedAt!) === d),
                 )
                 .map((d) => (
-                  <section key={d}>
+                  <section
+                    key={d}
+                    data-drop-day={d}
+                    data-drop-active={drag.visual?.target === d}
+                  >
                     <h3>
                       {new Intl.DateTimeFormat("en-AU", {
                         weekday: "short",
@@ -436,14 +572,8 @@ export function CalendarView({ user }: { user: CalendarUser }) {
                   key={d}
                   className={`mc-day ${d.slice(0, 7) !== day.slice(0, 7) ? "mc-day--outside" : ""}`}
                   data-today={d === dayKey(new Date().toISOString())}
-                  onDragOver={(e) => {
-                    if (editable) e.preventDefault();
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    const id = e.dataTransfer.getData("application/masca-post");
-                    if (id && editable) void move(id, d);
-                  }}
+                  data-drop-day={d}
+                  data-drop-active={drag.visual?.target === d}
                 >
                   <header>
                     <span>{Number(d.slice(-2))}</span>
@@ -465,7 +595,11 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           </div>
         )}
       </section>
-      <section className="mc-unscheduled">
+      <section
+        className="mc-unscheduled"
+        data-drop-day=""
+        data-drop-active={drag.visual?.target === "unscheduled"}
+      >
         <div className="mc-section-label">
           <div>
             <h2>Unscheduled</h2>
@@ -491,6 +625,55 @@ export function CalendarView({ user }: { user: CalendarUser }) {
         Planned dates help the team coordinate. Posts are published manually in
         Instagram or Meta Business Suite.
       </p>
+      {drag.visual && (
+        <div
+          className={`mc-drag-overlay ${drag.visual.dropping ? "mc-drag-overlay--dropping" : ""}`}
+          style={{
+            width: drag.visual.width,
+            transform: `translate3d(${drag.visual.x}px,${drag.visual.y}px,0) rotate(${drag.visual.dropping ? 0 : 2}deg)`,
+          }}
+          aria-hidden="true"
+        >
+          <CalendarCard
+            post={drag.visual.post}
+            category={data.categories.find(
+              (c) => c.id === drag.visual!.post.category,
+            )}
+            editable={false}
+            preview
+            open={() => {}}
+          />
+          <span className="mc-drag-hint">
+            {drag.visual.target
+              ? drag.visual.target === "unscheduled"
+                ? "Move to unscheduled"
+                : `Move to ${drag.visual.target}`
+              : "Drag to a date · Esc to cancel"}
+          </span>
+        </div>
+      )}
+      <div className="mc-toast-stack" aria-live="polite">
+        {notices.map((n) => (
+          <div className="mc-toast" key={n.id}>
+            <Check size={17} />
+            <span>{n.message}</span>
+            {n.undo && (
+              <button onClick={() => void undo(n)} disabled={n.working}>
+                <Undo2 size={14} />
+                {n.working ? "Restoring…" : "Undo"}
+              </button>
+            )}
+            <button
+              aria-label="Dismiss notification"
+              onClick={() =>
+                setNotices((current) => current.filter((v) => v.id !== n.id))
+              }
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
       {postId && (
         <PostPanel
           key={postId}

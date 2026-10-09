@@ -21,6 +21,50 @@ const update = (text: string) => {
   return Buffer.from(Y.encodeStateAsUpdate(d)).toString("base64");
 };
 describe("calendar workflow and concurrent edits", () => {
+  it("returns approved content to draft and clears approval without losing media", () => {
+    const p = newPost(author, {});
+    p.status = "approved";
+    p.assets = ["media"];
+    p.approval = { by: "2", at: p.createdAt, revision: 1 };
+    applyAction(p, author, { action: "draft", expectedVersion: 1 });
+    expect(p.status).toBe("draft");
+    expect(p.approval).toBeNull();
+    expect(p.assets).toEqual(["media"]);
+  });
+  it("soft deletes and restores posted history without changing its approval", () => {
+    const p = newPost(author, {});
+    p.status = "posted";
+    p.publishedURL = "https://instagram.com/p/example";
+    applyAction(p, author, { action: "delete", expectedVersion: 1 });
+    expect(p.deletedAt).toBeTruthy();
+    expect(() =>
+      applyAction(p, author, { action: "comment", body: "gone", mentions: [] }),
+    ).toThrow("deleted");
+    applyAction(p, author, { action: "restore", expectedVersion: 2 });
+    expect(p.deletedAt).toBeNull();
+    expect(p.status).toBe("posted");
+    expect(p.publishedURL).toBe("https://instagram.com/p/example");
+  });
+  it("rejects stale delete, viewer deletion, and returning posted content to draft", () => {
+    const p = newPost(author, {});
+    expect(() =>
+      applyAction(p, author, { action: "delete", expectedVersion: 9 }),
+    ).toThrow("changed");
+    expect(() =>
+      applyAction(
+        p,
+        {
+          ...author,
+          calendarAccess: { ...author.calendarAccess!, edit: false },
+        },
+        { action: "delete", expectedVersion: 1 },
+      ),
+    ).toThrow("editing");
+    p.status = "posted";
+    expect(() =>
+      applyAction(p, author, { action: "draft", expectedVersion: 1 }),
+    ).toThrow("posted");
+  });
   it("rejects stale metadata and prevents direct workflow overrides", () => {
     const p = newPost(author, {});
     expect(() =>
