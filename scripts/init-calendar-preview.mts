@@ -4,24 +4,29 @@ import { submissionSchemaSQL } from "../features/submissions/schema.ts";
 import { reviewSchemaSQL } from "../features/submissions/reviewSchema.ts";
 import { listingEmailSchemaSQL } from "../features/submissions/emailSchema.ts";
 import { changeRequestSchemaSQL } from "../features/submissions/changeRequestSchema.ts";
+const previewSchema = process.env.WORKSPACE_PREVIEW_SCHEMA;
 if (
   process.env.VERCEL_ENV === "production" ||
   process.env.MEDIA_CALENDAR_ENABLED !== "true" ||
   process.env.WORKSPACE_AUTH_ENABLED !== "true" ||
-  process.env.WORKSPACE_PREVIEW_SCHEMA !== "cms_calendar_preview"
+  (previewSchema !== "cms_calendar_preview" &&
+    previewSchema !== "cms_auth_preview") ||
+  (process.env.CALENDAR_PREVIEW_TESTS === "true" &&
+    previewSchema !== "cms_calendar_preview")
 )
-  throw new Error("Dedicated calendar preview only.");
+  throw new Error("Calendar requires an isolated Workspace preview schema.");
 process.env.WORKSPACE_BOOTSTRAP_EMAIL ||= "admin@masca.org.au";
 const c = new pg.Client({ connectionString: process.env.DATABASE_URI });
 await c.connect();
-await c.query("CREATE SCHEMA IF NOT EXISTS cms_calendar_preview");
+await c.query(`CREATE SCHEMA IF NOT EXISTS "${previewSchema}"`);
 const exists = await c.query(
-  "SELECT 1 FROM information_schema.tables WHERE table_schema='cms_calendar_preview' AND table_name='users'",
+  "SELECT 1 FROM information_schema.tables WHERE table_schema=$1 AND table_name='users'",
+  [previewSchema],
 );
 await c.query(calendarSchemaSQL("media_calendar_preview"));
 if (exists.rows.length)
   await c.query(
-    "ALTER TABLE cms_calendar_preview.users ADD COLUMN IF NOT EXISTS calendar_access jsonb",
+    `ALTER TABLE "${previewSchema}".users ADD COLUMN IF NOT EXISTS calendar_access jsonb`,
   );
 await c.end();
 process.env.WORKSPACE_INIT_SCHEMA = exists.rows.length ? "false" : "true";
@@ -29,7 +34,7 @@ Object.assign(process.env, { NODE_ENV: "development" });
 const { getPayload } = await import("payload"),
   { default: config } = await import("../payload.config.ts");
 const payload = await getPayload({ config });
-if (payload.db.schemaName !== "cms_calendar_preview")
+if (payload.db.schemaName !== previewSchema)
   throw new Error("Wrong database schema.");
 // Preserve the existing recovery account identity in this isolated preview.
 // No live user records or calendar approval memberships are copied.
@@ -61,7 +66,7 @@ for (const schema of [
   listingEmailSchemaSQL,
   changeRequestSchemaSQL,
 ])
-  await connection.query(schema("cms_calendar_preview"));
+  await connection.query(schema(previewSchema));
 // Preview-only QA accounts cannot authenticate against production or other preview schemas.
 if (process.env.CALENDAR_PREVIEW_TESTS === "true") {
   for (const [email, id, role] of [
