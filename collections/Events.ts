@@ -1,3 +1,6 @@
+import {changeRequestField} from '../features/submissions/changeRequestField.ts';
+import {changeRequestAction} from '../features/submissions/changeRequestActions.ts';
+import { listingEmailAction } from '../features/submissions/listingEmailActions.ts';
 import { listingAction } from '../features/submissions/listingActions.ts';
 import { submittedForReviewField, completeSubmissionReview, reviewFields } from "../features/submissions/review.ts";
 import { adminSearchFields, adminSearchHooks, withAdminSearch } from '../features/admin/adminSearch.ts';
@@ -87,6 +90,7 @@ export const Events: CollectionConfig = {
       "organisation",
       "startDate",
       "cmsStatus",
+      "changeRequestStatus",
     ],
   },
   access: {
@@ -100,8 +104,8 @@ export const Events: CollectionConfig = {
     maxPerDoc: 0,
   },
   lockDocuments: false,
-  endpoints: [{ path: '/:id/listing-action', method: 'post', handler: listingAction('events') }, { path: '/report', method: 'get', handler: eventReport }, { path: '/:id/lifecycle', method: 'post', handler: eventLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: eventQuickAction }],
-  fields: [
+  endpoints: [{ path: '/:id/change-requests', method: 'get', handler: changeRequestAction('events') }, { path: '/:id/change-requests', method: 'post', handler: changeRequestAction('events') }, { path: '/:id/approval-email', method: 'get', handler: listingEmailAction('events') }, { path: '/:id/approval-email', method: 'post', handler: listingEmailAction('events') }, { path: '/:id/listing-action', method: 'post', handler: listingAction('events') }, { path: '/report', method: 'get', handler: eventReport }, { path: '/:id/lifecycle', method: 'post', handler: eventLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: eventQuickAction }],
+  fields: [changeRequestField('events'),
     cmsStatusField('events'),
     submittedForReviewField,
     ...reviewFields,

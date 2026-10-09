@@ -1,4 +1,5 @@
 'use client';
+import { ListingEmailControl } from './ListingEmailControl';
 import './listingReview.css';
 import { ListingTools } from './ListingTools';
 import { ListingTutorial } from './ListingTutorial';
@@ -162,7 +163,7 @@ export function EventEditorFooter() {
     setStep(value => Math.min(value + 1, 4));
   };
   const busy = disabled || saveState === 'saving' || uploadStatus === 'uploading';
-  return <>{step === 4 && <ListingTools collection="events" review />}<div className="masca-wizard-footer">
+  return <>{step === 4 && <><ListingTools collection="events" review /><ListingEmailControl collection="events" /></>}<div className="masca-wizard-footer">
     <div className="masca-wizard-save-actions"><button data-tutorial="save" type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => void save.current?.('exit')}>Save and exit</button><span ref={setSaveStatusTarget} /></div>
     <div>{step > 0 && <button type="button" className="masca-wizard-secondary" onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}
       {step < 4 ? <button type="button" className="masca-wizard-primary" onClick={next} disabled={disabled}>Continue</button> : <button data-tutorial="publish" type="button" className="masca-wizard-primary" disabled={busy} onClick={() => void save.current?.('publish')}>{hasPublishedDoc ? 'Publish changes' : 'Publish event'}</button>}

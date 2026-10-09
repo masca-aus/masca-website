@@ -1,4 +1,5 @@
 'use client';
+import { ListingEmailControl } from './ListingEmailControl';
 import './listingReview.css';
 import { ListingTools } from './ListingTools';
 import { ListingTutorial } from './ListingTutorial';
@@ -137,7 +138,7 @@ export function CareerEditorFooter() {
     }
     setAttemptedSave(true);
   }
-  return <>{step === 3 && <ListingTools collection="careers" review />}<footer className="masca-wizard-footer">
+  return <>{step === 3 && <><ListingTools collection="careers" review /><ListingEmailControl collection="careers" /></>}<footer className="masca-wizard-footer">
     <div className="masca-wizard-save-actions"><Link href="/admin/collections/careers" className="masca-action masca-action--secondary">Cancel</Link><div onClickCapture={() => setAttemptedSave(false)}><span data-tutorial="save"><SaveDraftButton /></span></div><span className="masca-save-indicator" role="status">{busy ? 'Saving…' : id && !modified ? 'Saved' : 'Drafts stay private until published'}</span></div>
     <div>{step > 0 && <button type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}{step < 3 ? <button type="button" className="masca-wizard-primary" disabled={busy} onClick={() => nextRef.current?.()}>Continue</button> : <div data-tutorial="publish" onClickCapture={validatePublication}><PublishButton label="Publish opportunity" /></div>}</div>
   </footer></>;

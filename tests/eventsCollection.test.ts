@@ -63,6 +63,7 @@ describe("events collection", () => {
       "organisation",
       "startDate",
       "cmsStatus",
+      "changeRequestStatus",
     ]);
   });
 

@@ -1,3 +1,6 @@
+import {changeRequestField} from '../features/submissions/changeRequestField.ts';
+import {changeRequestAction} from '../features/submissions/changeRequestActions.ts';
+import { listingEmailAction } from '../features/submissions/listingEmailActions.ts';
 import { listingAction } from '../features/submissions/listingActions.ts';
 import { submittedForReviewField, completeSubmissionReview, reviewFields } from "../features/submissions/review.ts";
 import { adminSearchFields, adminSearchHooks, withAdminSearch } from '../features/admin/adminSearch.ts';
@@ -26,7 +29,7 @@ export const Careers: CollectionConfig = {
   slug: 'careers', labels: { singular: 'Opportunity', plural: 'Careers' },
   disableDuplicate: true,
   admin: {
-    useAsTitle: 'title', defaultColumns: ['title', 'company', 'type', 'cmsStatus', 'closes'],
+    useAsTitle: 'title', defaultColumns: ['title', 'company', 'type', 'cmsStatus', 'changeRequestStatus', 'closes'],
     description: 'Manage opportunities for students. Save private drafts, review details and publish when ready. Rolling roles expire after 60 days; update the listed date after reconfirming availability.',
     hideAPIURL: true, listSearchableFields: adminSearchFields.careers, baseFilter: withAdminSearch('careers', careerListFilter),
     components: {
@@ -40,8 +43,8 @@ export const Careers: CollectionConfig = {
   access: { read: publicCareerAccess, readVersions: authenticated, create: authenticated, update: authenticated, delete: careerDeleteAccess },
   versions: { drafts: true, maxPerDoc: 0 },
   lockDocuments: { duration: 300 }, defaultSort: '-added',
-  endpoints: [{ path: '/:id/listing-action', method: 'post', handler: listingAction('careers') }, { path: '/:id/lifecycle', method: 'post', handler: careerLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: careerQuickAction }],
-  fields: ([
+  endpoints: [{ path: '/:id/change-requests', method: 'get', handler: changeRequestAction('careers') }, { path: '/:id/change-requests', method: 'post', handler: changeRequestAction('careers') }, { path: '/:id/approval-email', method: 'get', handler: listingEmailAction('careers') }, { path: '/:id/approval-email', method: 'post', handler: listingEmailAction('careers') }, { path: '/:id/listing-action', method: 'post', handler: listingAction('careers') }, { path: '/:id/lifecycle', method: 'post', handler: careerLifecycleAction }, { path: '/:id/quick-status', method: 'post', handler: careerQuickAction }],
+  fields: ([changeRequestField('careers'),
     cmsStatusField('careers'),
     submittedForReviewField,
     ...reviewFields,

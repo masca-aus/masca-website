@@ -1,3 +1,4 @@
+import { sendSubmissionReceipt } from '@/features/submissions/listingEmailActions';
 import { isIP } from "node:net";
 
 import config from "@payload-config";
@@ -50,12 +51,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<SubmitEve
     }
 
     const payload = await getPayload({ config });
-    await createEventSubmission({
+    const submitted = await createEventSubmission({
       // Temporary until Task 6 regenerates Payload types for the registered Events collection.
       payload: payload as unknown as EventSubmissionPayload,
       data: result.data,
       poster: result.poster,
     });
+
+    await sendSubmissionReceipt(payload, 'events', submitted.id);
 
     return NextResponse.json(
       { ok: true, message: "Your event has been submitted and is pending review." },

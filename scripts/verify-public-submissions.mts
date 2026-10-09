@@ -1,3 +1,4 @@
+import {createChangeToken,submitChangeRequest} from '../features/submissions/listingChanges.ts';
 import assert from 'node:assert/strict';
 import type { Payload } from 'payload';
 import { publicCareerSubmission, publicEventSubmission } from '../features/access/publicSubmissionContext.ts';
@@ -15,12 +16,23 @@ export async function verifyPublicSubmissions(payload:Payload) {
    const saved=await payload.findByID({collection,id,draft:true,overrideAccess:false,req});
    assert.equal(saved.submittedForReview,true);
    assert.equal((saved.cmsStatus as {status:string}).status,'review');
+   const token=createChangeToken(collection,{...saved},payload.secret);
+   const [first,second]=await Promise.all([submitChangeRequest(payload,token,'Please update the location to the library.'),submitChangeRequest(payload,token,'Please update the location to the library.')]);
+   assert.equal(first.id,second.id);
+   const unchanged=await payload.findByID({collection,id,draft:true,overrideAccess:false,req});
+   assert.equal(unchanged._status,'draft');assert.equal(unchanged.changeRequestStatus,'Change requested');
+   await assert.rejects(()=>payload.find({collection:'listing-change-requests',overrideAccess:false}));
+
    const publicList=await payload.find({collection,overrideAccess:false,where:{id:{equals:id}}});assert.equal(publicList.totalDocs,0);
    await payload.update({collection,id,draft:false,overrideAccess:false,req,data:{_status:'published',...(collection==='events'?{reviewStatus:'approved'}:{})} as never});
    const live=await payload.find({collection,overrideAccess:false,where:{id:{equals:id}}});assert.equal(live.totalDocs,1);
    assert.equal(live.docs[0].contactEmail,undefined);assert.equal(live.docs[0].contactName,undefined);
    const approved=await payload.findByID({collection,id,req,overrideAccess:false});assert.equal(approved.submittedForReview,false);
-  } finally {if(id)await payload.delete({collection,id,req,overrideAccess:true});}
+  } finally {if(id){
+   const requests=await payload.find({collection:'listing-change-requests',where:{and:[{listingCollection:{equals:collection}},{listingID:{equals:String(id)}}]},overrideAccess:true,limit:100});
+   for(const request of requests.docs)await payload.delete({collection:'listing-change-requests',id:request.id,overrideAccess:true});
+   await payload.delete({collection,id,req,overrideAccess:true});
+  }}
  }
- console.log('Public submission moderation and contact privacy verified for both collections.');
+ console.log('Public submission moderation, private change requests, duplicate prevention and contact privacy verified for both collections.');
 }

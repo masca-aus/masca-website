@@ -1,3 +1,4 @@
+import { sendSubmissionReceipt } from '@/features/submissions/listingEmailActions';
 import { isIP } from "node:net";
 
 import config from "@payload-config";
@@ -50,7 +51,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<SubmitCar
     }
 
     const payload = await getPayload({ config });
-    await createCareerSubmission(payload, result.data);
+    const submitted = await createCareerSubmission(payload, result.data);
+
+    await sendSubmissionReceipt(payload, 'careers', submitted.id);
 
     return NextResponse.json(
       { ok: true, message: "Your opportunity has been received. The Careers team will review it before publication." },

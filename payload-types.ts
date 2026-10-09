@@ -68,6 +68,8 @@ export interface Config {
   blocks: {};
   collections: {
     careers: Career;
+    'listing-emails': ListingEmail;
+    'listing-change-requests': ListingChangeRequest;
     'career-lifecycle': CareerLifecycle;
     organisations: Organisation;
     'event-lifecycle': EventLifecycle;
@@ -84,6 +86,8 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     careers: CareersSelect<false> | CareersSelect<true>;
+    'listing-emails': ListingEmailsSelect<false> | ListingEmailsSelect<true>;
+    'listing-change-requests': ListingChangeRequestsSelect<false> | ListingChangeRequestsSelect<true>;
     'career-lifecycle': CareerLifecycleSelect<false> | CareerLifecycleSelect<true>;
     organisations: OrganisationsSelect<false> | OrganisationsSelect<true>;
     'event-lifecycle': EventLifecycleSelect<false> | EventLifecycleSelect<true>;
@@ -143,6 +147,7 @@ export interface Career {
    * The team responsible for this record. Independent of the public event/job location.
    */
   owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
+  changeRequestStatus?: string | null;
   cmsStatus?:
     | {
         [k: string]: unknown;
@@ -153,6 +158,7 @@ export interface Career {
     | boolean
     | null;
   submittedForReview?: boolean | null;
+  submissionReceivedAt?: string | null;
   needsChanges?: boolean | null;
   reviewNotes?: string | null;
   /**
@@ -210,6 +216,49 @@ export interface Career {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-emails".
+ */
+export interface ListingEmail {
+  id: number;
+  key: string;
+  listingCollection: string;
+  listingID: string;
+  kind: string;
+  email:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  sentBy: string;
+  sentAt?: string | null;
+  providerID?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-change-requests".
+ */
+export interface ListingChangeRequest {
+  id: number;
+  openKey: string;
+  listingCollection: string;
+  listingID: string;
+  title: string;
+  message: string;
+  status: 'open' | 'resolved';
+  resolution?: string | null;
+  resolvedAt?: string | null;
+  resolvedBy?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -318,6 +367,7 @@ export interface Event {
    * The team responsible for this record. Independent of the public event/job location.
    */
   owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
+  changeRequestStatus?: string | null;
   cmsStatus?:
     | {
         [k: string]: unknown;
@@ -328,6 +378,7 @@ export interface Event {
     | boolean
     | null;
   submittedForReview?: boolean | null;
+  submissionReceivedAt?: string | null;
   needsChanges?: boolean | null;
   reviewNotes?: string | null;
   lifecycle?: string | null;
@@ -568,8 +619,10 @@ export interface PayloadMigration {
  */
 export interface CareersSelect<T extends boolean = true> {
   owningScope?: T;
+  changeRequestStatus?: T;
   cmsStatus?: T;
   submittedForReview?: T;
+  submissionReceivedAt?: T;
   needsChanges?: T;
   reviewNotes?: T;
   contactName?: T;
@@ -601,6 +654,39 @@ export interface CareersSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-emails_select".
+ */
+export interface ListingEmailsSelect<T extends boolean = true> {
+  key?: T;
+  listingCollection?: T;
+  listingID?: T;
+  kind?: T;
+  email?: T;
+  sentBy?: T;
+  sentAt?: T;
+  providerID?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "listing-change-requests_select".
+ */
+export interface ListingChangeRequestsSelect<T extends boolean = true> {
+  openKey?: T;
+  listingCollection?: T;
+  listingID?: T;
+  title?: T;
+  message?: T;
+  status?: T;
+  resolution?: T;
+  resolvedAt?: T;
+  resolvedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -737,8 +823,10 @@ export interface SponsorsSelect<T extends boolean = true> {
  */
 export interface EventsSelect<T extends boolean = true> {
   owningScope?: T;
+  changeRequestStatus?: T;
   cmsStatus?: T;
   submittedForReview?: T;
+  submissionReceivedAt?: T;
   needsChanges?: T;
   reviewNotes?: T;
   lifecycle?: T;

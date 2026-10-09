@@ -71,6 +71,8 @@ describe("payload config", () => {
       "committee",
       "event-lifecycle",
       "events",
+      "listing-change-requests",
+      "listing-emails",
       "media",
       "organisations",
       "sponsors",

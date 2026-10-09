@@ -298,6 +298,7 @@ export function configureWorkspace(
         },
       };
     }
+    if (["listing-emails", "listing-change-requests"].includes(collection.slug)) return collection;
     // Any future settings collections stay administrator-only.
     return {
       ...collection,

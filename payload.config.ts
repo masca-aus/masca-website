@@ -1,3 +1,5 @@
+import { ListingChangeRequests } from './collections/ListingChangeRequests.ts';
+import { ListingEmails } from './collections/ListingEmails.ts';
 import { workspaceSchema, workspaceSchemaPush } from "./features/access/workspaceEnvironment.ts";
 import { configureWorkspace } from "./features/access/configureWorkspace.ts";
 import { adminSearchFields, adminSearchHooks, withAdminSearch } from './features/admin/adminSearch.ts';
@@ -220,6 +222,8 @@ export default buildConfig({
 
 function workspaceCollections(): import("payload").CollectionConfig[] { return [
     Careers,
+    ListingEmails,
+    ListingChangeRequests,
     CareerLifecycle,
     Organisations,
     EventLifecycle,

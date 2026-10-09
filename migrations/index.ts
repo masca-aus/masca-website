@@ -1,3 +1,5 @@
+import * as listingChanges from './20261008_140000_listing_changes';
+import * as listingEmails from './20261008_130000_listing_emails';
 import * as listingReview from './20261001_160000_listing_review';
 import * as publicSubmissions from './20261001_120000_public_submissions';
 import * as workspaceAccess from "./20260930_221300_workspace_access";
@@ -54,4 +56,6 @@ export const migrations = [
   {up: workspaceAccess.up, down: workspaceAccess.down, name: "20260930_221300_workspace_access"},
   {up: publicSubmissions.up, down: publicSubmissions.down, name: "20261001_120000_public_submissions"},
   {up:listingReview.up,down:listingReview.down,name:'20261001_160000_listing_review'},
+  {up:listingEmails.up,down:listingEmails.down,name:'20261008_130000_listing_emails'},
+  {up:listingChanges.up,down:listingChanges.down,name:'20261008_140000_listing_changes'},
 ];
