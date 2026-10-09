@@ -156,6 +156,7 @@ export default buildConfig({
         Icon: "/components/admin/MascaBrand#MascaIcon",
       },
       views: {
+        mediaCalendar: {Component: "/components/admin/mediaCalendar/MediaCalendar#MediaCalendar", path: "/media-calendar", exact: true},
         dashboard: {
           Component: "/components/admin/MascaDashboard#MascaDashboard",
         },

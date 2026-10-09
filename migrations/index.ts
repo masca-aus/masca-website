@@ -1,3 +1,4 @@
+import * as calendar from './20261010_140000_media_calendar';
 import * as listingChanges from './20261008_140000_listing_changes';
 import * as listingEmails from './20261008_130000_listing_emails';
 import * as migration_20261006_140000_optional_media_alt from './20261006_140000_optional_media_alt';
@@ -90,4 +91,5 @@ export const migrations = [
   { up: migration_20261006_140000_optional_media_alt.up, down: migration_20261006_140000_optional_media_alt.down, name: '20261006_140000_optional_media_alt' },
   {up:listingEmails.up,down:listingEmails.down,name:'20261008_130000_listing_emails'},
   {up:listingChanges.up,down:listingChanges.down,name:'20261008_140000_listing_changes'},
+  {up:calendar.up,down:calendar.down,name:'20261010_140000_media_calendar'},
 ];

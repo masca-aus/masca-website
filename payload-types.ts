@@ -282,6 +282,18 @@ export interface CareerLifecycle {
  */
 export interface User {
   id: number;
+  /**
+   * National team only. Separate from the public media library.
+   */
+  calendarAccess?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   email: string;
   role: 'administrator' | 'editor';
   status: 'invited' | 'active' | 'suspended';
@@ -502,7 +514,10 @@ export interface Committee {
    * Shown in the expanded modal on the committee page. Optional — the modal simply omits it when empty.
    */
   bio?: string | null;
-  linkedin_url?: string | null;
+  /**
+   * Required before publishing. Use the member’s LinkedIn profile URL.
+   */
+  linkedin_url: string;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -744,6 +759,7 @@ export interface EventLifecycleSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  calendarAccess?: T;
   email?: T;
   role?: T;
   status?: T;

@@ -1,3 +1,5 @@
+import {mayUseCalendar} from "@/features/mediaCalendar/policy";
+import type {CalendarUser} from "@/features/mediaCalendar/types";
 import { careerLifecycleIDs } from "@/features/careers/careerLifecycle";
 import { DashboardTutorial } from "./DashboardTutorial";
 import {
@@ -219,6 +221,7 @@ export function DashboardContent({
             </div>
           </section>
         ))}
+      {mayUseCalendar(account as CalendarUser, "view") && <section className="masca-dashboard__content-row"><div><h3>Media calendar</h3><p>Prepare Instagram posts, collaborate on captions and review together.</p></div><Link className="masca-action masca-action--secondary" href="/admin/media-calendar">Open calendar</Link></section>}
       {isAdmin && (
         <footer className="masca-dashboard__content-row">
           <div>

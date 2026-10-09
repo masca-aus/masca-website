@@ -113,3 +113,15 @@ launching publicly, add a durable distributed rate limit, working Turnstile
 verification, notification delivery to reviewers, and stakeholder approval.
 The current submission limiter is process-local and the form does not send
 review notifications.
+
+### National media calendar
+
+The private calendar lives at `/admin/media-calendar`. Enable `MEDIA_CALENDAR_ENABLED=true` with Google Workspace authentication. In People & access, give named National media members separate calendar viewing, editing and approval permissions, with a Member or Chair designation for reviewers. Existing public-media permissions do not grant calendar access. Administrators can manage/preview; approval still requires a designated reviewer who did not create or contribute to the content.
+
+Use a **private** S3-compatible bucket distinct from website `media`: `CALENDAR_PRIVATE_BUCKET` for production and `CALENDAR_PRIVATE_PREVIEW_BUCKET` for preview. Allow JPEG, PNG, WebP, MP4, QuickTime and WebP thumbnails, with a 50 MB object limit. Images are limited to 20 MB and 40 megapixels; videos to 50 MB, with at most ten assets per post. Permit signed browser PUT requests in bucket CORS for the exact deployment origin. There must be no anonymous bucket/object read policies. Run Payload migrations before enabling production. For a dedicated preview, set `WORKSPACE_PREVIEW_SCHEMA=cms_calendar_preview`; its initialization runs from the Vercel build script and uses separate CMS users and calendar records. Never set `CALENDAR_PREVIEW_TESTS` in production.
+
+Caption changes merge through Yjs and authenticated CMS endpoints. The first transport polls the open post every 750 ms while visible (five seconds in background), with room presence every four seconds. Durable writes and presence reads recheck current account permissions; cursor identities are server-derived and presence expires after 15 seconds. This uses more server requests than WebSockets: review actual usage before expanding beyond the National team. Saves batch at 500 ms idle/two seconds maximum, and disconnected caption updates are kept per account/post. The calendar does not require Meta credentials or automatically publish posts.
+
+The workflow is Draft → In review → Approved → Posted. Review freezes content. Date-only changes preserve approval; caption, title, format or media edits invalidate it. Posted content is immutable; Duplicate starts a new draft. Request review requires completed uploads and a caption at or below 2,200 characters. Discussions, mentions and review notifications stay in the CMS.
+
+Incomplete uploads older than 24 hours can be removed with `node --experimental-strip-types scripts/cleanup-calendar-uploads.mts`, using the correct environment. This job never deletes ready media or objects referenced by duplicates. The local browser smoke check is `node scripts/check-media-calendar.mjs` after starting a dedicated local QA sandbox; it deliberately refuses remote/production URLs. Production storage signing and the hosted deployment must be verified with the real preview credentials before rollout.

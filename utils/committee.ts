@@ -63,7 +63,7 @@ export function getCommitteeYears(members: CommitteeMember[]): string[] {
 }
 
 /** Maps a Payload doc to the shape the committee components render. */
-export function toCommitteeMember(doc: Committee): CommitteeMember {
+export function toCommitteeMember(doc: Omit<Committee, "linkedin_url"> & { linkedin_url?: string | null }): CommitteeMember {
   // At depth 1 the portrait arrives populated; profiles without an uploaded
   // portrait use the shared placeholder illustration.
   const portrait = typeof doc.portrait === "object" ? doc.portrait : null

@@ -1,6 +1,8 @@
 "use client";
+import {mayUseCalendar} from "@/features/mediaCalendar/policy";
+import type {CalendarUser} from "@/features/mediaCalendar/types";
 
-import { Link, NavToggler, useNav } from "@payloadcms/ui";
+import { Link, NavToggler, useNav, useAuth } from "@payloadcms/ui";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type CSSProperties } from "react";
 import { BriefcaseBusiness, CalendarDays, Handshake, House, Images, Building2, Users, UserRound, PanelLeftClose, PanelLeftOpen, ShieldCheck, LogOut } from "lucide-react";
@@ -25,6 +27,7 @@ const groups = [
 
 export function MascaNav({ visibleEntities }: { visibleEntities: { collections: string[] } }) {
   const pathname = usePathname();
+  const {user} = useAuth();
   const { navOpen, navRef, hydrated, shouldAnimate, setNavOpen } = useNav();
   const dashboard = pathname === "/admin" || pathname === "/admin/";
 
@@ -64,12 +67,13 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
               })}
             </section> : null;
           })}
+          {mayUseCalendar(user as unknown as CalendarUser, "view") && <Link href="/admin/media-calendar" className="masca-nav__link" aria-current={pathname==="/admin/media-calendar" ? "page" : undefined}><CalendarDays size={19}/>Media calendar</Link>}
           <div className="masca-nav__account">
             {dashboard && <h2>Settings</h2>}
             <div className="masca-nav__theme"><ThemeToggle /></div>
             {visibleEntities.collections.includes("users") && <Link href="/admin/collections/users" className="masca-nav__link" aria-current={pathname.startsWith("/admin/collections/users") ? "page" : undefined}><ShieldCheck size={19} />People & access</Link>}
             <Link href="/admin/account" className="masca-nav__link" aria-current={pathname === "/admin/account" ? "page" : undefined}><UserRound size={19} />My account</Link>
-            <Link href="/admin/logout" prefetch={false} className="masca-nav__link"><LogOut size={19} />Log out</Link>
+            <Link href="/admin/logout" onClick={() => {for(const key of Object.keys(localStorage))if(key.startsWith("masca-caption:"))localStorage.removeItem(key);}} prefetch={false} className="masca-nav__link"><LogOut size={19} />Log out</Link>
           </div>
         </nav>
         <p className="masca-nav__version" aria-label={`MASCA CMS version ${version}`}>MASCA CMS <span>v{version}</span></p>
