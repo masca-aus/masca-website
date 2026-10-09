@@ -31,6 +31,26 @@ const { getPayload } = await import("payload"),
 const payload = await getPayload({ config });
 if (payload.db.schemaName !== "cms_calendar_preview")
   throw new Error("Wrong database schema.");
+// Preserve the existing recovery account identity in this isolated preview.
+// No live user records or calendar approval memberships are copied.
+if (process.env.CALENDAR_PREVIEW_TESTS !== "true") {
+  const existing = await payload.find({
+    collection: "users",
+    limit: 1,
+    overrideAccess: true,
+  });
+  if (!existing.totalDocs)
+    await payload.create({
+      collection: "users",
+      overrideAccess: true,
+      data: {
+        email: process.env.WORKSPACE_BOOTSTRAP_EMAIL,
+        role: "administrator",
+        status: "active",
+        grants: [],
+      } as never,
+    });
+}
 const connection = new pg.Client({
   connectionString: process.env.DATABASE_URI,
 });
