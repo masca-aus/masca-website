@@ -71,6 +71,16 @@ it("shows immediate creation feedback, prevents duplicates, and opens before ref
   const button = screen.getByRole("button", { name: "New post" });
   fireEvent.click(button);
   expect(screen.getByRole("dialog", { name: "Creating post" })).toBeTruthy();
+  expect(document.activeElement).toBe(
+    screen.getByRole("dialog", { name: "Creating post" }),
+  );
+  expect(document.body.style.overflow).toBe("hidden");
+  fireEvent.keyDown(screen.getByRole("dialog", { name: "Creating post" }), {
+    key: "Tab",
+  });
+  expect(document.activeElement).toBe(
+    screen.getByRole("dialog", { name: "Creating post" }),
+  );
   fireEvent.click(button);
   expect(createCount).toBe(1);
   expect(createPatch.category).toBe("masa");

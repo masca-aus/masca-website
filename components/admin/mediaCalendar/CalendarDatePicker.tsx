@@ -163,18 +163,19 @@ function DatePopover({
     };
   }, [anchor]);
   useLayoutEffect(() => {
+    if (position.visibility !== "visible") return;
     picker.current
       ?.querySelector<HTMLElement>(`[data-date="${focusDay}"]`)
-      ?.focus();
+      ?.focus({ preventScroll: true });
     const frame = window.requestAnimationFrame?.(() =>
       picker.current
         ?.querySelector<HTMLElement>(`[data-date="${focusDay}"]`)
-        ?.focus(),
+        ?.focus({ preventScroll: true }),
     );
     return () => {
       if (frame !== undefined) window.cancelAnimationFrame(frame);
     };
-  }, [focusDay]);
+  }, [focusDay, position.visibility]);
   const navigate = (day: string) => {
     setMonth(day);
     setFocusDay(day);

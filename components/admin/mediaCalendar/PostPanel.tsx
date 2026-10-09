@@ -104,12 +104,42 @@ export function PostPanelLoading({
   error?: boolean;
   onClose?: () => void;
 }) {
+  const loadingPanel = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const target = loadingPanel.current;
+    (target?.querySelector<HTMLElement>("button") ?? target)?.focus({
+      preventScroll: true,
+    });
+    return () => {
+      document.body.style.overflow = overflow;
+      previous?.focus({ preventScroll: true });
+    };
+  }, []);
   return (
     <div
+      ref={loadingPanel}
+      tabIndex={-1}
       role="dialog"
       aria-modal="true"
       aria-label={onClose ? "Opening post" : "Creating post"}
       className="mc-panel mc-panel-loading"
+      onKeyDown={(e) => {
+        e.stopPropagation();
+        if (e.key === "Tab") {
+          e.preventDefault();
+          (
+            loadingPanel.current?.querySelector<HTMLElement>("button") ??
+            loadingPanel.current
+          )?.focus();
+        }
+        if (e.key === "Escape" && onClose) {
+          e.preventDefault();
+          onClose();
+        }
+      }}
     >
       <header className="mc-panel-header">
         <span className="mc-eyebrow">INSTAGRAM · DRAFT</span>
