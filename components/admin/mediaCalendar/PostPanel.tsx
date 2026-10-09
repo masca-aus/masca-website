@@ -124,7 +124,10 @@ function LoadedPanel({
     [changeMessage, setChangeMessage] = useState(""),
     [posting, setPosting] = useState(false),
     [publishedURL, setPublishedURL] = useState(""),
-    [copied, setCopied] = useState(false);
+    [copied, setCopied] = useState(false),
+    [localCopyExported, setLocalCopyExported] = useState(false),
+    [storageFailed, setStorageFailed] = useState(false),
+    [discarding, setDiscarding] = useState(false);
   const post = { ...savedPost, ...pendingPatch };
   const localCopyKey = `masca-calendar-deleted-copy:${user.id}:${post.id}`;
   const [localCopy, setLocalCopy] = useState(() => {
@@ -160,10 +163,13 @@ function LoadedPanel({
     const text = `${localTitle.current}\n\n${captionRef.current?.text() ?? caption}\n\nReference links:\n${localLinks.current}\n\nUnsaved details:\n${JSON.stringify(pendingDetails.current, null, 2)}`;
     try {
       localStorage.setItem(localCopyKey, text);
+      return true;
     } catch {
+      setStorageFailed(true);
       setError(
         "Copy your changes before closing; this device could not keep a local copy.",
       );
+      return false;
     }
   };
   const receive = (p: Post) => {
@@ -280,7 +286,7 @@ function LoadedPanel({
   useEffect(() => {
     close.current = () => {
       if (postRef.current.deletedAt) {
-        keepDeletedCopy();
+        if (!keepDeletedCopy() && !localCopyExported) return;
         captionRef.current?.retainLocal();
         onClose();
         return;
@@ -363,6 +369,7 @@ function LoadedPanel({
   const copyLocal = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
+      if (post.deletedAt) setLocalCopyExported(true);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -407,6 +414,18 @@ function LoadedPanel({
             {copied ? "Copied" : "Copy my changes"}
           </button>
           <button onClick={() => close.current()}>Back to calendar</button>
+          {storageFailed && !localCopyExported && (
+            <button
+              onClick={() => {
+                if (discarding) onClose();
+                else setDiscarding(true);
+              }}
+            >
+              {discarding
+                ? "Confirm discard and close"
+                : "Discard unsaved changes"}
+            </button>
+          )}
         </section>
       </div>
     );
