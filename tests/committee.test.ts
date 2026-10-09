@@ -175,7 +175,7 @@ describe("toCommitteeMember (Payload doc → page shape)", () => {
 
   it("uses the placeholder rather than crashing when the portrait is unpopulated", () => {
     const member = toCommitteeMember({ ...doc, portrait: 1 });
-    expect(member.img).toBe("/casts/committee-placeholder.svg");
+    expect(member.img).toBe("/committee/placeholder.svg");
   });
 });
 

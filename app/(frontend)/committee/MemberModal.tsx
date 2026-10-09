@@ -44,7 +44,7 @@ export default function MemberModal({ member, onClose }: { member: CommitteeMemb
   }}>
     <div className="committee-dialog-header"><span>Meet your committee</span><button type="button" autoFocus onClick={() => void close()} aria-label="Close profile">Close ×</button></div>
     <div className="committee-dialog-body">
-      <div className="committee-dialog-photo"><img src={member.img || '/casts/committee-placeholder.svg'} alt={member.name} /></div>
+      <div className="committee-dialog-photo"><img src={member.img || '/committee/placeholder.svg'} alt={member.name} /></div>
       <div className="committee-person">
         <h2 id="committee-profile-name">{member.name}</h2>
         {(member.university || member.course) && <p className="committee-university">{member.university}{member.university && member.course && <br />}{member.course && <span>{member.course}</span>}</p>}

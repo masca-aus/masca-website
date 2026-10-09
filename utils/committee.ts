@@ -73,7 +73,7 @@ export function toCommitteeMember(doc: Committee): CommitteeMember {
     name: doc.name,
     role: doc.role,
     department: doc.department,
-    img: portrait?.url ?? "/casts/committee-placeholder.svg",
+    img: portrait?.url ?? "/committee/placeholder.svg",
     year: doc.year,
     // Empty strings coalesce to undefined so the UI hides what's unset.
     university: doc.university || undefined,
