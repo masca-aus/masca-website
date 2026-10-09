@@ -28,6 +28,35 @@ if (exists.rows.length)
   await c.query(
     `ALTER TABLE "${previewSchema}".users ADD COLUMN IF NOT EXISTS calendar_access jsonb`,
   );
+// The original Workspace preview predates committee drafts. Upgrade only this
+// closed-set preview schema, preserving existing profiles as published.
+const committeeStatus = await c.query(
+  "SELECT 1 FROM information_schema.columns WHERE table_schema=$1 AND table_name='committee' AND column_name='_status'",
+  [previewSchema],
+);
+if (exists.rows.length && !committeeStatus.rows.length) {
+  await c.query(`
+    BEGIN;
+    DO $$ BEGIN CREATE TYPE "${previewSchema}".enum_committee_status AS ENUM ('draft','published'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    DO $$ BEGIN CREATE TYPE "${previewSchema}".enum__committee_v_version_status AS ENUM ('draft','published'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+    ALTER TABLE "${previewSchema}".committee
+      ALTER COLUMN name DROP NOT NULL, ALTER COLUMN role DROP NOT NULL,
+      ALTER COLUMN department DROP NOT NULL, ALTER COLUMN year DROP NOT NULL,
+      ALTER COLUMN portrait_id DROP NOT NULL,
+      ADD COLUMN _status "${previewSchema}".enum_committee_status DEFAULT 'draft';
+    UPDATE "${previewSchema}".committee SET _status='published';
+    ALTER TABLE "${previewSchema}"._committee_v
+      ALTER COLUMN version_name DROP NOT NULL, ALTER COLUMN version_role DROP NOT NULL,
+      ALTER COLUMN version_department DROP NOT NULL, ALTER COLUMN version_year DROP NOT NULL,
+      ALTER COLUMN version_portrait_id DROP NOT NULL,
+      ADD COLUMN version__status "${previewSchema}".enum__committee_v_version_status DEFAULT 'draft',
+      ADD COLUMN latest boolean;
+    CREATE INDEX IF NOT EXISTS committee__status_idx ON "${previewSchema}".committee(_status);
+    CREATE INDEX IF NOT EXISTS _committee_v_version_version__status_idx ON "${previewSchema}"._committee_v(version__status);
+    CREATE INDEX IF NOT EXISTS _committee_v_latest_idx ON "${previewSchema}"._committee_v(latest);
+    COMMIT;
+  `);
+}
 await c.end();
 process.env.WORKSPACE_INIT_SCHEMA = exists.rows.length ? "false" : "true";
 Object.assign(process.env, { NODE_ENV: "development" });
