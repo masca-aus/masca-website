@@ -2146,7 +2146,7 @@
 }
 .mc-calendar-layout {
   display: grid;
-  grid-template-columns: 214px minmax(0, 1fr);
+  grid-template-columns: 248px minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
@@ -2179,24 +2179,23 @@
   padding: 0 4px 16px;
 }
 .mc-instagram-mark {
-  width: 33px;
-  height: 33px;
+  width: 38px;
+  height: 38px;
   flex-shrink: 0;
   border-radius: 10px;
-  background: linear-gradient(135deg, #7456c8, #c65786 60%, #cf9461);
   display: grid;
   place-items: center;
   color: #fff;
 }
 .mc-sidebar-platform strong {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 650;
 }
 .mc-sidebar-platform small {
   display: block;
   color: var(--mc-muted);
-  font-size: 10px;
+  font-size: 11px;
   margin-top: 2px;
 }
 .mc-workspace .mc-sidebar-close {
@@ -2213,7 +2212,7 @@
   color: var(--mc-muted);
 }
 .mc-workspace .mc-sidebar-search input {
-  font-size: 11px;
+  font-size: 12px;
   width: 100%;
   border: 0;
   padding: 8px 3px;
@@ -2230,7 +2229,7 @@
   justify-content: flex-start;
   border-color: transparent;
   background: transparent;
-  font-size: 11px;
+  font-size: 12px;
   padding: 8px;
   min-height: 35px;
   text-align: left;
@@ -2247,7 +2246,7 @@
 }
 .mc-sidebar-shortcuts button small {
   color: var(--mc-muted);
-  font-size: 10px;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 .mc-workspace .mc-sidebar button[aria-pressed="true"] {
@@ -2266,7 +2265,7 @@
   margin-bottom: 4px;
 }
 .mc-workspace .mc-sidebar-types h2 {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--mc-muted);
 }
@@ -2608,7 +2607,7 @@
   justify-content: flex-start;
   border-color: transparent;
   background: transparent;
-  font-size: 11px;
+  font-size: 12px;
   padding: 8px 32px 8px 8px;
   min-height: 35px;
   text-align: left;
