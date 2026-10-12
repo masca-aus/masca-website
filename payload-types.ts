@@ -161,10 +161,6 @@ export interface CarePathway {
    * Link to an existing page such as /care/healthcare or a secure external https:// page. Leave blank to use this section's generated detail page.
    */
   linkUrl?: string | null;
-  /**
-   * Lower numbers appear first among the same parent.
-   */
-  sortOrder: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -583,7 +579,6 @@ export interface CarePathwaysSelect<T extends boolean = true> {
   parent?: T;
   detail?: T;
   linkUrl?: T;
-  sortOrder?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -50,6 +50,13 @@ try {
       throw error;
     }
   }
+  const legacySortOrder = await connection.query(
+    "SELECT 1 FROM information_schema.columns WHERE table_schema = $1 AND table_name = 'care_pathways' AND column_name = 'sort_order'",
+    [schema],
+  );
+  if (legacySortOrder.rowCount) {
+    await connection.query(`ALTER TABLE "${schema}"."care_pathways" DROP COLUMN "sort_order"`);
+  }
   const tables = await connection.query(
     "SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema = $1",
     [schema],

@@ -15,9 +15,9 @@ export const CarePathways: CollectionConfig = {
   labels: { singular: "Care section", plural: "Cares" },
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "parent", "sortOrder"],
+    defaultColumns: ["title", "parent"],
     description:
-      "Create top-level categories with no parent, then create as many nested sections as you need by choosing a parent. Every section can link to its own detail page.",
+      "Create categories and nested sections in the order you want them displayed. Leave Parent blank for a category, or choose a parent to nest a section. Every section can link to its own detail page.",
     hideAPIURL: true,
     components: {
       beforeList: ["/components/admin/DocumentBackLink#CollectionBackLink"],
@@ -32,7 +32,7 @@ export const CarePathways: CollectionConfig = {
     update: authenticated,
     delete: authenticated,
   },
-  defaultSort: "sortOrder",
+  defaultSort: "id",
   fields: [
     {
       name: "title",
@@ -81,16 +81,6 @@ export const CarePathways: CollectionConfig = {
       admin: {
         description:
           "Link to an existing page such as /care/healthcare or a secure external https:// page. Leave blank to use this section's generated detail page.",
-      },
-    },
-    {
-      name: "sortOrder",
-      type: "number",
-      required: true,
-      defaultValue: 1,
-      admin: {
-        position: "sidebar",
-        description: "Lower numbers appear first among the same parent.",
       },
     },
   ],

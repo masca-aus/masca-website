@@ -10,6 +10,7 @@ import * as migration_20260930_221300_workspace_access from './20260930_221300_w
 import * as migration_20261001_120000_public_submissions from './20261001_120000_public_submissions';
 import * as migration_20261012_063405_add_care_pathways from './20261012_063405_add_care_pathways';
 import * as migration_20261012_080126_expand_care_pathway_tree from './20261012_080126_expand_care_pathway_tree';
+import * as migration_20261012_081627_remove_care_pathway_sort_order from './20261012_081627_remove_care_pathway_sort_order';
 
 export const migrations = [
   {
@@ -70,6 +71,11 @@ export const migrations = [
   {
     up: migration_20261012_080126_expand_care_pathway_tree.up,
     down: migration_20261012_080126_expand_care_pathway_tree.down,
-    name: '20261012_080126_expand_care_pathway_tree'
+    name: '20261012_080126_expand_care_pathway_tree',
+  },
+  {
+    up: migration_20261012_081627_remove_care_pathway_sort_order.up,
+    down: migration_20261012_081627_remove_care_pathway_sort_order.down,
+    name: '20261012_081627_remove_care_pathway_sort_order'
   },
 ];

@@ -5,7 +5,7 @@ import { defaultCarePathways } from "./carePathwayDefaults";
 
 export type PublicCarePathway = Pick<
   CarePathway,
-  "id" | "title" | "shortDescription" | "sortOrder" | "detail" | "linkUrl"
+  "id" | "title" | "shortDescription" | "detail" | "linkUrl"
 > & { children: PublicCarePathway[] };
 
 type CarePathwayRecord = Omit<PublicCarePathway, "children"> & {
@@ -33,7 +33,7 @@ function buildTree(records: CarePathwayRecord[]): PublicCarePathway[] {
   }
 
   const sortNodes = (items: PublicCarePathway[]) => {
-    items.sort((left, right) => left.sortOrder - right.sortOrder || left.id - right.id);
+    items.sort((left, right) => left.id - right.id);
     items.forEach((item) => sortNodes(item.children));
   };
   sortNodes(roots);
@@ -46,7 +46,6 @@ function fallbackTree(): PublicCarePathway[] {
     id: id++,
     title: node.title,
     shortDescription: node.shortDescription,
-    sortOrder: node.sortOrder,
     detail: node.detail ?? null,
     linkUrl: node.linkUrl ?? null,
     children: (node.children ?? []).map(mapNode),
@@ -59,7 +58,7 @@ export async function getPublicCarePathways(): Promise<PublicCarePathway[]> {
     const payload = await getPayload({ config });
     const result = await payload.find({
       collection: "care-pathways",
-      sort: "sortOrder",
+      sort: "id",
       limit: 1000,
       depth: 0,
     });
