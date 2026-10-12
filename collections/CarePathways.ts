@@ -65,7 +65,8 @@ export const CarePathways: CollectionConfig = {
       maxLength: 40,
       admin: {
         condition: (_, siblingData) => siblingData.entryType === "parent",
-        description: "The small label shown above this category’s title on the Cares page.",
+        placeholder: "START HERE",
+        description: "Customize the small label above this category’s title on the Cares page. Leave blank to use the default label.",
       },
     },
     {
