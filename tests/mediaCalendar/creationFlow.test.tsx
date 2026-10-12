@@ -23,6 +23,7 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   navigation.push.mockClear();
+  window.history.replaceState(null, "", "/");
 });
 it("shows immediate creation feedback, prevents duplicates, and opens before refreshing the calendar", async () => {
   vi.stubGlobal("matchMedia", () => ({ matches: false }));
@@ -87,10 +88,6 @@ it("shows immediate creation feedback, prevents duplicates, and opens before ref
   await act(async () =>
     complete(new Response(JSON.stringify({ post: { id: "new-post" } }))),
   );
-  await waitFor(() =>
-    expect(navigation.push).toHaveBeenCalledWith(
-      "/admin/media-calendar?post=new-post",
-      { scroll: false },
-    ),
-  );
+  await waitFor(() => expect(window.location.search).toBe("?post=new-post"));
+  expect(navigation.push).not.toHaveBeenCalled();
 });

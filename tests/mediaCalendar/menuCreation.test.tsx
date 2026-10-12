@@ -13,6 +13,7 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
   navigation.push.mockClear();
+  window.history.replaceState(null, "", "/");
 });
 it("opening a scheduled card through its portalled menu never creates a draft", async () => {
   vi.stubGlobal("matchMedia", () => ({ matches: false }));
@@ -62,8 +63,6 @@ it("opening a scheduled card through its portalled menu never creates a draft", 
   );
   fireEvent.click(screen.getByRole("menuitem", { name: "Open post" }));
   expect(creates).toBe(0);
-  expect(navigation.push).toHaveBeenCalledWith(
-    "/admin/media-calendar?post=existing",
-    { scroll: false },
-  );
+  expect(window.location.search).toBe("?post=existing");
+  expect(navigation.push).not.toHaveBeenCalled();
 });

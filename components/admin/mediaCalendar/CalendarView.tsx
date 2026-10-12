@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { PostPanel } from "./PostPanel";
 import {
   Plus,
@@ -45,9 +45,12 @@ type Overview = {
   next: number | null;
 };
 export function CalendarView({ user }: { user: CalendarUser }) {
-  const router = useRouter(),
-    query = useSearchParams();
-  const postId = query.get("post");
+  const query = useSearchParams();
+  const queryPostId = query.get("post");
+  const [postId, setPostId] = useState(queryPostId);
+  useEffect(() => {
+    queueMicrotask(() => setPostId(queryPostId));
+  }, [queryPostId]);
   const [day, setDay] = useState(() => dayKey(new Date().toISOString())),
     [view, setView] = useState<"month" | "week" | "list">("month"),
     [data, setData] = useState<Overview>({
@@ -167,8 +170,18 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       clearTimeout(timer);
     };
   }, [day, view]);
-  const open = (id: string) =>
-    router.push(`/admin/media-calendar?post=${id}`, { scroll: false });
+  const open = (id: string) => {
+    window.history.pushState(
+      null,
+      "",
+      `/admin/media-calendar?post=${encodeURIComponent(id)}`,
+    );
+    setPostId(id);
+  };
+  const closeEditor = () => {
+    window.history.pushState(null, "", "/admin/media-calendar");
+    setPostId(null);
+  };
   const create = async (date: string | null) => {
     if (creatingRef.current) return;
     creatingRef.current = true;
@@ -774,9 +787,8 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           user={user}
           members={data.members}
           categories={data.categories}
-          onClose={() =>
-            router.push("/admin/media-calendar", { scroll: false })
-          }
+          onClose={closeEditor}
+          onOpen={open}
           onChange={() => {
             cache.current.clear();
             void load(true);

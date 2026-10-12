@@ -75,6 +75,7 @@ export function PostPanel(props: {
   members: Member[];
   categories: Category[];
   onClose: () => void;
+  onOpen?: (id: string) => void;
   onChange: () => void;
 }) {
   const [loaded, setLoaded] = useState<(Detail & { id: string }) | null>(null),
@@ -232,6 +233,7 @@ function LoadedPanel({
   members,
   categories,
   onClose,
+  onOpen,
   onChange,
 }: {
   initial: Detail;
@@ -241,6 +243,7 @@ function LoadedPanel({
   members: Member[];
   categories: Category[];
   onClose: () => void;
+  onOpen?: (id: string) => void;
   onChange: () => void;
 }) {
   const router = useRouter();
@@ -992,9 +995,11 @@ function LoadedPanel({
                   expectedRevision: post.contentRevision,
                 })
                   .then((p) => {
-                    router.push(`/admin/media-calendar?post=${p.id}`, {
-                      scroll: false,
-                    });
+                    if (onOpen) onOpen(p.id);
+                    else
+                      router.push(`/admin/media-calendar?post=${p.id}`, {
+                        scroll: false,
+                      });
                   })
                   .catch(() => {})
               }
