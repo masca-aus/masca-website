@@ -35,7 +35,6 @@ import { CalendarSidebar, type CalendarScope } from "./CalendarSidebar";
 import { useCalendarDrag } from "./useCalendarDrag";
 import { CalendarCard } from "./CalendarCard";
 import { RoomPresence } from "./RoomPresence";
-import { CategoryManager } from "./CategoryManager";
 import "./calendar.css";
 type Overview = {
   posts: Card[];
@@ -70,7 +69,6 @@ export function CalendarView({ user }: { user: CalendarUser }) {
     [owner, setOwner] = useState("all"),
     [format, setFormat] = useState("all"),
     [filtersOpen, setFiltersOpen] = useState(false),
-    [manage, setManage] = useState<"edit" | null>(null),
     [notifications, setNotifications] = useState(false),
     [busy, setBusy] = useState<string | null>(null),
     [landed, setLanded] = useState<string | null>(null),
@@ -505,9 +503,17 @@ export function CalendarView({ user }: { user: CalendarUser }) {
             cache.current.clear();
             void load(true);
           }}
-          onEditTypes={() => {
-            setManage("edit");
-            setFiltersOpen(false);
+          onTypeUpdated={(saved) => {
+            setData((current) => ({
+              ...current,
+              categories: [
+                ...current.categories.filter((c) => c.id !== saved.id),
+                saved,
+              ],
+            }));
+            if (saved.archived && category === saved.id) setCategory("all");
+            cache.current.clear();
+            void load(true);
           }}
         />
         <div className="mc-calendar-main">
@@ -520,25 +526,6 @@ export function CalendarView({ user }: { user: CalendarUser }) {
               Filters{filterCount > 0 && <span>{filterCount}</span>}
             </button>
           </div>
-          {manage && (
-            <CategoryManager
-              key={manage}
-              categories={data.categories}
-              onClose={() => setManage(null)}
-              onUpdate={(saved) => {
-                setData((current) => ({
-                  ...current,
-                  categories: [
-                    ...current.categories.filter((c) => c.id !== saved.id),
-                    saved,
-                  ],
-                }));
-                if (saved.archived && category === saved.id) setCategory("all");
-                cache.current.clear();
-                void load(true);
-              }}
-            />
-          )}
           {scope !== "ideas" && (
             <section className="mc-calendar-shell">
               <div className="mc-toolbar">

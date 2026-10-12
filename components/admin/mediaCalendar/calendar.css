@@ -2491,3 +2491,129 @@
     transform: none;
   }
 }
+.mc-type-row {
+  position: relative;
+}
+.mc-type-filter-row {
+  position: relative;
+}
+.mc-workspace .mc-sidebar .mc-type-filter {
+  width: 100%;
+  justify-content: flex-start;
+  border-color: transparent;
+  background: transparent;
+  font-size: 11px;
+  padding: 8px 32px 8px 8px;
+  min-height: 35px;
+  text-align: left;
+}
+.mc-workspace .mc-sidebar .mc-type-filter:hover {
+  background: var(--mc-soft);
+}
+.mc-workspace .mc-sidebar .mc-type-filter[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--mc-primary) 7%, var(--mc-bg));
+}
+.mc-workspace .mc-sidebar .mc-type-actions {
+  position: absolute;
+  right: 4px;
+  top: 5px;
+  min-height: 25px;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--mc-muted);
+  opacity: 0;
+  transition:
+    opacity 140ms ease,
+    background-color 140ms ease;
+}
+.mc-type-row:hover .mc-type-actions,
+.mc-type-row:focus-within .mc-type-actions,
+.mc-type-actions[aria-expanded="true"] {
+  opacity: 1;
+}
+.mc-workspace .mc-type-error {
+  font-size: 10px;
+  color: #bd4141;
+  line-height: 1.5;
+  margin: 4px 8px 8px;
+}
+.mc-deleted-types {
+  margin-top: 8px;
+  border-top: 1px solid var(--mc-line);
+  padding-top: 8px;
+}
+.mc-workspace .mc-deleted-types-toggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--mc-muted);
+  font-size: 10px;
+  padding: 5px 8px;
+  text-align: left;
+}
+.mc-deleted-types-toggle small {
+  margin-left: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.mc-deleted-types-toggle svg {
+  transition: transform 180ms ease;
+}
+.mc-deleted-types[data-open="true"] .mc-deleted-types-toggle svg {
+  transform: rotate(180deg);
+}
+.mc-deleted-types-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 180ms ease,
+    opacity 150ms ease;
+}
+.mc-deleted-types[data-open="true"] .mc-deleted-types-reveal {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.mc-deleted-types-reveal > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.mc-workspace .mc-type-deleted-note {
+  font-size: 10px;
+  color: var(--mc-muted);
+  margin: 6px 8px;
+  line-height: 1.6;
+}
+.mc-type-deleted-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: var(--mc-muted);
+}
+.mc-type-deleted-row > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mc-workspace .mc-type-deleted-row button {
+  flex-shrink: 0;
+  min-height: 26px;
+  padding: 4px 5px;
+  font-size: 9px;
+}
+@media (hover: none), (pointer: coarse) {
+  .mc-workspace .mc-sidebar .mc-type-actions {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mc-workspace .mc-sidebar .mc-type-actions,
+  .mc-deleted-types-toggle svg,
+  .mc-deleted-types-reveal {
+    transition: none;
+  }
+}

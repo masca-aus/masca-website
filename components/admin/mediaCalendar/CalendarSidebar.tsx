@@ -6,13 +6,13 @@ import {
   ClipboardCheck,
   Lightbulb,
   Plus,
-  SlidersHorizontal,
   X,
   Search,
   ChevronDown,
 } from "lucide-react";
 import type { Card, Category, Member } from "@/features/mediaCalendar/types";
 import { CalendarSelect } from "./CalendarSelect";
+import { ContentTypeRow } from "./ContentTypeRow";
 import { InlineContentType } from "./InlineContentType";
 import { statusLabels } from "./CalendarCard";
 export type CalendarScope = "all" | "mine" | "review" | "ideas";
@@ -38,7 +38,7 @@ export function CalendarSidebar({
   onSearch,
   onClear,
   onTypeCreated,
-  onEditTypes,
+  onTypeUpdated,
 }: {
   scope: CalendarScope;
   category: string;
@@ -61,7 +61,7 @@ export function CalendarSidebar({
   onSearch: (v: string) => void;
   onClear: () => void;
   onTypeCreated: (category: Category) => void;
-  onEditTypes: () => void;
+  onTypeUpdated: (category: Category) => void;
 }) {
   const panel = useRef<HTMLElement>(null);
   const addButton = useRef<HTMLButtonElement>(null);
@@ -69,6 +69,20 @@ export function CalendarSidebar({
   const [adding, setAdding] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [deletedOpen, setDeletedOpen] = useState(false);
+  const [lastDeleted, setLastDeleted] = useState<Category | null>(null);
+  const deletedButton = useRef<HTMLButtonElement>(null);
+  const deleted = categories.filter((c) => c.archived);
+  const updateType = (saved: Category) => {
+    onTypeUpdated(saved);
+    if (saved.archived) {
+      setLastDeleted(saved);
+      setDeletedOpen(true);
+      queueMicrotask(() =>
+        deletedButton.current?.focus({ preventScroll: true }),
+      );
+    } else if (saved.id === lastDeleted?.id) setLastDeleted(null);
+  };
   useEffect(
     () => () => {
       if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -287,21 +301,54 @@ export function CalendarSidebar({
           {categories
             .filter((c) => !c.archived)
             .map((c) => (
-              <button
+              <ContentTypeRow
                 key={c.id}
-                aria-label={`Filter by ${c.name}`}
-                aria-pressed={category === c.id}
-                onClick={() => onCategory(category === c.id ? "all" : c.id)}
-              >
-                <i className="mc-color-dot" style={{ background: c.color }} />
-                <span>{c.name}</span>
-              </button>
+                category={c}
+                selected={category === c.id}
+                editable={editable}
+                onSelect={() => onCategory(category === c.id ? "all" : c.id)}
+                onSaved={updateType}
+              />
             ))}
-          {editable && (
-            <button className="mc-types-edit" onClick={onEditTypes}>
-              <SlidersHorizontal size={14} />
-              <span>Edit content types</span>
-            </button>
+          {editable && deleted.length > 0 && (
+            <div className="mc-deleted-types" data-open={deletedOpen}>
+              <button
+                ref={deletedButton}
+                className="mc-deleted-types-toggle"
+                aria-expanded={deletedOpen}
+                aria-controls="mc-deleted-type-list"
+                onClick={() => setDeletedOpen(!deletedOpen)}
+              >
+                <span>
+                  Deleted types <small>{deleted.length}</small>
+                </span>
+                <ChevronDown size={13} />
+              </button>
+              <div
+                className="mc-deleted-types-reveal"
+                id="mc-deleted-type-list"
+                inert={!deletedOpen}
+              >
+                <div>
+                  {lastDeleted && (
+                    <p role="status" className="mc-type-deleted-note">
+                      Deleted “{lastDeleted.name}”. Your posts are unchanged.
+                    </p>
+                  )}
+                  {deleted.map((c) => (
+                    <ContentTypeRow
+                      key={c.id}
+                      category={c}
+                      selected={false}
+                      editable={editable}
+                      recent={c.id === lastDeleted?.id}
+                      onSelect={() => {}}
+                      onSaved={updateType}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
         </section>
         <section className="mc-sidebar-more" data-open={moreOpen}>
