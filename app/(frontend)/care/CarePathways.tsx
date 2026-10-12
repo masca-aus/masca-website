@@ -151,7 +151,7 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
                   <a
                     key={item.id}
                     href={href}
-                    className="group flex min-h-52 flex-col items-start rounded-lg bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    className="group flex flex-col items-start rounded-lg bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 md:p-6"
                   >
                     <strong className="text-lg text-blue-600">{item.title}</strong>
                     <span className="mt-2 text-sm leading-relaxed text-gray-700">{item.shortDescription}</span>
