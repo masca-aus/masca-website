@@ -2185,7 +2185,8 @@
   border-radius: 10px;
   display: grid;
   place-items: center;
-  color: #fff;
+  background: var(--mc-soft);
+  color: var(--mc-muted);
 }
 .mc-sidebar-platform strong {
   display: block;
