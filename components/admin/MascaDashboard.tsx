@@ -79,14 +79,14 @@ export function DashboardContent({ account, context = dashboardContext(account),
   const areas = orderedAreas(account);
   const isAdmin = !account || mayManagePeople(account);
   const published = publishedRows(account, content);
+  const calendarVisible = mayUseCalendar(account as CalendarUser, "view");
   const sections = [{ title: 'Content', areas: areas.filter(area => contentAreas.includes(area as ContentArea)) }, { title: 'Resources', areas: areas.filter(area => !contentAreas.includes(area as ContentArea)) }];
   return <DashboardTabs key={`${context.branch}:${view}`} initialView={view} branch={context.branch}
     metrics={<>{websiteInsights}{contentMetrics ?? <DashboardContentMetrics rows={published} branch={context.branch} />}</>}
     workspace={<>
     {summary ?? <DashboardSummary account={account} context={context} tasks={tasks} content={content} />}
-    {sections.filter(section => section.areas.length > 0).map(section => <section key={section.title} className="masca-dashboard__section" aria-label={section.title}><h2>{section.title}</h2><div className="masca-dashboard__content">{section.areas.map(area => <ContentRow key={area} area={area} account={account} context={context} />)}</div></section>)}
-    {mayUseCalendar(account as CalendarUser, "view") && <section className="masca-dashboard__section" aria-label="Media calendar"><h2>Media calendar</h2><div className="masca-dashboard__content-row"><span className="masca-dashboard__content-icon"><CalendarDays size={21} aria-hidden="true" /></span><div className="masca-dashboard__content-label"><h3>Plan together</h3><p>Prepare Instagram posts, collaborate on captions and review together.</p></div><Link className="masca-dashboard__manage" href="/admin/media-calendar">Open calendar</Link></div></section>}
-    {areas.length === 0 && <p>No content sections are assigned to this account. Contact your administrator.</p>}
+    {sections.filter(section => section.areas.length > 0 || (section.title === 'Content' && calendarVisible)).map(section => <section key={section.title} className="masca-dashboard__section" aria-label={section.title}><h2>{section.title}</h2><div className="masca-dashboard__content">{section.areas.map(area => <ContentRow key={area} area={area} account={account} context={context} />)}{section.title === 'Content' && calendarVisible && <div className="masca-dashboard__content-row"><span className="masca-dashboard__content-icon"><CalendarDays size={21} aria-hidden="true" /></span><div className="masca-dashboard__content-label"><h3><Link href="/admin/media-calendar">Media calendar</Link></h3><p>Plan posts, collaborate on captions and review together.</p></div><Link className="masca-dashboard__manage" href="/admin/media-calendar">Open calendar</Link></div>}</div></section>)}
+    {areas.length === 0 && !calendarVisible && <p>No content sections are assigned to this account. Contact your administrator.</p>}
     </>}>
     <header className="masca-dashboard__heading">
       <div><h1>Your workspace</h1><p>Manage your content and keep the website up to date.</p></div>
