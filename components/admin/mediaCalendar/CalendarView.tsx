@@ -70,7 +70,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
     [owner, setOwner] = useState("all"),
     [format, setFormat] = useState("all"),
     [filtersOpen, setFiltersOpen] = useState(false),
-    [manage, setManage] = useState<"new" | "edit" | null>(null),
+    [manage, setManage] = useState<"edit" | null>(null),
     [notifications, setNotifications] = useState(false),
     [busy, setBusy] = useState<string | null>(null),
     [landed, setLanded] = useState<string | null>(null),
@@ -492,9 +492,18 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           }}
           onSearch={setSearch}
           onClear={clearFilters}
-          onAddType={() => {
-            setManage("new");
-            setFiltersOpen(false);
+          onTypeCreated={(saved) => {
+            setData((current) => ({
+              ...current,
+              categories: [
+                ...current.categories.filter((c) => c.id !== saved.id),
+                saved,
+              ],
+            }));
+            setCategory(saved.id);
+            setScope("all");
+            cache.current.clear();
+            void load(true);
           }}
           onEditTypes={() => {
             setManage("edit");
@@ -514,7 +523,6 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           {manage && (
             <CategoryManager
               key={manage}
-              startNew={manage === "new"}
               categories={data.categories}
               onClose={() => setManage(null)}
               onUpdate={(saved) => {
@@ -525,12 +533,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
                     saved,
                   ],
                 }));
-                if (manage === "new") {
-                  setCategory(saved.id);
-                  setScope("all");
-                  setManage(null);
-                } else if (saved.archived && category === saved.id)
-                  setCategory("all");
+                if (saved.archived && category === saved.id) setCategory("all");
                 cache.current.clear();
                 void load(true);
               }}

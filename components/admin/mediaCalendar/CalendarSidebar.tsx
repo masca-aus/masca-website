@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
   UserRound,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { Card, Category, Member } from "@/features/mediaCalendar/types";
 import { CalendarSelect } from "./CalendarSelect";
+import { InlineContentType } from "./InlineContentType";
 import { statusLabels } from "./CalendarCard";
 export type CalendarScope = "all" | "mine" | "review" | "ideas";
 export function CalendarSidebar({
@@ -36,7 +37,7 @@ export function CalendarSidebar({
   onStatus,
   onSearch,
   onClear,
-  onAddType,
+  onTypeCreated,
   onEditTypes,
 }: {
   scope: CalendarScope;
@@ -59,10 +60,41 @@ export function CalendarSidebar({
   onStatus: (v: string) => void;
   onSearch: (v: string) => void;
   onClear: () => void;
-  onAddType: () => void;
+  onTypeCreated: (category: Category) => void;
   onEditTypes: () => void;
 }) {
   const panel = useRef<HTMLElement>(null);
+  const addButton = useRef<HTMLButtonElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
+  useEffect(
+    () => () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    },
+    [],
+  );
+  const closeDrawer = () => {
+    if (closeTimer.current) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      onClose();
+      return;
+    }
+    setClosing(true);
+    closeTimer.current = setTimeout(() => {
+      closeTimer.current = null;
+      setClosing(false);
+      closeRef.current();
+    }, 160);
+  };
+  const previouslyAdding = useRef(false);
+  useEffect(() => {
+    if (!adding && previouslyAdding.current)
+      addButton.current?.focus({ preventScroll: true });
+    previouslyAdding.current = adding;
+  }, [adding]);
+  const finishAdding = () => setAdding(false);
   const closeRef = useRef(onClose);
   useEffect(() => {
     closeRef.current = onClose;
@@ -82,6 +114,11 @@ export function CalendarSidebar({
     breakpoint.addEventListener?.("change", checkBreakpoint);
     if (!breakpoint.matches) queueMicrotask(checkBreakpoint);
     return () => {
+      if (closeTimer.current) {
+        clearTimeout(closeTimer.current);
+        closeTimer.current = null;
+        queueMicrotask(() => setClosing(false));
+      }
       breakpoint.removeEventListener?.("change", checkBreakpoint);
       document.body.style.overflow = overflow;
       previous?.focus({ preventScroll: true });
@@ -117,14 +154,14 @@ export function CalendarSidebar({
     <>
       {mobileOpen && (
         <button
-          className="mc-sidebar-backdrop"
+          className={`mc-sidebar-backdrop ${closing ? "mc-sidebar-backdrop--closing" : ""}`}
           aria-label="Close calendar filters"
-          onClick={onClose}
+          onClick={closeDrawer}
         />
       )}
       <aside
         ref={panel}
-        className={`mc-sidebar ${mobileOpen ? "mc-sidebar--open" : ""}`}
+        className={`mc-sidebar ${mobileOpen ? "mc-sidebar--open" : ""} ${closing ? "mc-sidebar--closing" : ""}`}
         role={mobileOpen ? "dialog" : "navigation"}
         aria-modal={mobileOpen || undefined}
         aria-label="Calendar planning"
@@ -132,14 +169,16 @@ export function CalendarSidebar({
           if (!mobileOpen) return;
           if (e.key === "Escape" && !e.defaultPrevented) {
             e.preventDefault();
-            onClose();
+            closeDrawer();
           }
           if (e.key === "Tab") {
             const buttons = Array.from(
               panel.current?.querySelectorAll<HTMLElement>(
-                'button:not(:disabled),input,summary,[tabindex="0"]',
+                'button:not(:disabled),input:not(:disabled),summary,[tabindex="0"]',
               ) ?? [],
-            ).filter((el) => el.offsetParent !== null);
+            ).filter(
+              (el) => el.offsetParent !== null && !el.closest("[inert]"),
+            );
             const first = buttons[0],
               last = buttons.at(-1);
             if (e.shiftKey && document.activeElement === first) {
@@ -175,7 +214,7 @@ export function CalendarSidebar({
           <button
             className="mc-sidebar-close"
             aria-label="Close calendar filters"
-            onClick={onClose}
+            onClick={closeDrawer}
           >
             <X size={18} />
           </button>
@@ -210,12 +249,33 @@ export function CalendarSidebar({
               <button
                 aria-label="Add content type"
                 title="Add content type"
-                onClick={onAddType}
+                ref={addButton}
+                aria-expanded={adding}
+                aria-controls="mc-inline-content-type"
+                disabled={adding}
+                onClick={() => setAdding(true)}
               >
                 <Plus size={16} />
               </button>
             )}
           </header>
+          <div
+            id="mc-inline-content-type"
+            className="mc-inline-type-reveal"
+            data-open={adding}
+          >
+            <div>
+              {adding && (
+                <InlineContentType
+                  onCancel={finishAdding}
+                  onCreated={(saved) => {
+                    onTypeCreated(saved);
+                    finishAdding();
+                  }}
+                />
+              )}
+            </div>
+          </div>
           <button
             aria-label="Filter by all content types"
             aria-pressed={category === "all"}
@@ -244,56 +304,67 @@ export function CalendarSidebar({
             </button>
           )}
         </section>
-        <details className="mc-sidebar-more">
-          <summary>
+        <section className="mc-sidebar-more" data-open={moreOpen}>
+          <button
+            className="mc-sidebar-more-toggle"
+            aria-expanded={moreOpen}
+            aria-controls="mc-sidebar-extra-filters"
+            onClick={() => setMoreOpen(!moreOpen)}
+          >
             More filters <ChevronDown size={14} />
-          </summary>
-          <div>
-            <label>
-              <span>Status</span>
-              <CalendarSelect
-                label="Filter status"
-                value={status}
-                onChange={onStatus}
-                options={[
-                  { value: "all", label: "All statuses" },
-                  ...Object.entries(statusLabels).map(([value, label]) => ({
-                    value,
-                    label,
-                  })),
-                  { value: "hold", label: "On hold" },
-                ]}
-              />
-            </label>
-            <label>
-              <span>Assigned to</span>
-              <CalendarSelect
-                label="Filter teammate"
-                value={owner}
-                onChange={onOwner}
-                options={[
-                  { value: "all", label: "Everyone" },
-                  ...members.map((m) => ({ value: m.id, label: m.name })),
-                ]}
-              />
-            </label>
-            <label>
-              <span>Format</span>
-              <CalendarSelect
-                label="Filter format"
-                value={format}
-                onChange={onFormat}
-                options={[
-                  { value: "all", label: "All formats" },
-                  { value: "feed", label: "Feed posts" },
-                  { value: "carousel", label: "Carousels" },
-                  { value: "reel", label: "Reels" },
-                  { value: "story", label: "Stories" },
-                ]}
-              />
-            </label>
+          </button>
+          <div
+            id="mc-sidebar-extra-filters"
+            className="mc-sidebar-more-reveal"
+            inert={!moreOpen}
+          >
+            <div className="mc-sidebar-more-content">
+              <label>
+                <span>Status</span>
+                <CalendarSelect
+                  label="Filter status"
+                  value={status}
+                  onChange={onStatus}
+                  options={[
+                    { value: "all", label: "All statuses" },
+                    ...Object.entries(statusLabels).map(([value, label]) => ({
+                      value,
+                      label,
+                    })),
+                    { value: "hold", label: "On hold" },
+                  ]}
+                />
+              </label>
+              <label>
+                <span>Assigned to</span>
+                <CalendarSelect
+                  label="Filter teammate"
+                  value={owner}
+                  onChange={onOwner}
+                  options={[
+                    { value: "all", label: "Everyone" },
+                    ...members.map((m) => ({ value: m.id, label: m.name })),
+                  ]}
+                />
+              </label>
+              <label>
+                <span>Format</span>
+                <CalendarSelect
+                  label="Filter format"
+                  value={format}
+                  onChange={onFormat}
+                  options={[
+                    { value: "all", label: "All formats" },
+                    { value: "feed", label: "Feed posts" },
+                    { value: "carousel", label: "Carousels" },
+                    { value: "reel", label: "Reels" },
+                    { value: "story", label: "Stories" },
+                  ]}
+                />
+              </label>
+            </div>
           </div>
-        </details>
+        </section>
         <button className="mc-sidebar-reset" onClick={onClear}>
           Clear filters
         </button>
@@ -302,7 +373,7 @@ export function CalendarSidebar({
           date.
         </p>
         {mobileOpen && (
-          <button className="mc-primary mc-sidebar-done" onClick={onClose}>
+          <button className="mc-primary mc-sidebar-done" onClick={closeDrawer}>
             Show posts
           </button>
         )}
