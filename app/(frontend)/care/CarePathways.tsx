@@ -130,7 +130,7 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
 
             <div className="grid gap-4 p-5 md:grid-cols-3 md:p-8">
               {selected.children.map((item, index) => {
-                const Icon = iconForTopic(item.title);
+                const Icon = iconForTopic(item.title ?? "");
                 const href = item.linkUrl?.trim() || `/care/pathways/${item.id}`;
                 return (
                   <a
