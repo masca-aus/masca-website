@@ -1,14 +1,7 @@
 "use client";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { PostPanel, PostPanelLoading } from "./PostPanel";
+import { PostPanel } from "./PostPanel";
 import {
   Plus,
   ChevronLeft,
@@ -17,7 +10,6 @@ import {
   List,
   SlidersHorizontal,
   Bell,
-  Search,
   Check,
   X,
   Undo2,
@@ -39,9 +31,9 @@ import {
   TIMEZONE,
 } from "@/features/mediaCalendar/dates";
 import { api, calendarAPI } from "./api";
-import { CalendarSelect } from "./CalendarSelect";
+import { CalendarSidebar, type CalendarScope } from "./CalendarSidebar";
 import { useCalendarDrag } from "./useCalendarDrag";
-import { CalendarCard, statusLabels } from "./CalendarCard";
+import { CalendarCard } from "./CalendarCard";
 import { RoomPresence } from "./RoomPresence";
 import { CategoryManager } from "./CategoryManager";
 import "./calendar.css";
@@ -71,7 +63,11 @@ export function CalendarView({ user }: { user: CalendarUser }) {
     [category, setCategory] = useState("all"),
     [status, setStatus] = useState("all"),
     [search, setSearch] = useState(""),
-    [manage, setManage] = useState(false),
+    [scope, setScope] = useState<CalendarScope>("all"),
+    [owner, setOwner] = useState("all"),
+    [format, setFormat] = useState("all"),
+    [filtersOpen, setFiltersOpen] = useState(false),
+    [manage, setManage] = useState<"new" | "edit" | null>(null),
     [notifications, setNotifications] = useState(false),
     [busy, setBusy] = useState<string | null>(null),
     [landed, setLanded] = useState<string | null>(null),
@@ -334,12 +330,39 @@ export function CalendarView({ user }: { user: CalendarUser }) {
   const filtered = data.posts.filter(
     (p) =>
       (category === "all" || p.category === category) &&
+      (scope !== "mine" || p.owner === String(user.id)) &&
+      (scope !== "review" || p.status === "in_review") &&
+      (scope !== "ideas" || (!p.plannedAt && p.status !== "posted")) &&
+      (owner === "all" || p.owner === owner) &&
+      (format === "all" || p.type === format) &&
       (status === "all" ||
         (status === "hold" ? p.onHold : p.status === status)) &&
       p.title.toLowerCase().includes(search.toLowerCase()),
   );
   const scheduled = filtered.filter((p) => p.plannedAt),
     unscheduled = filtered.filter((p) => !p.plannedAt);
+  const clearFilters = () => {
+    setScope("all");
+    setCategory("all");
+    setStatus("all");
+    setOwner("all");
+    setFormat("all");
+    setSearch("");
+  };
+  const selectScope = (value: CalendarScope) => {
+    setScope(value);
+    setOwner("all");
+    setStatus("all");
+    setFiltersOpen(false);
+  };
+  const filterCount = [
+    scope !== "all",
+    category !== "all",
+    status !== "all",
+    owner !== "all",
+    format !== "all",
+    !!search,
+  ].filter(Boolean).length;
   const nav = (direction: number) => {
     if (view === "week") setDay(addDays(day, direction * 7));
     else {
@@ -428,237 +451,273 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           ))}
         </section>
       )}
-      <section className="mc-calendar-shell">
-        <div className="mc-toolbar">
-          <div className="mc-month-navigation">
-            <button aria-label="Previous range" onClick={() => nav(-1)}>
-              <ChevronLeft size={19} />
-            </button>
-            <h2>{title}</h2>
-            <button aria-label="Next range" onClick={() => nav(1)}>
-              <ChevronRight size={19} />
-            </button>
+      <div className="mc-calendar-layout">
+        <CalendarSidebar
+          scope={scope}
+          category={category}
+          owner={owner}
+          format={format}
+          status={status}
+          search={search}
+          posts={data.posts}
+          categories={data.categories}
+          members={data.members}
+          userId={String(user.id)}
+          editable={editable}
+          mobileOpen={filtersOpen}
+          onClose={() => setFiltersOpen(false)}
+          onScope={selectScope}
+          onCategory={setCategory}
+          onOwner={(value) => {
+            setOwner(value);
+            if (scope === "mine") setScope("all");
+          }}
+          onFormat={setFormat}
+          onStatus={(value) => {
+            setStatus(value);
+            if (scope === "review") setScope("all");
+          }}
+          onSearch={setSearch}
+          onClear={clearFilters}
+          onAddType={() => {
+            setManage("new");
+            setFiltersOpen(false);
+          }}
+          onEditTypes={() => {
+            setManage("edit");
+            setFiltersOpen(false);
+          }}
+        />
+        <div className="mc-calendar-main">
+          <div className="mc-mobile-filter-row">
             <button
-              className="mc-today"
-              onClick={() => setDay(dayKey(new Date().toISOString()))}
+              aria-expanded={filtersOpen}
+              onClick={() => setFiltersOpen(true)}
             >
-              Today
+              <SlidersHorizontal size={16} />
+              Filters{filterCount > 0 && <span>{filterCount}</span>}
             </button>
           </div>
-          <div className="mc-view-toggle" aria-label="Calendar view">
-            {(["month", "week", "list"] as const).map((v) => (
-              <button
-                key={v}
-                aria-pressed={view === v}
-                onClick={() => setView(v)}
-              >
-                {v === "list" ? <List size={16} /> : <CalendarDays size={16} />}
-                <span>{v[0].toUpperCase() + v.slice(1)}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="mc-filters">
-          <label>
-            <Search size={15} />
-            <input
-              aria-label="Search posts"
-              placeholder="Search posts"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+          {manage && (
+            <CategoryManager
+              key={manage}
+              startNew={manage === "new"}
+              categories={data.categories}
+              onClose={() => setManage(null)}
+              onUpdate={(saved) => {
+                setData((current) => ({
+                  ...current,
+                  categories: [
+                    ...current.categories.filter((c) => c.id !== saved.id),
+                    saved,
+                  ],
+                }));
+                if (manage === "new") {
+                  setCategory(saved.id);
+                  setScope("all");
+                  setManage(null);
+                } else if (saved.archived && category === saved.id)
+                  setCategory("all");
+                cache.current.clear();
+                void load(true);
+              }}
             />
-          </label>
-          <CalendarSelect
-            label="Filter status"
-            value={status}
-            onChange={setStatus}
-            options={[
-              { value: "all", label: "All statuses" },
-              ...Object.entries(statusLabels).map(([value, label]) => ({
-                value,
-                label,
-              })),
-              { value: "hold", label: "On hold" },
-            ]}
-          />
-          <small>{TIMEZONE} · AEST</small>
-        </div>
-        <div className="mc-tag-bar" role="group" aria-label="Post tags">
-          <span className="mc-tag-label">Tags</span>
-          <button
-            aria-pressed={category === "all"}
-            onClick={() => setCategory("all")}
-          >
-            All posts
-          </button>
-          {data.categories
-            .filter((c) => !c.archived)
-            .map((c) => (
-              <button
-                key={c.id}
-                aria-label={`Filter by ${c.name}`}
-                aria-pressed={category === c.id}
-                style={{ "--tag-color": c.color } as CSSProperties}
-                onClick={() => setCategory(category === c.id ? "all" : c.id)}
-              >
-                <i className="mc-color-dot" style={{ background: c.color }} />
-                {c.name}
-              </button>
-            ))}
-          {editable && (
-            <button
-              className="mc-tag-manage"
-              aria-label="Manage tags"
-              aria-expanded={manage}
-              onClick={() => setManage(!manage)}
-            >
-              <SlidersHorizontal size={14} />
-              Edit tags
-            </button>
           )}
-        </div>
-        {manage && (
-          <CategoryManager
-            categories={data.categories}
-            onClose={() => setManage(false)}
-            onUpdate={() => {
-              cache.current.clear();
-              void load(true);
-            }}
-          />
-        )}
-        {error && (
-          <div className="mc-error" role="alert">
-            {error}
-            <button onClick={() => void load(true)}>Retry</button>
-          </div>
-        )}
-        {loading && !data.posts.length ? (
-          <div className="mc-calendar-loading" role="status">
-            Loading your calendar…
-          </div>
-        ) : view === "list" ? (
-          <div className="mc-list" key={`list-${days[0]}`}>
-            {scheduled.length ? (
-              days
-                .filter((d) =>
-                  scheduled.some((p) => dayKey(p.plannedAt!) === d),
-                )
-                .map((d) => (
-                  <section
-                    key={d}
-                    data-drop-day={d}
-                    data-drop-active={drag.visual?.target === d}
-                  >
-                    <h3>
-                      {new Intl.DateTimeFormat("en-AU", {
-                        weekday: "short",
-                        timeZone: TIMEZONE,
-                        day: "numeric",
-                        month: "short",
-                      }).format(new Date(`${d}T12:00:00Z`))}
-                    </h3>
-                    <div>
-                      {scheduled
-                        .filter((p) => dayKey(p.plannedAt!) === d)
-                        .map(card)}
-                    </div>
-                    {editable && (
-                      <button
-                        className="mc-list-add"
-                        onClick={() => void create(d)}
-                      >
-                        <Plus size={15} />
-                        Add post
-                      </button>
-                    )}
-                  </section>
-                ))
-            ) : (
-              <div className="mc-empty">
-                <CalendarDays size={32} />
-                <h3>Room for your next idea</h3>
-                <p>Choose a date or start an unscheduled draft.</p>
-                {editable && (
-                  <button
-                    className="mc-primary"
-                    onClick={() => void create(day)}
-                  >
-                    Create a post
+          {scope !== "ideas" && (
+            <section className="mc-calendar-shell">
+              <div className="mc-toolbar">
+                <div className="mc-month-navigation">
+                  <button aria-label="Previous range" onClick={() => nav(-1)}>
+                    <ChevronLeft size={19} />
                   </button>
-                )}
+                  <h2>{title}</h2>
+                  <button aria-label="Next range" onClick={() => nav(1)}>
+                    <ChevronRight size={19} />
+                  </button>
+                  <button
+                    className="mc-today"
+                    onClick={() => setDay(dayKey(new Date().toISOString()))}
+                  >
+                    Today
+                  </button>
+                </div>
+                <div className="mc-view-toggle" aria-label="Calendar view">
+                  {(["month", "week", "list"] as const).map((v) => (
+                    <button
+                      key={v}
+                      aria-pressed={view === v}
+                      onClick={() => setView(v)}
+                    >
+                      {v === "list" ? (
+                        <List size={16} />
+                      ) : (
+                        <CalendarDays size={16} />
+                      )}
+                      <span>{v[0].toUpperCase() + v.slice(1)}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
-          </div>
-        ) : (
-          <div
-            className={`mc-grid mc-grid--${view}`}
-            key={`${view}-${days[0]}`}
-          >
-            <div className="mc-weekdays">
-              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-                <span key={d}>{d}</span>
-              ))}
-            </div>
-            <div className="mc-days">
-              {days.map((d) => (
-                <section
-                  key={d}
-                  className={`mc-day ${d.slice(0, 7) !== day.slice(0, 7) ? "mc-day--outside" : ""}`}
-                  data-today={d === dayKey(new Date().toISOString())}
-                  data-drop-day={d}
-                  data-drop-active={drag.visual?.target === d}
+              <p className="mc-calendar-timezone">{TIMEZONE} · AEST</p>
+              {error && (
+                <div className="mc-error" role="alert">
+                  {error}
+                  <button onClick={() => void load(true)}>Retry</button>
+                </div>
+              )}
+              {loading && !data.posts.length ? (
+                <div className="mc-calendar-loading" role="status">
+                  Loading your calendar…
+                </div>
+              ) : view === "list" ? (
+                <div className="mc-list" key={`list-${days[0]}`}>
+                  {scheduled.length ? (
+                    days
+                      .filter((d) =>
+                        scheduled.some((p) => dayKey(p.plannedAt!) === d),
+                      )
+                      .map((d) => (
+                        <section
+                          key={d}
+                          data-drop-day={d}
+                          data-drop-active={drag.visual?.target === d}
+                        >
+                          <h3>
+                            {new Intl.DateTimeFormat("en-AU", {
+                              weekday: "short",
+                              timeZone: TIMEZONE,
+                              day: "numeric",
+                              month: "short",
+                            }).format(new Date(`${d}T12:00:00Z`))}
+                          </h3>
+                          <div>
+                            {scheduled
+                              .filter((p) => dayKey(p.plannedAt!) === d)
+                              .map(card)}
+                          </div>
+                          {editable && (
+                            <button
+                              className="mc-list-add"
+                              onClick={() => void create(d)}
+                            >
+                              <Plus size={15} />
+                              Add post
+                            </button>
+                          )}
+                        </section>
+                      ))
+                  ) : (
+                    <div className="mc-empty">
+                      <CalendarDays size={32} />
+                      <h3>Room for your next idea</h3>
+                      <p>Choose a date or start an unscheduled draft.</p>
+                      {editable && (
+                        <button
+                          className="mc-primary"
+                          onClick={() => void create(day)}
+                        >
+                          Create a post
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div
+                  className={`mc-grid mc-grid--${view}`}
+                  key={`${view}-${days[0]}`}
                 >
-                  <header>
-                    <span>{Number(d.slice(-2))}</span>
-                    {editable && (
-                      <button
-                        aria-label={`Create post on ${d}`}
-                        onClick={() => void create(d)}
-                      >
-                        <Plus size={14} />
-                      </button>
+                  <div className="mc-weekdays">
+                    {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
+                      (d) => (
+                        <span key={d}>{d}</span>
+                      ),
                     )}
-                  </header>
-                  {scheduled
-                    .filter((p) => dayKey(p.plannedAt!) === d)
-                    .map(card)}
-                </section>
-              ))}
+                  </div>
+                  <div className="mc-days">
+                    {days.map((d) => (
+                      <section
+                        key={d}
+                        onClick={(e) => {
+                          if (
+                            editable &&
+                            !creatingRef.current &&
+                            !pending.current &&
+                            !drag.suppressClick() &&
+                            !(e.target as HTMLElement).closest(
+                              "button,.mc-card",
+                            )
+                          )
+                            void create(d);
+                        }}
+                        className={`mc-day ${d.slice(0, 7) !== day.slice(0, 7) ? "mc-day--outside" : ""}`}
+                        data-today={d === dayKey(new Date().toISOString())}
+                        data-drop-day={d}
+                        data-drop-active={drag.visual?.target === d}
+                      >
+                        <header>
+                          <span>{Number(d.slice(-2))}</span>
+                          {editable && (
+                            <button
+                              aria-label={`Create post on ${d}`}
+                              onClick={() => void create(d)}
+                            >
+                              <Plus size={14} />
+                            </button>
+                          )}
+                        </header>
+                        {scheduled
+                          .filter((p) => dayKey(p.plannedAt!) === d)
+                          .map(card)}
+                      </section>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+          <section
+            className="mc-unscheduled"
+            data-drop-day=""
+            data-drop-active={drag.visual?.target === "unscheduled"}
+          >
+            <div className="mc-section-label">
+              <div>
+                <h2>Unscheduled ideas</h2>
+                <p>Ideas without a publishing date.</p>
+              </div>
+              <span>{unscheduled.length}</span>
+              {editable && (
+                <button onClick={() => void create(null)}>
+                  <Plus size={16} />
+                  Add idea
+                </button>
+              )}
             </div>
-          </div>
-        )}
-      </section>
-      <section
-        className="mc-unscheduled"
-        data-drop-day=""
-        data-drop-active={drag.visual?.target === "unscheduled"}
-      >
-        <div className="mc-section-label">
-          <div>
-            <h2>Unscheduled</h2>
-            <p>Ideas without a publishing date.</p>
-          </div>
-          <span>{unscheduled.length}</span>
-          {editable && (
-            <button onClick={() => void create(null)}>
-              <Plus size={16} />
-              Add idea
-            </button>
+            <div className="mc-unscheduled-cards">
+              {unscheduled.length ? (
+                unscheduled.map(card)
+              ) : (
+                <p className="mc-muted">
+                  {filterCount
+                    ? "No ideas match these filters. Clear filters or start a new idea."
+                    : "Your undated drafts will live here."}
+                </p>
+              )}
+            </div>
+          </section>
+          <p className="mc-footnote">
+            Planned dates help the team coordinate. Posts are published manually
+            in Instagram or Meta Business Suite.
+          </p>
+          {scope === "ideas" && error && (
+            <div className="mc-error" role="alert">
+              {error}
+              <button onClick={() => void load(true)}>Retry</button>
+            </div>
           )}
         </div>
-        <div className="mc-unscheduled-cards">
-          {unscheduled.length ? (
-            unscheduled.map(card)
-          ) : (
-            <p className="mc-muted">Your undated drafts will live here.</p>
-          )}
-        </div>
-      </section>
-      <p className="mc-footnote">
-        Planned dates help the team coordinate. Posts are published manually in
-        Instagram or Meta Business Suite.
-      </p>
+      </div>
       {drag.visual && (
         <div
           className={`mc-drag-overlay ${drag.visual.dropping ? "mc-drag-overlay--dropping" : ""}`}
@@ -708,14 +767,8 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           </div>
         ))}
       </div>
-      {creating && !postId && (
-        <div className="mc-overlay">
-          <PostPanelLoading />
-        </div>
-      )}
-      {postId && (
+      {(creating || postId) && (
         <PostPanel
-          key={postId}
           id={postId}
           user={user}
           members={data.members}

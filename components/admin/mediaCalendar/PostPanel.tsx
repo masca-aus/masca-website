@@ -1,5 +1,12 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
@@ -31,7 +38,24 @@ import { useUploads } from "./useUploads";
 import type { CaptionHandle } from "./CaptionEditor";
 const CaptionEditor = dynamic(
   () => import("./CaptionEditor").then((m) => m.CaptionEditor),
-  { ssr: false, loading: () => <p>Opening caption…</p> },
+  {
+    ssr: false,
+    loading: () => (
+      <section className="mc-caption" aria-busy="true">
+        <div className="mc-section-label">
+          <h3>Caption</h3>
+          <span role="status">Opening caption…</span>
+        </div>
+        <div className="mc-presence" aria-hidden="true" />
+        <div className="mc-caption-input">
+          <div className="mc-caption-skeleton" />
+        </div>
+        <div className="mc-caption-meta">
+          <small>Preparing your caption editor</small>
+        </div>
+      </section>
+    ),
+  },
 );
 type Detail = {
   post: Post;
@@ -46,16 +70,32 @@ type Detail = {
   }[];
 };
 export function PostPanel(props: {
-  id: string;
+  id: string | null;
   user: CalendarUser;
   members: Member[];
   categories: Category[];
   onClose: () => void;
   onChange: () => void;
 }) {
-  const [detail, setDetail] = useState<Detail | null>(null),
+  const [loaded, setLoaded] = useState<(Detail & { id: string }) | null>(null),
     [error, setError] = useState(""),
     [closing, setClosing] = useState(false);
+  const container = useRef<HTMLDivElement>(null);
+  const requestClose = useRef<() => void>(() => {});
+  const detail = loaded?.id === props.id ? loaded : null;
+  useLayoutEffect(() => {
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    (
+      container.current?.querySelector<HTMLElement>("button:not(:disabled)") ??
+      container.current
+    )?.focus({ preventScroll: true });
+    return () => {
+      document.body.style.overflow = overflow;
+      previous?.focus({ preventScroll: true });
+    };
+  }, []);
   const closingTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   );
@@ -69,10 +109,11 @@ export function PostPanel(props: {
     closingTimer.current = setTimeout(props.onClose, reduced ? 0 : 150);
   }, [props.onClose]);
   useEffect(() => {
+    if (!props.id) return;
     let alive = true;
     void api<Detail>(`${calendarAPI}?id=${props.id}`)
       .then((d) => {
-        if (alive) setDetail(d);
+        if (alive) setLoaded({ ...d, id: props.id! });
       })
       .catch((e) => {
         if (alive) setError((e as Error).message);
@@ -81,20 +122,70 @@ export function PostPanel(props: {
       alive = false;
     };
   }, [props.id]);
+  useEffect(() => {
+    if (!detail)
+      requestClose.current = () => {
+        if (props.id) finish();
+      };
+  }, [detail, finish, props.id]);
   return (
     <div className={`mc-overlay ${closing ? "mc-overlay--closing" : ""}`}>
-      {detail ? (
-        <LoadedPanel {...props} onClose={finish} initial={detail} />
-      ) : (
-        <PostPanelLoading
-          message={error || "Opening your post…"}
-          error={!!error}
-          onClose={finish}
-        />
-      )}
+      <div
+        ref={container}
+        className="mc-panel"
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
+        aria-label={
+          detail ? "Post editor" : props.id ? "Opening post" : "Creating post"
+        }
+        onKeyDown={(e) => {
+          if (e.key === "Escape" && !e.defaultPrevented) {
+            e.preventDefault();
+            requestClose.current();
+          }
+          if (e.key === "Tab") {
+            const targets = Array.from(
+              container.current?.querySelectorAll<HTMLElement>(
+                'button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),[tabindex="0"],[contenteditable="true"],a[href],summary',
+              ) ?? [],
+            ).filter((el) => el.offsetParent !== null);
+            const first = targets[0],
+              last = targets.at(-1);
+            if (!targets.length) {
+              e.preventDefault();
+              container.current?.focus();
+            } else if (e.shiftKey && document.activeElement === first) {
+              e.preventDefault();
+              last?.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+              e.preventDefault();
+              first?.focus();
+            }
+          }
+        }}
+      >
+        {detail ? (
+          <LoadedPanel
+            key={detail.id}
+            {...props}
+            initial={detail}
+            container={container}
+            requestCloseRef={requestClose}
+            onClose={finish}
+          />
+        ) : (
+          <PostPanelLoading
+            message={error || "Opening your draft…"}
+            error={!!error}
+            onClose={props.id ? finish : undefined}
+          />
+        )}
+      </div>
     </div>
   );
 }
+
 export function PostPanelLoading({
   message = "Creating your draft…",
   error = false,
@@ -104,50 +195,15 @@ export function PostPanelLoading({
   error?: boolean;
   onClose?: () => void;
 }) {
-  const loadingPanel = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null;
-    const overflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const target = loadingPanel.current;
-    (target?.querySelector<HTMLElement>("button") ?? target)?.focus({
-      preventScroll: true,
-    });
-    return () => {
-      document.body.style.overflow = overflow;
-      previous?.focus({ preventScroll: true });
-    };
-  }, []);
   return (
-    <div
-      ref={loadingPanel}
-      tabIndex={-1}
-      role="dialog"
-      aria-modal="true"
-      aria-label={onClose ? "Opening post" : "Creating post"}
-      className="mc-panel mc-panel-loading"
-      onKeyDown={(e) => {
-        e.stopPropagation();
-        if (e.key === "Tab") {
-          e.preventDefault();
-          (
-            loadingPanel.current?.querySelector<HTMLElement>("button") ??
-            loadingPanel.current
-          )?.focus();
-        }
-        if (e.key === "Escape" && onClose) {
-          e.preventDefault();
-          onClose();
-        }
-      }}
-    >
+    <>
       <header className="mc-panel-header">
         <span className="mc-eyebrow">INSTAGRAM · DRAFT</span>
-        {onClose && (
-          <button aria-label="Close post" onClick={onClose}>
+        {
+          <button aria-label="Close post" disabled={!onClose} onClick={onClose}>
             <X size={22} />
           </button>
-        )}
+        }
       </header>
       <div className="mc-composer-skeleton">
         <p role={error ? "alert" : "status"}>{message}</p>
@@ -160,11 +216,13 @@ export function PostPanelLoading({
           </>
         )}
       </div>
-    </div>
+    </>
   );
 }
 function LoadedPanel({
   initial,
+  container,
+  requestCloseRef,
   user,
   members,
   categories,
@@ -172,6 +230,8 @@ function LoadedPanel({
   onChange,
 }: {
   initial: Detail;
+  container: RefObject<HTMLDivElement | null>;
+  requestCloseRef: RefObject<() => void>;
   user: CalendarUser;
   members: Member[];
   categories: Category[];
@@ -215,8 +275,8 @@ function LoadedPanel({
   const pendingDetails = useRef<Partial<Post>>({});
   const captionRef = useRef<CaptionHandle>(null),
     postRef = useRef(post),
-    panel = useRef<HTMLDivElement>(null),
-    close = useRef<() => void>(() => {}),
+    panel = container,
+    closeRef = requestCloseRef,
     queue = useRef(Promise.resolve()),
     titleVersion = useRef(post.version),
     localTitle = useRef(title),
@@ -361,7 +421,7 @@ function LoadedPanel({
       throw new Error("Finish or cancel media uploads before continuing.");
   };
   useEffect(() => {
-    close.current = () => {
+    closeRef.current = () => {
       if (postRef.current.deletedAt) {
         if (!keepDeletedCopy() && !exportedCopy.current) return;
         captionRef.current?.retainLocal();
@@ -386,44 +446,16 @@ function LoadedPanel({
     };
   });
   useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null,
-      scroll = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     const titleInput =
       panel.current?.querySelector<HTMLInputElement>("#post-panel-title");
     if (focusTitleOnOpen.current && titleInput) {
-      titleInput.focus();
+      titleInput.focus({ preventScroll: true });
       titleInput.select();
-    } else panel.current?.querySelector<HTMLElement>("button")?.focus();
-    const handle = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !e.defaultPrevented) {
-        e.preventDefault();
-        close.current();
-      }
-      if (e.key === "Tab") {
-        const targets = Array.from(
-          panel.current?.querySelectorAll<HTMLElement>(
-            'button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),[tabindex="0"],[contenteditable="true"],a[href],summary',
-          ) ?? [],
-        ).filter((el) => el.offsetParent !== null);
-        const first = targets[0],
-          last = targets.at(-1);
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last?.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first?.focus();
-        }
-      }
-    };
-    document.addEventListener("keydown", handle);
-    return () => {
-      document.body.style.overflow = scroll;
-      document.removeEventListener("keydown", handle);
-      previous?.focus();
-    };
-  }, []);
+    } else
+      panel.current
+        ?.querySelector<HTMLElement>("button:not(:disabled)")
+        ?.focus({ preventScroll: true });
+  }, [panel]);
   const workflow = async (
     action: string,
     extra: Record<string, unknown> = {},
@@ -472,7 +504,7 @@ function LoadedPanel({
       >
         <header className="mc-panel-header">
           <h2 id="deleted-post-title">This post was deleted</h2>
-          <button aria-label="Close post" onClick={() => close.current()}>
+          <button aria-label="Close post" onClick={() => closeRef.current()}>
             <X size={20} />
           </button>
         </header>
@@ -498,7 +530,7 @@ function LoadedPanel({
             <Copy size={16} />
             {copied ? "Copied" : "Copy my changes"}
           </button>
-          <button onClick={() => close.current()}>Back to calendar</button>
+          <button onClick={() => closeRef.current()}>Back to calendar</button>
           {storageFailed && !localCopyExported && (
             <button
               onClick={() => {
@@ -515,13 +547,7 @@ function LoadedPanel({
       </div>
     );
   return (
-    <div
-      ref={panel}
-      className="mc-panel"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="post-panel-title"
-    >
+    <>
       <header className="mc-panel-header">
         <div>
           <span className="mc-eyebrow">
@@ -532,7 +558,7 @@ function LoadedPanel({
             {statusLabels[post.status]}
           </span>
         </div>
-        <button aria-label="Close post" onClick={() => close.current()}>
+        <button aria-label="Close post" onClick={() => closeRef.current()}>
           <X size={22} />
         </button>
       </header>
@@ -592,16 +618,16 @@ function LoadedPanel({
             />
           </label>
           <label>
-            Tag
+            Content type
             <CalendarSelect
-              label="Post tag"
+              label="Post content type"
               disabled={!editable || post.status === "posted"}
               value={post.category ?? ""}
               onChange={(value) =>
                 void patch({ category: value || null }).catch(() => {})
               }
               options={[
-                { value: "", label: "Add a tag" },
+                { value: "", label: "Choose a type" },
                 ...categories
                   .filter((c) => !c.archived || c.id === post.category)
                   .map((c) => ({
@@ -1088,6 +1114,6 @@ function LoadedPanel({
           </button>
         </div>
       )}
-    </div>
+    </>
   );
 }
