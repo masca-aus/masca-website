@@ -91,6 +91,7 @@ try {
   );
   if (carePathwayTable.rowCount) {
     await connection.query(`
+      ALTER TABLE "${schema}"."care_pathways" ADD COLUMN IF NOT EXISTS "header" varchar;
       CREATE TABLE IF NOT EXISTS "${schema}"."care_pathways_subsections" (
         "id" varchar PRIMARY KEY NOT NULL,
         "_order" integer NOT NULL,
