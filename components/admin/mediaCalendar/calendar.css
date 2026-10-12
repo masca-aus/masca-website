@@ -1537,7 +1537,7 @@
   text-align: left;
 }
 .mc-card-meta {
-  padding-right: 46px;
+  padding-right: 23px;
 }
 .mc-card-tools {
   display: flex;
@@ -1558,7 +1558,7 @@
   background: var(--mc-soft);
   color: var(--mc-text);
 }
-.mc-workspace button.mc-card-grip {
+.mc-card-meta[data-drag-handle="true"] {
   cursor: grab;
   touch-action: none;
 }

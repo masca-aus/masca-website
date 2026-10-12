@@ -8,7 +8,6 @@ import {
   ImageIcon,
   Pause,
   Ellipsis,
-  GripVertical,
   FilePenLine,
   Trash2,
   ExternalLink,
@@ -89,7 +88,21 @@ export function CalendarCard({
         aria-label={`Open ${post.title}`}
         tabIndex={preview ? -1 : 0}
       >
-        <span className="mc-card-meta">
+        <span
+          className="mc-card-meta"
+          data-drag-handle={
+            editable &&
+            !preview &&
+            !moving &&
+            post.status !== "posted" &&
+            !!onPickUp
+          }
+          title={
+            editable && !preview && post.status !== "posted" && onPickUp
+              ? "Drag to another date"
+              : undefined
+          }
+        >
           <Icon size={13} />
           {post.plannedAt ? timeLabel(post.plannedAt) : "Unscheduled"}
           {post.onHold && <Pause size={12} />}
@@ -120,17 +133,6 @@ export function CalendarCard({
       </button>
       {editable && !preview && onAction && (
         <div className="mc-card-tools">
-          {post.status !== "posted" && (
-            <button
-              type="button"
-              className="mc-card-grip"
-              aria-label={`Drag ${post.title} to another date`}
-              title="Drag to another date"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <GripVertical size={14} />
-            </button>
-          )}
           <button
             ref={anchor}
             type="button"
