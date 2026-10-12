@@ -134,7 +134,7 @@ export interface UserAuthOperations {
   };
 }
 /**
- * Create top-level categories with no parent, then create as many nested sections as you need by choosing a parent. Every section can link to its own detail page.
+ * Choose whether you are adding a parent category or a child section. Child sections can be added under an existing parent category.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "care-pathways".
@@ -142,7 +142,11 @@ export interface UserAuthOperations {
 export interface CarePathway {
   id: number;
   /**
-   * The category or section title.
+   * Choose a parent category or a child section beneath an existing category.
+   */
+  entryType: 'parent' | 'child';
+  /**
+   * The title of this category or section.
    */
   title: string;
   /**
@@ -150,7 +154,7 @@ export interface CarePathway {
    */
   shortDescription: string;
   /**
-   * Leave this blank for a top-level category. Choose a category or section to nest this item beneath it.
+   * Choose an existing parent category for this child section.
    */
   parent?: (number | null) | CarePathway;
   /**
@@ -574,6 +578,7 @@ export interface PayloadMigration {
  * via the `definition` "care-pathways_select".
  */
 export interface CarePathwaysSelect<T extends boolean = true> {
+  entryType?: T;
   title?: T;
   shortDescription?: T;
   parent?: T;

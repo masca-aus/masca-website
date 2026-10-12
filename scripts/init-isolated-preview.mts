@@ -57,6 +57,34 @@ try {
   if (legacySortOrder.rowCount) {
     await connection.query(`ALTER TABLE "${schema}"."care_pathways" DROP COLUMN "sort_order"`);
   }
+  const entryTypeColumn = await connection.query(
+    "SELECT 1 FROM information_schema.columns WHERE table_schema = $1 AND table_name = 'care_pathways' AND column_name = 'entry_type'",
+    [schema],
+  );
+  if (!entryTypeColumn.rowCount) {
+    await connection.query("BEGIN");
+    try {
+      await connection.query(`
+        DO $$ BEGIN
+          CREATE TYPE "${schema}"."enum_care_pathways_entry_type" AS ENUM ('parent', 'child');
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$;
+        ALTER TABLE "${schema}"."care_pathways"
+          ADD COLUMN IF NOT EXISTS "entry_type" "${schema}"."enum_care_pathways_entry_type";
+        UPDATE "${schema}"."care_pathways"
+          SET "entry_type" = CASE
+            WHEN "parent_id" IS NULL THEN 'parent'::"${schema}"."enum_care_pathways_entry_type"
+            ELSE 'child'::"${schema}"."enum_care_pathways_entry_type"
+          END
+          WHERE "entry_type" IS NULL;
+        ALTER TABLE "${schema}"."care_pathways" ALTER COLUMN "entry_type" SET NOT NULL;
+      `);
+      await connection.query("COMMIT");
+    } catch (error) {
+      await connection.query("ROLLBACK");
+      throw error;
+    }
+  }
   const tables = await connection.query(
     "SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema = $1",
     [schema],
@@ -88,7 +116,7 @@ try {
         const { children, ...fields } = node;
         const created = await payload.create({
           collection: "care-pathways",
-          data: { ...fields, ...(parent ? { parent } : {}) },
+          data: { ...fields, entryType: parent ? "child" : "parent", ...(parent ? { parent } : {}) },
           overrideAccess: true,
         });
         if (children?.length) await seedChildren(children, created.id);

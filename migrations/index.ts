@@ -11,6 +11,7 @@ import * as migration_20261001_120000_public_submissions from './20261001_120000
 import * as migration_20261012_063405_add_care_pathways from './20261012_063405_add_care_pathways';
 import * as migration_20261012_080126_expand_care_pathway_tree from './20261012_080126_expand_care_pathway_tree';
 import * as migration_20261012_081627_remove_care_pathway_sort_order from './20261012_081627_remove_care_pathway_sort_order';
+import * as migration_20261012_093000_care_pathway_parent_child_type from './20261012_093000_care_pathway_parent_child_type';
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20261012_081627_remove_care_pathway_sort_order.up,
     down: migration_20261012_081627_remove_care_pathway_sort_order.down,
     name: '20261012_081627_remove_care_pathway_sort_order'
+  },
+  {
+    up: migration_20261012_093000_care_pathway_parent_child_type.up,
+    down: migration_20261012_093000_care_pathway_parent_child_type.down,
+    name: '20261012_093000_care_pathway_parent_child_type'
   },
 ];
