@@ -10,6 +10,7 @@ import {
   act,
 } from "@testing-library/react";
 import { CalendarView } from "../../components/admin/mediaCalendar/CalendarView";
+import { newPost } from "../../features/mediaCalendar/service";
 const navigation = vi.hoisted(() => ({
   push: vi.fn(),
   query: new URLSearchParams(),
@@ -86,7 +87,25 @@ it("shows immediate creation feedback, prevents duplicates, and opens before ref
   expect(createCount).toBe(1);
   expect(createPatch.category).toBe("masa");
   await act(async () =>
-    complete(new Response(JSON.stringify({ post: { id: "new-post" } }))),
+    complete(
+      new Response(
+        JSON.stringify({
+          post: {
+            ...newPost(
+              {
+                id: "1",
+                email: "test@masca.org.au",
+                role: "administrator",
+                status: "active",
+              },
+              {},
+            ),
+            id: "new-post",
+            category: "masa",
+          },
+        }),
+      ),
+    ),
   );
   await waitFor(() => expect(window.location.search).toBe("?post=new-post"));
   expect(navigation.push).not.toHaveBeenCalled();
