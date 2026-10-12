@@ -1,12 +1,19 @@
 "use client";
-import { PresenceStrip, type PresencePerson } from "./PresenceStrip";
+import {
+  PresenceStrip,
+  type PresencePerson,
+  type CollaborationConnection,
+} from "./PresenceStrip";
 import { useEffect, useState } from "react";
 import { api, calendarAPI, RequestError } from "./api";
 export function RoomPresence() {
   const [people, setPeople] = useState<PresencePerson[]>([]);
+  const [connection, setConnection] =
+    useState<CollaborationConnection>("connecting");
   useEffect(() => {
     let alive = true,
-      timer: ReturnType<typeof setTimeout>;
+      timer: ReturnType<typeof setTimeout>,
+      stale: ReturnType<typeof setTimeout>;
     const clientId = crypto.randomUUID();
     const sync = async () => {
       try {
@@ -14,14 +21,31 @@ export function RoomPresence() {
           `${calendarAPI}/collaboration`,
           { clientId, postId: null, cursor: null },
         );
-        if (alive)
+        if (alive) {
+          setConnection("live");
+          clearTimeout(stale);
+          stale = setTimeout(() => {
+            if (alive) {
+              setPeople([]);
+              setConnection("reconnecting");
+            }
+          }, 15000);
           setPeople(
             Array.from(
               new Map(result.participants.map((p) => [p.userId, p])).values(),
             ),
           );
+        }
       } catch (e) {
-        if (alive) setPeople([]);
+        clearTimeout(stale);
+        if (alive) {
+          setPeople([]);
+          setConnection(
+            e instanceof RequestError && [401, 403].includes(e.status)
+              ? "unavailable"
+              : "reconnecting",
+          );
+        }
         if (e instanceof RequestError && [401, 403].includes(e.status)) return;
       }
       if (alive)
@@ -31,6 +55,7 @@ export function RoomPresence() {
     return () => {
       alive = false;
       clearTimeout(timer);
+      clearTimeout(stale);
       void api(`${calendarAPI}/collaboration`, {
         clientId,
         postId: null,
@@ -39,5 +64,5 @@ export function RoomPresence() {
       }).catch(() => {});
     };
   }, []);
-  return <PresenceStrip people={people} />;
+  return <PresenceStrip people={people} connection={connection} />;
 }
