@@ -73,6 +73,7 @@ export function configureWorkspace(
           unlock: () => false,
         },
         fields: [
+          { name: "accountPhoto", type: "ui", admin: { components: { Field: "/components/admin/AccountPhoto#AccountPhoto" } } },
           { name: "calendarAccess", type: "json", label: "Media calendar", access: {create: ({req}) => mayManagePeople(accountOf(req.user)), update: ({req}) => mayManagePeople(accountOf(req.user))}, validate: (value) => validCalendarAccess(value) || "Choose consistent calendar permissions and a media member or chair for approval.", admin: {components: {Field: "/components/admin/mediaCalendar/CalendarPermissions#CalendarPermissions"}, description: "National team only. Separate from the public media library."}},
           { name: "email", type: "email", required: true, unique: true },
           {
