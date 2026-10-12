@@ -411,11 +411,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       data-landed={landed ?? undefined}
     >
       <header className="mc-heading">
-        <div>
-          <span className="mc-eyebrow">MASCA NATIONAL · MEDIA TEAM</span>
-          <h1>Media calendar</h1>
-          <p>A little planning. A bigger impact.</p>
-        </div>
+        <h1>Media calendar</h1>
         <div className="mc-heading-actions">
           <RoomPresence />
           <button
