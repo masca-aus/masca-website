@@ -2234,6 +2234,12 @@
   border: 0;
   padding: 8px 3px;
 }
+.mc-workspace .mc-sidebar-search input:focus,
+.mc-workspace .mc-sidebar-search input:focus-visible {
+  border: 0;
+  outline: none;
+  box-shadow: none;
+}
 .mc-sidebar-shortcuts {
   display: grid;
   gap: 3px;
@@ -2496,7 +2502,7 @@
   background: var(--mc-soft);
 }
 .mc-sidebar-search:focus-within {
-  border-color: var(--mc-primary);
+  border-color: var(--mc-muted);
 }
 .mc-inline-type {
   margin: 5px 0 9px;
