@@ -76,5 +76,6 @@ try {
   }
   console.log(`Isolated Cares preview schema ${schema} is ready.`);
 } finally {
+  await payload.db.pool?.end();
   await payload.destroy();
 }
