@@ -30,6 +30,7 @@ import type {
 } from "@/features/mediaCalendar/types";
 import { mayApprove, mayUseCalendar } from "@/features/mediaCalendar/policy";
 import { CalendarDatePicker } from "./CalendarDatePicker";
+import { AddToCalendar } from "./AddToCalendar";
 import { api, calendarAPI } from "./api";
 import { CalendarSelect } from "./CalendarSelect";
 import { statusLabels } from "./CalendarCard";
@@ -728,6 +729,14 @@ function LoadedPanel({
         <small className="mc-muted">
           Australia/Brisbane · AEST · planned date only
         </small>
+        <AddToCalendar
+          post={savedPost}
+          disabled={
+            busy ||
+            title.trim() !== savedPost.title ||
+            Object.keys(pendingPatch).length > 0
+          }
+        />
       </div>
       {error && (
         <div className="mc-error" role="alert">
