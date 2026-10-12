@@ -30,11 +30,7 @@ export function RoomPresence() {
               setConnection("reconnecting");
             }
           }, 15000);
-          setPeople(
-            Array.from(
-              new Map(result.participants.map((p) => [p.userId, p])).values(),
-            ),
-          );
+          setPeople(result.participants);
         }
       } catch (e) {
         clearTimeout(stale);

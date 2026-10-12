@@ -276,12 +276,16 @@ export function CaptionEditor({
           clientId,
           postId: post.id,
           knownRevision: postRef.current.contentRevision,
-          cursor: cursor
-            ? {
-                anchor: encode(Y.encodeRelativePosition(cursor.anchor)),
-                head: encode(Y.encodeRelativePosition(cursor.head)),
-              }
-            : null,
+          cursor:
+            cursor &&
+            view.hasFocus &&
+            !disabledRef.current &&
+            !["in_review", "posted"].includes(postRef.current.status)
+              ? {
+                  anchor: encode(Y.encodeRelativePosition(cursor.anchor)),
+                  head: encode(Y.encodeRelativePosition(cursor.head)),
+                }
+              : null,
         });
         if (!alive) return;
         setPeople(result.participants);
