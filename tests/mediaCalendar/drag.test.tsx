@@ -8,6 +8,7 @@ import {
   screen,
   act,
 } from "@testing-library/react";
+import { CalendarCard } from "../../components/admin/mediaCalendar/CalendarCard";
 import { useCalendarDrag } from "../../components/admin/mediaCalendar/useCalendarDrag";
 import type { Card } from "../../features/mediaCalendar/types";
 afterEach(() => {
@@ -121,3 +122,70 @@ it("scrolls at the visible viewport edge even when the page is much taller", () 
   expect(scroll).toBeGreaterThan(0);
   expect(screen.getByRole("status").textContent).toBe("Dragging");
 });
+
+it.each(["mouse", "touch"])(
+  "drags from the card metadata without a separate handle using %s",
+  (pointerType) => {
+    vi.useFakeTimers();
+    class TestPointerEvent extends MouseEvent {
+      pointerType: string;
+      pointerId: number;
+      constructor(type: string, init: PointerEventInit) {
+        super(type, init);
+        this.pointerType = init.pointerType ?? "mouse";
+        this.pointerId = init.pointerId ?? 1;
+      }
+    }
+    vi.stubGlobal("PointerEvent", TestPointerEvent);
+    vi.stubGlobal("requestAnimationFrame", () => 1);
+    vi.stubGlobal("cancelAnimationFrame", () => {});
+    vi.stubGlobal("matchMedia", () => ({ matches: false }));
+    let destination: string | null | undefined;
+    function Example() {
+      const drag = useCalendarDrag(
+        (_id, date) => {
+          destination = date;
+        },
+        () => {},
+      );
+      return (
+        <>
+          <CalendarCard
+            post={post}
+            editable
+            open={() => {}}
+            onAction={() => {}}
+            onPickUp={drag.pickUp}
+          />
+          <section data-drop-day="2026-10-20">20 October</section>
+        </>
+      );
+    }
+    render(<Example />);
+    Object.defineProperty(document, "elementFromPoint", {
+      configurable: true,
+      value: () => screen.getByText("20 October"),
+    });
+    fireEvent.pointerDown(screen.getByText("Unscheduled"), {
+      pointerType,
+      pointerId: 1,
+      button: 0,
+      clientX: 10,
+      clientY: 10,
+    });
+    fireEvent.pointerMove(document, {
+      pointerType,
+      pointerId: 1,
+      clientX: 90,
+      clientY: 40,
+    });
+    fireEvent.pointerUp(document, {
+      pointerType,
+      pointerId: 1,
+      clientX: 90,
+      clientY: 40,
+    });
+    act(() => vi.advanceTimersByTime(180));
+    expect(destination).toBe("2026-10-20");
+  },
+);

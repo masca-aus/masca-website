@@ -14,7 +14,7 @@ export type DragVisual = {
   target: string | null;
   dropping: boolean;
 };
-/** Pointer sensor keeps the real card visible on mouse, pen, and touch handles. */
+/** Pointer sensor keeps the real card visible on mouse, pen, and touch. */
 export function useCalendarDrag(
   onDrop: (id: string, date: string | null) => void,
   onActive: (active: boolean) => void,
@@ -31,10 +31,10 @@ export function useCalendarDrag(
   useEffect(() => () => dispose.current(), []);
   const pickUp = (e: ReactPointerEvent<HTMLElement>, post: Card) => {
     if (e.button !== 0 || post.status === "posted") return;
-    // A dedicated handle leaves normal touch scrolling available on the card.
+    // The metadata line supports touch dragging; the rest of the card can scroll.
     if (
       e.pointerType === "touch" &&
-      !(e.target as HTMLElement).closest(".mc-card-grip")
+      !(e.target as HTMLElement).closest('[data-drag-handle="true"]')
     )
       return;
     dispose.current();
