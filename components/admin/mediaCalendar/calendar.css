@@ -630,6 +630,22 @@
   margin-top: 14px;
   margin-bottom: 7px;
 }
+.mc-calendar-export {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  margin-top: 12px;
+}
+.mc-calendar-export > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.mc-calendar-export > small {
+  font-size: 11px;
+}
 .mc-post-meta label {
   font-size: 10px;
   flex: 1;
