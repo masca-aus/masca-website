@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
@@ -220,8 +219,25 @@ export function CalendarSidebar({
         }}
       >
         <header className="mc-sidebar-platform">
-          <span className="mc-instagram-mark">
-            <Image src="/icons/instagram.svg" width={38} height={38} alt="" />
+          <span className="mc-instagram-mark" aria-hidden="true">
+            <svg
+              width="38"
+              height="38"
+              viewBox="0 0 40 40"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.3"
+            >
+              <rect x="9" y="9" width="22" height="22" rx="6.5" />
+              <circle cx="20" cy="20" r="5.2" />
+              <circle
+                cx="27"
+                cy="13"
+                r="1.45"
+                fill="currentColor"
+                stroke="none"
+              />
+            </svg>
           </span>
           <div>
             <strong>Instagram</strong>
