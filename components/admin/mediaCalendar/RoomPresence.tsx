@@ -1,17 +1,16 @@
 "use client";
-import { PresenceStrip } from "./PresenceStrip";
+import { PresenceStrip, type PresencePerson } from "./PresenceStrip";
 import { useEffect, useState } from "react";
 import { api, calendarAPI, RequestError } from "./api";
-type Person = { userId: string; name: string; color: string };
 export function RoomPresence() {
-  const [people, setPeople] = useState<Person[]>([]);
+  const [people, setPeople] = useState<PresencePerson[]>([]);
   useEffect(() => {
     let alive = true,
       timer: ReturnType<typeof setTimeout>;
     const clientId = crypto.randomUUID();
     const sync = async () => {
       try {
-        const result = await api<{ participants: Person[] }>(
+        const result = await api<{ participants: PresencePerson[] }>(
           `${calendarAPI}/collaboration`,
           { clientId, postId: null, cursor: null },
         );

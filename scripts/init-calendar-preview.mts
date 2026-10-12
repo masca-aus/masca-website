@@ -1,3 +1,4 @@
+import { accountPhotoSchemaSQL } from "../features/account/photoSchema.ts";
 import pg from "pg";
 import { calendarSchemaSQL } from "../features/mediaCalendar/schema.ts";
 import { submissionSchemaSQL } from "../features/submissions/schema.ts";
@@ -92,6 +93,7 @@ const connection = new pg.Client({
 });
 await connection.connect();
 for (const schema of [
+  accountPhotoSchemaSQL,
   departmentSchemaSQL,
   submissionSchemaSQL,
   reviewSchemaSQL,

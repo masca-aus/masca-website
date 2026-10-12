@@ -1,3 +1,4 @@
+import { accountPhotoSchemaSQL } from "../features/account/photoSchema.ts";
 import {changeRequestSchemaSQL} from '../features/submissions/changeRequestSchema.ts';
 import { listingEmailSchemaSQL } from '../features/submissions/emailSchema.ts';
 import { departmentSchemaSQL } from "../features/dashboard/departmentSchema.ts";
@@ -40,6 +41,7 @@ if (payload.db.schemaName !== "cms_auth_preview")
 const postInitConnection = new pg.Client({connectionString:process.env.DATABASE_URI});
 await postInitConnection.connect();
 try {
+  await postInitConnection.query(accountPhotoSchemaSQL("cms_auth_preview"));
   await postInitConnection.query(departmentSchemaSQL("cms_auth_preview"));
 } finally {
   await postInitConnection.end();

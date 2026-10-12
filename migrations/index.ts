@@ -1,3 +1,4 @@
+import * as accountPhotos from "./20261012_200000_account_photos";
 import * as calendar from './20261010_140000_media_calendar';
 import * as listingChanges from './20261008_140000_listing_changes';
 import * as listingEmails from './20261008_130000_listing_emails';
@@ -99,4 +100,5 @@ export const migrations = [
     down: migration_20261008_033000_account_departments.down,
     name: '20261008_033000_account_departments',
   },
+  {up:accountPhotos.up,down:accountPhotos.down,name:"20261012_200000_account_photos"},
 ];
