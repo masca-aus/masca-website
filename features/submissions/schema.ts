@@ -1,5 +1,5 @@
 /** Fixed schema names only; shared by production migration and isolated preview setup. */
-export function submissionSchemaSQL(schema: 'public' | 'cms_auth_preview') {
+export function submissionSchemaSQL(schema: 'public' | 'cms_auth_preview'|'cms_calendar_preview') {
  return `
 ALTER TABLE "${schema}"."events" ADD COLUMN IF NOT EXISTS submitted_for_review boolean DEFAULT false;
 ALTER TABLE "${schema}"."_events_v" ADD COLUMN IF NOT EXISTS version_submitted_for_review boolean DEFAULT false;

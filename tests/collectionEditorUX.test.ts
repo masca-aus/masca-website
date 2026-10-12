@@ -16,8 +16,8 @@ describe("collection editor UX", () => {
       events:
         "Manage events for MASCA students. Save a private draft or publish when ready.",
       committee:
-        "Create and update committee profiles step by step. Changes appear on the website when you Save.",
-      media: "Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.",
+        "Create committee profiles as drafts, then publish them when they are ready to appear on the website.",
+      media: "Upload images only. Large JPEG and PNG photos are automatically compressed to fit.",
       sponsors: "Add sponsor details, choose a logo and review before saving. Changes appear on the homepage when saved.",
       users: "Manage the people who can sign in and update MASCA website content.",
     };
@@ -93,11 +93,11 @@ describe("collection editor UX", () => {
   });
 });
 
- it("retains private committee change history without introducing drafts", async () => {
+ it("retains private committee change history with explicit publication", async () => {
    const config = await configPromise;
    const committee = config.collections.find(c => c.slug === 'committee')!;
    expect(committee.versions).toMatchObject({ maxPerDoc: 0 });
-   expect(committee.versions && committee.versions.drafts).toBeFalsy();
+   expect(committee.versions && committee.versions.drafts).toMatchObject({ autosave: false, validate: false });
    expect(committee.admin.components?.views?.edit?.versions?.tab?.label).toBe('Change history');
    expect(await committee.access.readVersions!({ req: { user: null } } as never)).toBe(false);
    expect(await committee.access.readVersions!({ req: { user: { id: 1 } } } as never)).toBe(true);

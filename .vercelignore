@@ -1,0 +1,11 @@
+.git/
+node_modules/
+.next/
+.superpowers/
+.calendar-preview/
+.calendar-check/
+.env*
+!.env.example
+coverage/
+*.log
+*.tsbuildinfo

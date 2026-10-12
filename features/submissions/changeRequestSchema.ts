@@ -1,4 +1,4 @@
-export function changeRequestSchemaSQL(schema:'public'|'cms_auth_preview'){
+export function changeRequestSchemaSQL(schema:'public'|'cms_auth_preview'|'cms_calendar_preview'){
  return `CREATE TABLE IF NOT EXISTS "${schema}"."listing_change_requests" (
  id serial PRIMARY KEY, open_key varchar NOT NULL, listing_collection varchar NOT NULL, listing_i_d varchar NOT NULL,
  title varchar NOT NULL, message varchar NOT NULL, status varchar NOT NULL DEFAULT 'open', resolution varchar,

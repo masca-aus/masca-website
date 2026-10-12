@@ -32,6 +32,7 @@ export type ApprovedAccount = {
   permissions?: ContentPermissions | null;
   allContentAccess?: boolean | null;
   googleSubject?: string | null;
+  calendarAccess?: import("../mediaCalendar/types").CalendarAccess | null;
 };
 export function normalizedEmail(email: string) {
   return email.trim().toLowerCase();

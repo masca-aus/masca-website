@@ -27,11 +27,12 @@ describe("media collection (Supabase Storage uploads)", () => {
     expect(config.upload.abortOnLimit).toBe(true);
   });
 
-  it("requires alt text on every image", async () => {
+  it("preserves optional alt text without blocking the simplified upload flow", async () => {
     const media = await getMedia();
     const alt = media.fields.find((f) => "name" in f && f.name === "alt");
     expect(alt).toBeDefined();
-    expect(alt && "required" in alt && alt.required).toBe(true);
+    expect(alt && "required" in alt && alt.required).not.toBe(true);
+    expect(alt && "admin" in alt && alt.admin).toMatchObject({ hidden: true });
   });
 
   it("is publicly readable (portraits/logos render on the public site)", async () => {

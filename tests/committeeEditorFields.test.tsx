@@ -7,7 +7,9 @@ const h = vi.hoisted(() => ({ data: {} as Record<string, unknown>, errors: vi.fn
 vi.mock('@/components/admin/useEventPoster', () => ({ useMediaPreview: () => null }));
 vi.mock('@payloadcms/ui', () => ({
   DefaultEditView: () => <><CommitteeEditorHeader /><CommitteeEditorFooter /></>,
-  SaveButton: () => <button onClick={h.save}>Save member</button>,
+  SaveDraftButton: () => <button onClick={h.save}>Save draft</button>,
+  PublishButton: ({ label }: { label: string }) => <button>{label}</button>,
+  UnpublishButton: ({ label }: { label: string }) => <button>{label}</button>,
   useDocumentInfo: () => ({ id: undefined }), useFormProcessing: () => false,
   useFormModified: () => true, useFormSubmitted: () => h.submitted,
   useForm: () => ({ getData: () => h.data, dispatchFields: h.errors, setSubmitted: () => {} }),
@@ -16,13 +18,15 @@ vi.mock('@payloadcms/ui', () => ({
 const editor = () => <CommitteeEditorView {...({} as DocumentViewClientProps)} />;
 beforeEach(() => { vi.clearAllMocks(); h.submitted = false; h.firstError = ''; h.data = { name: 'Aisha', role: 'President', department: 'unassigned', year: '2026/2027', portrait: 3 }; });
 afterEach(cleanup);
-it('navigates without saving and offers the native save only after review', () => {
+it('navigates without saving and offers draft and publish actions only after review', () => {
   render(editor());
-  expect(screen.queryByRole('button', { name: 'Save member' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Save draft' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Publish member' })).toBeNull();
   for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
   expect(screen.getByRole('heading', { name: 'Review and save' })).toBeTruthy();
   expect(h.save).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole('button', { name: 'Save member' }));
+  expect(screen.getByRole('button', { name: 'Publish member' })).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
   expect(h.save).toHaveBeenCalledTimes(1);
 });
 it('blocks skipping incomplete steps and keeps the entered data', () => {
@@ -43,7 +47,7 @@ it('does not jump away while correcting a previously invalid field', () => {
 it('reveals a server field error after attempting save', () => {
   const view = render(editor());
   for (let i = 0; i < 3; i++) fireEvent.click(screen.getByRole('button', { name: 'Continue' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Save member' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Save draft' }));
   h.submitted = true; h.firstError = 'year';
   view.rerender(editor());
   expect(screen.getByRole('heading', { name: 'Role and term' })).toBeTruthy();

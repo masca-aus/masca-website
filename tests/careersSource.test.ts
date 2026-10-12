@@ -182,7 +182,7 @@ describe("getCareerBoard (for the page)", () => {
   it("returns the jobs when the sheet reads cleanly", async () => {
     vi.stubEnv("CAREERS_SHEET_ID", ID);
     vi.stubGlobal("fetch", respond(csvBody));
-    const board = await getCareerBoard();
+    const board = await getCareerBoard({ now: NOW });
     expect(board.status).toBe("ok");
     if (board.status === "ok") expect(board.jobs.map((j) => j.title)).toEqual(["Analyst"]);
   });
