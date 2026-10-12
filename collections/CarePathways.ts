@@ -59,6 +59,16 @@ export const CarePathways: CollectionConfig = {
       },
     },
     {
+      name: "header",
+      label: "Header",
+      type: "text",
+      maxLength: 40,
+      admin: {
+        condition: (_, siblingData) => siblingData.entryType === "parent",
+        description: "The small label shown above this category’s title on the Cares page.",
+      },
+    },
+    {
       name: "shortDescription",
       type: "textarea",
       required: true,

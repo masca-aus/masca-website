@@ -177,6 +177,10 @@ export interface CarePathway {
    */
   title?: string | null;
   /**
+   * The small label shown above this category’s title on the Cares page.
+   */
+  header?: string | null;
+  /**
    * A short description shown on the Cares page.
    */
   shortDescription?: string | null;
@@ -600,6 +604,7 @@ export interface PayloadMigration {
 export interface CarePathwaysSelect<T extends boolean = true> {
   entryType?: T;
   title?: T;
+  header?: T;
   shortDescription?: T;
   parent?: T;
   subsections?: T | CarePathwaySubsectionSelect<T>;

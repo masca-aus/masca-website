@@ -116,7 +116,7 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
                   <Icon size={24} strokeWidth={2} aria-hidden="true" />
                 </span>
                 <span className={`eyebrow mt-8 block ${isActive ? style.activeEyebrow : style.text}`}>
-                  {style.eyebrow}
+                  {pathway.header || style.eyebrow}
                 </span>
                 <span className="mt-3 block font-secondary text-3xl font-bold leading-tight">{pathway.title}</span>
                 <span className={`mt-4 block leading-relaxed ${isActive ? style.activeDescription : "text-gray-700"}`}>
@@ -134,7 +134,7 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
           <div className="grid lg:grid-cols-[0.75fr_1.25fr]">
             <div className="flex flex-col justify-between bg-white p-7 md:p-10">
               <div>
-                <span className={`eyebrow ${selectedStyle.text}`}>{selectedStyle.eyebrow}</span>
+                <span className={`eyebrow ${selectedStyle.text}`}>{selected.header || selectedStyle.eyebrow}</span>
                 <h3 className="mt-3 font-secondary text-3xl font-bold text-blue-600 md:text-4xl">{selected.title}</h3>
                 <p className="mt-5 text-gray-700">{selected.shortDescription}</p>
               </div>

@@ -15,6 +15,7 @@ export type PublicCareSubsection = {
 export type PublicCarePathway = {
   id: number;
   title: string;
+  header: string;
   shortDescription: string;
   children: PublicCarePathway[];
   subsections: PublicCareSubsection[];
@@ -38,6 +39,7 @@ function buildTree(records: CarePathwayRecord[]): PublicCarePathway[] {
     nodes.set(record.id, {
       id: record.id,
       title: record.title ?? "",
+      header: record.header ?? "",
       shortDescription: record.shortDescription ?? "",
       children: [],
       subsections: (Array.isArray(record.subsections) ? record.subsections : []).map((section, index) => {
@@ -81,6 +83,7 @@ function fallbackTree(): PublicCarePathway[] {
   const mapNode = (node: (typeof defaultCarePathways)[number]): PublicCarePathway => ({
     id: id++,
     title: node.title,
+    header: "",
     shortDescription: node.shortDescription,
     children: (node.children ?? []).map(mapNode),
     subsections: [],

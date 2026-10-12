@@ -13,6 +13,7 @@ import * as migration_20261012_080126_expand_care_pathway_tree from './20261012_
 import * as migration_20261012_081627_remove_care_pathway_sort_order from './20261012_081627_remove_care_pathway_sort_order';
 import * as migration_20261012_093000_care_pathway_parent_child_type from './20261012_093000_care_pathway_parent_child_type';
 import * as migration_20261012_110000_add_care_pathway_subsections from './20261012_110000_add_care_pathway_subsections';
+import * as migration_20261012_120000_add_care_pathway_header from './20261012_120000_add_care_pathway_header';
 
 export const migrations = [
   {
@@ -89,5 +90,10 @@ export const migrations = [
     up: migration_20261012_110000_add_care_pathway_subsections.up,
     down: migration_20261012_110000_add_care_pathway_subsections.down,
     name: '20261012_110000_add_care_pathway_subsections'
+  },
+  {
+    up: migration_20261012_120000_add_care_pathway_header.up,
+    down: migration_20261012_120000_add_care_pathway_header.down,
+    name: '20261012_120000_add_care_pathway_header'
   },
 ];
