@@ -308,6 +308,35 @@ body:has(.masca-dashboard-menu) .template-default__wrap { padding-top: 56px; }
 .masca-nav__heading small { color: var(--theme-elevation-550); font-size: .7rem; font-weight: 500; }
 .masca-nav__heading button { display: grid; place-items: center; min-width: 36px; min-height: 36px; border: 0; border-radius: 8px; background: transparent; color: var(--theme-elevation-650); cursor: pointer; }
 .masca-nav__heading button:hover { background: var(--theme-elevation-100); }
+/* Match Payload's page-header opener to the sidebar's panel control. */
+.template-default__nav-toggler,
+.app-header__mobile-nav-toggler {
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--theme-elevation-650);
+}
+.template-default__nav-toggler { display: grid; }
+:is(.template-default__nav-toggler, .app-header__mobile-nav-toggler) .hamburger { display: none; }
+:is(.template-default__nav-toggler, .app-header__mobile-nav-toggler)::before {
+  content: "";
+  width: 19px;
+  height: 19px;
+  background: currentColor;
+  -webkit-mask: url("/icons/sidebar-open.svg") center / contain no-repeat;
+  mask: url("/icons/sidebar-open.svg") center / contain no-repeat;
+}
+:is(.template-default__nav-toggler, .app-header__mobile-nav-toggler):hover { background: var(--theme-elevation-100); }
+:is(.template-default__nav-toggler, .app-header__mobile-nav-toggler):focus-visible { outline: 2px solid var(--masca-yellow); outline-offset: 3px; }
+@media (max-width: 768px) {
+  .template-default__nav-toggler-wrapper { display: none; }
+  .app-header__mobile-nav-toggler { display: grid; }
+  body:has(.masca-nav.nav--nav-open) .app-header__mobile-nav-toggler { visibility: hidden; }
+}
 .masca-nav__links { display: flex; flex-direction: column; flex: 1; gap: 20px; }
 .masca-nav__links h2 { margin: 0 0 .6rem; padding-inline: .85rem; font-size: 12px; font-weight: 500; color: var(--theme-elevation-550); }
 .masca-nav__link { position: relative; --section-accent: var(--theme-elevation-400); display: flex; align-items: center; gap: .8rem; min-height: 44px; margin-block: 4px; padding: 6px 12px; border: 1px solid transparent; border-radius: 8px; color: var(--theme-text); text-decoration: none; font-size: 14px; }
