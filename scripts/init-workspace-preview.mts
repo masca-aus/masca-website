@@ -1,5 +1,6 @@
 import {changeRequestSchemaSQL} from '../features/submissions/changeRequestSchema.ts';
 import { listingEmailSchemaSQL } from '../features/submissions/emailSchema.ts';
+import { departmentSchemaSQL } from "../features/dashboard/departmentSchema.ts";
 import { reviewSchemaSQL } from '../features/submissions/reviewSchema.ts';
 // One-time initialization of the isolated authentication preview only.
 import pg from "pg";
@@ -25,6 +26,7 @@ if (tables.rows[0].count > 0) await connection.query(submissionSchemaSQL("cms_au
 if (tables.rows[0].count > 0) await connection.query(reviewSchemaSQL("cms_auth_preview"));
 if (tables.rows[0].count > 0) await connection.query(listingEmailSchemaSQL("cms_auth_preview"));
 if (tables.rows[0].count > 0) await connection.query(changeRequestSchemaSQL("cms_auth_preview"));
+if (tables.rows[0].count > 0) await connection.query(departmentSchemaSQL("cms_auth_preview"));
 await connection.end();
 process.env.WORKSPACE_INIT_SCHEMA =
   tables.rows[0].count === 0 ? "true" : "false";

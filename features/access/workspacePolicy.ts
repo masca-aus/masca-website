@@ -29,6 +29,7 @@ export type ApprovedAccount = {
   status: "invited" | "active" | "suspended";
   role: "administrator" | "editor";
   grants: AccessGrant[];
+  departments?: string[] | null;
   permissions?: ContentPermissions | null;
   allContentAccess?: boolean | null;
   googleSubject?: string | null;

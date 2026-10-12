@@ -260,31 +260,11 @@ html[data-theme="dark"] .masca-event-status-badge--rejected {
   background: #4c2020;
 }
 
-.masca-admin-loading { min-height: 2rem; }
-
-.masca-admin-loading__bar,
-.masca-admin-route-progress {
-  position: fixed;
-  z-index: 1000;
-  top: 0;
-  left: 0;
-  width: 34%;
-  height: 2px;
-  border-radius: 0 999px 999px 0;
-  background: var(--theme-elevation-500);
-  animation: masca-admin-progress 950ms ease-in-out infinite;
-}
-
-@keyframes masca-admin-progress {
-  from { transform: translateX(-110%); }
-  to { transform: translateX(330%); }
-}
-
+/* Payload owns transition completion and cancellation; avoid a second progress bar. */
+.progress-bar__progress { background: #e4b600; }
 @media (prefers-reduced-motion: reduce) {
-  .masca-admin-loading__bar,
-  .masca-admin-route-progress { animation: none; }
+  .progress-bar, .progress-bar__progress { transition: none !important; }
 }
-
 
 /* Actions share one shape; pills are reserved for status indicators. */
 .btn { border-radius: 8px; }
@@ -316,24 +296,26 @@ html[data-theme="dark"] .masca-action--primary:hover, html[data-theme="dark"] .m
 .masca-document-back-link { border-color: transparent; background: transparent; color: var(--theme-elevation-650); padding-inline: .25rem; }
 .masca-document-back-link:hover { background: transparent; border-color: transparent; color: var(--theme-text); text-decoration: underline; }
 
-/* Dashboard cards supply content navigation; the sidebar holds settings. */
+/* The dashboard keeps content navigation and account controls together. */
 body:has(.masca-nav--dashboard) .app-header,
 body:has(.masca-nav--dashboard) .template-default__nav-toggler-wrapper { display: none; }
-.masca-nav--dashboard .masca-nav__account { margin-top: 0; padding-top: 1rem; }
 .masca-dashboard-menu { position: fixed; top: 12px; left: 16px; z-index: var(--z-modal); display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 12px; border: 1px solid var(--theme-elevation-150); border-radius: 10px; background: var(--theme-bg); color: var(--theme-text); cursor: pointer; }
 body:has(.masca-dashboard-menu) .template-default__wrap { padding-top: 56px; }
-.masca-nav { border-right: 1px solid var(--theme-elevation-150); background: var(--theme-bg); }
+.masca-nav { --nav-selected-bg: #eef2f6; --nav-hover-bg: #f7f7f8; border-right: 1px solid var(--theme-elevation-150); background: var(--theme-bg); }
+[data-theme="dark"] .masca-nav { --nav-selected-bg: #29323e; --nav-hover-bg: #22262c; }
 .masca-nav .nav__scroll { padding: 1.25rem 1rem; }
 .masca-nav__heading { display: flex; align-items: center; justify-content: space-between; min-height: 3rem; margin-bottom: 1.25rem; padding-inline: .75rem; font-weight: 750; letter-spacing: .04em; }
 .masca-nav__heading small { color: var(--theme-elevation-550); font-size: .7rem; font-weight: 500; }
 .masca-nav__heading button { display: grid; place-items: center; min-width: 36px; min-height: 36px; border: 0; border-radius: 8px; background: transparent; color: var(--theme-elevation-650); cursor: pointer; }
 .masca-nav__heading button:hover { background: var(--theme-elevation-100); }
-.masca-nav__links { display: flex; flex-direction: column; flex: 1; gap: 1.75rem; }
-.masca-nav__links h2 { margin: 0 0 .6rem; padding-inline: .85rem; font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--theme-elevation-550); }
-.masca-nav__link { --section-accent: var(--theme-elevation-400); display: flex; align-items: center; gap: .8rem; min-height: 44px; margin-block: .2rem; padding: .55rem .8rem; border: 1px solid transparent; border-radius: 8px; color: var(--theme-text); text-decoration: none; font-size: .9rem; }
-.masca-nav__link:hover { background: var(--theme-elevation-100); }
-.masca-nav__link[aria-current] { font-weight: 650; background: color-mix(in srgb, var(--section-accent) 14%, var(--theme-bg)); border-color: color-mix(in srgb, var(--section-accent) 35%, var(--theme-elevation-100)); }
-.masca-nav__icon { display: grid; place-items: center; width: 29px; height: 29px; border-radius: 7px; background: color-mix(in srgb, var(--section-accent) 25%, var(--theme-bg)); }
+.masca-nav__links { display: flex; flex-direction: column; flex: 1; gap: 20px; }
+.masca-nav__links h2 { margin: 0 0 .6rem; padding-inline: .85rem; font-size: 12px; font-weight: 500; color: var(--theme-elevation-550); }
+.masca-nav__link { position: relative; --section-accent: var(--theme-elevation-400); display: flex; align-items: center; gap: .8rem; min-height: 44px; margin-block: 4px; padding: 6px 12px; border: 1px solid transparent; border-radius: 8px; color: var(--theme-text); text-decoration: none; font-size: 14px; }
+.masca-nav__link:hover { background: var(--nav-hover-bg); }
+.masca-nav__link[href="/admin"] { --section-accent: #ffcc00; }
+.masca-nav__link[aria-current] { font-weight: 650; background: var(--nav-selected-bg); border-color: transparent; }
+.masca-nav__link[aria-current="page"]::before { content: ""; position: absolute; inset-inline-start: 0; inset-block: 10px; width: 3px; border-radius: 2px; background: var(--masca-yellow); pointer-events: none; }
+.masca-nav__icon { display: grid; place-items: center; width: 29px; height: 29px; flex-shrink: 0; border-radius: 7px; background: color-mix(in srgb, var(--section-accent) 25%, var(--theme-bg)); }
 .masca-nav__link > svg { margin-inline: 5px; }
 .masca-nav__account { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--theme-elevation-150); }
 .masca-nav :is(a, button):focus-visible { outline: 2px solid var(--masca-yellow); outline-offset: 3px; }
@@ -468,3 +450,13 @@ html[data-theme="dark"] .template-minimal:has(.masca-login-welcome)::before {
 
 .masca-nav__version { margin: 1.5rem 0 0; padding: .85rem .8rem 0; border-top: 1px solid var(--theme-elevation-150); color: var(--theme-elevation-650); font-size: .75rem; display: flex; justify-content: space-between; gap: .75rem; }
 .masca-nav__version span { font-variant-numeric: tabular-nums; }
+
+/* One sidebar appearance across the workspace and every content tool. */
+@media (prefers-reduced-motion: no-preference) {
+  .masca-nav__link { transition: background-color 160ms ease-out; }
+  .masca-nav__link[aria-current="page"] { animation: masca-nav-active 160ms ease-out; }
+}
+@keyframes masca-nav-active {
+  from { background-color: transparent; }
+  to { background-color: var(--nav-selected-bg); }
+}

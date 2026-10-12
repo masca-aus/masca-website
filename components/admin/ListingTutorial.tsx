@@ -1,5 +1,6 @@
 'use client';
 
+import { useAdminNavigation } from './AdminNavigationContext';
 import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { TutorialSpotlight, type SpotlightStep } from './TutorialSpotlight';
@@ -28,6 +29,7 @@ export function reviewQueueHref(collection: Collection) {
 }
 
 export function ListingTutorial({ collection, accountId, editor = false, currentStep = 0, onPreviewStep }: { collection: Collection; accountId?: string | number; editor?: boolean; currentStep?: number; onPreviewStep?: (step: number) => void }) {
+  const navigation = useAdminNavigation();
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const originalStep = useRef(currentStep);
@@ -88,7 +90,10 @@ export function ListingTutorial({ collection, accountId, editor = false, current
     {headerSlot ? createPortal(tutorialButton, headerSlot) : tutorialButton}
     {open && <TutorialSpotlight steps={steps} label={collection === 'careers' ? 'Careers' : 'Events'} onClose={close} onPreviewStep={onPreviewStep} onNavigate={(href, action) => {
       if (action === 'create') { try { sessionStorage.setItem(continuationKey, 'true'); } catch { /* Replay inside the form is still available. */ } }
-      close(); window.location.assign(href);
+      close();
+      const url = new URL(href, window.location.origin);
+      if (navigation && url.origin === window.location.origin) navigation.navigate(`${url.pathname}${url.search}${url.hash}`);
+      else window.location.assign(href);
     }} />}
   </>;
 }

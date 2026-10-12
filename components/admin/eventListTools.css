@@ -388,3 +388,8 @@
 .masca-report-options [role="option"] {
   line-height: 1.4;
 }
+
+.masca-event-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin-block: 16px; }
+.masca-event-filters .masca-report-field { min-width: 180px; }
+.masca-event-filters .masca-action { min-height: 44px; }
+@media (max-width: 650px) { .masca-event-filters .masca-report-field { flex: 1 1 180px; } }

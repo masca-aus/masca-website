@@ -1,7 +1,7 @@
 "use client";
 import { ListingTools } from "./ListingTools";
 
-import Link from "next/link";
+import { AdminLink as Link } from "./AdminNavigationContext";
 import { useDocumentTitle, useDocumentInfo } from "@payloadcms/ui";
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
@@ -50,7 +50,7 @@ export function DocumentBackLink() {
   if (!target) return null;
 
   return (
-    <><Link ref={linkRef} className="masca-document-back-link" href={target.href}>
+    <><Link restoreContext ref={linkRef} className="masca-document-back-link" href={target.href}>
       <span aria-hidden="true">←</span>
       {target.label}
     </Link>{["events","careers"].includes(pathname.split("/")[3]) && <ListingTools collection={pathname.split("/")[3] as "events"|"careers"} />}</>

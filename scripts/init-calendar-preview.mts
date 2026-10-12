@@ -4,6 +4,7 @@ import { submissionSchemaSQL } from "../features/submissions/schema.ts";
 import { reviewSchemaSQL } from "../features/submissions/reviewSchema.ts";
 import { listingEmailSchemaSQL } from "../features/submissions/emailSchema.ts";
 import { changeRequestSchemaSQL } from "../features/submissions/changeRequestSchema.ts";
+import {departmentSchemaSQL} from "../features/dashboard/departmentSchema.ts";
 const previewSchema = process.env.WORKSPACE_PREVIEW_SCHEMA;
 if (
   process.env.VERCEL_ENV === "production" ||
@@ -24,6 +25,7 @@ const exists = await c.query(
   [previewSchema],
 );
 await c.query(calendarSchemaSQL("media_calendar_preview"));
+if (exists.rows.length) await c.query(departmentSchemaSQL(previewSchema));
 if (exists.rows.length)
   await c.query(
     `ALTER TABLE "${previewSchema}".users ADD COLUMN IF NOT EXISTS calendar_access jsonb`,

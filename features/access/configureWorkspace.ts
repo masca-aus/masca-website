@@ -1,4 +1,6 @@
 import {validCalendarAccess} from "../mediaCalendar/policy.ts";
+import { COMMITTEE_DEPARTMENTS } from "../../utils/committeeDepartments.js";
+import { defaultCreationScope } from "../dashboard/teamDashboard.ts";
 import { publicEventSubmission, publicCareerSubmission } from "./publicSubmissionContext.ts";
 import { randomUUID } from "node:crypto";
 import {
@@ -91,6 +93,12 @@ export function configureWorkspace(
             required: true,
             defaultValue: "invited",
             options: ["invited", "active", "suspended"],
+          },
+          {
+            name: "departments", label: "Departments", type: "select", hasMany: true,
+            options: COMMITTEE_DEPARTMENTS.map(({ label, value }) => ({ label, value })),
+            access: { create: ({ req }) => mayManagePeople(accountOf(req.user)), update: ({ req }) => mayManagePeople(accountOf(req.user)) },
+            admin: { description: "Personalises the dashboard. Content permissions below control access." },
           },
           {
             name: "allContentAccess",
@@ -233,10 +241,7 @@ export function configureWorkspace(
             label: "Managed by",
             type: "select",
             required: true,
-            defaultValue: ({ user }) =>
-              mayManageSharedContent(accountOf(user))
-                ? "National"
-                : permissionsFor(accountOf(user))[area]?.scopes?.[0],
+            defaultValue: ({ user, req }) => defaultCreationScope(accountOf(user), area, req?.query?.branch),
             options: [...ownershipScopes],
             admin: {
               hidden: true,
