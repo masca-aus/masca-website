@@ -9,6 +9,7 @@ import {
 } from "../../features/account/photoRepository";
 import { syncCollaboration } from "../../features/mediaCalendar/collaboration";
 import { calendarSchemaSQL } from "../../features/mediaCalendar/schema";
+import { createPost } from "../../features/mediaCalendar/repository";
 const url = process.env.MASCA_ACCOUNT_PHOTO_TEST_DATABASE_URI;
 describe.runIf(!!url)("private account photos in disposable Postgres", () => {
   let db: pg.Pool;
@@ -125,5 +126,48 @@ describe.runIf(!!url)("private account photos in disposable Postgres", () => {
     );
     expect(present.participants[0].photoVersion).toBe(saved.photoVersion);
     expect(JSON.stringify(present)).not.toContain("private-photo-bytes");
+  });
+  it("reports temporary viewing and editing activity with the server-owned post title", async () => {
+    const member = {
+      ...actor,
+      role: "administrator" as const,
+      status: "active" as const,
+    };
+    const post = await createPost(member, { title: "Community night" });
+    const clientId = crypto.randomUUID();
+    const sync = (cursor: { anchor: string; head: string } | null) =>
+      syncCollaboration(member, { clientId, postId: post.id, cursor });
+    let result = await sync(null);
+    expect(
+      result.participants.find((p) => p.clientId === clientId),
+    ).toMatchObject({ activity: "viewing", postTitle: "Community night" });
+    result = await sync({ anchor: "caption-anchor", head: "caption-head" });
+    expect(
+      result.participants.find((p) => p.clientId === clientId),
+    ).toMatchObject({ activity: "editing", postTitle: "Community night" });
+    const room = await syncCollaboration(member, {
+      clientId: crypto.randomUUID(),
+      postId: null,
+      cursor: null,
+    });
+    expect(
+      room.participants.find((p) => p.clientId === clientId),
+    ).toMatchObject({ activity: "editing", cursor: null });
+    result = await sync(null);
+    expect(
+      result.participants.find((p) => p.clientId === clientId)?.activity,
+    ).toBe("viewing");
+    await db.query(
+      "UPDATE media_calendar_preview.presence SET expires_at=now()-interval '1 second' WHERE client_id=$1",
+      [clientId],
+    );
+    const expired = await syncCollaboration(member, {
+      clientId: crypto.randomUUID(),
+      postId: null,
+      cursor: null,
+    });
+    expect(expired.participants.some((p) => p.clientId === clientId)).toBe(
+      false,
+    );
   });
 });

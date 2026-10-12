@@ -70,7 +70,7 @@ export async function syncCollaboration(
     if (!result.rows.length)
       throw new CalendarError("Reconnect to the calendar.", 409);
     const members = await c.query(
-      `SELECT p.client_id,p.post_id,p.cursor,u.id,u.email,u.role,u.status,u.calendar_access,ap.version AS photo_version FROM ${t} p JOIN "${workspaceSchema()}".users u ON u.id::text=p.user_id LEFT JOIN "${workspaceSchema()}".account_photos ap ON ap.user_id=u.id WHERE p.expires_at>now()`,
+      `SELECT p.client_id,p.post_id,p.cursor,u.id,u.email,u.role,u.status,u.calendar_access,ap.version AS photo_version,post.data->>'title' AS post_title FROM ${t} p JOIN "${workspaceSchema()}".users u ON u.id::text=p.user_id LEFT JOIN "${workspaceSchema()}".account_photos ap ON ap.user_id=u.id LEFT JOIN ${table("posts")} post ON post.id=p.post_id AND post.data->>'deletedAt' IS NULL WHERE p.expires_at>now()`,
     );
     let post: (Omit<Post, "captionState"> & { captionState?: string }) | null =
       null;
@@ -102,6 +102,13 @@ export async function syncCollaboration(
           name: memberName(r),
           color: participantColor(String(r.id)),
           postId: r.post_id,
+          postTitle: r.post_title ?? null,
+          activity:
+            r.post_title == null
+              ? "calendar"
+              : r.cursor
+                ? "editing"
+                : "viewing",
           photoVersion: r.photo_version ?? null,
           cursor: r.post_id === input.postId ? r.cursor : null,
         })),
