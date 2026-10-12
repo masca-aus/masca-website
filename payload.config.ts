@@ -18,6 +18,7 @@ import { Organisations } from "./collections/Organisations.ts";
 import { EventLifecycle } from "./collections/EventLifecycle.ts";
 import { Careers } from "./collections/Careers.ts";
 import { CareerLifecycle } from "./collections/CareerLifecycle.ts";
+import { CarePathways } from "./collections/CarePathways.ts";
 import { Events } from "./collections/Events.ts";
 import { COMMITTEE_DEPARTMENT_OPTIONS } from "./utils/committeeDepartments.js";
 import { editorSection } from "./utils/editorSection.ts";
@@ -219,6 +220,7 @@ export default buildConfig({
 });
 
 function workspaceCollections(): import("payload").CollectionConfig[] { return [
+    CarePathways,
     Careers,
     CareerLifecycle,
     Organisations,

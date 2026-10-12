@@ -2,102 +2,30 @@
 
 import { useRef, useState } from "react";
 import {
-  ArrowRight,
-  Brain,
-  BriefcaseBusiness,
-  Camera,
-  HeartHandshake,
-  HeartPulse,
-  Home,
-  GraduationCap,
-  MapPin,
-  MessageCircle,
-  Scale,
-  ShieldCheck,
-  Sparkles,
-  WalletCards,
+  ArrowRight, Brain, BriefcaseBusiness, Camera, GraduationCap, HeartHandshake,
+  HeartPulse, Home, MapPin, MessageCircle, Scale, ShieldCheck, Sparkles,
+  WalletCards, type LucideIcon,
 } from "lucide-react";
+import type { PublicCarePathway } from "@/features/care/publicCarePathways";
 
-type PathwayKey = "wellbeing" | "finance" | "academic" | "settling";
+type PathwayKey = PublicCarePathway["category"];
+type PathwayStyle = { eyebrow: string; icon: LucideIcon; accent: string; soft: string; text: string; activeCard: string; activeIcon: string; activeEyebrow: string; activeDescription: string };
 
-const pathways = [
-  {
-    key: "wellbeing" as const,
-    eyebrow: "Start here",
-    title: "Wellbeing",
-    description: "Make space for your wellbeing and find a supportive next step.",
-    icon: Sparkles,
-    accent: "bg-blue-600",
-    soft: "bg-blue-50",
-    text: "text-blue-600",
-    activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2",
-    activeIcon: "bg-yellow-500 text-blue-900",
-    activeEyebrow: "text-yellow-500",
-    activeDescription: "text-blue-100",
-    items: [
-      { title: "Healthcare", detail: "Find a GP, doctor, hospital or other health service.", icon: HeartPulse },
-      { title: "Mental Health", detail: "Explore counselling, wellbeing support and professional care.", icon: Brain },
-      { title: "Personal Safety", detail: "Find support for safety concerns and unsafe situations.", icon: ShieldCheck },
-    ],
-  },
-  {
-    key: "finance" as const,
-    eyebrow: "Plan ahead",
-    title: "Finance",
-    description: "Get a clearer view of costs, options, and practical support.",
-    icon: WalletCards,
-    accent: "bg-yellow-500",
-    soft: "bg-yellow-50",
-    text: "text-yellow-800",
-    activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2",
-    activeIcon: "bg-blue-600 text-white",
-    activeEyebrow: "text-blue-800",
-    activeDescription: "text-blue-900",
-    items: [
-      { title: "Budgeting", detail: "Make your money go further", icon: WalletCards },
-      { title: "Work and income", detail: "Explore practical options", icon: BriefcaseBusiness },
-      { title: "Financial support", detail: "Find a place to begin", icon: ShieldCheck },
-    ],
-  },
-  {
-    key: "academic" as const,
-    eyebrow: "Keep moving",
-    title: "Academic",
-    description: "Find support that helps you stay connected to your study goals.",
-    icon: GraduationCap,
-    accent: "bg-blue-600",
-    soft: "bg-blue-50",
-    text: "text-blue-600",
-    activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2",
-    activeIcon: "bg-yellow-500 text-blue-900",
-    activeEyebrow: "text-yellow-500",
-    activeDescription: "text-blue-100",
-    items: [
-      { title: "Study support", detail: "Get back into your rhythm", icon: GraduationCap },
-      { title: "Your options", detail: "Understand the next step", icon: Scale },
-      { title: "Campus connection", detail: "Find help close to you", icon: MapPin },
-    ],
-  },
-  {
-    key: "settling" as const,
-    eyebrow: "Find your footing",
-    title: "Settling in",
-    description: "Just landed in Australia? Get the essentials you need to settle in, find your feet, and survive those first few weeks away from home.",
-    icon: Home,
-    accent: "bg-yellow-500",
-    soft: "bg-yellow-50",
-    text: "text-yellow-800",
-    activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2",
-    activeIcon: "bg-blue-600 text-white",
-    activeEyebrow: "text-blue-800",
-    activeDescription: "text-blue-900",
-    items: [
-      { title: "Accommodation", detail: "Find a safer next step", icon: Home },
-      { title: "Local support", detail: "Connect with your state", icon: MapPin },
-      { title: "Community", detail: "Meet people who understand", icon: HeartHandshake },
-    ],
-  },
-] as const;
+const pathwayStyles: Record<PathwayKey, PathwayStyle> = {
+  wellbeing: { eyebrow: "Start here", icon: Sparkles, accent: "bg-blue-600", soft: "bg-blue-50", text: "text-blue-600", activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2", activeIcon: "bg-yellow-500 text-blue-900", activeEyebrow: "text-yellow-500", activeDescription: "text-blue-100" },
+  finance: { eyebrow: "Plan ahead", icon: WalletCards, accent: "bg-yellow-500", soft: "bg-yellow-50", text: "text-yellow-800", activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2", activeIcon: "bg-blue-600 text-white", activeEyebrow: "text-blue-800", activeDescription: "text-blue-900" },
+  settling: { eyebrow: "Find your footing", icon: Home, accent: "bg-yellow-500", soft: "bg-yellow-50", text: "text-yellow-800", activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2", activeIcon: "bg-blue-600 text-white", activeEyebrow: "text-blue-800", activeDescription: "text-blue-900" },
+  academic: { eyebrow: "Keep moving", icon: GraduationCap, accent: "bg-blue-600", soft: "bg-blue-50", text: "text-blue-600", activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2", activeIcon: "bg-yellow-500 text-blue-900", activeEyebrow: "text-yellow-500", activeDescription: "text-blue-100" },
+};
+
+const topicIcons: Array<[RegExp, LucideIcon]> = [
+  [/health|doctor|gp/i, HeartPulse], [/mental|wellbeing|counsell/i, Brain],
+  [/safety|emergency/i, ShieldCheck], [/budget|finance|financial/i, WalletCards],
+  [/work|income/i, BriefcaseBusiness], [/study|academic|campus/i, GraduationCap],
+  [/option|rights|legal/i, Scale], [/accommodation|housing|home/i, Home],
+  [/local|state|location/i, MapPin], [/community|people/i, HeartHandshake],
+];
+const iconForTopic = (title: string): LucideIcon => topicIcons.find(([pattern]) => pattern.test(title))?.[1] ?? ArrowRight;
 
 const states: { code: string; instagram?: string }[] = [
   { code: "VIC", instagram: "https://www.instagram.com/mascavic/" },
@@ -126,10 +54,11 @@ const communityLinks = [
   },
 ] as const;
 
-export default function CarePathways() {
-  const [active, setActive] = useState<PathwayKey>("wellbeing");
+export default function CarePathways({ pathways }: { pathways: PublicCarePathway[] }) {
+  const [active, setActive] = useState<PathwayKey>(pathways[0]?.category ?? "wellbeing");
   const detailsRef = useRef<HTMLDivElement>(null);
-  const selected = pathways.find((pathway) => pathway.key === active) ?? pathways[0];
+  const selected = pathways.find((pathway) => pathway.category === active) ?? pathways[0];
+  if (!selected) return null;
 
   function explorePathway(pathway: PathwayKey) {
     setActive(pathway);
@@ -151,29 +80,30 @@ export default function CarePathways() {
 
         <div className="mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-4" aria-label="Care pathways">
           {pathways.map((pathway) => {
-            const Icon = pathway.icon;
-            const isActive = pathway.key === active;
+            const style = pathwayStyles[pathway.category];
+            const Icon = style.icon;
+            const isActive = pathway.category === active;
             return (
               <button
-                key={pathway.key}
+                key={pathway.category}
                 type="button"
                 aria-pressed={isActive}
-                onClick={() => explorePathway(pathway.key)}
+                onClick={() => explorePathway(pathway.category)}
                 className={`group min-h-72 rounded-xl border-2 p-7 text-left transition duration-200 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-yellow-500 md:p-8 ${
                   isActive
-                    ? pathway.activeCard
+                    ? style.activeCard
                     : "border-blue-100 bg-white text-blue-600 shadow-sm hover:-translate-y-1 hover:border-blue-600 hover:shadow-lg"
                 }`}
               >
-                <span className={`flex h-12 w-12 items-center justify-center rounded-lg ${isActive ? pathway.activeIcon : pathway.soft + " " + pathway.text}`}>
+                <span className={`flex h-12 w-12 items-center justify-center rounded-lg ${isActive ? style.activeIcon : style.soft + " " + style.text}`}>
                   <Icon size={24} strokeWidth={2} aria-hidden="true" />
                 </span>
-                <span className={`eyebrow mt-8 block ${isActive ? pathway.activeEyebrow : pathway.text}`}>
-                  {pathway.eyebrow}
+                <span className={`eyebrow mt-8 block ${isActive ? style.activeEyebrow : style.text}`}>
+                  {style.eyebrow}
                 </span>
                 <span className="mt-3 block font-secondary text-3xl font-bold leading-tight">{pathway.title}</span>
-                <span className={`mt-4 block leading-relaxed ${isActive ? pathway.activeDescription : "text-gray-700"}`}>
-                  {pathway.description}
+                <span className={`mt-4 block leading-relaxed ${isActive ? style.activeDescription : "text-gray-700"}`}>
+                  {pathway.shortDescription}
                 </span>
                 <span className="mt-7 inline-flex items-center gap-2 text-sm font-bold">
                   Explore this path <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />
@@ -187,25 +117,26 @@ export default function CarePathways() {
           <div className="grid lg:grid-cols-[0.75fr_1.25fr]">
             <div className="flex flex-col justify-between bg-white p-7 md:p-10">
               <div>
-                <span className={`eyebrow ${selected.text}`}>{selected.eyebrow}</span>
+                <span className={`eyebrow ${pathwayStyles[selected.category].text}`}>{pathwayStyles[selected.category].eyebrow}</span>
                 <h3 className="mt-3 font-secondary text-3xl font-bold text-blue-600 md:text-4xl">{selected.title}</h3>
-                <p className="mt-5 text-gray-700">Browse a few common starting points, then take the next step that feels right for you.</p>
+                <p className="mt-5 text-gray-700">{selected.shortDescription}</p>
               </div>
               <div className="mt-8 flex items-center gap-3 border-t border-blue-100 pt-6 text-sm font-semibold text-blue-600">
-                <span className={`h-2.5 w-2.5 rounded-full ${selected.accent}`} />
+                <span className={`h-2.5 w-2.5 rounded-full ${pathwayStyles[selected.category].accent}`} />
                 Selected pathway
               </div>
             </div>
 
             <div className="grid gap-4 p-5 md:grid-cols-3 md:p-8">
-              {selected.items.map((item, index) => {
-                const Icon = item.icon;
+              {(selected.subsections ?? []).map((item, index) => {
+                const Icon = iconForTopic(item.title);
+                const href = item.linkUrl?.trim() || "#quick-support";
                 return (
                   <a
-                    key={item.title}
-                    href={item.title === "Healthcare" ? "/care/healthcare" : "#quick-support"}
-                    target={item.title === "Healthcare" ? "_blank" : undefined}
-                    rel={item.title === "Healthcare" ? "noopener noreferrer" : undefined}
+                    key={item.id ?? `${selected.category}-${index}-${item.title}`}
+                    href={href}
+                    target={href.startsWith("https://") ? "_blank" : undefined}
+                    rel={href.startsWith("https://") ? "noopener noreferrer" : undefined}
                     className="group flex min-h-52 flex-col rounded-lg bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                   >
                     <span className="flex items-center justify-between text-blue-600">

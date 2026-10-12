@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import Button from "@/components/Button";
+import { getPublicCarePathways } from "@/features/care/publicCarePathways";
 import { pageMetadata } from "@/utils/seo";
 import CarePathways from "./CarePathways";
 import FindNextStepButton from "./FindNextStepButton";
@@ -12,7 +13,9 @@ export const metadata: Metadata = pageMetadata({
   path: "/care",
 });
 
-export default function MascaCaresPage() {
+export default async function MascaCaresPage() {
+  const pathways = await getPublicCarePathways();
+
   return (
     <main id="main" className="overflow-hidden bg-white">
       <section className="relative isolate flex min-h-[42rem] items-center overflow-hidden bg-blue-600 pb-24 pt-40 text-white md:pb-32 md:pt-48">
@@ -91,7 +94,7 @@ export default function MascaCaresPage() {
         </div>
       </section>
 
-      <CarePathways />
+      <CarePathways pathways={pathways} />
 
       <section id="quick-support" className="bg-blue-50">
         <div className="container section-pad">

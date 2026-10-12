@@ -67,6 +67,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    'care-pathways': CarePathway;
     careers: Career;
     'career-lifecycle': CareerLifecycle;
     organisations: Organisation;
@@ -83,6 +84,7 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    'care-pathways': CarePathwaysSelect<false> | CarePathwaysSelect<true>;
     careers: CareersSelect<false> | CareersSelect<true>;
     'career-lifecycle': CareerLifecycleSelect<false> | CareerLifecycleSelect<true>;
     organisations: OrganisationsSelect<false> | OrganisationsSelect<true>;
@@ -130,6 +132,27 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
+}
+/**
+ * Manage the four starting points on the Cares page. Update each title and short description, then add, reorder or remove the resources shown inside it.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "care-pathways".
+ */
+export interface CarePathway {
+  id: number;
+  category: 'wellbeing' | 'finance' | 'settling' | 'academic';
+  title: string;
+  shortDescription: string;
+  sortOrder: number;
+  subsections?: {
+    title: string;
+    detail: string;
+    linkUrl?: string | null;
+    id?: string | null;
+  }[] | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Manage opportunities for students. Save private drafts, review details and publish when ready. Rolling roles expire after 60 days; update the listed date after reconfirming availability.
@@ -497,6 +520,10 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'care-pathways';
+        value: number | CarePathway;
+      } | null)
+    | ({
         relationTo: 'careers';
         value: number | Career;
       } | null)
@@ -557,6 +584,19 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "care-pathways_select".
+ */
+export interface CarePathwaysSelect<T extends boolean = true> {
+  category?: T;
+  title?: T;
+  shortDescription?: T;
+  sortOrder?: T;
+  subsections?: T | { title?: T; detail?: T; linkUrl?: T; id?: T };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

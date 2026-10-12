@@ -1,5 +1,6 @@
 import * as publicSubmissions from './20261001_120000_public_submissions';
 import * as workspaceAccess from "./20260930_221300_workspace_access";
+import * as carePathways from './20261012_063405_add_care_pathways';
 import * as migration_20260802_071222_restructure_committee from './20260802_071222_restructure_committee';
 import * as migration_20260907_142655_add_committee_departments from './20260907_142655_add_committee_departments';
 import * as migration_20260916_010000_add_events_submission_workflow from './20260916_010000_add_events_submission_workflow';
@@ -52,4 +53,5 @@ export const migrations = [
   },
   {up: workspaceAccess.up, down: workspaceAccess.down, name: "20260930_221300_workspace_access"},
   {up: publicSubmissions.up, down: publicSubmissions.down, name: "20261001_120000_public_submissions"},
+  {up: carePathways.up, down: carePathways.down, name: "20261012_063405_add_care_pathways"},
 ];
