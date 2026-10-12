@@ -43,6 +43,7 @@ import { CalendarSidebar, type CalendarScope } from "./CalendarSidebar";
 import { useCalendarDrag } from "./useCalendarDrag";
 import { CalendarCard } from "./CalendarCard";
 import { RoomPresence } from "./RoomPresence";
+import { CalendarLoading } from "./CalendarLoading";
 import { createCalendarRowMotion } from "./rowMotion";
 import "./calendar.css";
 type Overview = {
@@ -111,6 +112,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       next: null,
     }),
     [loading, setLoading] = useState(true),
+    [hasLoaded, setHasLoaded] = useState(false),
     [creating, setCreating] = useState(false),
     [error, setError] = useState(""),
     [category, setCategory] = useState("all"),
@@ -193,7 +195,10 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       } catch (e) {
         if (n === epoch.current) setError((e as Error).message);
       } finally {
-        if (n === epoch.current) setLoading(false);
+        if (n === epoch.current) {
+          setLoading(false);
+          setHasLoaded(true);
+        }
       }
     },
     [rangeURL, days],
@@ -573,6 +578,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       }}
     />
   );
+  const initialLoading = loading && !hasLoaded;
   return (
     <main
       className="mc-workspace"
@@ -640,6 +646,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           members={data.members}
           userId={String(user.id)}
           editable={editable}
+          loading={initialLoading}
           mobileOpen={filtersOpen}
           onClose={() => setFiltersOpen(false)}
           onScope={selectScope}
@@ -744,10 +751,8 @@ export function CalendarView({ user }: { user: CalendarUser }) {
                   <button onClick={() => void load(true)}>Retry</button>
                 </div>
               )}
-              {loading && !data.posts.length ? (
-                <div className="mc-calendar-loading" role="status">
-                  Loading your calendar…
-                </div>
+              {initialLoading && view === "list" ? (
+                <CalendarLoading />
               ) : view === "list" ? (
                 <div className="mc-list" key={`list-${days[0]}`}>
                   {scheduled.length ? (
@@ -803,23 +808,38 @@ export function CalendarView({ user }: { user: CalendarUser }) {
                 </div>
               ) : (
                 <div
-                  className={`mc-grid mc-grid--${view}`}
+                  className={`mc-grid mc-grid--${view} ${initialLoading ? "mc-grid--loading" : ""}`}
                   key={`${view}-${days[0]}`}
+                  role={initialLoading ? "status" : undefined}
+                  aria-label={initialLoading ? "Loading calendar" : undefined}
+                  aria-busy={initialLoading}
                 >
-                  <div className="mc-weekdays">
+                  {initialLoading && (
+                    <span className="mc-loading-label">
+                      Loading your calendar…
+                    </span>
+                  )}
+                  <div
+                    className="mc-weekdays"
+                    aria-hidden={initialLoading || undefined}
+                  >
                     {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
                       (d) => (
                         <span key={d}>{d}</span>
                       ),
                     )}
                   </div>
-                  <div className="mc-days">
-                    {days.map((d) => (
+                  <div
+                    className="mc-days"
+                    aria-hidden={initialLoading || undefined}
+                  >
+                    {days.map((d, index) => (
                       <section
                         key={d}
                         onClick={(e) => {
                           if (
                             editable &&
+                            !initialLoading &&
                             e.currentTarget.contains(e.target as Node) &&
                             !creatingRef.current &&
                             !pending.current &&
@@ -837,7 +857,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
                       >
                         <header>
                           <span>{Number(d.slice(-2))}</span>
-                          {editable && (
+                          {editable && !initialLoading && (
                             <button
                               aria-label={`Create post on ${d}`}
                               onClick={() => void create(d)}
@@ -846,6 +866,12 @@ export function CalendarView({ user }: { user: CalendarUser }) {
                             </button>
                           )}
                         </header>
+                        {initialLoading && index % 9 === 3 && (
+                          <div className="mc-loading-card">
+                            <i />
+                            <i />
+                          </div>
+                        )}
                         {scheduled
                           .filter((p) => dayKey(p.plannedAt!) === d)
                           .map(card)}
@@ -866,7 +892,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
                 <h2>Unscheduled ideas</h2>
                 <p>Ideas without a publishing date.</p>
               </div>
-              <span>{unscheduled.length}</span>
+              <span>{initialLoading ? "—" : unscheduled.length}</span>
               {editable && (
                 <button onClick={() => void create(null)}>
                   <Plus size={16} />
@@ -875,7 +901,12 @@ export function CalendarView({ user }: { user: CalendarUser }) {
               )}
             </div>
             <div className="mc-unscheduled-cards">
-              {unscheduled.length ? (
+              {initialLoading ? (
+                <div
+                  className="mc-loading-line mc-loading-ideas"
+                  aria-hidden="true"
+                />
+              ) : unscheduled.length ? (
                 unscheduled.map(card)
               ) : (
                 <p className="mc-muted">

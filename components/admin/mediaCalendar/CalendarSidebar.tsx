@@ -28,6 +28,7 @@ export function CalendarSidebar({
   members,
   userId,
   editable,
+  loading = false,
   mobileOpen,
   onClose,
   onScope,
@@ -52,6 +53,7 @@ export function CalendarSidebar({
   members: Member[];
   userId: string;
   editable: boolean;
+  loading?: boolean;
   mobileOpen: boolean;
   onClose: () => void;
   onScope: (v: CalendarScope) => void;
@@ -263,7 +265,7 @@ export function CalendarSidebar({
             >
               <Icon size={16} />
               <span>{label}</span>
-              <small aria-hidden="true">{count}</small>
+              <small aria-hidden="true">{loading ? "—" : count}</small>
             </button>
           ))}
         </div>
@@ -309,19 +311,27 @@ export function CalendarSidebar({
             <i className="mc-type-all" />
             <span>All types</span>
           </button>
-          {categories
-            .filter((c) => !c.archived)
-            .map((c) => (
-              <ContentTypeRow
-                key={c.id}
-                category={c}
-                selected={category === c.id}
-                editable={editable}
-                onSelect={() => onCategory(category === c.id ? "all" : c.id)}
-                onSaved={updateType}
-                onPurged={purgeType}
-              />
-            ))}
+          {loading && (
+            <div className="mc-loading-types" aria-hidden="true">
+              {[0, 1, 2, 3].map((i) => (
+                <div className="mc-loading-line" key={i} />
+              ))}
+            </div>
+          )}
+          {!loading &&
+            categories
+              .filter((c) => !c.archived)
+              .map((c) => (
+                <ContentTypeRow
+                  key={c.id}
+                  category={c}
+                  selected={category === c.id}
+                  editable={editable}
+                  onSelect={() => onCategory(category === c.id ? "all" : c.id)}
+                  onSaved={updateType}
+                  onPurged={purgeType}
+                />
+              ))}
           {editable && deleted.length > 0 && (
             <div className="mc-deleted-types" data-open={deletedOpen}>
               <button
