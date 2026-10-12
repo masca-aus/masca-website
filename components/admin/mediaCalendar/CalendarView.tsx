@@ -1,5 +1,12 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "next/navigation";
 import { PostPanel } from "./PostPanel";
 import {
@@ -36,6 +43,7 @@ import { CalendarSidebar, type CalendarScope } from "./CalendarSidebar";
 import { useCalendarDrag } from "./useCalendarDrag";
 import { CalendarCard } from "./CalendarCard";
 import { RoomPresence } from "./RoomPresence";
+import { createCalendarRowMotion } from "./rowMotion";
 import "./calendar.css";
 type Overview = {
   posts: Card[];
@@ -311,6 +319,65 @@ export function CalendarView({ user }: { user: CalendarUser }) {
         setCreating(false);
       });
   }, [postId]);
+  const rowRoot = useRef<HTMLDivElement>(null);
+  const [rowMotion] = useState(createCalendarRowMotion);
+  const rowLayout = useMemo(
+    () =>
+      JSON.stringify({
+        view,
+        day,
+        category,
+        scope,
+        owner,
+        format,
+        status,
+        search,
+        posts: data.posts.map(
+          ({
+            id,
+            plannedAt,
+            title,
+            type,
+            category,
+            owner,
+            status,
+            onHold,
+            thumbnail,
+          }) => ({
+            id,
+            plannedAt,
+            title,
+            type,
+            category,
+            owner,
+            status,
+            onHold,
+            thumbnail,
+          }),
+        ),
+        categories: data.categories.map(({ id, name }) => ({ id, name })),
+      }),
+    [
+      view,
+      day,
+      category,
+      scope,
+      owner,
+      format,
+      status,
+      search,
+      data.posts,
+      data.categories,
+    ],
+  );
+  useLayoutEffect(() => {
+    if (rowRoot.current)
+      rowMotion.update(
+        rowRoot.current,
+        !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches,
+      );
+  }, [rowLayout, loading, rowMotion]);
+  useEffect(() => () => rowMotion.cancel(), [rowMotion]);
   const notify = (message: string, undo?: { id: string; version: number }) => {
     const id = crypto.randomUUID();
     setNotices((current) => [
@@ -623,7 +690,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
             void load(true);
           }}
         />
-        <div className="mc-calendar-main">
+        <div className="mc-calendar-main" ref={rowRoot}>
           <div className="mc-mobile-filter-row">
             <button
               aria-expanded={filtersOpen}

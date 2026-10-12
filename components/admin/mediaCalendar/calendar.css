@@ -228,6 +228,11 @@
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
 }
+.mc-days[data-row-resizing="true"] .mc-day,
+.mc-list > section[data-row-resizing="true"],
+.mc-unscheduled-cards[data-row-resizing="true"] {
+  overflow: clip;
+}
 .mc-day {
   min-height: 106px;
   padding: 9px 7px;
