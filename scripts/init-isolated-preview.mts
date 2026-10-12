@@ -92,7 +92,7 @@ try {
   if (carePathwayTable.rowCount) {
     await connection.query(`
       CREATE TABLE IF NOT EXISTS "${schema}"."care_pathways_subsections" (
-        "id" serial PRIMARY KEY NOT NULL,
+        "id" varchar PRIMARY KEY NOT NULL,
         "_order" integer NOT NULL,
         "_parent_id" integer NOT NULL,
         "title" varchar NOT NULL,
@@ -101,12 +101,21 @@ try {
         "image_id" integer
       );
       CREATE TABLE IF NOT EXISTS "${schema}"."care_pathways_subsections_links" (
-        "id" serial PRIMARY KEY NOT NULL,
+        "id" varchar PRIMARY KEY NOT NULL,
         "_order" integer NOT NULL,
-        "_parent_id" integer NOT NULL,
+        "_parent_id" varchar NOT NULL,
         "label" varchar NOT NULL,
         "url" varchar NOT NULL
       );
+      ALTER TABLE "${schema}"."care_pathways_subsections_links"
+        DROP CONSTRAINT IF EXISTS "care_pathways_subsections_links_parent_id_fk";
+      ALTER TABLE "${schema}"."care_pathways_subsections" ALTER COLUMN "id" DROP DEFAULT;
+      ALTER TABLE "${schema}"."care_pathways_subsections_links" ALTER COLUMN "id" DROP DEFAULT;
+      ALTER TABLE "${schema}"."care_pathways_subsections" ALTER COLUMN "id" TYPE varchar USING "id"::varchar;
+      ALTER TABLE "${schema}"."care_pathways_subsections_links" ALTER COLUMN "id" TYPE varchar USING "id"::varchar;
+      ALTER TABLE "${schema}"."care_pathways_subsections_links" ALTER COLUMN "_parent_id" TYPE varchar USING "_parent_id"::varchar;
+      DROP SEQUENCE IF EXISTS "${schema}"."care_pathways_subsections_id_seq";
+      DROP SEQUENCE IF EXISTS "${schema}"."care_pathways_subsections_links_id_seq";
       DO $$ BEGIN
         ALTER TABLE "${schema}"."care_pathways_subsections"
           ADD CONSTRAINT "care_pathways_subsections_parent_id_fk"

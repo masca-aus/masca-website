@@ -3,7 +3,7 @@ import { MigrateDownArgs, MigrateUpArgs, sql } from '@payloadcms/db-postgres'
 export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
     CREATE TABLE "care_pathways_subsections" (
-      "id" serial PRIMARY KEY NOT NULL,
+      "id" varchar PRIMARY KEY NOT NULL,
       "_order" integer NOT NULL,
       "_parent_id" integer NOT NULL,
       "title" varchar NOT NULL,
@@ -12,9 +12,9 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
       "image_id" integer
     );
     CREATE TABLE "care_pathways_subsections_links" (
-      "id" serial PRIMARY KEY NOT NULL,
+      "id" varchar PRIMARY KEY NOT NULL,
       "_order" integer NOT NULL,
-      "_parent_id" integer NOT NULL,
+      "_parent_id" varchar NOT NULL,
       "label" varchar NOT NULL,
       "url" varchar NOT NULL
     );
@@ -35,7 +35,6 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     ALTER TABLE "care_pathways_subsections" ENABLE ROW LEVEL SECURITY;
     ALTER TABLE "care_pathways_subsections_links" ENABLE ROW LEVEL SECURITY;
     REVOKE ALL ON TABLE "care_pathways_subsections", "care_pathways_subsections_links" FROM anon, authenticated;
-    REVOKE ALL ON SEQUENCE "care_pathways_subsections_id_seq", "care_pathways_subsections_links_id_seq" FROM anon, authenticated;
   `)
 }
 
