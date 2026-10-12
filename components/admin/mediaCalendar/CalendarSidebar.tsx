@@ -63,6 +63,10 @@ export function CalendarSidebar({
   onEditTypes: () => void;
 }) {
   const panel = useRef<HTMLElement>(null);
+  const closeRef = useRef(onClose);
+  useEffect(() => {
+    closeRef.current = onClose;
+  });
   useEffect(() => {
     if (!mobileOpen) return;
     const previous = document.activeElement as HTMLElement | null,
@@ -71,7 +75,14 @@ export function CalendarSidebar({
     panel.current
       ?.querySelector<HTMLElement>("button")
       ?.focus({ preventScroll: true });
+    const breakpoint = window.matchMedia("(max-width: 1099px)");
+    const checkBreakpoint = () => {
+      if (!breakpoint.matches) closeRef.current();
+    };
+    breakpoint.addEventListener?.("change", checkBreakpoint);
+    if (!breakpoint.matches) queueMicrotask(checkBreakpoint);
     return () => {
+      breakpoint.removeEventListener?.("change", checkBreakpoint);
       document.body.style.overflow = overflow;
       previous?.focus({ preventScroll: true });
     };

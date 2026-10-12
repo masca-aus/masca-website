@@ -61,6 +61,7 @@ it("keeps a deleted editor open after storage failure until the local changes ar
     />,
   );
   await screen.findByRole("heading", { name: "This post was deleted" });
+  expect(screen.getAllByRole("dialog")).toHaveLength(1);
   await waitFor(() =>
     expect(document.activeElement).toBe(
       screen.getByRole("button", { name: "Close post" }),

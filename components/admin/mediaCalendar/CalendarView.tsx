@@ -641,6 +641,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
                         onClick={(e) => {
                           if (
                             editable &&
+                            e.currentTarget.contains(e.target as Node) &&
                             !creatingRef.current &&
                             !pending.current &&
                             !drag.suppressClick() &&

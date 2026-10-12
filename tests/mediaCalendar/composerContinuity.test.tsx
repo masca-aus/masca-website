@@ -1,7 +1,14 @@
 // @vitest-environment jsdom
 import React from "react";
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen, act, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  act,
+  waitFor,
+} from "@testing-library/react";
 import { PostPanel } from "../../components/admin/mediaCalendar/PostPanel";
 import { newPost } from "../../features/mediaCalendar/service";
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: () => {} }) }));
@@ -11,6 +18,11 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 it("keeps one modal and scroll lock from creating through detail loading and editing", async () => {
+  vi.spyOn(HTMLElement.prototype, "offsetParent", "get").mockImplementation(
+    function (this: HTMLElement) {
+      return this.parentElement;
+    },
+  );
   const user = {
     id: "1",
     email: "test@masca.org.au",
@@ -41,6 +53,10 @@ it("keeps one modal and scroll lock from creating through detail loading and edi
   view.rerender(<PostPanel {...props} id={post.id} />);
   expect(screen.getByRole("dialog", { name: "Opening post" })).toBe(dialog);
   expect(dialog.parentElement).toBe(overlay);
+  fireEvent.keyDown(dialog, { key: "Tab", shiftKey: true });
+  expect(document.activeElement).toBe(
+    screen.getByRole("button", { name: "Close post" }),
+  );
   await act(async () =>
     finish(
       new Response(

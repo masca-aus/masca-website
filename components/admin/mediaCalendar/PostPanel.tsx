@@ -155,6 +155,11 @@ export function PostPanel(props: {
             if (!targets.length) {
               e.preventDefault();
               container.current?.focus();
+            } else if (
+              !targets.includes(document.activeElement as HTMLElement)
+            ) {
+              e.preventDefault();
+              (e.shiftKey ? last : first)?.focus();
             } else if (e.shiftKey && document.activeElement === first) {
               e.preventDefault();
               last?.focus();
@@ -495,13 +500,7 @@ function LoadedPanel({
   };
   if (post.deletedAt)
     return (
-      <div
-        ref={panel}
-        className="mc-panel"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="deleted-post-title"
-      >
+      <>
         <header className="mc-panel-header">
           <h2 id="deleted-post-title">This post was deleted</h2>
           <button aria-label="Close post" onClick={() => closeRef.current()}>
@@ -544,7 +543,7 @@ function LoadedPanel({
             </button>
           )}
         </section>
-      </div>
+      </>
     );
   return (
     <>
