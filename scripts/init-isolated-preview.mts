@@ -29,6 +29,7 @@ Object.assign(process.env, { NODE_ENV: "development" });
 const { getPayload } = await import("payload");
 const { default: config } = await import("../payload.config.ts");
 const payload = await getPayload({ config });
+let bootstrapError: unknown;
 try {
   if (payload.db.schemaName !== schema) {
     throw new Error("Payload connected to a different schema; refusing to seed preview content.");
@@ -75,7 +76,11 @@ try {
     await access.end();
   }
   console.log(`Isolated Cares preview schema ${schema} is ready.`);
+} catch (error) {
+  bootstrapError = error;
+  console.error(error);
 } finally {
-  await payload.db.pool?.end();
+  void payload.db.pool?.end().catch(() => {});
   await payload.destroy();
 }
+process.exit(bootstrapError ? 1 : 0);
