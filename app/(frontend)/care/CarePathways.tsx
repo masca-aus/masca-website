@@ -145,18 +145,15 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
             </div>
 
             <div className="grid gap-4 p-5 md:grid-cols-3 md:p-8">
-              {selected.children.map((item, index) => {
+              {selected.children.map((item) => {
                 const href = `/care/pathways/${item.id}`;
                 return (
                   <a
                     key={item.id}
                     href={href}
-                    className="group flex min-h-52 flex-col rounded-lg bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    className="group flex min-h-52 flex-col items-start rounded-lg bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                   >
-                    <span className="flex items-center justify-end text-blue-600">
-                      <span className="font-secondary text-lg font-bold text-blue-100">0{index + 1}</span>
-                    </span>
-                    <strong className="mt-auto pt-8 text-lg text-blue-600">{item.title}</strong>
+                    <strong className="text-lg text-blue-600">{item.title}</strong>
                     <span className="mt-2 text-sm leading-relaxed text-gray-700">{item.shortDescription}</span>
                   </a>
                 );
