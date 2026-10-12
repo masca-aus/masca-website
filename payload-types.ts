@@ -298,6 +298,10 @@ export interface User {
   role: 'administrator' | 'editor';
   status: 'invited' | 'active' | 'suspended';
   /**
+   * Personalises the dashboard. Content permissions below control access.
+   */
+  departments?: ('chairs' | 'secretariat' | 'treasury' | 'amplifies' | 'careers' | 'cares' | 'unites')[] | null;
+  /**
    * Manage all departments and states, including Organisations and Media. Account management remains restricted to administrators.
    */
   allContentAccess?: boolean | null;
@@ -763,6 +767,7 @@ export interface UsersSelect<T extends boolean = true> {
   email?: T;
   role?: T;
   status?: T;
+  departments?: T;
   allContentAccess?: T;
   permissions?: T;
   grants?:

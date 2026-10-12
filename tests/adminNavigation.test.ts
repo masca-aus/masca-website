@@ -17,3 +17,10 @@ describe("CMS route preloading", () => {
     );
   });
 });
+
+it('never preloads authentication, mutations, document editors or external destinations', () => {
+  for (const href of ['/admin/logout', '/admin/login', '/admin/reset-password', '/admin/collections/events/create', '/admin/collections/events/17', '/admin/../api/auth/google/start', '/admin/collections/events#row', '//example.com/admin']) {
+    expect(isAdminNavigationTarget(href)).toBe(false);
+  }
+  expect(isAdminNavigationTarget('/admin?branch=QLD&view=metrics')).toBe(true);
+});

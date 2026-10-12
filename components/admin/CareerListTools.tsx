@@ -1,5 +1,5 @@
 'use client';
-import Link from 'next/link';
+import { AdminLink as Link } from './AdminNavigationContext';
 import { useAuth } from '@payloadcms/ui';
 import { ListingTutorial, reviewQueueHref } from './ListingTutorial';
 import { AdminSearchHelp } from './AdminSearchHelp';

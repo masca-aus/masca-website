@@ -2,6 +2,7 @@ import * as calendar from './20261010_140000_media_calendar';
 import * as listingChanges from './20261008_140000_listing_changes';
 import * as listingEmails from './20261008_130000_listing_emails';
 import * as migration_20261006_140000_optional_media_alt from './20261006_140000_optional_media_alt';
+import * as migration_20261008_033000_account_departments from './20261008_033000_account_departments';
 import * as migration_20260802_071222_restructure_committee from './20260802_071222_restructure_committee';
 import * as migration_20260907_142655_add_committee_departments from './20260907_142655_add_committee_departments';
 import * as migration_20260916_010000_add_events_submission_workflow from './20260916_010000_add_events_submission_workflow';
@@ -18,6 +19,7 @@ import * as migration_20261003_041050_committee_scope_defaults from './20261003_
 import * as migration_20261003_041100_seed_national_council from './20261003_041100_seed_national_council';
 
 export const migrations = [
+
   {
     up: migration_20260802_071222_restructure_committee.up,
     down: migration_20260802_071222_restructure_committee.down,
@@ -92,4 +94,9 @@ export const migrations = [
   {up:listingEmails.up,down:listingEmails.down,name:'20261008_130000_listing_emails'},
   {up:listingChanges.up,down:listingChanges.down,name:'20261008_140000_listing_changes'},
   {up:calendar.up,down:calendar.down,name:'20261010_140000_media_calendar'},
+  {
+    up: migration_20261008_033000_account_departments.up,
+    down: migration_20261008_033000_account_departments.down,
+    name: '20261008_033000_account_departments',
+  },
 ];

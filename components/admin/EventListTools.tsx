@@ -1,25 +1,30 @@
 "use client";
-import Link from "next/link";
+import { AdminLink as Link, useAdminNavigation } from "./AdminNavigationContext";
 import { useAuth } from "@payloadcms/ui";
-import { ListingTutorial, reviewQueueHref } from "./ListingTutorial";
+import { ListingTutorial } from "./ListingTutorial";
 import { AdminSearchHelp } from "./AdminSearchHelp";
 import { EnsureStatusColumn } from "./EnsureStatusColumn";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import "./eventListTools.css";
 import { SectionToolbar } from "./SectionToolbar";
-import { EventReportPanel } from "./EventReportPanel";
+import dynamic from 'next/dynamic';
+import { ReportSelect } from './ReportSelect';
+import { eventListHref, eventListSelection } from './eventListNavigation';
+import { ownershipScopes } from '@/features/access/workspacePolicy';
+import { STATES } from '@/utils/states';
+const EventReportPanel = dynamic(() => import('./EventReportPanel').then(module => module.EventReportPanel), { loading: () => <p role="status">Loading report tools…</p> });
 
 export function EventListTools() {
   const { user } = useAuth();
   const params = useSearchParams();
-  const reviewing = params.get('where[submittedForReview][equals]') === 'true';
-  const requested = params.get("eventView");
-  const view =
-    requested === "archived"
-      ? requested
-      : "current";
+  const router = useRouter();
+  const navigation = useAdminNavigation();
+  const { view, status, branch } = eventListSelection(params);
   const [reports, setReports] = useState(false);
+  const [reportsLoaded, setReportsLoaded] = useState(false);
+  const navigate = (href: string) => navigation ? navigation.navigate(href, { scroll: false }) : router.push(href, { scroll: false });
+  const branchOptions = [{value:'all',label:'All branches'}, ...(branch === 'custom' ? [{value:'custom',label:'Selected branches'}] : []), ...ownershipScopes.map(value => ({value,label: STATES.find(state => state.code === value)?.name ?? ({ACT:'Australian Capital Territory',NT:'Northern Territory'} as Record<string,string>)[value] ?? value}))];
   return (
     <div className="masca-event-tools masca-section-shell">
       <EnsureStatusColumn />
@@ -31,7 +36,7 @@ export function EventListTools() {
             className="masca-action masca-action--secondary"
             aria-expanded={reports}
             aria-controls="masca-event-reports"
-            onClick={() => setReports(!reports)}
+            onClick={() => { setReportsLoaded(true); setReports(!reports); }}
           >
             Reports
           </button></div>
@@ -44,16 +49,21 @@ export function EventListTools() {
           ].map(([key, label]) => (
             <Link
               key={key}
-              href={`/admin/collections/events?eventView=${key}`}
-              data-tutorial={key === "archived" ? "archived" : undefined} aria-current={!reviewing && view === key ? "page" : undefined}
+              href={eventListHref(params, { view: key as 'current' | 'archived' })}
+              data-tutorial={key === "archived" ? "archived" : undefined} aria-current={view === key ? "page" : undefined}
             >
               {label}
             </Link>
           ))}
-          <Link data-tutorial="review-queue" href={reviewQueueHref("events")} aria-current={reviewing ? "page" : undefined}>To be reviewed</Link>
+          <Link data-tutorial="review-queue" href={eventListHref(params, { view: 'review' })} aria-current={view === 'review' ? "page" : undefined}>To be reviewed</Link>
         </nav>
       </SectionToolbar>
 
+      <div className="masca-event-filters" aria-label="Event filters">
+        <ReportSelect label="Branch" value={branch} options={branchOptions} onChange={value => navigate(eventListHref(params, { branch: value }))} />
+        {view !== 'review' && <ReportSelect label="Status" value={status} options={[{value:'all',label:'All statuses'},{value:'draft',label:'Drafts'},{value:'published',label:'Published'}]} onChange={value => navigate(eventListHref(params, { status: value as 'all' | 'draft' | 'published' }))} />}
+        <Link href={eventListHref(params, { clear: true })} className="masca-action masca-action--secondary">Clear search &amp; filters</Link>
+      </div>
       {view === "archived" && (
         <p>
           Archived events are kept for your records and reports. Restore an
@@ -68,7 +78,7 @@ export function EventListTools() {
         inert={!reports}
       >
         <div className="masca-report-disclosure__inner">
-          <EventReportPanel />
+          {reportsLoaded && <EventReportPanel />}
         </div>
       </div>
     </div>

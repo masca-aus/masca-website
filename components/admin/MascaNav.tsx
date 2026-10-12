@@ -3,13 +3,14 @@ import {mayUseCalendar} from "@/features/mediaCalendar/policy";
 import {clearCalendarRecovery} from "@/features/mediaCalendar/localRecovery";
 import type {CalendarUser} from "@/features/mediaCalendar/types";
 
-import { Link, NavToggler, useNav, useAuth } from "@payloadcms/ui";
+import { NavToggler, useNav, useAuth } from "@payloadcms/ui";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type CSSProperties } from "react";
 import { BriefcaseBusiness, CalendarDays, Handshake, House, Images, Building2, Users, UserRound, PanelLeftClose, PanelLeftOpen, ShieldCheck, LogOut } from "lucide-react";
 
 import { version } from "@/package.json";
 
+import { AdminLink as Link } from "./AdminNavigationContext";
 import { MascaMark } from "./MascaBrand";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -51,30 +52,30 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
 
   return (
     <>
-    {dashboard && !open && <button type="button" className="masca-dashboard-menu" aria-label="Open account menu" onClick={() => setNavOpen(true)}><PanelLeftOpen size={20} /><span>Menu</span></button>}
+    {dashboard && !open && <button type="button" className="masca-dashboard-menu" aria-label="Open navigation" onClick={() => setNavOpen(true)}><PanelLeftOpen size={20} /><span>Menu</span></button>}
     <aside className={["nav", "masca-nav", dashboard && "masca-nav--dashboard", open && "nav--nav-open", hydrated && "nav--nav-hydrated", shouldAnimate && "nav--nav-animate"].filter(Boolean).join(" ")} inert={!open}>
       <div className="nav__scroll" ref={navRef}>
         <div className="masca-nav__heading"><span className="masca-nav__brand"><MascaMark /><span>MASCA <small>CMS</small></span></span><NavToggler><PanelLeftClose size={19} /></NavToggler></div>
         <nav aria-label="CMS navigation" className="masca-nav__links">
-          {!dashboard && <Link href="/admin" className="masca-nav__link"><House size={19} />Dashboard</Link>}
-          {!dashboard && groups.map(group => {
+          {<Link restoreContext href="/admin" aria-current={dashboard ? "page" : undefined} className="masca-nav__link"><span className="masca-nav__icon"><House size={18} /></span>Dashboard</Link>}
+          {groups.map(group => {
             const items = group.items.filter(item => visibleEntities.collections.includes(item.slug));
             return items.length ? <section key={group.label} aria-label={group.label}>
               <h2>{group.label}</h2>
               {items.map(({ slug, label, icon: Icon, color }) => {
                 const href = `/admin/collections/${slug}`;
                 const active = pathname === href || pathname.startsWith(`${href}/`);
-                return <Link key={slug} href={href} className="masca-nav__link" aria-current={active ? "page" : undefined} style={{ "--section-accent": color } as CSSProperties}><span className="masca-nav__icon"><Icon size={18} /></span>{label}</Link>;
+                return <Link restoreContext key={slug} href={href} className="masca-nav__link" aria-current={active ? "page" : undefined} style={{ "--section-accent": color } as CSSProperties}><span className="masca-nav__icon"><Icon size={18} /></span>{label}</Link>;
               })}
             </section> : null;
           })}
-          {mayUseCalendar(user as unknown as CalendarUser, "view") && <Link href="/admin/media-calendar" className="masca-nav__link" aria-current={pathname==="/admin/media-calendar" ? "page" : undefined}><CalendarDays size={19}/>Media calendar</Link>}
+          {mayUseCalendar(user as unknown as CalendarUser, "view") && <Link href="/admin/media-calendar" className="masca-nav__link" aria-current={pathname === "/admin/media-calendar" ? "page" : undefined}><CalendarDays size={19} />Media calendar</Link>}
           <div className="masca-nav__account">
-            {dashboard && <h2>Settings</h2>}
+            <h2>Settings</h2>
             <div className="masca-nav__theme"><ThemeToggle /></div>
-            {visibleEntities.collections.includes("users") && <Link href="/admin/collections/users" className="masca-nav__link" aria-current={pathname.startsWith("/admin/collections/users") ? "page" : undefined}><ShieldCheck size={19} />People & access</Link>}
+            {visibleEntities.collections.includes("users") && <Link restoreContext href="/admin/collections/users" className="masca-nav__link" aria-current={pathname.startsWith("/admin/collections/users") ? "page" : undefined}><ShieldCheck size={19} />People & access</Link>}
             <Link href="/admin/account" className="masca-nav__link" aria-current={pathname === "/admin/account" ? "page" : undefined}><UserRound size={19} />My account</Link>
-            <Link href="/admin/logout" onClick={() => {try {clearCalendarRecovery(localStorage);} catch { /* Sign-out remains available when storage is denied. */ }}} prefetch={false} className="masca-nav__link"><LogOut size={19} />Log out</Link>
+            <Link href="/admin/logout" onClick={() => {try {clearCalendarRecovery(localStorage);} catch { /* Storage denial must not block sign-out. */ }}} prefetch={false} className="masca-nav__link"><LogOut size={19} />Log out</Link>
           </div>
         </nav>
         <p className="masca-nav__version" aria-label={`MASCA CMS version ${version}`}>MASCA CMS <span>v{version}</span></p>
