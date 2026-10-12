@@ -2,29 +2,18 @@
 
 import { useRef, useState } from "react";
 import {
-  ArrowRight, Brain, BriefcaseBusiness, Camera, GraduationCap, HeartHandshake,
-  HeartPulse, Home, MapPin, MessageCircle, Scale, ShieldCheck, Sparkles,
-  WalletCards, type LucideIcon,
+  ArrowRight, HeartHandshake, MessageCircle, Phone, type LucideIcon,
 } from "lucide-react";
 import type { PublicCarePathway } from "@/features/care/publicCarePathways";
 
 type PathwayStyle = { eyebrow: string; icon: LucideIcon; accent: string; soft: string; text: string; activeCard: string; activeIcon: string; activeEyebrow: string; activeDescription: string };
 
 const pathwayStyles: PathwayStyle[] = [
-  { eyebrow: "Start here", icon: Sparkles, accent: "bg-blue-600", soft: "bg-blue-50", text: "text-blue-600", activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2", activeIcon: "bg-yellow-500 text-blue-900", activeEyebrow: "text-yellow-500", activeDescription: "text-blue-100" },
-  { eyebrow: "Plan ahead", icon: WalletCards, accent: "bg-yellow-500", soft: "bg-yellow-50", text: "text-yellow-800", activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2", activeIcon: "bg-blue-600 text-white", activeEyebrow: "text-blue-800", activeDescription: "text-blue-900" },
-  { eyebrow: "Find your footing", icon: Home, accent: "bg-yellow-500", soft: "bg-yellow-50", text: "text-yellow-800", activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2", activeIcon: "bg-blue-600 text-white", activeEyebrow: "text-blue-800", activeDescription: "text-blue-900" },
-  { eyebrow: "Keep moving", icon: GraduationCap, accent: "bg-blue-600", soft: "bg-blue-50", text: "text-blue-600", activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2", activeIcon: "bg-yellow-500 text-blue-900", activeEyebrow: "text-yellow-500", activeDescription: "text-blue-100" },
+  { eyebrow: "Start here", icon: HeartHandshake, accent: "bg-blue-600", soft: "bg-blue-50", text: "text-blue-600", activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2", activeIcon: "bg-yellow-500 text-blue-900", activeEyebrow: "text-yellow-500", activeDescription: "text-blue-100" },
+  { eyebrow: "Plan ahead", icon: HeartHandshake, accent: "bg-yellow-500", soft: "bg-yellow-50", text: "text-yellow-800", activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2", activeIcon: "bg-blue-600 text-white", activeEyebrow: "text-blue-800", activeDescription: "text-blue-900" },
+  { eyebrow: "Find your footing", icon: HeartHandshake, accent: "bg-yellow-500", soft: "bg-yellow-50", text: "text-yellow-800", activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2", activeIcon: "bg-blue-600 text-white", activeEyebrow: "text-blue-800", activeDescription: "text-blue-900" },
+  { eyebrow: "Keep moving", icon: HeartHandshake, accent: "bg-blue-600", soft: "bg-blue-50", text: "text-blue-600", activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2", activeIcon: "bg-yellow-500 text-blue-900", activeEyebrow: "text-yellow-500", activeDescription: "text-blue-100" },
 ];
-
-const topicIcons: Array<[RegExp, LucideIcon]> = [
-  [/health|doctor|gp/i, HeartPulse], [/mental|wellbeing|counsell/i, Brain],
-  [/safety|emergency/i, ShieldCheck], [/budget|finance|financial/i, WalletCards],
-  [/work|income/i, BriefcaseBusiness], [/study|academic|campus/i, GraduationCap],
-  [/option|rights|legal/i, Scale], [/accommodation|housing|home/i, Home],
-  [/local|state|location/i, MapPin], [/community|people/i, HeartHandshake],
-];
-const iconForTopic = (title: string): LucideIcon => topicIcons.find(([pattern]) => pattern.test(title))?.[1] ?? ArrowRight;
 
 const states: { code: string; instagram?: string }[] = [
   { code: "VIC", instagram: "https://www.instagram.com/mascavic/" },
@@ -41,17 +30,44 @@ const communityLinks = [
     key: "instagram",
     label: "Instagram",
     description: "Stay in the loop! Get latest updates on events, gatherings, and everything happening in our community.",
-    icon: Camera,
-    colour: "bg-pink-50 text-pink-600",
+    logoStyle: "bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 text-white shadow-lg shadow-pink-200",
   },
   {
     key: "whatsapp",
     label: "WhatsApp",
     description: "Meet, connect & support! Join the group to make new friends, ask questions, share tips, and find your people in the community.",
-    icon: MessageCircle,
-    colour: "bg-green-50 text-green-700",
+    logoStyle: "bg-green-600 text-white shadow-lg shadow-green-200",
   },
 ] as const;
+
+const stateBubblePositions = [
+  "lg:col-start-1 lg:row-start-1",
+  "lg:col-start-2 lg:row-start-1",
+  "lg:col-start-3 lg:row-start-1",
+  "lg:col-start-1 lg:row-start-2",
+  "lg:col-start-3 lg:row-start-2",
+  "lg:col-start-1 lg:row-start-3",
+  "lg:col-start-2 lg:row-start-3",
+];
+
+function CommunityMark({ platform }: { platform: "instagram" | "whatsapp" }) {
+  if (platform === "instagram") {
+    return (
+      <svg viewBox="0 0 24 24" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.5" cy="6.5" r=".75" fill="currentColor" stroke="none" />
+      </svg>
+    );
+  }
+
+  return (
+    <span className="relative flex h-10 w-10 items-center justify-center" aria-hidden="true">
+      <MessageCircle size={39} strokeWidth={1.8} />
+      <Phone size={15} strokeWidth={2} className="absolute" />
+    </span>
+  );
+}
 
 export default function CarePathways({ pathways }: { pathways: PublicCarePathway[] }) {
   const [active, setActive] = useState<number>(pathways[0]?.id ?? 0);
@@ -130,7 +146,6 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
 
             <div className="grid gap-4 p-5 md:grid-cols-3 md:p-8">
               {selected.children.map((item, index) => {
-                const Icon = iconForTopic(item.title ?? "");
                 const href = `/care/pathways/${item.id}`;
                 return (
                   <a
@@ -138,8 +153,7 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
                     href={href}
                     className="group flex min-h-52 flex-col rounded-lg bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                   >
-                    <span className="flex items-center justify-between text-blue-600">
-                      <Icon size={23} aria-hidden="true" />
+                    <span className="flex items-center justify-end text-blue-600">
                       <span className="font-secondary text-lg font-bold text-blue-100">0{index + 1}</span>
                     </span>
                     <strong className="mt-auto pt-8 text-lg text-blue-600">{item.title}</strong>
@@ -162,23 +176,25 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
             </p>
           </div>
 
-          <div className="mt-10 grid gap-5 lg:grid-cols-2">
+          <div className="mt-10 grid gap-6 lg:grid-cols-2">
             {communityLinks.map((link) => {
-              const Icon = link.icon;
               return (
-                <article key={link.key} className="rounded-xl border border-blue-100 bg-white p-6 shadow-lg md:p-8">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${link.colour}`}>
-                    <Icon size={24} aria-hidden="true" />
-                  </div>
-                  <h3 className="mt-5 font-secondary text-2xl font-bold text-blue-600">{link.label}</h3>
-                  <p className="mt-2 min-h-14 text-sm leading-relaxed text-gray-700">{link.description}</p>
-                  <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label={`${link.label} by state`}>
-                    {states.map((item) => {
-                      const tileClass = "inline-flex min-h-11 items-center justify-between gap-2 rounded-lg bg-blue-50 px-3 text-sm font-bold text-blue-600 transition hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600";
+                <article key={link.key} className="overflow-hidden rounded-2xl border border-blue-100 bg-white p-5 shadow-lg md:p-7">
+                  <div className="mx-auto grid max-w-2xl grid-cols-2 gap-3 lg:min-h-[390px] lg:grid-cols-3 lg:grid-rows-3 lg:gap-5" aria-label={`${link.label} by state`}>
+                    <div className="col-span-2 flex flex-col items-center justify-center px-3 py-5 text-center lg:col-span-1 lg:col-start-2 lg:row-start-2">
+                      <span className={`flex h-20 w-20 items-center justify-center rounded-full ${link.logoStyle}`}>
+                        <CommunityMark platform={link.key} />
+                      </span>
+                      <h3 className="mt-4 font-secondary text-2xl font-bold text-blue-600">{link.label}</h3>
+                      <p className="mt-2 max-w-xs text-sm leading-relaxed text-gray-700">{link.description}</p>
+                    </div>
+                    {states.map((item, index) => {
+                      const tileClass = "mx-auto flex aspect-square w-20 flex-col items-center justify-center gap-1 rounded-full border border-blue-100 bg-blue-50 text-sm font-bold text-blue-600 shadow-sm transition sm:w-24 lg:w-20 xl:w-24";
                       if (link.key === "whatsapp") {
                         return (
-                          <span key={item.code} aria-disabled="true" className={`${tileClass} cursor-default opacity-60 hover:bg-blue-50`}>
-                            {item.code}<ArrowRight size={15} aria-hidden="true" />
+                          <span key={item.code} aria-disabled="true" title="WhatsApp group link coming soon" className={`${tileClass} ${stateBubblePositions[index]} cursor-default opacity-55`}>
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700"><MessageCircle size={17} aria-hidden="true" /></span>
+                            {item.code}
                           </span>
                         );
                       }
@@ -190,9 +206,10 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
                           href={href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={tileClass}
+                          aria-label={`Open ${item.code} MASCA Instagram`}
+                          className={`${tileClass} ${stateBubblePositions[index]} hover:-translate-y-1 hover:border-pink-200 hover:bg-pink-50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600`}
                         >
-                          {item.code}<ArrowRight size={15} aria-hidden="true" />
+                          {item.code}
                         </a>
                       );
                     })}
