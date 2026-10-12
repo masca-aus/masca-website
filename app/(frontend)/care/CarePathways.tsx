@@ -41,13 +41,13 @@ const communityLinks = [
 ] as const;
 
 const stateBubblePositions = [
-  "lg:col-start-1 lg:row-start-1",
-  "lg:col-start-2 lg:row-start-1",
-  "lg:col-start-3 lg:row-start-1",
-  "lg:col-start-1 lg:row-start-2",
-  "lg:col-start-3 lg:row-start-2",
-  "lg:col-start-1 lg:row-start-3",
-  "lg:col-start-2 lg:row-start-3",
+  "left-0 top-0 lg:left-[5%] lg:top-[4%]",
+  "left-1/2 top-0 -translate-x-1/2",
+  "right-0 top-0 lg:right-[5%]",
+  "left-0 top-1/2 -translate-y-1/2",
+  "right-0 top-1/2 -translate-y-1/2",
+  "bottom-0 left-[16%]",
+  "bottom-0 right-[16%]",
 ];
 
 function CommunityMark({ platform }: { platform: "instagram" | "whatsapp" }) {
@@ -180,19 +180,19 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
             {communityLinks.map((link) => {
               return (
                 <article key={link.key} className="overflow-hidden rounded-2xl border border-blue-100 bg-white p-5 shadow-lg md:p-7">
-                  <div className="mx-auto grid max-w-2xl grid-cols-2 gap-3 lg:min-h-[390px] lg:grid-cols-3 lg:grid-rows-3 lg:gap-5" aria-label={`${link.label} by state`}>
-                    <div className="col-span-2 flex flex-col items-center justify-center px-3 py-5 text-center lg:col-span-1 lg:col-start-2 lg:row-start-2">
-                      <span className={`flex h-20 w-20 items-center justify-center rounded-full ${link.logoStyle}`}>
+                  <div className="relative mx-auto h-[390px] max-w-2xl sm:h-[420px] lg:h-[390px]" aria-label={`${link.label} by state`}>
+                    <div className="absolute left-1/2 top-1/2 flex w-40 -translate-x-1/2 -translate-y-1/2 flex-col items-center text-center sm:w-48 lg:w-60">
+                      <span className={`flex h-16 w-16 items-center justify-center rounded-full sm:h-20 sm:w-20 ${link.logoStyle}`}>
                         <CommunityMark platform={link.key} />
                       </span>
-                      <h3 className="mt-4 font-secondary text-2xl font-bold text-blue-600">{link.label}</h3>
-                      <p className="mt-2 max-w-xs text-sm leading-relaxed text-gray-700">{link.description}</p>
+                      <h3 className="mt-3 font-secondary text-xl font-bold text-blue-600 sm:text-2xl">{link.label}</h3>
+                      <p className="mt-2 max-w-[10rem] text-xs leading-relaxed text-gray-700 sm:max-w-xs sm:text-sm">{link.description}</p>
                     </div>
                     {states.map((item, index) => {
-                      const tileClass = "mx-auto flex aspect-square w-20 flex-col items-center justify-center gap-1 rounded-full border border-blue-100 bg-blue-50 text-sm font-bold text-blue-600 shadow-sm transition sm:w-24 lg:w-20 xl:w-24";
+                      const tileClass = `absolute flex aspect-square w-16 flex-col items-center justify-center gap-1 rounded-full border border-blue-100 bg-blue-50 text-sm font-bold text-blue-600 shadow-sm transition sm:w-20 lg:w-24 ${stateBubblePositions[index]}`;
                       if (link.key === "whatsapp") {
                         return (
-                          <span key={item.code} aria-disabled="true" title="WhatsApp group link coming soon" className={`${tileClass} ${stateBubblePositions[index]} cursor-default opacity-55`}>
+                          <span key={item.code} aria-disabled="true" title="WhatsApp group link coming soon" className={`${tileClass} cursor-default opacity-55`}>
                             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700"><MessageCircle size={17} aria-hidden="true" /></span>
                             {item.code}
                           </span>
@@ -207,7 +207,7 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`Open ${item.code} MASCA Instagram`}
-                          className={`${tileClass} ${stateBubblePositions[index]} hover:-translate-y-1 hover:border-pink-200 hover:bg-pink-50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600`}
+                          className={`${tileClass} hover:-translate-y-1 hover:border-pink-200 hover:bg-pink-50 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600`}
                         >
                           {item.code}
                         </a>
