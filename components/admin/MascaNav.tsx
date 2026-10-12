@@ -53,7 +53,7 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
 
   return (
     <>
-    {dashboard && !open && <button type="button" className="masca-dashboard-menu" aria-label="Open navigation" onClick={() => setNavOpen(true)}><PanelLeftOpen size={20} /><span>Menu</span></button>}
+    {dashboard && !open && <button type="button" className="masca-dashboard-menu" aria-label="Open navigation" onClick={() => setNavOpen(true)}><PanelLeftOpen size={19} /><span>Menu</span></button>}
     <aside className={["nav", "masca-nav", dashboard && "masca-nav--dashboard", open && "nav--nav-open", hydrated && "nav--nav-hydrated", shouldAnimate && "nav--nav-animate"].filter(Boolean).join(" ")} inert={!open}>
       <div className="nav__scroll" ref={navRef}>
         <div className="masca-nav__heading"><span className="masca-nav__brand"><MascaMark /><span>MASCA <small>CMS</small></span></span><NavToggler><PanelLeftClose size={19} /></NavToggler></div>
