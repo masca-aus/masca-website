@@ -9,6 +9,8 @@ import {
   calendarSchema,
 } from "../features/mediaCalendar/schema.ts";
 export async function up({ db }: MigrateUpArgs) {
+  if (calendarSchema() === "media_calendar_preview" && workspaceSchema() === "public")
+    throw new Error("Calendar previews require isolated CMS users and migration history.");
   await db.execute(
     sql.raw(
       `ALTER TABLE "${workspaceSchema()}".users ADD COLUMN IF NOT EXISTS calendar_access jsonb; ${calendarSchemaSQL()}`,

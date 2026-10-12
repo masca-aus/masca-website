@@ -1,6 +1,10 @@
 #!/bin/sh
 set -eu
-if [ "${VERCEL_ENV:-}" != "production" ] && [ "${VERCEL_GIT_COMMIT_REF:-}" = "codex/media-calendar" ]; then
+if [ "${VERCEL_ENV:-}" = "preview" ] && [ "${WORKSPACE_AUTH_ENABLED:-}" != "true" ]; then
+  echo "Preview builds require isolated Workspace settings; refusing production migration history." >&2
+  exit 1
+fi
+if [ "${VERCEL_ENV:-}" != "production" ] && [ "${MEDIA_CALENDAR_ENABLED:-}" = "true" ]; then
   if [ "${MEDIA_CALENDAR_ENABLED:-}" != "true" ] || [ "${WORKSPACE_AUTH_ENABLED:-}" != "true" ]; then
     echo "Calendar preview requires its isolated settings; refusing the default migration step." >&2
     exit 1

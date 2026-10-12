@@ -254,6 +254,7 @@ function LoadedPanel({
       initial.pendingUploads ?? [],
     ),
     [linksDraft, setLinksDraft] = useState(initial.post.links.join("\n")),
+    [holdReason, setHoldReason] = useState(initial.post.holdReason),
     [history, setHistory] = useState(initial.history),
     [title, setTitle] = useState(initial.post.title),
     [caption, setCaption] = useState(initial.post.caption),
@@ -286,10 +287,13 @@ function LoadedPanel({
     panel = container,
     closeRef = requestCloseRef,
     queue = useRef(Promise.resolve()),
+    acknowledgedVersions = useRef(new Map<number, number>()),
     titleVersion = useRef(post.version),
     localTitle = useRef(title),
     localLinks = useRef(linksDraft),
-    linksVersion = useRef(post.version);
+    linksVersion = useRef(post.version),
+    localHoldReason = useRef(holdReason),
+    holdVersion = useRef(post.version);
   useEffect(() => {
     postRef.current = savedPost;
     localTitle.current = title;
@@ -333,6 +337,11 @@ function LoadedPanel({
       localLinks.current = p.links.join("\n");
       linksVersion.current = p.version;
     }
+    if (localHoldReason.current === previous.holdReason) {
+      setHoldReason(p.holdReason);
+      localHoldReason.current = p.holdReason;
+      holdVersion.current = p.version;
+    }
     onChange();
     if (JSON.stringify(p.assets) !== JSON.stringify(previous.assets))
       void api<Detail>(`${calendarAPI}?id=${p.id}`)
@@ -373,18 +382,26 @@ function LoadedPanel({
     }
   };
   const patch = (values: Partial<Post>, version?: number) => {
+    const baseVersion = version ?? postRef.current.version;
     const pending = { ...pendingDetails.current, ...values };
     pendingDetails.current = pending;
     setPendingPatch(pending);
     const op = queue.current
       .catch(() => {})
-      .then(() =>
-        act({
+      .then(async () => {
+        let expectedVersion = baseVersion;
+        // Only our acknowledged writes can advance a queued edit's base.
+        // A teammate's version must still produce a conflict.
+        while (acknowledgedVersions.current.has(expectedVersion))
+          expectedVersion = acknowledgedVersions.current.get(expectedVersion)!;
+        const result = await act({
           action: "patch",
           patch: values,
-          expectedVersion: version ?? postRef.current.version,
-        }),
-      )
+          expectedVersion,
+        });
+        acknowledgedVersions.current.set(expectedVersion, result.version);
+        return result;
+      })
       .then((p) => {
         const next = { ...pendingDetails.current };
         for (const key of Object.keys(values) as (keyof Post)[])
@@ -672,6 +689,7 @@ function LoadedPanel({
                 setAssets(d.assets);
                 titleVersion.current = d.post.version;
                 linksVersion.current = d.post.version;
+                holdVersion.current = d.post.version;
                 setPendingUploads(d.pendingUploads ?? []);
                 setError(
                   "Latest post loaded. Your local title and caption are kept; retry your edit when ready.",
@@ -846,11 +864,20 @@ function LoadedPanel({
                 <label>
                   Hold reason
                   <textarea
-                    defaultValue={post.holdReason}
+                    value={holdReason}
                     disabled={!editable}
-                    onBlur={(e) =>
-                      void patch({ holdReason: e.target.value }).catch(() => {})
-                    }
+                    onChange={(e) => {
+                      if (localHoldReason.current === postRef.current.holdReason)
+                        holdVersion.current = postRef.current.version;
+                      localHoldReason.current = e.target.value;
+                      setHoldReason(e.target.value);
+                    }}
+                    onBlur={() => {
+                      if (localHoldReason.current !== postRef.current.holdReason)
+                        void patch({ holdReason: localHoldReason.current }, holdVersion.current)
+                          .then(() => { holdVersion.current = postRef.current.version; })
+                          .catch(() => {});
+                    }}
                   />
                 </label>
               )}

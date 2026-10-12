@@ -1,5 +1,6 @@
 "use client";
 import {mayUseCalendar} from "@/features/mediaCalendar/policy";
+import {clearCalendarRecovery} from "@/features/mediaCalendar/localRecovery";
 import type {CalendarUser} from "@/features/mediaCalendar/types";
 
 import { Link, NavToggler, useNav, useAuth } from "@payloadcms/ui";
@@ -73,7 +74,7 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
             <div className="masca-nav__theme"><ThemeToggle /></div>
             {visibleEntities.collections.includes("users") && <Link href="/admin/collections/users" className="masca-nav__link" aria-current={pathname.startsWith("/admin/collections/users") ? "page" : undefined}><ShieldCheck size={19} />People & access</Link>}
             <Link href="/admin/account" className="masca-nav__link" aria-current={pathname === "/admin/account" ? "page" : undefined}><UserRound size={19} />My account</Link>
-            <Link href="/admin/logout" onClick={() => {for(const key of Object.keys(localStorage))if(key.startsWith("masca-caption:"))localStorage.removeItem(key);}} prefetch={false} className="masca-nav__link"><LogOut size={19} />Log out</Link>
+            <Link href="/admin/logout" onClick={() => {try {clearCalendarRecovery(localStorage);} catch { /* Sign-out remains available when storage is denied. */ }}} prefetch={false} className="masca-nav__link"><LogOut size={19} />Log out</Link>
           </div>
         </nav>
         <p className="masca-nav__version" aria-label={`MASCA CMS version ${version}`}>MASCA CMS <span>v{version}</span></p>

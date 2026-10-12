@@ -81,6 +81,15 @@ describe.runIf(!!url)(
         ).rows,
       ).toHaveLength(0);
     });
+    it("does not recreate permanently deleted default types during repeated initialization", async () => {
+      const id = "00000000-0000-4000-8000-000000000001";
+      const c = { id, name: "MASA", color: "#5959c9", archived: true };
+      const exists = await db.query("SELECT 1 FROM media_calendar_preview.categories WHERE id=$1", [id]);
+      await saveCategory(actor, c, !exists.rowCount);
+      await deleteCategory(actor, id);
+      await db.query(calendarSchemaSQL("media_calendar_preview"));
+      expect((await db.query("SELECT 1 FROM media_calendar_preview.categories WHERE id=$1", [id])).rowCount).toBe(0);
+    });
     it("rejects deleting an active type or a type attached to posts", async () => {
       const active = type(false);
       await saveCategory(actor, active, true);

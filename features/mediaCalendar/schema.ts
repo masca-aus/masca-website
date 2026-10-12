@@ -7,7 +7,10 @@ export function calendarSchema(env: NodeJS.ProcessEnv = process.env) {
 export function calendarSchemaSQL(
   schema: "media_calendar" | "media_calendar_preview" = calendarSchema(),
 ) {
-  return `CREATE SCHEMA IF NOT EXISTS "${schema}";
+  return `DO $calendar_init$
+ DECLARE seed_defaults boolean := to_regclass('"${schema}".categories') IS NULL;
+ BEGIN
+ CREATE SCHEMA IF NOT EXISTS "${schema}";
  CREATE TABLE IF NOT EXISTS "${schema}".posts (id uuid PRIMARY KEY, planned_at timestamptz, status text NOT NULL, category uuid, data jsonb NOT NULL);
  CREATE INDEX IF NOT EXISTS calendar_posts_planned ON "${schema}".posts(planned_at);
  CREATE INDEX IF NOT EXISTS calendar_posts_status ON "${schema}".posts(status);
@@ -22,6 +25,7 @@ export function calendarSchemaSQL(
  CREATE TABLE IF NOT EXISTS "${schema}".presence (client_id uuid PRIMARY KEY, user_id text NOT NULL, post_id uuid REFERENCES "${schema}".posts(id), cursor jsonb, expires_at timestamptz NOT NULL);
  CREATE INDEX IF NOT EXISTS calendar_presence_expiry ON "${schema}".presence(expires_at);
  ${["presence", "posts", "categories", "assets", "revisions", "notifications"].map((t) => `ALTER TABLE "${schema}".${t} ENABLE ROW LEVEL SECURITY; REVOKE ALL ON "${schema}".${t} FROM PUBLIC;`).join("\n")}
+ IF seed_defaults THEN
  INSERT INTO "${schema}".categories(id,data) VALUES
  ${[
    ["MASA", "#5959c9"],
@@ -35,5 +39,7 @@ export function calendarSchemaSQL(
        `('00000000-0000-4000-8000-00000000000${i + 1}', '${JSON.stringify({ id: `00000000-0000-4000-8000-00000000000${i + 1}`, name, color, archived: false })}'::jsonb)`,
    )
    .join(",")}
- ON CONFLICT (id) DO NOTHING;`;
+ ON CONFLICT (id) DO NOTHING;
+ END IF;
+ END $calendar_init$;`;
 }
