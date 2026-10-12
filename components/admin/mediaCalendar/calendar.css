@@ -44,7 +44,11 @@
   padding: 8px 12px;
   cursor: pointer;
   min-height: 36px;
-  transition: background 0.12s;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    opacity 140ms ease;
 }
 .mc-workspace button:hover {
   background: var(--mc-soft);
@@ -1626,6 +1630,13 @@
   max-width: calc(100vw - 32px);
   max-height: 40dvh;
   overflow: auto;
+  background: transparent;
+  box-shadow: none;
+  scrollbar-width: none;
+  pointer-events: none;
+}
+.mc-toast-stack::-webkit-scrollbar {
+  display: none;
 }
 .mc-toast {
   display: flex;
@@ -1635,9 +1646,11 @@
   color: var(--mc-text);
   background: var(--mc-bg);
   border: 1px solid var(--mc-line);
-  box-shadow: 0 8px 32px #10153520;
+  box-shadow: none;
   border-radius: 12px;
-  animation: mc-toast-in 180ms ease-out;
+  font-size: 12px;
+  pointer-events: auto;
+  animation: mc-toast-in 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .mc-toast > span {
   flex: 1;
@@ -1650,8 +1663,19 @@
 }
 .mc-workspace .mc-toast button {
   padding: 5px 8px;
-  min-height: 30px;
+  min-height: 28px;
   flex-shrink: 0;
+  border-color: transparent;
+  background: transparent;
+  font-weight: 600;
+}
+.mc-workspace .mc-toast button:hover {
+  background: var(--mc-soft);
+}
+.mc-workspace .mc-toast button[aria-label] {
+  width: 28px;
+  padding: 5px;
+  color: var(--mc-muted);
 }
 @keyframes mc-menu-in {
   from {
@@ -1816,7 +1840,27 @@
 }
 .mc-grid,
 .mc-list {
-  animation: mc-content-in 180ms ease-out;
+  animation: mc-content-in 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mc-range-title {
+  animation: mc-fade-in 140ms ease-out;
+}
+.mc-notifications,
+.mc-empty,
+.mc-details[open] > :not(summary),
+.mc-history[open] > :not(summary),
+.mc-mentions[open] > :not(summary),
+.mc-downloads[open] > :not(summary) {
+  animation: mc-fade-in 140ms ease-out;
+}
+.mc-sidebar-search {
+  transition: border-color 140ms ease;
+}
+.mc-sidebar-search:focus-within {
+  border-color: var(--mc-muted);
+}
+.mc-workspace summary {
+  transition: color 140ms ease;
 }
 .mc-grid--week .mc-day {
   min-height: 200px;
@@ -1976,11 +2020,19 @@
 @keyframes mc-content-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(3px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@keyframes mc-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 @keyframes mc-skeleton-pulse {
@@ -2017,6 +2069,16 @@
   .mc-date-popover {
     animation: none;
     transition: none;
+  }
+}
+
+/* Keep all planning motion optional, including controls and native details. */
+@media (prefers-reduced-motion: reduce) {
+  .mc-workspace *,
+  .mc-workspace *::before,
+  .mc-workspace *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }
 
