@@ -144,7 +144,6 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
                     </span>
                     <strong className="mt-auto pt-8 text-lg text-blue-600">{item.title}</strong>
                     <span className="mt-2 text-sm leading-relaxed text-gray-700">{item.shortDescription}</span>
-                    <ArrowRight size={18} className="mt-5 text-red-600 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                   </a>
                 );
               })}
