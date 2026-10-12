@@ -51,6 +51,16 @@ export default async function MascaCaresPage() {
           </div>
 
           <div className="mt-10 grid gap-5 md:grid-cols-3">
+            <article className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm md:p-7">
+              <span className="eyebrow text-blue-600">crisis support</span>
+              <h3 className="mt-3 font-secondary text-2xl font-bold text-blue-600">Lifeline Australia</h3>
+              <p className="mt-3 min-h-16 leading-relaxed text-gray-700">Confidential crisis support, available 24/7.</p>
+              <div className="mt-5 flex flex-col items-center text-center">
+                <a className="text-2xl font-bold text-blue-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:131114">13 11 14</a>
+                <a href="/contacts/lifeline-australia-131114.vcf" download className="mt-3 inline-flex min-h-10 items-center justify-center rounded-lg border border-blue-600 px-4 py-2 text-sm font-bold text-blue-600 transition hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Add To Contact</a>
+              </div>
+            </article>
+
             <article className="rounded-xl border border-red-100 bg-white p-6 shadow-sm md:p-7">
               <span className="eyebrow text-red-600">immediate danger</span>
               <h3 className="mt-3 font-secondary text-2xl font-bold text-blue-600">Emergency</h3>
@@ -60,16 +70,6 @@ export default async function MascaCaresPage() {
               <div className="mt-5 flex flex-col items-center text-center">
                 <a className="text-2xl font-bold text-red-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:000">000</a>
                 <a href="/contacts/triple-zero.vcf" download className="mt-3 inline-flex min-h-10 items-center justify-center rounded-lg border border-blue-600 px-4 py-2 text-sm font-bold text-blue-600 transition hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Add To Contact</a>
-              </div>
-            </article>
-
-            <article className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm md:p-7">
-              <span className="eyebrow text-blue-600">crisis support</span>
-              <h3 className="mt-3 font-secondary text-2xl font-bold text-blue-600">Lifeline Australia</h3>
-              <p className="mt-3 min-h-16 leading-relaxed text-gray-700">Confidential crisis support, available 24/7.</p>
-              <div className="mt-5 flex flex-col items-center text-center">
-                <a className="text-2xl font-bold text-blue-600 underline decoration-yellow-500 decoration-2 underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600" href="tel:131114">13 11 14</a>
-                <a href="/contacts/lifeline-australia-131114.vcf" download className="mt-3 inline-flex min-h-10 items-center justify-center rounded-lg border border-blue-600 px-4 py-2 text-sm font-bold text-blue-600 transition hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Add To Contact</a>
               </div>
             </article>
 
