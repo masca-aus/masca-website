@@ -21,6 +21,7 @@ import type {
   CalendarNotification,
   CalendarUser,
   Post,
+  Asset,
 } from "@/features/mediaCalendar/types";
 import { mayUseCalendar } from "@/features/mediaCalendar/policy";
 import {
@@ -43,12 +44,54 @@ type Overview = {
   notifications: CalendarNotification[];
   next: number | null;
 };
+function withSavedPost(
+  posts: Card[],
+  post: Post,
+  days: string[],
+  assets?: Asset[],
+): Card[] {
+  const previous = posts.find((p) => p.id === post.id);
+  if (previous && previous.version > post.version) return posts;
+  if (
+    post.deletedAt ||
+    (post.plannedAt && !days.includes(dayKey(post.plannedAt)))
+  )
+    return posts.filter((p) => p.id !== post.id);
+  const thumbnail = assets
+    ? (post.assets.find((id) =>
+        assets.some((a) => a.id === id && a.thumbnailKey),
+      ) ?? null)
+    : previous?.thumbnail && post.assets.includes(previous.thumbnail)
+      ? previous.thumbnail
+      : null;
+  const card: Card = {
+    id: post.id,
+    title: post.title,
+    type: post.type,
+    category: post.category,
+    plannedAt: post.plannedAt,
+    status: post.status,
+    onHold: post.onHold,
+    version: post.version,
+    owner: post.owner,
+    thumbnail,
+  };
+  return previous
+    ? posts.map((p) => (p.id === post.id ? card : p))
+    : [...posts, card];
+}
 export function CalendarView({ user }: { user: CalendarUser }) {
   const query = useSearchParams();
   const queryPostId = query.get("post");
   const [postId, setPostId] = useState(queryPostId);
+  const [initialPost, setInitialPost] = useState<Post | null>(null);
   useEffect(() => {
-    queueMicrotask(() => setPostId(queryPostId));
+    queueMicrotask(() => {
+      setPostId(queryPostId);
+      setInitialPost((current) =>
+        current?.id === queryPostId ? current : null,
+      );
+    });
   }, [queryPostId]);
   const [day, setDay] = useState(() => dayKey(new Date().toISOString())),
     [view, setView] = useState<"month" | "week" | "list">("month"),
@@ -87,6 +130,10 @@ export function CalendarView({ user }: { user: CalendarUser }) {
   );
   useEffect(() => () => clearTimeout(landingTimer.current), []);
   const cache = useRef(new Map<string, Overview>()),
+    savedPosts = useRef(
+      new Map<string, { post: Post; assets?: Asset[]; generation: number }>(),
+    ),
+    writeGeneration = useRef(0),
     epoch = useRef(0),
     dragging = useRef(false),
     editable = mayUseCalendar(user, "edit");
@@ -99,6 +146,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
   const load = useCallback(
     async (force = false) => {
       const n = ++epoch.current;
+      const startedBeforeWrite = writeGeneration.current;
       const cached = cache.current.get(rangeURL);
       if (cached && !force) {
         setData(cached);
@@ -114,8 +162,23 @@ export function CalendarView({ user }: { user: CalendarUser }) {
             next: next.next,
           };
         }
-        cache.current.set(rangeURL, result);
         if (n === epoch.current) {
+          // A refresh started before a save must not put the old card back.
+          for (const saved of savedPosts.current.values())
+            if (saved.generation > startedBeforeWrite)
+              result = {
+                ...result,
+                posts: withSavedPost(
+                  result.posts,
+                  saved.post,
+                  days,
+                  saved.assets,
+                ),
+              };
+          for (const [id, saved] of savedPosts.current)
+            if (saved.generation <= startedBeforeWrite)
+              savedPosts.current.delete(id);
+          cache.current.set(rangeURL, result);
           setData(result);
           setError("");
         }
@@ -125,7 +188,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
         if (n === epoch.current) setLoading(false);
       }
     },
-    [rangeURL],
+    [rangeURL, days],
   );
   useEffect(() => {
     const mobile = window.matchMedia("(max-width: 767px)").matches;
@@ -139,11 +202,12 @@ export function CalendarView({ user }: { user: CalendarUser }) {
     }, 30000);
     return () => {
       clearInterval(interval);
-      epoch.current++;
+      epoch.current = epoch.current + 1;
     };
   }, [load]);
   useEffect(() => {
     let alive = true;
+    const writes = writeGeneration.current;
     const timer = setTimeout(() => {
       for (const direction of [-1, 1]) {
         let adjacent: string;
@@ -158,7 +222,12 @@ export function CalendarView({ user }: { user: CalendarUser }) {
         if (!cache.current.has(url))
           void api<Overview>(url)
             .then((result) => {
-              if (alive && result.next === null) cache.current.set(url, result);
+              if (
+                alive &&
+                writes === writeGeneration.current &&
+                result.next === null
+              )
+                cache.current.set(url, result);
             })
             .catch(() => {});
       }
@@ -168,17 +237,19 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       clearTimeout(timer);
     };
   }, [day, view]);
-  const open = (id: string) => {
+  const open = (id: string, createdPost?: Post) => {
     window.history.pushState(
       null,
       "",
       `/admin/media-calendar?post=${encodeURIComponent(id)}`,
     );
     setPostId(id);
+    setInitialPost(createdPost ?? null);
   };
   const closeEditor = () => {
     window.history.pushState(null, "", "/admin/media-calendar");
     setPostId(null);
+    setInitialPost(null);
   };
   const create = async (date: string | null) => {
     if (creatingRef.current) return;
@@ -194,13 +265,44 @@ export function CalendarView({ user }: { user: CalendarUser }) {
         },
       });
       cache.current.clear();
-      open(result.post.id);
-      void load(true);
+      updatePost(result.post);
+      open(result.post.id, result.post);
     } catch (e) {
       setError((e as Error).message);
       creatingRef.current = false;
       setCreating(false);
     }
+  };
+  const updatePost = (post: Post, assets?: Asset[]) => {
+    cache.current.clear();
+    const previous = savedPosts.current.get(post.id);
+    if (assets) {
+      // Asset reads enrich an existing card, never count as a newly saved post.
+      // In particular, they cannot reinsert a card a fresh overview removed.
+      if (previous?.post.version === post.version)
+        savedPosts.current.set(post.id, { ...previous, assets });
+      setData((current) =>
+        current.posts.some(
+          (p) => p.id === post.id && p.version === post.version,
+        )
+          ? {
+              ...current,
+              posts: withSavedPost(current.posts, post, days, assets),
+            }
+          : current,
+      );
+      return;
+    }
+    if (!previous || previous.post.version <= post.version)
+      savedPosts.current.set(post.id, {
+        post,
+        assets: assets ?? previous?.assets,
+        generation: ++writeGeneration.current,
+      });
+    setData((current) => ({
+      ...current,
+      posts: withSavedPost(current.posts, post, days, assets),
+    }));
   };
   useEffect(() => {
     if (postId)
@@ -779,15 +881,13 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       {(creating || postId) && (
         <PostPanel
           id={postId}
+          initialPost={initialPost}
           user={user}
           members={data.members}
           categories={data.categories}
           onClose={closeEditor}
           onOpen={open}
-          onChange={() => {
-            cache.current.clear();
-            void load(true);
-          }}
+          onChange={updatePost}
         />
       )}
     </main>

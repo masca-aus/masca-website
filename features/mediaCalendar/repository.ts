@@ -256,24 +256,36 @@ export async function mutatePost(actor: CalendarUser, id: string, a: Action) {
 }
 export async function detail(actor: CalendarUser, id: string) {
   return transaction(actor, "view", async (c) => {
-    const p = await lockedPost(c, id);
-    const assets = await c.query(
-      `SELECT data FROM ${table("assets")} WHERE post_id=$1 AND id=ANY($2::uuid[])`,
-      [id, p.assets],
-    );
-    const pending = await c.query(
-      `SELECT data FROM ${table("assets")} WHERE post_id=$1 AND data->>'ready'='false' AND COALESCE(data->>'cancelled','false')='false' AND (data->>'createdAt')::timestamptz>now()-interval '1 day'`,
+    // One MVCC snapshot keeps the post, assets and history consistent without
+    // locking the post against a teammate's save. Writes still use lockedPost.
+    const { rows } = await c.query(
+      `SELECT p.data AS post,
+        COALESCE((SELECT jsonb_agg(a.data ORDER BY array_position(
+          ARRAY(SELECT jsonb_array_elements_text(p.data->'assets')),a.id::text))
+          FROM ${table("assets")} a WHERE a.post_id=p.id AND p.data->'assets' ? a.id::text),'[]'::jsonb) AS assets,
+        COALESCE((SELECT jsonb_agg(a.data) FROM ${table("assets")} a
+          WHERE a.post_id=p.id AND a.data->>'ready'='false'
+          AND COALESCE(a.data->>'cancelled','false')='false'
+          AND (a.data->>'createdAt')::timestamptz>now()-interval '1 day'),'[]'::jsonb) AS "pendingUploads",
+        COALESCE((SELECT jsonb_agg(h ORDER BY h."createdAt" DESC,h.id::bigint DESC) FROM (
+          SELECT r.id::text,author,action,created_at AS "createdAt",data->>'contentRevision' AS revision
+          FROM ${table("revisions")} r WHERE post_id=p.id ORDER BY created_at DESC,r.id DESC LIMIT 30
+        ) h),'[]'::jsonb) AS history
+       FROM ${table("posts")} p WHERE p.id=$1 AND p.data->>'deletedAt' IS NULL`,
       [id],
     );
-    const history = await c.query(
-      `SELECT id,author,action,created_at AS "createdAt",data->>'contentRevision' AS revision FROM ${table("revisions")} WHERE post_id=$1 ORDER BY created_at DESC LIMIT 30`,
-      [id],
-    );
-    return {
-      post: p,
-      assets: assets.rows.map((r) => r.data as Asset),
-      pendingUploads: pending.rows.map((r) => r.data as Asset),
-      history: history.rows,
+    if (!rows.length) throw new CalendarError("Post not found.", 404);
+    return rows[0] as {
+      post: Post;
+      assets: Asset[];
+      pendingUploads: Asset[];
+      history: {
+        id: string;
+        author: string;
+        action: string;
+        createdAt: string;
+        revision: string;
+      }[];
     };
   });
 }

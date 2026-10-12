@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type RefObject,
@@ -71,19 +72,34 @@ type Detail = {
 };
 export function PostPanel(props: {
   id: string | null;
+  initialPost?: Post | null;
   user: CalendarUser;
   members: Member[];
   categories: Category[];
   onClose: () => void;
   onOpen?: (id: string) => void;
-  onChange: () => void;
+  onChange: (post: Post, assets?: Asset[]) => void;
 }) {
   const [loaded, setLoaded] = useState<(Detail & { id: string }) | null>(null),
     [error, setError] = useState(""),
     [closing, setClosing] = useState(false);
   const container = useRef<HTMLDivElement>(null);
   const requestClose = useRef<() => void>(() => {});
-  const detail = loaded?.id === props.id ? loaded : null;
+  const detail = useMemo(
+    () =>
+      loaded?.id === props.id
+        ? loaded
+        : props.initialPost?.id === props.id
+          ? {
+              id: props.initialPost.id,
+              post: props.initialPost,
+              assets: [],
+              pendingUploads: [],
+              history: [],
+            }
+          : null,
+    [loaded, props.id, props.initialPost],
+  );
   useLayoutEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
@@ -110,7 +126,7 @@ export function PostPanel(props: {
     closingTimer.current = setTimeout(props.onClose, reduced ? 0 : 150);
   }, [props.onClose]);
   useEffect(() => {
-    if (!props.id) return;
+    if (!props.id || props.initialPost?.id === props.id) return;
     let alive = true;
     void api<Detail>(`${calendarAPI}?id=${props.id}`)
       .then((d) => {
@@ -122,7 +138,7 @@ export function PostPanel(props: {
     return () => {
       alive = false;
     };
-  }, [props.id]);
+  }, [props.id, props.initialPost]);
   useEffect(() => {
     if (!detail)
       requestClose.current = () => {
@@ -244,7 +260,7 @@ function LoadedPanel({
   categories: Category[];
   onClose: () => void;
   onOpen?: (id: string) => void;
-  onChange: () => void;
+  onChange: (post: Post, assets?: Asset[]) => void;
 }) {
   const router = useRouter();
   const [savedPost, setSavedPost] = useState(initial.post),
@@ -256,6 +272,8 @@ function LoadedPanel({
     [linksDraft, setLinksDraft] = useState(initial.post.links.join("\n")),
     [holdReason, setHoldReason] = useState(initial.post.holdReason),
     [history, setHistory] = useState(initial.history),
+    [historyOpen, setHistoryOpen] = useState(false),
+    [historyError, setHistoryError] = useState(""),
     [title, setTitle] = useState(initial.post.title),
     [caption, setCaption] = useState(initial.post.caption),
     [error, setError] = useState(""),
@@ -271,6 +289,13 @@ function LoadedPanel({
     [storageFailed, setStorageFailed] = useState(false),
     [discarding, setDiscarding] = useState(false);
   const exportedCopy = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
   const post = { ...savedPost, ...pendingPatch };
   const localCopyKey = `masca-calendar-deleted-copy:${user.id}:${post.id}`;
   const [localCopy, setLocalCopy] = useState(() => {
@@ -322,6 +347,7 @@ function LoadedPanel({
     }
   };
   const receive = (p: Post) => {
+    if (!mounted.current) return;
     if (p.version <= postRef.current.version) return;
     if (p.deletedAt) keepDeletedCopy();
     const previous = postRef.current;
@@ -342,28 +368,44 @@ function LoadedPanel({
       localHoldReason.current = p.holdReason;
       holdVersion.current = p.version;
     }
-    onChange();
+    onChange(p);
     if (JSON.stringify(p.assets) !== JSON.stringify(previous.assets))
       void api<Detail>(`${calendarAPI}?id=${p.id}`)
         .then((d) => {
+          if (
+            !mounted.current ||
+            JSON.stringify(d.post.assets) !==
+              JSON.stringify(postRef.current.assets)
+          )
+            return;
           setAssets(d.assets);
           setPendingUploads(d.pendingUploads ?? []);
+          setHistory(d.history);
+          onChange(postRef.current, d.assets);
         })
         .catch(() => {});
-    if (p.checkpointAt !== previous.checkpointAt)
-      void api<Detail>(`${calendarAPI}?id=${p.id}`)
-        .then((d) => setHistory(d.history))
-        .catch(() => {});
   };
-  const uploads = useUploads(post, (p) => {
-    receive(p);
-    void api<Detail>(`${calendarAPI}?id=${p.id}`)
+  const uploads = useUploads(post, receive);
+  useEffect(() => {
+    if (!historyOpen) return;
+    let alive = true;
+    void api<Detail>(`${calendarAPI}?id=${savedPost.id}`)
       .then((d) => {
-        setAssets(d.assets);
-        setPendingUploads(d.pendingUploads ?? []);
+        if (alive) {
+          setHistory(d.history);
+          setHistoryError("");
+        }
       })
-      .catch(() => {});
-  });
+      .catch(() => {
+        if (alive)
+          setHistoryError(
+            "History could not load. Close and reopen this section to retry.",
+          );
+      });
+    return () => {
+      alive = false;
+    };
+  }, [historyOpen, savedPost.id, savedPost.checkpointAt]);
   const act = async (action: Record<string, unknown>) => {
     setBusy(true);
     try {
@@ -875,12 +917,16 @@ function LoadedPanel({
                     value={holdReason}
                     disabled={!editable}
                     onChange={(e) => {
-                      if (localHoldReason.current === postRef.current.holdReason)
+                      if (
+                        localHoldReason.current === postRef.current.holdReason
+                      )
                         holdVersion.current = postRef.current.version;
                       localHoldReason.current = e.target.value;
                       setHoldReason(e.target.value);
                     }}
-                    onBlur={() => { void saveHoldReason().catch(() => {}); }}
+                    onBlur={() => {
+                      void saveHoldReason().catch(() => {});
+                    }}
                   />
                 </label>
               )}
@@ -972,8 +1018,12 @@ function LoadedPanel({
               Add comment
             </button>
           </section>
-          <details className="mc-history">
+          <details
+            className="mc-history"
+            onToggle={(event) => setHistoryOpen(event.currentTarget.open)}
+          >
             <summary>Activity & review history</summary>
+            {historyError && <p role="status">{historyError}</p>}
             {history.map((h) => (
               <p key={h.id}>
                 <strong>{h.action.replace("_", " ")}</strong> · {name(h.author)}
