@@ -2,6 +2,12 @@
 import Image from "next/image";
 import { useState } from "react";
 
+export type CollaborationConnection =
+  | "connecting"
+  | "live"
+  | "reconnecting"
+  | "unavailable";
+
 export type PresencePerson = {
   userId: string;
   name: string;
@@ -38,9 +44,11 @@ function AvatarContent({ person }: { person: PresencePerson }) {
 export function PresenceStrip({
   people,
   postId,
+  connection,
 }: {
   people: PresencePerson[];
   postId?: string;
+  connection?: CollaborationConnection;
 }) {
   const present = Array.from(
     new Map(
@@ -58,6 +66,23 @@ export function PresenceStrip({
           : "People online in the media calendar"
       }
     >
+      {connection && (
+        <span
+          className="mc-connection"
+          data-state={connection}
+          aria-label="Collaboration connection"
+          role="status"
+        >
+          <i aria-hidden="true" />
+          {connection === "live"
+            ? "Live"
+            : connection === "connecting"
+              ? "Connecting"
+              : connection === "reconnecting"
+                ? "Reconnecting"
+                : "Unavailable"}
+        </span>
+      )}
       {present.slice(0, 5).map((p) => (
         <span
           key={p.userId}

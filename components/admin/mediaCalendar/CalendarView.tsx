@@ -581,8 +581,8 @@ export function CalendarView({ user }: { user: CalendarUser }) {
     >
       <header className="mc-heading">
         <h1>Media calendar</h1>
+        <RoomPresence />
         <div className="mc-heading-actions">
-          <RoomPresence />
           <button
             className="mc-notification-button"
             aria-label={`Notifications, ${data.notifications.filter((n) => !n.read).length} unread`}

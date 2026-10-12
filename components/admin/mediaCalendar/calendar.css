@@ -278,6 +278,17 @@
 .mc-day:focus-within header button {
   opacity: 1;
 }
+/* The planning surface is interactive, not a text document. Keep editors selectable. */
+.mc-calendar-main {
+  -webkit-user-select: none;
+  user-select: none;
+}
+.mc-calendar-main input,
+.mc-calendar-main textarea,
+.mc-calendar-main [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
 .mc-workspace .mc-card {
   display: block;
   width: 100%;
@@ -2772,5 +2783,52 @@
   }
   .mc-room-presence small {
     margin-right: 0;
+  }
+}
+
+.mc-room-presence .mc-connection {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: auto;
+  height: auto;
+  margin: 0 6px 0 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--mc-muted);
+  font-size: 10px;
+  white-space: nowrap;
+}
+.mc-connection i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ba914a;
+}
+.mc-connection[data-state="live"] i {
+  background: #38856c;
+}
+.mc-connection[data-state="unavailable"] i {
+  background: var(--mc-muted);
+}
+.mc-room-presence > .mc-connection + .mc-presence-avatar {
+  margin-left: 0;
+}
+
+.mc-heading > .mc-room-presence {
+  margin-left: auto;
+}
+.mc-heading > .mc-room-presence small {
+  margin-right: 0;
+}
+@media (max-width: 767px) {
+  .mc-heading {
+    flex-wrap: wrap;
+  }
+  .mc-heading > .mc-room-presence {
+    order: 1;
+    width: 100%;
+    margin-left: 0;
+    flex-wrap: wrap;
   }
 }
