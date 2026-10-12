@@ -280,7 +280,7 @@ function LoadedPanel({
       return "";
     }
   });
-  const deletionCopy = `${title}\n\n${caption}\n\nReference links:\n${linksDraft}\n\nUnsaved details:\n${JSON.stringify(pendingPatch, null, 2)}`;
+  const deletionCopy = `${title}\n\n${caption}\n\nReference links:\n${linksDraft}\n\nHold reason:\n${holdReason}\n\nUnsaved details:\n${JSON.stringify(pendingPatch, null, 2)}`;
   const pendingDetails = useRef<Partial<Post>>({});
   const captionRef = useRef<CaptionHandle>(null),
     postRef = useRef(post),
@@ -309,7 +309,7 @@ function LoadedPanel({
     initial.post.title === "Untitled post" && !locked,
   );
   const keepDeletedCopy = () => {
-    const text = `${localTitle.current}\n\n${captionRef.current?.text() ?? caption}\n\nReference links:\n${localLinks.current}\n\nUnsaved details:\n${JSON.stringify(pendingDetails.current, null, 2)}`;
+    const text = `${localTitle.current}\n\n${captionRef.current?.text() ?? caption}\n\nReference links:\n${localLinks.current}\n\nHold reason:\n${localHoldReason.current}\n\nUnsaved details:\n${JSON.stringify(pendingDetails.current, null, 2)}`;
     try {
       localStorage.setItem(localCopyKey, text);
       return true;
@@ -433,10 +433,17 @@ function LoadedPanel({
       linksVersion.current = postRef.current.version;
     }
   };
+  const saveHoldReason = async () => {
+    if (localHoldReason.current !== postRef.current.holdReason) {
+      await patch({ holdReason: localHoldReason.current }, holdVersion.current);
+      holdVersion.current = postRef.current.version;
+    }
+  };
   const flush = async () => {
     await queue.current;
     await saveTitle();
     await saveLinks();
+    await saveHoldReason();
     if (Object.keys(pendingDetails.current).length)
       throw new Error(
         "Some post details have not saved. Load the latest post and retry your changes.",
@@ -462,6 +469,7 @@ function LoadedPanel({
             !Object.keys(pendingDetails.current).length &&
             localTitle.current.trim() === postRef.current.title &&
             localLinks.current === postRef.current.links.join("\n") &&
+            localHoldReason.current === postRef.current.holdReason &&
             captionRef.current?.retainLocal()
           )
             onClose();
@@ -872,12 +880,7 @@ function LoadedPanel({
                       localHoldReason.current = e.target.value;
                       setHoldReason(e.target.value);
                     }}
-                    onBlur={() => {
-                      if (localHoldReason.current !== postRef.current.holdReason)
-                        void patch({ holdReason: localHoldReason.current }, holdVersion.current)
-                          .then(() => { holdVersion.current = postRef.current.version; })
-                          .catch(() => {});
-                    }}
+                    onBlur={() => { void saveHoldReason().catch(() => {}); }}
                   />
                 </label>
               )}
