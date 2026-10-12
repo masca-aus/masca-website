@@ -1,6 +1,3 @@
-import * as publicSubmissions from './20261001_120000_public_submissions';
-import * as workspaceAccess from "./20260930_221300_workspace_access";
-import * as carePathways from './20261012_063405_add_care_pathways';
 import * as migration_20260802_071222_restructure_committee from './20260802_071222_restructure_committee';
 import * as migration_20260907_142655_add_committee_departments from './20260907_142655_add_committee_departments';
 import * as migration_20260916_010000_add_events_submission_workflow from './20260916_010000_add_events_submission_workflow';
@@ -9,6 +6,10 @@ import * as migration_20260917_104410_organisations_event_locations from './2026
 import * as migration_20260917_114229_event_lifecycle from './20260917_114229_event_lifecycle';
 import * as migration_20260917_121119_committee_history from './20260917_121119_committee_history';
 import * as migration_20260917_124307_careers_cms from './20260917_124307_careers_cms';
+import * as migration_20260930_221300_workspace_access from './20260930_221300_workspace_access';
+import * as migration_20261001_120000_public_submissions from './20261001_120000_public_submissions';
+import * as migration_20261012_063405_add_care_pathways from './20261012_063405_add_care_pathways';
+import * as migration_20261012_080126_expand_care_pathway_tree from './20261012_080126_expand_care_pathway_tree';
 
 export const migrations = [
   {
@@ -49,9 +50,26 @@ export const migrations = [
   {
     up: migration_20260917_124307_careers_cms.up,
     down: migration_20260917_124307_careers_cms.down,
-    name: '20260917_124307_careers_cms'
+    name: '20260917_124307_careers_cms',
   },
-  {up: workspaceAccess.up, down: workspaceAccess.down, name: "20260930_221300_workspace_access"},
-  {up: publicSubmissions.up, down: publicSubmissions.down, name: "20261001_120000_public_submissions"},
-  {up: carePathways.up, down: carePathways.down, name: "20261012_063405_add_care_pathways"},
+  {
+    up: migration_20260930_221300_workspace_access.up,
+    down: migration_20260930_221300_workspace_access.down,
+    name: '20260930_221300_workspace_access',
+  },
+  {
+    up: migration_20261001_120000_public_submissions.up,
+    down: migration_20261001_120000_public_submissions.down,
+    name: '20261001_120000_public_submissions',
+  },
+  {
+    up: migration_20261012_063405_add_care_pathways.up,
+    down: migration_20261012_063405_add_care_pathways.down,
+    name: '20261012_063405_add_care_pathways',
+  },
+  {
+    up: migration_20261012_080126_expand_care_pathway_tree.up,
+    down: migration_20261012_080126_expand_care_pathway_tree.down,
+    name: '20261012_080126_expand_care_pathway_tree'
+  },
 ];

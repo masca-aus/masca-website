@@ -8,15 +8,14 @@ import {
 } from "lucide-react";
 import type { PublicCarePathway } from "@/features/care/publicCarePathways";
 
-type PathwayKey = PublicCarePathway["category"];
 type PathwayStyle = { eyebrow: string; icon: LucideIcon; accent: string; soft: string; text: string; activeCard: string; activeIcon: string; activeEyebrow: string; activeDescription: string };
 
-const pathwayStyles: Record<PathwayKey, PathwayStyle> = {
-  wellbeing: { eyebrow: "Start here", icon: Sparkles, accent: "bg-blue-600", soft: "bg-blue-50", text: "text-blue-600", activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2", activeIcon: "bg-yellow-500 text-blue-900", activeEyebrow: "text-yellow-500", activeDescription: "text-blue-100" },
-  finance: { eyebrow: "Plan ahead", icon: WalletCards, accent: "bg-yellow-500", soft: "bg-yellow-50", text: "text-yellow-800", activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2", activeIcon: "bg-blue-600 text-white", activeEyebrow: "text-blue-800", activeDescription: "text-blue-900" },
-  settling: { eyebrow: "Find your footing", icon: Home, accent: "bg-yellow-500", soft: "bg-yellow-50", text: "text-yellow-800", activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2", activeIcon: "bg-blue-600 text-white", activeEyebrow: "text-blue-800", activeDescription: "text-blue-900" },
-  academic: { eyebrow: "Keep moving", icon: GraduationCap, accent: "bg-blue-600", soft: "bg-blue-50", text: "text-blue-600", activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2", activeIcon: "bg-yellow-500 text-blue-900", activeEyebrow: "text-yellow-500", activeDescription: "text-blue-100" },
-};
+const pathwayStyles: PathwayStyle[] = [
+  { eyebrow: "Start here", icon: Sparkles, accent: "bg-blue-600", soft: "bg-blue-50", text: "text-blue-600", activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2", activeIcon: "bg-yellow-500 text-blue-900", activeEyebrow: "text-yellow-500", activeDescription: "text-blue-100" },
+  { eyebrow: "Plan ahead", icon: WalletCards, accent: "bg-yellow-500", soft: "bg-yellow-50", text: "text-yellow-800", activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2", activeIcon: "bg-blue-600 text-white", activeEyebrow: "text-blue-800", activeDescription: "text-blue-900" },
+  { eyebrow: "Find your footing", icon: Home, accent: "bg-yellow-500", soft: "bg-yellow-50", text: "text-yellow-800", activeCard: "border-yellow-500 bg-yellow-500 text-blue-900 shadow-brand lg:-translate-y-2", activeIcon: "bg-blue-600 text-white", activeEyebrow: "text-blue-800", activeDescription: "text-blue-900" },
+  { eyebrow: "Keep moving", icon: GraduationCap, accent: "bg-blue-600", soft: "bg-blue-50", text: "text-blue-600", activeCard: "border-blue-600 bg-blue-600 text-white shadow-brand lg:-translate-y-2", activeIcon: "bg-yellow-500 text-blue-900", activeEyebrow: "text-yellow-500", activeDescription: "text-blue-100" },
+];
 
 const topicIcons: Array<[RegExp, LucideIcon]> = [
   [/health|doctor|gp/i, HeartPulse], [/mental|wellbeing|counsell/i, Brain],
@@ -55,12 +54,14 @@ const communityLinks = [
 ] as const;
 
 export default function CarePathways({ pathways }: { pathways: PublicCarePathway[] }) {
-  const [active, setActive] = useState<PathwayKey>(pathways[0]?.category ?? "wellbeing");
+  const [active, setActive] = useState<number>(pathways[0]?.id ?? 0);
   const detailsRef = useRef<HTMLDivElement>(null);
-  const selected = pathways.find((pathway) => pathway.category === active) ?? pathways[0];
+  const selected = pathways.find((pathway) => pathway.id === active) ?? pathways[0];
   if (!selected) return null;
+  const selectedIndex = Math.max(0, pathways.findIndex((pathway) => pathway.id === selected.id));
+  const selectedStyle = pathwayStyles[selectedIndex % pathwayStyles.length];
 
-  function explorePathway(pathway: PathwayKey) {
+  function explorePathway(pathway: number) {
     setActive(pathway);
     requestAnimationFrame(() => {
       detailsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -79,16 +80,16 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
         </div>
 
         <div className="mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-4" aria-label="Care pathways">
-          {pathways.map((pathway) => {
-            const style = pathwayStyles[pathway.category];
+          {pathways.map((pathway, index) => {
+            const style = pathwayStyles[index % pathwayStyles.length];
             const Icon = style.icon;
-            const isActive = pathway.category === active;
+            const isActive = pathway.id === active;
             return (
               <button
-                key={pathway.category}
+                key={pathway.id}
                 type="button"
                 aria-pressed={isActive}
-                onClick={() => explorePathway(pathway.category)}
+                onClick={() => explorePathway(pathway.id)}
                 className={`group min-h-72 rounded-xl border-2 p-7 text-left transition duration-200 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-yellow-500 md:p-8 ${
                   isActive
                     ? style.activeCard
@@ -117,23 +118,23 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
           <div className="grid lg:grid-cols-[0.75fr_1.25fr]">
             <div className="flex flex-col justify-between bg-white p-7 md:p-10">
               <div>
-                <span className={`eyebrow ${pathwayStyles[selected.category].text}`}>{pathwayStyles[selected.category].eyebrow}</span>
+                <span className={`eyebrow ${selectedStyle.text}`}>{selectedStyle.eyebrow}</span>
                 <h3 className="mt-3 font-secondary text-3xl font-bold text-blue-600 md:text-4xl">{selected.title}</h3>
                 <p className="mt-5 text-gray-700">{selected.shortDescription}</p>
               </div>
               <div className="mt-8 flex items-center gap-3 border-t border-blue-100 pt-6 text-sm font-semibold text-blue-600">
-                <span className={`h-2.5 w-2.5 rounded-full ${pathwayStyles[selected.category].accent}`} />
-                Selected pathway
+                <span className={`h-2.5 w-2.5 rounded-full ${selectedStyle.accent}`} />
+                Selected category
               </div>
             </div>
 
             <div className="grid gap-4 p-5 md:grid-cols-3 md:p-8">
-              {(selected.subsections ?? []).map((item, index) => {
+              {selected.children.map((item, index) => {
                 const Icon = iconForTopic(item.title);
-                const href = item.linkUrl?.trim() || "#quick-support";
+                const href = item.linkUrl?.trim() || `/care/pathways/${item.id}`;
                 return (
                   <a
-                    key={item.id ?? `${selected.category}-${index}-${item.title}`}
+                    key={item.id}
                     href={href}
                     target={href.startsWith("https://") ? "_blank" : undefined}
                     rel={href.startsWith("https://") ? "noopener noreferrer" : undefined}

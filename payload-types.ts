@@ -134,23 +134,37 @@ export interface UserAuthOperations {
   };
 }
 /**
- * Manage the four starting points on the Cares page. Update each title and short description, then add, reorder or remove the resources shown inside it.
+ * Create top-level categories with no parent, then create as many nested sections as you need by choosing a parent. Every section can link to its own detail page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "care-pathways".
  */
 export interface CarePathway {
   id: number;
-  category: 'wellbeing' | 'finance' | 'settling' | 'academic';
+  /**
+   * The category or section title.
+   */
   title: string;
+  /**
+   * A short description shown on the Cares page.
+   */
   shortDescription: string;
+  /**
+   * Leave this blank for a top-level category. Choose a category or section to nest this item beneath it.
+   */
+  parent?: (number | null) | CarePathway;
+  /**
+   * Optional longer information shown on this section's own page.
+   */
+  detail?: string | null;
+  /**
+   * Link to an existing page such as /care/healthcare or a secure external https:// page. Leave blank to use this section's generated detail page.
+   */
+  linkUrl?: string | null;
+  /**
+   * Lower numbers appear first among the same parent.
+   */
   sortOrder: number;
-  subsections?: {
-    title: string;
-    detail: string;
-    linkUrl?: string | null;
-    id?: string | null;
-  }[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -162,10 +176,6 @@ export interface CarePathway {
  */
 export interface Career {
   id: number;
-  /**
-   * The team responsible for this record. Independent of the public event/job location.
-   */
-  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
   cmsStatus?:
     | {
         [k: string]: unknown;
@@ -193,11 +203,11 @@ export interface Career {
    */
   logoUrl?: string | null;
   /**
-   * Australia, Malaysia, or both.
+   * Choose the country where the role is based.
    */
   country?: string | null;
   /**
-   * Use the state name or describe multiple locations.
+   * Options follow the selected country. Existing values are preserved.
    */
   state?: string | null;
   city?: string | null;
@@ -247,40 +257,30 @@ export interface CareerLifecycle {
   createdAt: string;
 }
 /**
- * Approve a MASCA Workspace email, assign access, or suspend an account.
+ * Manage the people who can sign in and update MASCA website content.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
-  email: string;
-  role: 'administrator' | 'editor';
-  status: 'invited' | 'active' | 'suspended';
-  /**
-   * Manage all departments and states, including Organisations and Media. Account management remains restricted to administrators.
-   */
-  allContentAccess?: boolean | null;
-  permissions?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  grants?:
-    | {
-        area: 'events' | 'careers' | 'committee' | 'sponsors';
-        scope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
-        id?: string | null;
-      }[]
-    | null;
-  googleSubject?: string | null;
-  sessionRevision?: string | null;
   updatedAt: string;
   createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
   collection: 'users';
 }
 /**
@@ -335,10 +335,6 @@ export interface EventLifecycle {
  */
 export interface Event {
   id: number;
-  /**
-   * The team responsible for this record. Independent of the public event/job location.
-   */
-  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
   cmsStatus?:
     | {
         [k: string]: unknown;
@@ -430,10 +426,6 @@ export interface Media {
  */
 export interface Committee {
   id: number;
-  /**
-   * The team responsible for this record. Independent of the public event/job location.
-   */
-  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
   _order?: string | null;
   name: string;
   /**
@@ -476,10 +468,6 @@ export interface Committee {
  */
 export interface Sponsor {
   id: number;
-  /**
-   * The team responsible for this record. Independent of the public event/job location.
-   */
-  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
   /**
    * Sponsor name — doubles as the logo's alt text.
    */
@@ -590,11 +578,12 @@ export interface PayloadMigration {
  * via the `definition` "care-pathways_select".
  */
 export interface CarePathwaysSelect<T extends boolean = true> {
-  category?: T;
   title?: T;
   shortDescription?: T;
+  parent?: T;
+  detail?: T;
+  linkUrl?: T;
   sortOrder?: T;
-  subsections?: T | { title?: T; detail?: T; linkUrl?: T; id?: T };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -603,7 +592,6 @@ export interface CarePathwaysSelect<T extends boolean = true> {
  * via the `definition` "careers_select".
  */
 export interface CareersSelect<T extends boolean = true> {
-  owningScope?: T;
   cmsStatus?: T;
   submittedForReview?: T;
   contactName?: T;
@@ -685,22 +673,22 @@ export interface EventLifecycleSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
-  email?: T;
-  role?: T;
-  status?: T;
-  allContentAccess?: T;
-  permissions?: T;
-  grants?:
-    | T
-    | {
-        area?: T;
-        scope?: T;
-        id?: T;
-      };
-  googleSubject?: T;
-  sessionRevision?: T;
   updatedAt?: T;
   createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -739,7 +727,6 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "committee_select".
  */
 export interface CommitteeSelect<T extends boolean = true> {
-  owningScope?: T;
   _order?: T;
   name?: T;
   university?: T;
@@ -758,7 +745,6 @@ export interface CommitteeSelect<T extends boolean = true> {
  * via the `definition` "sponsors_select".
  */
 export interface SponsorsSelect<T extends boolean = true> {
-  owningScope?: T;
   name?: T;
   date?: T;
   logo?: T;
@@ -770,7 +756,6 @@ export interface SponsorsSelect<T extends boolean = true> {
  * via the `definition` "events_select".
  */
 export interface EventsSelect<T extends boolean = true> {
-  owningScope?: T;
   cmsStatus?: T;
   submittedForReview?: T;
   lifecycle?: T;

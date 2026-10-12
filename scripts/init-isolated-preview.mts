@@ -16,6 +16,40 @@ const connection = new pg.Client({ connectionString: process.env.DATABASE_URI })
 await connection.connect();
 try {
   await connection.query(`CREATE SCHEMA IF NOT EXISTS "${schema}"`);
+  const legacyCarePathways = await connection.query(
+    "SELECT 1 FROM information_schema.columns WHERE table_schema = $1 AND table_name = 'care_pathways' AND column_name = 'category'",
+    [schema],
+  );
+  if (legacyCarePathways.rowCount) {
+    await connection.query("BEGIN");
+    try {
+      await connection.query(`
+        ALTER TABLE "${schema}"."care_pathways" ADD COLUMN IF NOT EXISTS "parent_id" integer;
+        ALTER TABLE "${schema}"."care_pathways" ADD COLUMN IF NOT EXISTS "detail" varchar;
+        ALTER TABLE "${schema}"."care_pathways" ADD COLUMN IF NOT EXISTS "link_url" varchar;
+        INSERT INTO "${schema}"."care_pathways" ("title", "short_description", "sort_order", "parent_id", "link_url")
+        SELECT subsection."title", subsection."detail", subsection."_order" + 1, subsection."_parent_id", subsection."link_url"
+        FROM "${schema}"."care_pathways_subsections" AS subsection
+        ORDER BY subsection."_parent_id", subsection."_order";
+        ALTER TABLE "${schema}"."care_pathways_subsections" DISABLE ROW LEVEL SECURITY;
+        DROP TABLE "${schema}"."care_pathways_subsections" CASCADE;
+        DROP INDEX IF EXISTS "${schema}"."care_pathways_category_idx";
+        ALTER TABLE "${schema}"."care_pathways" DROP COLUMN "category";
+        DROP TYPE IF EXISTS "${schema}"."enum_care_pathways_category";
+        DO $$ BEGIN
+          ALTER TABLE "${schema}"."care_pathways"
+            ADD CONSTRAINT "care_pathways_parent_id_care_pathways_id_fk"
+            FOREIGN KEY ("parent_id") REFERENCES "${schema}"."care_pathways"("id") ON DELETE SET NULL;
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$;
+        CREATE INDEX IF NOT EXISTS "care_pathways_parent_idx" ON "${schema}"."care_pathways" ("parent_id");
+      `);
+      await connection.query("COMMIT");
+    } catch (error) {
+      await connection.query("ROLLBACK");
+      throw error;
+    }
+  }
   const tables = await connection.query(
     "SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema = $1",
     [schema],
@@ -42,13 +76,18 @@ try {
     overrideAccess: true,
   });
   if (!existing.totalDocs) {
-    for (const pathway of defaultCarePathways) {
-      await payload.create({
-        collection: "care-pathways",
-        data: pathway,
-        overrideAccess: true,
-      });
-    }
+    const seedChildren = async (nodes: typeof defaultCarePathways, parent?: number) => {
+      for (const node of nodes) {
+        const { children, ...fields } = node;
+        const created = await payload.create({
+          collection: "care-pathways",
+          data: { ...fields, ...(parent ? { parent } : {}) },
+          overrideAccess: true,
+        });
+        if (children?.length) await seedChildren(children, created.id);
+      }
+    };
+    await seedChildren(defaultCarePathways);
   }
 
   const access = new pg.Client({ connectionString: process.env.DATABASE_URI });
