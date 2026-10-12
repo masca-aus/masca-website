@@ -576,6 +576,7 @@
   border-radius: 18px;
   border: 1px solid var(--mc-line);
   box-shadow: 0 24px 90px #11112035;
+  outline: none;
 }
 .mc-panel-loading {
   padding: 0;

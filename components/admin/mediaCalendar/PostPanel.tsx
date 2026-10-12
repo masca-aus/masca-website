@@ -105,10 +105,7 @@ export function PostPanel(props: {
     const previous = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    (
-      container.current?.querySelector<HTMLElement>("button:not(:disabled)") ??
-      container.current
-    )?.focus({ preventScroll: true });
+    container.current?.focus({ preventScroll: true });
     return () => {
       document.body.style.overflow = overflow;
       previous?.focus({ preventScroll: true });
@@ -331,9 +328,6 @@ function LoadedPanel({
       !!post.deletedAt ||
       ["in_review", "posted"].includes(post.status),
     canApprove = mayApprove(user, post);
-  const focusTitleOnOpen = useRef(
-    initial.post.title === "Untitled post" && !locked,
-  );
   const keepDeletedCopy = () => {
     const text = `${localTitle.current}\n\n${captionRef.current?.text() ?? caption}\n\nReference links:\n${localLinks.current}\n\nHold reason:\n${localHoldReason.current}\n\nUnsaved details:\n${JSON.stringify(pendingDetails.current, null, 2)}`;
     try {
@@ -522,16 +516,11 @@ function LoadedPanel({
     };
   });
   useEffect(() => {
-    const titleInput =
-      panel.current?.querySelector<HTMLInputElement>("#post-panel-title");
-    if (focusTitleOnOpen.current && titleInput) {
-      titleInput.focus({ preventScroll: true });
-      titleInput.select();
-    } else
-      panel.current
-        ?.querySelector<HTMLElement>("button:not(:disabled)")
-        ?.focus({ preventScroll: true });
-  }, [panel]);
+    const target = initial.post.deletedAt
+      ? panel.current?.querySelector<HTMLElement>("button:not(:disabled)")
+      : panel.current;
+    target?.focus({ preventScroll: true });
+  }, [panel, initial.post.deletedAt]);
   const workflow = async (
     action: string,
     extra: Record<string, unknown> = {},
