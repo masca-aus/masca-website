@@ -27,15 +27,15 @@ try {
         ALTER TABLE "${schema}"."care_pathways" ADD COLUMN IF NOT EXISTS "parent_id" integer;
         ALTER TABLE "${schema}"."care_pathways" ADD COLUMN IF NOT EXISTS "detail" varchar;
         ALTER TABLE "${schema}"."care_pathways" ADD COLUMN IF NOT EXISTS "link_url" varchar;
+        DROP INDEX IF EXISTS "${schema}"."care_pathways_category_idx";
+        ALTER TABLE "${schema}"."care_pathways" DROP COLUMN "category";
+        DROP TYPE IF EXISTS "${schema}"."enum_care_pathways_category";
         INSERT INTO "${schema}"."care_pathways" ("title", "short_description", "sort_order", "parent_id", "link_url")
         SELECT subsection."title", subsection."detail", subsection."_order" + 1, subsection."_parent_id", subsection."link_url"
         FROM "${schema}"."care_pathways_subsections" AS subsection
         ORDER BY subsection."_parent_id", subsection."_order";
         ALTER TABLE "${schema}"."care_pathways_subsections" DISABLE ROW LEVEL SECURITY;
         DROP TABLE "${schema}"."care_pathways_subsections" CASCADE;
-        DROP INDEX IF EXISTS "${schema}"."care_pathways_category_idx";
-        ALTER TABLE "${schema}"."care_pathways" DROP COLUMN "category";
-        DROP TYPE IF EXISTS "${schema}"."enum_care_pathways_category";
         DO $$ BEGIN
           ALTER TABLE "${schema}"."care_pathways"
             ADD CONSTRAINT "care_pathways_parent_id_care_pathways_id_fk"
