@@ -3,13 +3,26 @@ import { getPayload } from "payload";
 import type { CarePathway } from "@/payload-types";
 import { defaultCarePathways } from "./carePathwayDefaults";
 
-export type PublicCarePathway = Pick<
-  CarePathway,
-  "id" | "title" | "shortDescription" | "detail" | "linkUrl"
-> & { children: PublicCarePathway[] };
+export type PublicCareSubsection = {
+  id: string;
+  title: string;
+  shortDescription: string;
+  detail: string;
+  image: { url: string; alt: string } | null;
+  links: { id: string; label: string; url: string }[];
+};
 
-type CarePathwayRecord = Omit<PublicCarePathway, "children"> & {
+export type PublicCarePathway = {
+  id: number;
+  title: string;
+  shortDescription: string;
+  children: PublicCarePathway[];
+  subsections: PublicCareSubsection[];
+};
+
+type CarePathwayRecord = Omit<CarePathway, "parent" | "subsections"> & {
   parent?: number | { id?: number } | null;
+  subsections?: CarePathway["subsections"];
 };
 
 function relationId(parent: CarePathwayRecord["parent"]): number | null {
@@ -21,7 +34,30 @@ function relationId(parent: CarePathwayRecord["parent"]): number | null {
 
 function buildTree(records: CarePathwayRecord[]): PublicCarePathway[] {
   const nodes = new Map<number, PublicCarePathway>();
-  for (const record of records) nodes.set(record.id, { ...record, children: [] });
+  for (const record of records) {
+    nodes.set(record.id, {
+      id: record.id,
+      title: record.title ?? "",
+      shortDescription: record.shortDescription ?? "",
+      children: [],
+      subsections: (Array.isArray(record.subsections) ? record.subsections : []).map((section, index) => {
+        const media = section.image;
+        const links = Array.isArray(section.links) ? section.links : [];
+        return {
+          id: section.id || `${record.id}-${index}`,
+          title: section.title,
+          shortDescription: section.shortDescription ?? "",
+          detail: section.detail ?? "",
+          image: media && typeof media === "object" && media.url ? { url: media.url, alt: media.alt } : null,
+          links: links.map((link, linkIndex) => ({
+            id: link.id || `${record.id}-${index}-${linkIndex}`,
+            label: link.label,
+            url: link.url,
+          })),
+        };
+      }),
+    });
+  }
 
   const roots: PublicCarePathway[] = [];
   for (const record of records) {
@@ -46,9 +82,8 @@ function fallbackTree(): PublicCarePathway[] {
     id: id++,
     title: node.title,
     shortDescription: node.shortDescription,
-    detail: node.detail ?? null,
-    linkUrl: node.linkUrl ?? null,
     children: (node.children ?? []).map(mapNode),
+    subsections: [],
   });
   return defaultCarePathways.map(mapNode);
 }
@@ -60,7 +95,7 @@ export async function getPublicCarePathways(): Promise<PublicCarePathway[]> {
       collection: "care-pathways",
       sort: "id",
       limit: 1000,
-      depth: 0,
+      depth: 1,
     });
     if (result.docs.length) return buildTree(result.docs as CarePathwayRecord[]);
   } catch (error) {

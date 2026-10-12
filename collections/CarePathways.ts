@@ -80,31 +80,38 @@ export const CarePathways: CollectionConfig = {
       },
     },
     {
-      name: "detail",
-      label: "Details",
-      type: "textarea",
-      maxLength: 5000,
+      name: "subsections",
+      label: "Subsections on this page",
+      type: "array",
+      interfaceName: "CarePathwaySubsection",
+      labels: { singular: "Subsection", plural: "Subsections" },
       admin: {
         condition: (_, siblingData) => siblingData.entryType === "child",
-        description:
-          "Optional longer information shown on this section's own page.",
+        description: "These appear as tabs on this section’s own page, like the Healthcare page.",
       },
-    },
-    {
-      name: "linkUrl",
-      label: "Existing page link (optional)",
-      type: "text",
-      validate: (value: unknown) => {
-        if (typeof value !== "string" || !value.trim()) return true;
-        return /^\/(?!\/)/.test(value.trim()) || /^https:\/\//i.test(value.trim())
-          ? true
-          : "Use a page path or a secure https:// link.";
-      },
-      admin: {
-        condition: (_, siblingData) => siblingData.entryType === "child",
-        description:
-          "Link to an existing page such as /care/healthcare or a secure external https:// page. Leave blank to use this section's generated detail page.",
-      },
+      fields: [
+        { name: "title", type: "text", required: true, maxLength: 90 },
+        { name: "shortDescription", label: "Short description", type: "textarea", maxLength: 500 },
+        { name: "detail", label: "Details", type: "textarea", maxLength: 5000 },
+        { name: "image", label: "Picture (optional)", type: "upload", relationTo: "media", displayPreview: true },
+        {
+          name: "links",
+          label: "Additional links (optional)",
+          type: "array",
+          interfaceName: "CarePathwaySubsectionLink",
+          labels: { singular: "Link", plural: "Links" },
+          fields: [
+            { name: "label", type: "text", required: true, maxLength: 90 },
+            {
+              name: "url",
+              label: "Link URL",
+              type: "text",
+              required: true,
+              validate: (value: unknown) => typeof value === "string" && (/^https:\/\//i.test(value.trim()) || /^\/(?!\/)/.test(value.trim())) ? true : "Use a page path or secure https:// link.",
+            },
+          ],
+        },
+      ],
     },
   ],
   hooks: {

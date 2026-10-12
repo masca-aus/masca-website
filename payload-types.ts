@@ -7,6 +7,33 @@
  */
 
 /**
+ * These appear as tabs on this section’s own page, like the Healthcare page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CarePathwaySubsection".
+ */
+export type CarePathwaySubsection =
+  | {
+      title: string;
+      shortDescription?: string | null;
+      detail?: string | null;
+      image?: (number | null) | Media;
+      links?: CarePathwaySubsectionLink;
+      id?: string | null;
+    }[]
+  | null;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CarePathwaySubsectionLink".
+ */
+export type CarePathwaySubsectionLink =
+  | {
+      label: string;
+      url: string;
+      id?: string | null;
+    }[]
+  | null;
+/**
  * Supported timezones in IANA format.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -148,25 +175,52 @@ export interface CarePathway {
   /**
    * The title of this category or section.
    */
-  title: string;
+  title?: string | null;
   /**
    * A short description shown on the Cares page.
    */
-  shortDescription: string;
+  shortDescription?: string | null;
   /**
    * Choose an existing parent category for this child section.
    */
   parent?: (number | null) | CarePathway;
-  /**
-   * Optional longer information shown on this section's own page.
-   */
-  detail?: string | null;
-  /**
-   * Link to an existing page such as /care/healthcare or a secure external https:// page. Leave blank to use this section's generated detail page.
-   */
-  linkUrl?: string | null;
+  subsections?: CarePathwaySubsection;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  /**
+   * Describe the image’s useful content in a short sentence. For a portrait, include the person’s name; for a logo, use the organisation’s name. Avoid filenames or ‘image of’.
+   */
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    'admin-preview'?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * Manage opportunities for students. Save private drafts, review details and publish when ready. Rolling roles expire after 60 days; update the listed date after reconfirming availability.
@@ -385,40 +439,6 @@ export interface Event {
   _status?: ('draft' | 'published') | null;
 }
 /**
- * Upload images only, up to 5 MB each. Add useful alt text so everyone can understand the image.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  /**
-   * Describe the image’s useful content in a short sentence. For a portrait, include the person’s name; for a logo, use the organisation’s name. Avoid filenames or ‘image of’.
-   */
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    'admin-preview'?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
-}
-/**
  * Create and update committee profiles step by step. Changes appear on the website when you Save.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -582,10 +602,30 @@ export interface CarePathwaysSelect<T extends boolean = true> {
   title?: T;
   shortDescription?: T;
   parent?: T;
-  detail?: T;
-  linkUrl?: T;
+  subsections?: T | CarePathwaySubsectionSelect<T>;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CarePathwaySubsection_select".
+ */
+export interface CarePathwaySubsectionSelect<T extends boolean = true> {
+  title?: T;
+  shortDescription?: T;
+  detail?: T;
+  image?: T;
+  links?: T | CarePathwaySubsectionLinkSelect<T>;
+  id?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CarePathwaySubsectionLink_select".
+ */
+export interface CarePathwaySubsectionLinkSelect<T extends boolean = true> {
+  label?: T;
+  url?: T;
+  id?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -85,6 +85,53 @@ try {
       throw error;
     }
   }
+  const carePathwayTable = await connection.query(
+    "SELECT 1 FROM information_schema.tables WHERE table_schema = $1 AND table_name = 'care_pathways'",
+    [schema],
+  );
+  if (carePathwayTable.rowCount) {
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS "${schema}"."care_pathways_subsections" (
+        "id" serial PRIMARY KEY NOT NULL,
+        "_order" integer NOT NULL,
+        "_parent_id" integer NOT NULL,
+        "title" varchar NOT NULL,
+        "short_description" varchar,
+        "detail" varchar,
+        "image_id" integer
+      );
+      CREATE TABLE IF NOT EXISTS "${schema}"."care_pathways_subsections_links" (
+        "id" serial PRIMARY KEY NOT NULL,
+        "_order" integer NOT NULL,
+        "_parent_id" integer NOT NULL,
+        "label" varchar NOT NULL,
+        "url" varchar NOT NULL
+      );
+      DO $$ BEGIN
+        ALTER TABLE "${schema}"."care_pathways_subsections"
+          ADD CONSTRAINT "care_pathways_subsections_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "${schema}"."care_pathways"("id") ON DELETE CASCADE;
+      EXCEPTION WHEN duplicate_object THEN NULL;
+      END $$;
+      DO $$ BEGIN
+        ALTER TABLE "${schema}"."care_pathways_subsections"
+          ADD CONSTRAINT "care_pathways_subsections_image_id_media_id_fk"
+          FOREIGN KEY ("image_id") REFERENCES "${schema}"."media"("id") ON DELETE SET NULL;
+      EXCEPTION WHEN duplicate_object THEN NULL;
+      END $$;
+      DO $$ BEGIN
+        ALTER TABLE "${schema}"."care_pathways_subsections_links"
+          ADD CONSTRAINT "care_pathways_subsections_links_parent_id_fk"
+          FOREIGN KEY ("_parent_id") REFERENCES "${schema}"."care_pathways_subsections"("id") ON DELETE CASCADE;
+      EXCEPTION WHEN duplicate_object THEN NULL;
+      END $$;
+      CREATE INDEX IF NOT EXISTS "care_pathways_subsections_order_idx" ON "${schema}"."care_pathways_subsections" ("_order");
+      CREATE INDEX IF NOT EXISTS "care_pathways_subsections_parent_idx" ON "${schema}"."care_pathways_subsections" ("_parent_id");
+      CREATE INDEX IF NOT EXISTS "care_pathways_subsections_image_idx" ON "${schema}"."care_pathways_subsections" ("image_id");
+      CREATE INDEX IF NOT EXISTS "care_pathways_subsections_links_order_idx" ON "${schema}"."care_pathways_subsections_links" ("_order");
+      CREATE INDEX IF NOT EXISTS "care_pathways_subsections_links_parent_idx" ON "${schema}"."care_pathways_subsections_links" ("_parent_id");
+    `);
+  }
   const tables = await connection.query(
     "SELECT count(*)::int AS count FROM information_schema.tables WHERE table_schema = $1",
     [schema],

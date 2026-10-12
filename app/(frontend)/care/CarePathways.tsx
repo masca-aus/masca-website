@@ -131,13 +131,11 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
             <div className="grid gap-4 p-5 md:grid-cols-3 md:p-8">
               {selected.children.map((item, index) => {
                 const Icon = iconForTopic(item.title ?? "");
-                const href = item.linkUrl?.trim() || `/care/pathways/${item.id}`;
+                const href = `/care/pathways/${item.id}`;
                 return (
                   <a
                     key={item.id}
                     href={href}
-                    target={href.startsWith("https://") ? "_blank" : undefined}
-                    rel={href.startsWith("https://") ? "noopener noreferrer" : undefined}
                     className="group flex min-h-52 flex-col rounded-lg bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                   >
                     <span className="flex items-center justify-between text-blue-600">

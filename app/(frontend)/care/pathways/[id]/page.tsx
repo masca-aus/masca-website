@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
+import CareSubsectionTabs from "@/app/(frontend)/care/CareSubsectionTabs";
 import { getPublicCarePathway } from "@/features/care/publicCarePathways";
 import { pageMetadata } from "@/utils/seo";
 
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: CarePathwayPageProps): Promis
 export default async function CarePathwayPage({ params }: CarePathwayPageProps) {
   const { id } = await params;
   const pathway = /^\d+$/.test(id) ? await getPublicCarePathway(Number(id)) : null;
-  if (!pathway) notFound();
+  if (!pathway || pathway.children.length) notFound();
 
   return (
     <main id="main" className="overflow-hidden bg-white">
@@ -36,44 +37,7 @@ export default async function CarePathwayPage({ params }: CarePathwayPageProps) 
           </div>
         </div>
       </section>
-
-      {pathway.detail ? (
-        <section className="container section-pad">
-          <div className="mx-auto max-w-4xl whitespace-pre-line text-lg leading-relaxed text-gray-700">
-            {pathway.detail}
-          </div>
-        </section>
-      ) : null}
-
-      {pathway.children.length ? (
-        <section className="bg-blue-50">
-          <div className="container section-pad">
-            <div className="mx-auto max-w-6xl">
-              <span className="eyebrow text-red-600">keep exploring</span>
-              <h2 className="mt-4 text-blue-600">More in {pathway.title}</h2>
-              <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {pathway.children.map((child) => {
-                  const href = child.linkUrl?.trim() || `/care/pathways/${child.id}`;
-                  const external = href.startsWith("https://");
-                  return (
-                    <a key={child.id} href={href} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer" : undefined} className="group flex min-h-48 flex-col rounded-xl border border-blue-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">
-                      <strong className="text-xl text-blue-600">{child.title}</strong>
-                      <span className="mt-3 text-sm leading-relaxed text-gray-700">{child.shortDescription}</span>
-                      <ArrowRight size={18} className="mt-auto pt-6 text-red-600 transition-transform group-hover:translate-x-1" aria-hidden="true" />
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      {!pathway.detail && pathway.children.length === 0 ? (
-        <section className="container section-pad">
-          <p className="mx-auto max-w-3xl text-center text-gray-700">More information for this section is coming soon.</p>
-        </section>
-      ) : null}
+      <CareSubsectionTabs title={pathway.title} subsections={pathway.subsections} />
     </main>
   );
 }
