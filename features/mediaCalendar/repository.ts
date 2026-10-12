@@ -75,7 +75,7 @@ export async function checkRelations(
 ) {
   if (p.category) {
     const r = await c.query(
-      `SELECT data FROM ${table("categories")} WHERE id=$1`,
+      `SELECT data FROM ${table("categories")} WHERE id=$1 FOR KEY SHARE`,
       [p.category],
     );
     if (!r.rows.length) throw new CalendarError("Choose an existing category.");
@@ -338,13 +338,64 @@ export async function overview(
     };
   });
 }
-export async function saveCategory(actor: CalendarUser, category: Category) {
+export async function saveCategory(
+  actor: CalendarUser,
+  category: Category,
+  create = false,
+) {
   return transaction(actor, "edit", async (c) => {
-    await c.query(
-      `INSERT INTO ${table("categories")}(id,data) VALUES($1,$2) ON CONFLICT(id) DO UPDATE SET data=$2`,
-      [category.id, JSON.stringify(category)],
+    const result = create
+      ? await c.query(
+          `INSERT INTO ${table("categories")}(id,data) VALUES($1,$2) ON CONFLICT(id) DO NOTHING RETURNING data`,
+          [category.id, JSON.stringify(category)],
+        )
+      : await c.query(
+          `UPDATE ${table("categories")} SET data=$2 WHERE id=$1 RETURNING data`,
+          [category.id, JSON.stringify(category)],
+        );
+    if (!result.rows.length) {
+      if (create) {
+        const existing = await c.query(
+          `SELECT data FROM ${table("categories")} WHERE id=$1`,
+          [category.id],
+        );
+        if (
+          existing.rows.length &&
+          existing.rows[0].data.name === category.name &&
+          existing.rows[0].data.color === category.color &&
+          existing.rows[0].data.archived === category.archived
+        )
+          return category;
+      }
+      throw new CalendarError(
+        "This content type changed or was permanently deleted. Refresh the calendar.",
+        409,
+      );
+    }
+    return result.rows[0].data as Category;
+  });
+}
+export async function deleteCategory(actor: CalendarUser, id: string) {
+  return transaction(actor, "edit", async (c) => {
+    const result = await c.query(
+      `SELECT data FROM ${table("categories")} WHERE id=$1 FOR UPDATE`,
+      [id],
     );
-    return category;
+    if (!result.rows.length)
+      throw new CalendarError("Content type not found.", 404);
+    if (!result.rows[0].data.archived)
+      throw new CalendarError("Move this type to Deleted types first.", 409);
+    const used = await c.query(
+      `SELECT 1 FROM ${table("posts")} WHERE category=$1 LIMIT 1`,
+      [id],
+    );
+    if (used.rows.length)
+      throw new CalendarError(
+        "This type is attached to posts. Reassign those posts before deleting it permanently.",
+        409,
+      );
+    await c.query(`DELETE FROM ${table("categories")} WHERE id=$1`, [id]);
+    return id;
   });
 }
 export async function readNotification(actor: CalendarUser, id: string) {

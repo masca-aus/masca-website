@@ -60,3 +60,27 @@ it("bounds cursor messages and derives names from verified users", () => {
     }).success,
   ).toBe(false);
 });
+it("converges four simultaneous caption contributors without losing their text", () => {
+  const p = newPost(user, {});
+  const documents = Array.from({ length: 4 }, () => new Y.Doc());
+  const names = ["Sarah", "Amir", "Mei", "Ravi"];
+  for (let i = 0; i < 4; i++)
+    documents[i].getText("caption").insert(0, `${names[i]} `);
+  for (const i of [2, 0, 3, 1])
+    applyAction(
+      p,
+      { ...user, id: String(i + 1) },
+      {
+        action: "caption",
+        update: Buffer.from(Y.encodeStateAsUpdate(documents[i])).toString(
+          "base64",
+        ),
+      },
+    );
+  for (const doc of documents) {
+    Y.applyUpdate(doc, Buffer.from(p.captionState, "base64"));
+    expect(doc.getText("caption").toString()).toBe(p.caption);
+  }
+  for (const name of names) expect(p.caption).toContain(name);
+  documents.forEach((doc) => doc.destroy());
+});

@@ -54,6 +54,7 @@ export function InlineContentType({
     try {
       const result = await api<{ category: Category }>(calendarAPI, {
         action: "category",
+        create: !initial,
         category: {
           id: id.current,
           name: name.trim(),

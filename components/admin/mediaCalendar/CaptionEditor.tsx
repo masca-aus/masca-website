@@ -7,6 +7,7 @@ import {
   type Ref,
 } from "react";
 import * as Y from "yjs";
+import { PresenceStrip } from "./PresenceStrip";
 import { EditorState, Compartment } from "@codemirror/state";
 import { EditorView, placeholder } from "@codemirror/view";
 import { yCollab } from "y-codemirror.next";
@@ -426,24 +427,7 @@ export function CaptionEditor({
         <h3>Caption</h3>
         <span aria-live="polite">{saving}</span>
       </div>
-      <div className="mc-presence" aria-label="People in the calendar">
-        {Array.from(new Map(people.map((p) => [p.userId, p])).values()).map(
-          (p) => (
-            <span
-              key={p.userId}
-              title={`${p.name}${p.postId === post.id ? " · viewing this post" : ""}`}
-              style={{ background: p.color }}
-            >
-              {p.name.slice(0, 2).toUpperCase()}
-            </span>
-          ),
-        )}
-        <small>
-          {people.filter((p) => p.postId === post.id).length > 1
-            ? "Editing together"
-            : "Only you here for now"}
-        </small>
-      </div>
+      <PresenceStrip people={people} postId={post.id} />
       <div ref={host} className="mc-caption-input" />
       <div className="mc-caption-meta">
         <small>Named text cursors · changes save automatically</small>

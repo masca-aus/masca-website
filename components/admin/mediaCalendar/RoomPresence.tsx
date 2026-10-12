@@ -1,4 +1,5 @@
 "use client";
+import { PresenceStrip } from "./PresenceStrip";
 import { useEffect, useState } from "react";
 import { api, calendarAPI, RequestError } from "./api";
 type Person = { userId: string; name: string; color: string };
@@ -39,17 +40,5 @@ export function RoomPresence() {
       }).catch(() => {});
     };
   }, []);
-  return (
-    <div
-      className="mc-room-presence"
-      aria-label="People online in the media calendar"
-    >
-      {people.slice(0, 5).map((p) => (
-        <span key={p.userId} title={p.name} style={{ background: p.color }}>
-          {p.name.slice(0, 2).toUpperCase()}
-        </span>
-      ))}
-      {people.length > 0 && <small>{people.length} online</small>}
-    </div>
-  );
+  return <PresenceStrip people={people} />;
 }

@@ -2617,3 +2617,67 @@
     transition: none;
   }
 }
+/* Quiet focus for the inline name field; scrolling still works with wheel, touch and keyboard. */
+.mc-workspace .mc-inline-type-name input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.mc-inline-type:focus-within {
+  border-color: color-mix(in srgb, var(--mc-text) 25%, var(--mc-line));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--mc-text) 10%, transparent);
+}
+.mc-panel,
+.mc-sidebar {
+  scrollbar-width: none;
+  scrollbar-gutter: auto;
+}
+.mc-panel::-webkit-scrollbar,
+.mc-sidebar::-webkit-scrollbar {
+  display: none;
+}
+.mc-type-confirm {
+  margin: 6px 3px;
+  padding: 9px;
+  background: var(--mc-soft);
+  border: 1px solid var(--mc-line);
+  border-radius: 8px;
+}
+.mc-type-confirm strong {
+  font-size: 10px;
+}
+.mc-workspace .mc-type-confirm p {
+  margin: 5px 0 8px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--mc-muted);
+}
+.mc-type-confirm > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.mc-workspace .mc-type-confirm button {
+  padding: 5px 6px;
+  min-height: 28px;
+  font-size: 10px;
+}
+.mc-workspace .mc-type-purge-confirm,
+.mc-workspace .mc-type-purge {
+  color: #bd4141;
+}
+.mc-room-presence > span + span,
+.mc-presence > span + span {
+  margin-left: -5px;
+}
+@media (max-width: 767px) {
+  .mc-room-presence {
+    display: flex;
+  }
+  .mc-room-presence span {
+    width: 23px;
+    height: 23px;
+  }
+  .mc-room-presence small {
+    margin-right: 0;
+  }
+}

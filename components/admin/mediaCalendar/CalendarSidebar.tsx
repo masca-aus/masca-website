@@ -39,6 +39,7 @@ export function CalendarSidebar({
   onClear,
   onTypeCreated,
   onTypeUpdated,
+  onTypePurged,
 }: {
   scope: CalendarScope;
   category: string;
@@ -62,6 +63,7 @@ export function CalendarSidebar({
   onClear: () => void;
   onTypeCreated: (category: Category) => void;
   onTypeUpdated: (category: Category) => void;
+  onTypePurged: (id: string) => void;
 }) {
   const panel = useRef<HTMLElement>(null);
   const addButton = useRef<HTMLButtonElement>(null);
@@ -73,6 +75,15 @@ export function CalendarSidebar({
   const [lastDeleted, setLastDeleted] = useState<Category | null>(null);
   const deletedButton = useRef<HTMLButtonElement>(null);
   const deleted = categories.filter((c) => c.archived);
+  const purgeType = (id: string) => {
+    onTypePurged(id);
+    if (lastDeleted?.id === id) setLastDeleted(null);
+    queueMicrotask(() =>
+      (deletedButton.current ?? addButton.current)?.focus({
+        preventScroll: true,
+      }),
+    );
+  };
   const updateType = (saved: Category) => {
     onTypeUpdated(saved);
     if (saved.archived) {
@@ -308,6 +319,7 @@ export function CalendarSidebar({
                 editable={editable}
                 onSelect={() => onCategory(category === c.id ? "all" : c.id)}
                 onSaved={updateType}
+                onPurged={purgeType}
               />
             ))}
           {editable && deleted.length > 0 && (
@@ -344,6 +356,7 @@ export function CalendarSidebar({
                       recent={c.id === lastDeleted?.id}
                       onSelect={() => {}}
                       onSaved={updateType}
+                      onPurged={purgeType}
                     />
                   ))}
                 </div>

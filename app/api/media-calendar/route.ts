@@ -15,6 +15,7 @@ import {
   overview,
   detail,
   saveCategory,
+  deleteCategory,
   readNotification,
 } from "@/features/mediaCalendar/repository";
 export const runtime = "nodejs";
@@ -119,8 +120,18 @@ export async function POST(request: Request) {
         })
         .strict()
         .parse(data.category);
-      return reply({ category: await saveCategory(user, category) });
+      return reply({
+        category: await saveCategory(
+          user,
+          category,
+          z.boolean().optional().parse(data.create) ?? false,
+        ),
+      });
     }
+    if (data.action === "delete-category")
+      return reply({
+        deletedId: await deleteCategory(user, idSchema.parse(data.id)),
+      });
     if (data.action === "notification") {
       await readNotification(user, idSchema.parse(data.id));
       return reply({ ok: true });

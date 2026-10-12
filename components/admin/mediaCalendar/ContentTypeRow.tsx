@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Ellipsis, Palette, Pencil, Trash2, Undo2 } from "lucide-react";
 import type { Category } from "@/features/mediaCalendar/types";
 import { api, calendarAPI } from "./api";
@@ -13,6 +13,7 @@ export function ContentTypeRow({
   recent,
   onSelect,
   onSaved,
+  onPurged,
 }: {
   category: Category;
   selected: boolean;
@@ -20,6 +21,7 @@ export function ContentTypeRow({
   recent?: boolean;
   onSelect: () => void;
   onSaved: (category: Category) => void;
+  onPurged: (id: string) => void;
 }) {
   const [menu, setMenu] = useState<{
     anchor: HTMLElement;
@@ -31,6 +33,29 @@ export function ContentTypeRow({
   const trigger = useRef<HTMLButtonElement>(null);
   const filter = useRef<HTMLButtonElement>(null);
   const saving = useRef(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const cancelDelete = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (confirmDelete) cancelDelete.current?.focus({ preventScroll: true });
+  }, [confirmDelete]);
+  const purge = async () => {
+    if (saving.current) return;
+    saving.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      const result = await api<{ deletedId: string }>(calendarAPI, {
+        action: "delete-category",
+        id: category.id,
+      });
+      onPurged(result.deletedId);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      saving.current = false;
+      setBusy(false);
+    }
+  };
   const closeMenu = (focus = true) => {
     setMenu(null);
     if (focus) trigger.current?.focus({ preventScroll: true });
@@ -95,6 +120,15 @@ export function ContentTypeRow({
             onClick={() => void archive(false)}
           >
             <Undo2 size={12} /> {recent ? "Undo" : "Restore"}
+          </button>
+          <button
+            className="mc-type-purge"
+            disabled={busy}
+            aria-label={`Delete permanently ${category.name}`}
+            title="Delete permanently"
+            onClick={() => setConfirmDelete(true)}
+          >
+            <Trash2 size={12} />
           </button>
         </div>
       ) : (
@@ -164,6 +198,44 @@ export function ContentTypeRow({
             }
           }}
         />
+      )}
+      {confirmDelete && (
+        <div
+          className="mc-type-confirm"
+          role="group"
+          aria-label={`Delete ${category.name} permanently`}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              e.preventDefault();
+              e.stopPropagation();
+              if (!busy) setConfirmDelete(false);
+            }
+          }}
+        >
+          <strong>Delete “{category.name}” permanently?</strong>
+          <p>
+            This cannot be undone. Types attached to posts must be reassigned
+            first.
+          </p>
+          <div>
+            <button
+              ref={cancelDelete}
+              disabled={busy}
+              aria-label="Cancel permanent deletion"
+              onClick={() => setConfirmDelete(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="mc-type-purge-confirm"
+              disabled={busy}
+              aria-label={`Confirm permanent deletion of ${category.name}`}
+              onClick={() => void purge()}
+            >
+              {busy ? "Deleting…" : "Delete permanently"}
+            </button>
+          </div>
+        </div>
       )}
       {error && (
         <p className="mc-type-error" role="alert">

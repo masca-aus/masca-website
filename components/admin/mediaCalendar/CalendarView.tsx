@@ -503,6 +503,15 @@ export function CalendarView({ user }: { user: CalendarUser }) {
             cache.current.clear();
             void load(true);
           }}
+          onTypePurged={(id) => {
+            setData((current) => ({
+              ...current,
+              categories: current.categories.filter((c) => c.id !== id),
+            }));
+            if (category === id) setCategory("all");
+            cache.current.clear();
+            void load(true);
+          }}
           onTypeUpdated={(saved) => {
             setData((current) => ({
               ...current,

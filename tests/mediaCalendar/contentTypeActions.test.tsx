@@ -18,30 +18,35 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
-function setup({ reject = false, viewer = false } = {}) {
+function setup({ reject = false, viewer = false, archived = false } = {}) {
   vi.stubGlobal("matchMedia", () => ({ matches: false }));
   let category = {
     id: "6135c336-0b1a-441e-9659-fb650682ed9e",
     name: "Events",
     color: "#5959c9",
-    archived: false,
+    archived,
   };
   const post = {
     id: "post",
     title: "Community night",
     owner: "1",
-    category: category.id,
+    category: archived ? null : category.id,
     plannedAt: null,
     type: "feed",
     status: "draft",
     version: 1,
     thumbnail: null,
   };
+  let purged = false;
   vi.stubGlobal("fetch", async (url: string, opts?: RequestInit) => {
     if (String(url).includes("collaboration"))
       return new Response(JSON.stringify({ participants: [] }));
     if (opts?.body) {
       const body = JSON.parse(String(opts.body));
+      if (body.action === "delete-category") {
+        purged = true;
+        return new Response(JSON.stringify({ deletedId: body.id }));
+      }
       if (body.action === "category") {
         if (reject)
           return new Response(
@@ -55,7 +60,7 @@ function setup({ reject = false, viewer = false } = {}) {
     return new Response(
       JSON.stringify({
         posts: [post],
-        categories: [category],
+        categories: purged ? [] : [category],
         members: [],
         notifications: [],
         next: null,
@@ -158,4 +163,37 @@ it("keeps the type when deletion fails and does not offer editing to viewers", a
   expect(
     screen.queryByRole("button", { name: "Actions for Events" }),
   ).toBeNull();
+});
+
+it("requires an inline confirmation before removing an unused deleted type permanently", async () => {
+  setup({ archived: true });
+  fireEvent.click(await screen.findByRole("button", { name: /Deleted types/ }));
+  fireEvent.click(
+    screen.getByRole("button", { name: "Delete permanently Events" }),
+  );
+  expect(
+    screen.getByRole("group", { name: "Delete Events permanently" }),
+  ).toBeTruthy();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Cancel permanent deletion" }),
+  );
+  expect(
+    screen.getByRole("button", { name: "Restore content type Events" }),
+  ).toBeTruthy();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Delete permanently Events" }),
+  );
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: "Confirm permanent deletion of Events",
+    }),
+  );
+  await waitFor(() =>
+    expect(
+      screen.queryByRole("button", { name: "Restore content type Events" }),
+    ).toBeNull(),
+  );
+  expect(
+    screen.getByRole("button", { name: "Open Community night" }),
+  ).toBeTruthy();
 });
