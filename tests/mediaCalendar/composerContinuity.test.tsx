@@ -70,9 +70,18 @@ it("keeps one modal and scroll lock from creating through detail loading and edi
   expect(document.body.style.overflow).toBe("hidden");
   await waitFor(() =>
     expect(document.activeElement).toBe(
-      screen.getByRole("textbox", { name: "Post title" }),
+      screen.getByRole("dialog", { name: "Post editor" }),
     ),
   );
+  const title = screen.getByRole("textbox", {
+    name: "Post title",
+  }) as HTMLInputElement;
+  expect(title.selectionStart).toBe(title.selectionEnd);
+  expect(title.value).toBe("Untitled post");
+  fireEvent.click(title);
+  title.focus();
+  fireEvent.change(title, { target: { value: "My new post" } });
+  expect(title.value).toBe("My new post");
   view.unmount();
   expect(document.body.style.overflow).toBe("");
 });
