@@ -92,6 +92,7 @@ const connection = new pg.Client({
 });
 await connection.connect();
 for (const schema of [
+  departmentSchemaSQL,
   submissionSchemaSQL,
   reviewSchemaSQL,
   listingEmailSchemaSQL,

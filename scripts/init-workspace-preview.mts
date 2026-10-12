@@ -37,6 +37,13 @@ const { default: config } = await import("../payload.config.ts");
 const payload = await getPayload({ config });
 if (payload.db.schemaName !== "cms_auth_preview")
   throw new Error("Wrong schema");
+const postInitConnection = new pg.Client({connectionString:process.env.DATABASE_URI});
+await postInitConnection.connect();
+try {
+  await postInitConnection.query(departmentSchemaSQL("cms_auth_preview"));
+} finally {
+  await postInitConnection.end();
+}
 const existing = await payload.find({
   collection: "users",
   limit: 1,
