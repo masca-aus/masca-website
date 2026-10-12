@@ -640,7 +640,9 @@ export function CalendarView({ user }: { user: CalendarUser }) {
                   <button aria-label="Previous range" onClick={() => nav(-1)}>
                     <ChevronLeft size={19} />
                   </button>
-                  <h2>{title}</h2>
+                  <h2 className="mc-range-title" key={`${view}-${days[0]}`}>
+                    {title}
+                  </h2>
                   <button aria-label="Next range" onClick={() => nav(1)}>
                     <ChevronRight size={19} />
                   </button>
