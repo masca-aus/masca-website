@@ -4,7 +4,7 @@ import { useAuth, useField } from "@payloadcms/ui";
 import type { JSONFieldClientComponent } from "payload";
 import { mayManagePeople, type ApprovedAccount, contentAreas, ownershipScopes, permissionAreas, permissionsFor, type ContentPermissions, type PermissionArea, type SectionPermission, type ContentArea } from "../../features/access/workspacePolicy";
 
-const labels = { events: "Events", careers: "Careers", committee: "Committee", sponsors: "Sponsors", organisations: "Organisations", media: "Media" };
+const labels = { events: "Events", careers: "Careers", committee: "Committee", sponsors: "Sponsors", organisations: "Organisations", media: "Media", "care-pathways": "Cares" };
 export const ContentPermissionsField: JSONFieldClientComponent = ({ path, readOnly }) => {
   const { value, setValue, disabled, showError, errorMessage } = useField<ContentPermissions>({ path });
   const { user } = useAuth();
@@ -27,7 +27,7 @@ export const ContentPermissionsField: JSONFieldClientComponent = ({ path, readOn
           <div className="masca-permissions__row">
             <span>{labels[area]}</span>
             <input type="checkbox" aria-label={`Can view ${labels[area]}`} checked={permission.view} onChange={e => update(area, { view: e.target.checked, ...(!e.target.checked ? { edit: false } : {}) })} />
-            <input type="checkbox" aria-label={`Can edit ${labels[area]}`} checked={permission.edit} onChange={e => update(area, { edit: e.target.checked, ...(e.target.checked ? { view: true, scopes: permission.scopes.length ? permission.scopes : ["National"] } : {}) })} />
+            <input type="checkbox" aria-label={`Can edit ${labels[area]}`} checked={permission.edit} onChange={e => update(area, { edit: e.target.checked, ...(e.target.checked ? { view: true, scopes: permission.scopes.length || !contentAreas.includes(area as ContentArea) ? permission.scopes : ["National"] } : {}) })} />
           </div>
           {permission.edit && contentAreas.includes(area as ContentArea) && <fieldset className="masca-permissions__scopes"><legend>Editing teams for {labels[area]}</legend>
             {ownershipScopes.map(scope => <label key={scope}><input type="checkbox" checked={permission.scopes.includes(scope)} onChange={e => update(area, { scopes: e.target.checked ? [...permission.scopes, scope] : permission.scopes.filter(s => s !== scope) })} />{scope}</label>)}

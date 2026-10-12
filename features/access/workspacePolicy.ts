@@ -19,7 +19,7 @@ export const ownershipScopes = [
 ] as const;
 export type ContentArea = (typeof contentAreas)[number];
 export type OwnershipScope = (typeof ownershipScopes)[number];
-export const permissionAreas = [...contentAreas, "organisations", "media"] as const;
+export const permissionAreas = [...contentAreas, "care-pathways", "organisations", "media"] as const;
 export type PermissionArea = (typeof permissionAreas)[number];
 export type SectionPermission = { view: boolean; edit: boolean; scopes: OwnershipScope[] };
 export type ContentPermissions = Partial<Record<PermissionArea, SectionPermission>>;
@@ -118,6 +118,7 @@ export function mayView(account: ApprovedAccount | null | undefined, area: Permi
 export function mayEditArea(account: ApprovedAccount | null | undefined, area: PermissionArea) {
   if (!mayView(account, area)) return false;
   if (mayManageSharedContent(account)) return true;
+  if (area === "care-pathways") return account?.permissions?.[area]?.edit === true;
   if (area === "media" || area === "organisations") return account?.permissions?.[area]?.edit === true;
   return ownershipScopes.some(scope => mayManage(account, area, scope));
 }

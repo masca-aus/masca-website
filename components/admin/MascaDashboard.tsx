@@ -11,6 +11,7 @@ import {
   Building2,
   CalendarDays,
   Briefcase,
+  HeartHandshake,
 } from "lucide-react";
 import "./dashboard.css";
 import type { PayloadRequest } from "payload";
@@ -30,6 +31,15 @@ const contentAreas = [
     href: "/admin/collections/careers",
     createHref: "/admin/collections/careers/create",
     action: "Add opportunity",
+  },
+  {
+    name: "Cares",
+    group: "content",
+    Icon: HeartHandshake,
+    description: "Manage the wellbeing, finance, settling-in and academic pathways.",
+    href: "/admin/collections/care-pathways",
+    createHref: "/admin/collections/care-pathways",
+    action: "Manage pathways",
   },
   {
     name: "Events",

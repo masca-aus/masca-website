@@ -3,7 +3,7 @@
 import { Link, NavToggler, useNav } from "@payloadcms/ui";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type CSSProperties } from "react";
-import { BriefcaseBusiness, CalendarDays, Handshake, House, Images, Building2, Users, UserRound, PanelLeftClose, PanelLeftOpen, ShieldCheck, LogOut } from "lucide-react";
+import { BriefcaseBusiness, CalendarDays, Handshake, HeartHandshake, House, Images, Building2, Users, UserRound, PanelLeftClose, PanelLeftOpen, ShieldCheck, LogOut } from "lucide-react";
 
 import { MascaMark } from "./MascaBrand";
 import { ThemeToggle } from "./ThemeToggle";
@@ -12,6 +12,7 @@ const groups = [
   { label: "Content", items: [
     { slug: "events", label: "Events", icon: CalendarDays, color: "#ef476f" },
     { slug: "careers", label: "Careers", icon: BriefcaseBusiness, color: "#ffcc00" },
+    { slug: "care-pathways", label: "Cares", icon: HeartHandshake, color: "#83c9b5" },
     { slug: "committee", label: "Committee", icon: Users, color: "#9bdd9b" },
     { slug: "sponsors", label: "Sponsors", icon: Handshake, color: "#86b8ef" },
   ] },

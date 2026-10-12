@@ -282,6 +282,23 @@ export function configureWorkspace(
         },
       };
     }
+    if (collection.slug === "care-pathways") {
+      const area = "care-pathways" as const;
+      const originalRead = collection.access?.read;
+      const shared: Access = ({ req }) => mayEditArea(accountOf(req.user), area);
+      return {
+        ...collection,
+        access: {
+          ...collection.access,
+          read: (args) => args.req.user ? mayView(accountOf(args.req.user), area) : originalRead ? originalRead(args) : true,
+          create: shared,
+          update: shared,
+          delete: shared,
+          readVersions: ({ req }) => mayView(accountOf(req.user), area),
+          unlock: shared,
+        },
+      };
+    }
     if (["media", "organisations"].includes(collection.slug)) {
       const area = collection.slug as "media" | "organisations";
       const originalRead = collection.access?.read;
