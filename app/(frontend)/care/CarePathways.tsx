@@ -163,7 +163,7 @@ export default function CarePathways({ pathways }: { pathways: PublicCarePathway
         </div>
       </section>
 
-      <section className="bg-yellow-50">
+      <section className="bg-blue-50">
         <div className="container section-pad">
           <div className="mx-auto max-w-3xl text-center">
             <span className="eyebrow text-red-600">get connected with your state counterparts</span>
