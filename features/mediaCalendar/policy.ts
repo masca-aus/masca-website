@@ -1,5 +1,6 @@
 import {
   committeeMode,
+  committeeScopes,
   accessibleCommittees,
   activeMemberships,
   mayAccessResource,
@@ -57,6 +58,7 @@ export function mayApprove(
       },
       "approve",
     );
+  if (!(committeeScopes as readonly string[]).includes(post.owningScope??"National"))return false;
   return (
     mayUseCalendar(user, "approve") &&
     String(user.id) !== post.creator &&
@@ -102,6 +104,7 @@ export function mayAccessPost(
       },
       action,
     );
+  if (!(committeeScopes as readonly string[]).includes(post.owningScope??"National"))return false;
   return action === "approve" || action === "publish"
     ? mayUseCalendar(user, "approve")
     : mayUseCalendar(

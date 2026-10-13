@@ -1,4 +1,3 @@
-import { committeeScopes } from "../access/committeePolicy.ts";
 import { z } from "zod";
 export const idSchema = z.string().uuid();
 const instant = z.string().datetime({ offset: true }).nullable();
@@ -30,7 +29,7 @@ export const patchSchema = z
   .partial()
   .strict();
 export const createSchema = patchSchema.extend({
-  owningScope: z.enum(committeeScopes).optional(),
+  owningScope: z.string().min(1).max(100).optional(),
 });
 export const sharingSchema = z
   .array(

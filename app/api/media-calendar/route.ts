@@ -1,5 +1,4 @@
 import { withCommitteeMode } from "@/features/access/committeeEnvironment";
-import { committeeScopes } from "@/features/access/committeePolicy";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { z } from "zod";
@@ -109,7 +108,7 @@ export async function GET(request: Request) {
         to,
         offset,
         z
-          .enum(committeeScopes)
+          .string().min(1).max(100)
           .parse(url.searchParams.get("owningScope") ?? "National"),
       ),
     );
@@ -142,7 +141,7 @@ export async function POST(request: Request) {
       const category = z
         .object({
           id: idSchema,
-          owningScope: z.enum(committeeScopes).optional(),
+          owningScope: z.string().min(1).max(100).optional(),
           name: z.string().trim().min(1).max(50),
           color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
           archived: z.boolean(),

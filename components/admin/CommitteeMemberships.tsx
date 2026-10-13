@@ -9,6 +9,7 @@ import {
   committeeAreas,
   committeeScopes,
   type CommitteeMembership,
+  type CommitteeAccount,
 } from "@/features/access/committeePolicy";
 import {
   memberAreaLabels,
@@ -221,7 +222,7 @@ export function CommitteeMemberships({
   });
   const memberships = Array.isArray(value) ? value : [];
   const editable = user?.role === "administrator" && !readOnly && !disabled;
-  const available = committeeScopes.filter(
+  const available = ((user as unknown as CommitteeAccount)?.accessCatalog?.filter(w=>w.status==="active").map(w=>w.id)??committeeScopes).filter(
     (scope) => !memberships.some((member) => member.committee === scope),
   );
   return (

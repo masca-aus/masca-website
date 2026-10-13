@@ -164,7 +164,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
   const days = useMemo(() => calendarDays(day, view), [day, view]);
   const rangeURL = useMemo(
     () =>
-      `${calendarAPI}?${committeeMode(user) ? `owningScope=${owningScope}&` : ""}from=${encodeURIComponent(new Date(`${days[0]}T00:00:00+10:00`).toISOString())}&to=${encodeURIComponent(new Date(`${addDays(days.at(-1)!, 1)}T00:00:00+10:00`).toISOString())}`,
+      `${calendarAPI}?${committeeMode(user) ? `owningScope=${encodeURIComponent(owningScope)}&` : ""}from=${encodeURIComponent(new Date(`${days[0]}T00:00:00+10:00`).toISOString())}&to=${encodeURIComponent(new Date(`${addDays(days.at(-1)!, 1)}T00:00:00+10:00`).toISOString())}`,
     [days, owningScope, user],
   );
   const load = useCallback(
@@ -245,7 +245,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           adjacent = date.toISOString().slice(0, 10);
         }
         const range = calendarDays(adjacent, view);
-        const url = `${calendarAPI}?${committeeMode(user) ? `owningScope=${owningScope}&` : ""}from=${encodeURIComponent(new Date(`${range[0]}T00:00:00+10:00`).toISOString())}&to=${encodeURIComponent(new Date(`${addDays(range.at(-1)!, 1)}T00:00:00+10:00`).toISOString())}`;
+        const url = `${calendarAPI}?${committeeMode(user) ? `owningScope=${encodeURIComponent(owningScope)}&` : ""}from=${encodeURIComponent(new Date(`${range[0]}T00:00:00+10:00`).toISOString())}&to=${encodeURIComponent(new Date(`${addDays(range.at(-1)!, 1)}T00:00:00+10:00`).toISOString())}`;
         if (!cache.current.has(url))
           void api<Overview>(url)
             .then((result) => {
@@ -268,7 +268,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
     window.history.pushState(
       null,
       "",
-      `/admin/media-calendar?${committeeMode(user) ? `owningScope=${owningScope}&` : ""}post=${encodeURIComponent(id)}`,
+      `/admin/media-calendar?${committeeMode(user) ? `owningScope=${encodeURIComponent(owningScope)}&` : ""}post=${encodeURIComponent(id)}`,
     );
     setPostId(id);
     setInitialPost(createdPost ?? null);
@@ -278,7 +278,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       null,
       "",
       committeeMode(user)
-        ? `/admin/media-calendar?owningScope=${owningScope}`
+        ? `/admin/media-calendar?owningScope=${encodeURIComponent(owningScope)}`
         : "/admin/media-calendar",
     );
     setPostId(null);
@@ -614,7 +614,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           <CalendarSelect
             label="Committee workspace"
             value={owningScope}
-            options={workspaces.map((value) => ({ value, label: value }))}
+            options={workspaces.map((value) => ({ value, label: user.workspaceNames?.[value]??value }))}
             onChange={(value) => {
               cache.current.clear();
               savedPosts.current.clear();
@@ -631,7 +631,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
               window.history.pushState(
                 null,
                 "",
-                `/admin/media-calendar?owningScope=${value}${postId ? `&post=${postId}` : ""}`,
+                `/admin/media-calendar?owningScope=${encodeURIComponent(value)}${postId ? `&post=${postId}` : ""}`,
               );
             }}
           />

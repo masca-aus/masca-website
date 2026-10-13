@@ -1,4 +1,4 @@
-import { committeeMode, committeeScopes } from "../access/committeePolicy.ts";
+import { committeeMode } from "../access/committeePolicy.ts";
 import { z } from "zod";
 import {
   transaction,
@@ -14,7 +14,7 @@ import { CalendarError, idSchema } from "./validation.ts";
 export const presenceSchema = z
   .object({
     clientId: idSchema,
-    owningScope: z.enum(committeeScopes).optional(),
+    owningScope: z.string().min(1).max(100).optional(),
     cursor: z
       .object({ anchor: z.string().max(1024), head: z.string().max(1024) })
       .nullable(),
@@ -113,7 +113,7 @@ export async function syncCollaboration(
       post,
       participants: members.rows
         .filter((r) => {
-          const participant = calendarAccount(r);
+          const participant = calendarAccount(r,user.accessCatalog);
           if (!committeeMode(user)) return mayUseCalendar(participant, "view");
           if (input.postId)
             return (
@@ -130,7 +130,7 @@ export async function syncCollaboration(
           const accessible =
             !!r.post_data &&
             mayAccessPost(user, r.post_data, "view") &&
-            mayAccessPost(calendarAccount(r), r.post_data, "view");
+            mayAccessPost(calendarAccount(r,user.accessCatalog), r.post_data, "view");
           return {
             clientId: r.client_id,
             userId: String(r.id),

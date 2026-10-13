@@ -1,3 +1,4 @@
+import {workspaceCatalogSchemaSQL} from "../../features/access/workspaces/schema";
 import { beforeAll, afterAll, it, expect, describe, vi } from "vitest";
 import pg from "pg";
 import { calendarSchemaSQL } from "../../features/mediaCalendar/schema";
@@ -42,6 +43,7 @@ describe.runIf(!!url)("committee calendar in disposable Postgres", () => {
       "CREATE SCHEMA IF NOT EXISTS cms_calendar_preview; CREATE TABLE IF NOT EXISTS cms_calendar_preview.users(id text PRIMARY KEY,email text,status text,role text,calendar_access jsonb,committee_memberships jsonb,committee_access_reviewed_at timestamptz,committee_access_reviewed_by text); CREATE TABLE IF NOT EXISTS cms_calendar_preview.account_photos(user_id text PRIMARY KEY,version int)",
     );
     await db.query(calendarSchemaSQL("media_calendar_preview"));
+    await db.query(workspaceCatalogSchemaSQL("cms_calendar_preview","media_calendar_preview"));
     await db.query(
       "TRUNCATE media_calendar_preview.assets,media_calendar_preview.revisions,media_calendar_preview.notifications,media_calendar_preview.presence,media_calendar_preview.posts CASCADE",
     );
@@ -68,6 +70,7 @@ describe.runIf(!!url)("committee calendar in disposable Postgres", () => {
         ],
       );
   });
+
   afterAll(async () => {
     await db?.end();
     delete (globalThis as typeof globalThis & { calendarPool?: pg.Pool })
@@ -207,4 +210,19 @@ describe.runIf(!!url)("committee calendar in disposable Postgres", () => {
       status: 403,
     });
   });
+  it("supports project owners and revokes mentions/presence/detail after archive",async()=>{
+    await db.query(`INSERT INTO cms_calendar_preview.access_workspaces(id,name,kind,areas) VALUES('ws-masa','MASA','project','["mediaCalendar"]') ON CONFLICT(id) DO UPDATE SET status='active'`);
+    await db.query(`UPDATE cms_calendar_preview.users SET committee_memberships=$1 WHERE id='1'`,[JSON.stringify([{id:'project',committee:'ws-masa',roles:{mediaCalendar:['editor']},manager:false,expiresAt:'2099-01-01T00:00:00Z'}])]);
+    const p=await createPost(actor('1'),{owningScope:'ws-masa',title:'Private project'});
+    expect((await detail(actor('1'),p.id)).members.map(m=>m.id)).toEqual(['1']);
+    await expect(detail(actor('2'),p.id)).rejects.toMatchObject({status:403});
+    const clientId=crypto.randomUUID();
+    expect((await syncCollaboration(actor('1'),{clientId,postId:p.id,cursor:null})).participants).toHaveLength(1);
+    await db.query(`UPDATE cms_calendar_preview.access_workspaces SET name='MASA team' WHERE id='ws-masa'`);
+    expect((await detail(actor('1'),p.id)).post.owningScope).toBe('ws-masa');
+    await db.query(`UPDATE cms_calendar_preview.access_workspaces SET status='archived' WHERE id='ws-masa'`);
+    await expect(detail(actor('1'),p.id)).rejects.toMatchObject({status:403});
+    await expect(syncCollaboration(actor('1'),{clientId,postId:p.id,cursor:null})).rejects.toMatchObject({status:403});
+  });
+
 });

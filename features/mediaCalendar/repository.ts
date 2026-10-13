@@ -1,3 +1,7 @@
+import {loadWorkspaceCatalog} from "../access/workspaces/repository.ts";
+import {withWorkspaceAuthority} from "../access/workspaces/policyContext.ts";
+import type {PolicyWorkspace} from "../access/workspaces/types.ts";
+import {committeeAccessEnabled} from "../access/committeeEnvironment.ts";
 import { withCommitteeMode } from "../access/committeeEnvironment.ts";
 import {
   committeeMode,
@@ -38,12 +42,13 @@ export async function transaction<T>(
   const c = await pool().connect();
   try {
     await c.query("BEGIN");
+    const catalog=committeeAccessEnabled()?await loadWorkspaceCatalog(c):undefined;
     const { rows } = await c.query(
       `SELECT id,email,status,role,calendar_access,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM "${workspaceSchema()}".users WHERE id=$1 FOR SHARE`,
       [actor.id],
     );
     const row = rows[0],
-      user = row ? calendarAccount(row) : null;
+      user = row ? calendarAccount(row,catalog) : null;
     if (
       !user ||
       !(committeeMode(user)
@@ -64,14 +69,15 @@ export async function transaction<T>(
     c.release();
   }
 }
-export function calendarAccount(row: Record<string, unknown>): CalendarUser {
-  return withCommitteeMode({
+export function calendarAccount(row: Record<string, unknown>,catalog?:PolicyWorkspace[]): CalendarUser {
+  const account=withCommitteeMode({
     ...row,
     calendarAccess: row.calendar_access,
     committeeMemberships: row.committee_memberships ?? [],
     committeeAccessReviewedAt: row.committee_access_reviewed_at,
     committeeAccessReviewedBy: row.committee_access_reviewed_by,
   } as CalendarUser);
+  return catalog?withWorkspaceAuthority(account,catalog):account;
 }
 export function requirePostAccess(
   user: CalendarUser,
@@ -90,7 +96,7 @@ export async function membersFor(
     `SELECT id,email,status,role,calendar_access,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM "${workspaceSchema()}".users`,
   );
   return rows
-    .map(calendarAccount)
+    .map(r=>calendarAccount(r,user.accessCatalog))
     .filter((r) => mayAccessPost(r, resource, "view"))
     .map((r) => ({
       id: String(r.id),
@@ -107,7 +113,7 @@ export async function sharingTargets(actor: CalendarUser, id: string) {
       `SELECT id,email,status,role,calendar_access,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM "${workspaceSchema()}".users`,
     );
     return rows
-      .map(calendarAccount)
+      .map(r=>calendarAccount(r,user.accessCatalog))
       .filter((r) =>
         committeeMode(user)
           ? activeMemberships(r).length > 0
@@ -192,7 +198,7 @@ export async function checkRelations(
     );
     if (
       rows.length !== people.length ||
-      rows.some((r) => !mayAccessPost(calendarAccount(r), p, "view"))
+      rows.some((r) => !mayAccessPost(calendarAccount(r,user?.accessCatalog), p, "view"))
     )
       throw new CalendarError("Choose current calendar members.");
   }
@@ -229,7 +235,7 @@ async function notify(
     recipients = r.rows
       .filter(
         (r) =>
-          mayApprove(calendarAccount(r), p) &&
+          mayApprove(calendarAccount(r,user.accessCatalog), p) &&
           !p.contributors.includes(String(r.id)),
       )
       .map((r) => String(r.id));
@@ -279,7 +285,7 @@ export async function mutatePost(actor: CalendarUser, id: string, a: Action) {
       if (
         rows.length !== changedGrants.length ||
         rows
-          .map(calendarAccount)
+          .map(r=>calendarAccount(r,user.accessCatalog))
           .some((r) =>
             committeeMode(user)
               ? !activeMemberships(r).length
@@ -440,8 +446,8 @@ export async function overview(
     );
     const previewIds = new Set(thumbnails.rows.map((r) => r.id));
     const categories = await c.query(
-      `SELECT data FROM ${table("categories")} WHERE NOT $1::boolean OR (COALESCE(data->>'owningScope','National')=$2 AND $3::boolean) ORDER BY data->>'name'`,
-      [strict, owningScope, owned],
+      `SELECT data FROM ${table("categories")} WHERE (NOT $1::boolean OR (COALESCE(data->>'owningScope','National')=$2 AND $3::boolean)) AND COALESCE(data->>'owningScope','National')=ANY($4::text[]) ORDER BY data->>'name'`,
+      [strict, owningScope, owned,strict?user.accessCatalog?.filter(w=>w.status==="active"&&w.areas.includes("mediaCalendar")).map(w=>w.id)??[]:["National","QLD","NSW","VIC","ACT","SA","WA","TAS","NT"]],
     );
     const notifications = await c.query(
       `SELECT n.id,n.post_id AS "postId",n.message,n.read,n.created_at AS "createdAt",p.data AS post FROM ${table("notifications")} n JOIN ${table("posts")} p ON p.id=n.post_id WHERE n.recipient=$1 AND p.data->>'deletedAt' IS NULL AND (NOT $2::boolean OR COALESCE(p.data->>'owningScope','National')=ANY($3::text[]) OR ($4::boolean AND p.data->'sharedWith' @> $5::jsonb)) ORDER BY n.created_at DESC LIMIT 50`,

@@ -20,7 +20,7 @@ export function dashboardContext(account?: ApprovedAccount, requestedBranch?: un
 }
 export type DashboardContext = ReturnType<typeof dashboardContext>;
 export function areaScopes(account: ApprovedAccount | undefined, area: ContentArea, branch: 'all' | OwnershipScope): OwnershipScope[] {
-  return ownershipScopes.filter(scope => (branch === 'all' || branch === scope) && (!account || (committeeMode(account)?rolesFor(account,scope,area).length>0:mayManage(account, area, scope))));
+  return (committeeMode(account)?accessibleCommittees(account,area):ownershipScopes).filter(scope => (branch === 'all' || branch === scope) && (!account || (committeeMode(account)?rolesFor(account,scope,area).length>0:mayManage(account, area, scope))));
 }
 export function orderedAreas(account?: ApprovedAccount,branch?:'all'|OwnershipScope): PermissionArea[] {
   const departments = account?.departments ?? [];
@@ -39,7 +39,7 @@ export function collectionLink(area: PermissionArea, where?: Where) {
   return `/admin/collections/${area}${params.size ? `?${params}` : ''}`;
 }
 export function defaultCreationScope(account: ApprovedAccount | null | undefined, area: ContentArea, requestedBranch?: unknown): OwnershipScope | undefined {
-  if (typeof requestedBranch === 'string' && (ownershipScopes as readonly string[]).includes(requestedBranch as OwnershipScope) && mayManage(account, area, requestedBranch as OwnershipScope)) return requestedBranch as OwnershipScope;
+  if (typeof requestedBranch === 'string' && mayManage(account, area, requestedBranch as OwnershipScope)) return requestedBranch as OwnershipScope;
   if (mayManageSharedContent(account)) return 'National';
   return permissionsFor(account)[area]?.scopes.find(scope => mayManage(account, area, scope));
 }

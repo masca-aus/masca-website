@@ -95,7 +95,7 @@ export function DashboardContent({ account, context = dashboardContext(account),
     <header className="masca-dashboard__heading">
       <div><h1>Your workspace</h1><p>Manage your content and keep the website up to date.</p></div>
       <div className="masca-dashboard__header-controls">
-        {context.branches.length > 0 && <DashboardBranchPicker branches={context.branches} value={context.branch} view={view} committeeOnly={committeeMode(account)} />}
+        {context.branches.length > 0 && <DashboardBranchPicker branches={context.branches} value={context.branch} view={view} committeeOnly={committeeMode(account)} workspaceNames={account?.workspaceNames} />}
         <div className="masca-dashboard__actions">
           {committeeMode(account) && managedCommittees(account).length>0 && <Link href="/admin/people-access" className="masca-action masca-action--secondary">People & access</Link>}
           <DashboardTutorial areas={areas} showEvents={(['events', 'careers'] as const).some(area => areaScopes(account, area, context.branch).length > 0)} isAdmin={isAdmin} />

@@ -1,3 +1,4 @@
+import {workspaceCatalogSchemaSQL} from "../features/access/workspaces/schema.ts";
 /* This localhost-only fixture exercises conditional Payload collection shapes. */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import assert from "node:assert/strict";
@@ -13,14 +14,15 @@ await db.connect();
 await db.query(
   committeeAccessSchemaSQL("cms_calendar_preview", "media_calendar_preview"),
 );
+await db.query(workspaceCatalogSchemaSQL("cms_calendar_preview","media_calendar_preview"));
 for (const [id, scope, roles] of [
   [
     9001,
     "QLD",
-    { events: ["editor"], sponsors: ["editor"], media: ["editor"] },
+    { events: ["editor"], sponsors: ["editor"], media: ["editor"], organisations: ["editor"] },
   ],
   [9002, "NSW", { events: ["editor"] }],
-  [9003, "QLD", { events: ["approver"], sponsors: ["approver"] }],
+  [9003, "QLD", { events: ["approver"], sponsors: ["approver"], organisations: ["approver"] }],
 ] as const) {
   const membership = {
     id: "fixture-" + id,
@@ -355,6 +357,20 @@ try {
       }),
     /changed/,
   );
+
+  await db.query(`INSERT INTO cms_calendar_preview.access_workspaces(id,name,kind,areas) VALUES('ws-payload-qa','Payload project QA','project','["events","media"]') ON CONFLICT(id) DO UPDATE SET status='active'`);
+  for(const [id,role] of [[9005,'editor'],[9006,'approver']] as const){
+    await db.query(`INSERT INTO cms_calendar_preview.users(id,email,role,status,committee_memberships,committee_access_reviewed_at,session_revision) VALUES($1,$2,'editor','active',$3,now(),'qa') ON CONFLICT(id) DO UPDATE SET committee_memberships=$3,committee_access_reviewed_at=now()`,[id,`fixture${id}@masca.org.au`,JSON.stringify([{id:`fixture-${id}`,committee:'ws-payload-qa',roles:{events:[role],media:[role]},manager:false,expiresAt:'2099-01-01T00:00:00Z'}])]);
+  }
+  const projectEditor:any=await person(9005),projectApprover:any=await person(9006);
+  const projectEvent=await payload.create({collection:'events',draft:true,overrideAccess:false,req:await request(projectEditor),data:{title:'Project isolation QA',organisation:'MASA',description:'Local project verification',contactName:'Local QA',contactEmail:'qa@example.org',startDate:'2027-12-01T08:00:00Z',venue:'Local QA',state:'QLD',owningScope:'ws-payload-qa',reviewStatus:'pending',_status:'draft'}});
+  await assert.rejects(async()=>payload.findByID({collection:'events',id:projectEvent.id,draft:true,overrideAccess:false,req:await request(foreign)}));
+  const selfReq=await request(projectEditor,projectEvent.id);selfReq.json=async()=>({action:'approve'});assert.equal((await review(selfReq)).status,403);
+  for(const action of ['approve','publish']){const req=await request(projectApprover,projectEvent.id);req.json=async()=>({action});const response=await review(req);assert.equal(response.status,200,await response.text())}
+  await db.query(`UPDATE cms_calendar_preview.access_workspaces SET name='Renamed project QA',status='archived' WHERE id='ws-payload-qa'`);
+  await assert.rejects(async()=>payload.update({collection:'events',id:projectEvent.id,draft:true,overrideAccess:false,req:await request(projectEditor),data:{title:'Stale authority'}}));
+  const publicProject=await payload.findByID({collection:'events',id:projectEvent.id,overrideAccess:false});assert.equal(publicProject.owningScope,'ws-payload-qa');assert.equal(publicProject._status,'published');assert.equal(publicProject.state,'QLD');
+  console.log('PASS: project ownership, cross-workspace privacy, independent review, archive revocation and public/geographic preservation.');
   console.log(
     "PASS: actual Payload scope/draft privacy, immediate sharing/revocation, independent event/sponsor/directory publication, preserved live revisions, populated private attachments, referenced-file deletion protection, atomic platform audits and stale membership rejection.",
   );

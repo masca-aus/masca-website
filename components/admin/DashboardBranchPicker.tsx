@@ -15,11 +15,11 @@ function branchLabel(branch: OwnershipScope) {
   return state ? `${state.name} (${branch})` : branch;
 }
 
-export function DashboardBranchPicker({ branches, value, view = 'workspace',committeeOnly=false }: {committeeOnly?:boolean; view?: 'workspace' | 'metrics'; branches: OwnershipScope[]; value: 'all' | OwnershipScope }) {
+export function DashboardBranchPicker({ branches, value, view = 'workspace',committeeOnly=false,workspaceNames={} }: {workspaceNames?:Record<string,string>;committeeOnly?:boolean; view?: 'workspace' | 'metrics'; branches: OwnershipScope[]; value: 'all' | OwnershipScope }) {
   const navigation = useAdminNavigation();
   const activeView = useDashboardView() ?? view;
   const [selected, setSelected] = useState<string>(value);
-  const options = [...(committeeOnly?[]:[{ value: 'all', label: 'All my branches' }]), ...branches.map(branch => ({ value: branch, label: branchLabel(branch) }))];
+  const options = [...(committeeOnly?[]:[{ value: 'all', label: 'All my branches' }]), ...branches.map(branch => ({ value: branch, label: workspaceNames[branch]??branchLabel(branch) }))];
   return <form action="/admin" method="get" className="masca-dashboard__branch" onSubmit={event => {
     if (!navigation) return;
     event.preventDefault();

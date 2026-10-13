@@ -52,6 +52,7 @@ export type ApprovedAccount = {
   id?: string | number;
   accessModel?: "legacy" | "committee";
   accessCatalog?: import("./workspaces/types.ts").PolicyWorkspace[];
+  workspaceNames?:Record<string,string>;
   committeeAccessReviewedAt?: string | null;
   committeeAccessReviewedBy?: string | null;
   committeeMemberships?: CommitteeMembership[] | null;

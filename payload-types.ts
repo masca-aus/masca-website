@@ -146,7 +146,7 @@ export interface Career {
   /**
    * The team responsible for this record. Independent of the public event/job location.
    */
-  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
+  owningScope: string;
   changeRequestStatus?: string | null;
   cmsStatus?:
     | {
@@ -304,7 +304,7 @@ export interface CareerLifecycle {
   createdAt: string;
 }
 /**
- * Approve a MASCA Workspace email, assign access, or suspend an account.
+ * Add members, assign committee access and manage handovers.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
@@ -313,6 +313,12 @@ export interface User {
   id: number;
   accessModel?: string | null;
   committeeAccessRevision?: string | null;
+  googleSubject?: string | null;
+  sessionRevision?: string | null;
+  /**
+   * Use an individual MASCA Google account. Shared inboxes should not be used for sign-in.
+   */
+  email: string;
   committeeMemberships?:
     | {
         [k: string]: unknown;
@@ -322,8 +328,6 @@ export interface User {
     | number
     | boolean
     | null;
-  committeeAccessReviewedAt?: string | null;
-  committeeAccessReviewedBy?: string | null;
   /**
    * National team only. Separate from the public media library.
    */
@@ -336,13 +340,6 @@ export interface User {
     | number
     | boolean
     | null;
-  email: string;
-  role: 'administrator' | 'editor';
-  status: 'invited' | 'active' | 'suspended';
-  /**
-   * Personalises the dashboard. Content permissions below control access.
-   */
-  departments?: ('chairs' | 'secretariat' | 'treasury' | 'amplifies' | 'careers' | 'cares' | 'unites')[] | null;
   /**
    * Manage all departments and states, including Organisations and Media. Account management remains restricted to administrators.
    */
@@ -363,8 +360,15 @@ export interface User {
         id?: string | null;
       }[]
     | null;
-  googleSubject?: string | null;
-  sessionRevision?: string | null;
+  role: string;
+  status: string;
+  /**
+   * Personalises the dashboard. Content permissions below control access.
+   */
+  departments?: ('chairs' | 'secretariat' | 'treasury' | 'amplifies' | 'careers' | 'cares' | 'unites')[] | null;
+  committeeAccessReviewedAt?: string | null;
+  committeeAccessReviewedBy?: string | null;
+  displayName?: string | null;
   updatedAt: string;
   createdAt: string;
   collection: 'users';
@@ -377,7 +381,7 @@ export interface User {
  */
 export interface Organisation {
   id: number;
-  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
+  owningScope: string;
   name: string;
   abbreviation?: string | null;
   university?: string | null;
@@ -454,7 +458,7 @@ export interface Event {
   /**
    * The team responsible for this record. Independent of the public event/job location.
    */
-  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
+  owningScope: string;
   changeRequestStatus?: string | null;
   cmsStatus?:
     | {
@@ -545,7 +549,7 @@ export interface Event {
  */
 export interface Media {
   id: number;
-  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
+  owningScope: string;
   prefix?: string | null;
   alt?: string | null;
   sharedWith?:
@@ -610,7 +614,7 @@ export interface Committee {
   /**
    * The team responsible for this record. Independent of the public event/job location.
    */
-  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
+  owningScope: string;
   committeePublicationStatus?:
     | {
         [k: string]: unknown;
@@ -698,7 +702,7 @@ export interface Sponsor {
   /**
    * The team responsible for this record. Independent of the public event/job location.
    */
-  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
+  owningScope: string;
   /**
    * Sponsor name — doubles as the logo's alt text.
    */
@@ -966,14 +970,11 @@ export interface EventLifecycleSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   accessModel?: T;
   committeeAccessRevision?: T;
-  committeeMemberships?: T;
-  committeeAccessReviewedAt?: T;
-  committeeAccessReviewedBy?: T;
-  calendarAccess?: T;
+  googleSubject?: T;
+  sessionRevision?: T;
   email?: T;
-  role?: T;
-  status?: T;
-  departments?: T;
+  committeeMemberships?: T;
+  calendarAccess?: T;
   allContentAccess?: T;
   permissions?: T;
   grants?:
@@ -983,8 +984,12 @@ export interface UsersSelect<T extends boolean = true> {
         scope?: T;
         id?: T;
       };
-  googleSubject?: T;
-  sessionRevision?: T;
+  role?: T;
+  status?: T;
+  departments?: T;
+  committeeAccessReviewedAt?: T;
+  committeeAccessReviewedBy?: T;
+  displayName?: T;
   updatedAt?: T;
   createdAt?: T;
 }

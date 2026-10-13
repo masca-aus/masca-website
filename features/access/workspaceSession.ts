@@ -42,7 +42,7 @@ export const workspaceStrategy: AuthStrategy = {
       )
         return { user: null };
       return {
-        user: { ...user, ...(committeeAccessEnabled()?{accessCatalog:(await loadWorkspaceCatalog()).map(({id,status,areas})=>({id,status,areas}))}:{}), accessModel:withCommitteeMode(user as unknown as ApprovedAccount).accessModel, collection: "users", _strategy: "workspace-google" },
+        user: { ...user, ...(committeeAccessEnabled()?{accessCatalog:account.accessCatalog??(await loadWorkspaceCatalog()).map(({id,status,areas})=>({id,status,areas})),workspaceNames:account.workspaceNames??{}}:{}), accessModel:withCommitteeMode(user as unknown as ApprovedAccount).accessModel, collection: "users", _strategy: "workspace-google" },
       };
     } catch {
       return { user: null };

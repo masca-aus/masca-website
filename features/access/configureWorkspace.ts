@@ -263,6 +263,7 @@ export function configureWorkspace(
                 name: "scope",
                 type: "select",
                 required: true,
+                options: [...ownershipScopes],
                   },
             ],
           },
@@ -307,7 +308,8 @@ export function configureWorkspace(
           afterRead: [
             async ({ doc }) => {
               const current = withCommitteeMode(doc as ApprovedAccount);
-              const account = committeeAccessEnabled()?withWorkspaceAuthority(current,await loadWorkspaceCatalog()):current;
+              const catalog=committeeAccessEnabled()?await loadWorkspaceCatalog():[];
+              const account = committeeAccessEnabled()?{...withWorkspaceAuthority(current,catalog),workspaceNames:Object.fromEntries(catalog.filter(w=>current.role==="administrator"||current.committeeMemberships?.some(m=>m.committee===w.id)).map(w=>[w.id,w.name]))}:current;
               return { ...account, permissions: permissionsFor(account) };
             },
           ],
@@ -344,6 +346,7 @@ export function configureWorkspace(
           beforeChange: [
             ({ data, originalDoc, req, context, operation }) => {
               delete data.accessCatalog;
+              delete data.workspaceNames;
               if (!isWorkspaceEmail(data.email ?? originalDoc?.email ?? ""))
                 throw new APIError("Use an exact @masca.org.au email.", 400);
               data.email = (data.email ?? originalDoc?.email)
@@ -445,7 +448,7 @@ export function configureWorkspace(
             defaultValue: ({ user, req }) =>
               defaultCreationScope(accountOf(user), area, req?.query?.branch),
             admin: {
-              hidden: true,
+              components:{Field:"/components/admin/access/WorkspaceOwner#WorkspaceOwner"},
               description:
                 "The team responsible for this record. Independent of the public event/job location.",
             },
@@ -458,6 +461,7 @@ export function configureWorkspace(
             ...(collection.hooks?.beforeChange ?? []),
             ({ data, originalDoc, req, context, operation }) => {
               delete data.accessCatalog;
+              delete data.workspaceNames;
               if (
                 area === "careers" &&
                 operation === "create" &&
