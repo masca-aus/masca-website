@@ -70,12 +70,27 @@ export function PostPanel(props: {
 }) {
   const [loaded, setLoaded] = useState<(Detail & { id: string }) | null>(null),
     [error, setError] = useState(""),
-    [closing, setClosing] = useState(false);
+    [closing, setClosing] = useState(false),
+    [captionModuleReady, setCaptionModuleReady] = useState(false),
+    [contentReadyId, setContentReadyId] = useState<string | null>(null),
+    [loaderRetiredId, setLoaderRetiredId] = useState<string | null>(null);
   const container = useRef<HTMLDivElement>(null);
   const requestClose = useRef<() => void>(() => {});
   useEffect(() => {
-    // Fetch the caption chunk alongside the draft rather than after it arrives.
-    void loadCaptionEditor().catch(() => {});
+    let alive = true;
+    void loadCaptionEditor()
+      .then(() => {
+        if (alive) setCaptionModuleReady(true);
+      })
+      .catch(() => {
+        if (alive)
+          setError(
+            "The caption editor could not load. Close this post and reopen it to retry.",
+          );
+      });
+    return () => {
+      alive = false;
+    };
   }, []);
   const detail = useMemo(
     () =>
@@ -92,6 +107,22 @@ export function PostPanel(props: {
           : null,
     [loaded, props.id, props.initialPost],
   );
+  const canMountEditor =
+    !!detail && (captionModuleReady || !!detail.post.deletedAt);
+  const contentReady =
+    !!detail && (!!detail.post.deletedAt || contentReadyId === detail.id);
+  const detailId = detail?.id ?? null;
+  useEffect(() => {
+    if (!contentReady || !detailId) return;
+    const reduced = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const timer = setTimeout(
+      () => setLoaderRetiredId(detailId),
+      reduced ? 0 : 160,
+    );
+    return () => clearTimeout(timer);
+  }, [contentReady, detailId]);
   useLayoutEffect(() => {
     const previous = document.activeElement as HTMLElement | null;
     const overflow = document.body.style.overflow;
@@ -129,21 +160,26 @@ export function PostPanel(props: {
     };
   }, [props.id, props.initialPost]);
   useEffect(() => {
-    if (!detail)
+    if (!canMountEditor)
       requestClose.current = () => {
         if (props.id) finish();
       };
-  }, [detail, finish, props.id]);
+  }, [canMountEditor, finish, props.id]);
   return (
     <div className={`mc-overlay ${closing ? "mc-overlay--closing" : ""}`}>
       <div
         ref={container}
         className="mc-panel"
+        data-content-ready={contentReady}
         role="dialog"
         aria-modal="true"
         tabIndex={-1}
         aria-label={
-          detail ? "Post editor" : props.id ? "Opening post" : "Creating post"
+          contentReady
+            ? "Post editor"
+            : props.id
+              ? "Opening post"
+              : "Creating post"
         }
         onKeyDown={(e) => {
           if (e.key === "Escape" && !e.defaultPrevented) {
@@ -155,7 +191,9 @@ export function PostPanel(props: {
               container.current?.querySelectorAll<HTMLElement>(
                 'button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),[tabindex="0"],[contenteditable="true"],a[href],summary',
               ) ?? [],
-            ).filter((el) => el.offsetParent !== null);
+            ).filter(
+              (el) => el.offsetParent !== null && !el.closest("[inert]"),
+            );
             const first = targets[0],
               last = targets.at(-1);
             if (!targets.length) {
@@ -176,21 +214,38 @@ export function PostPanel(props: {
           }
         }}
       >
-        {detail ? (
-          <LoadedPanel
-            key={detail.id}
-            {...props}
-            initial={detail}
-            container={container}
-            requestCloseRef={requestClose}
-            onClose={finish}
-          />
-        ) : (
-          <PostPanelLoading
-            message={error || "Opening your draft…"}
-            error={!!error}
-            onClose={props.id ? finish : undefined}
-          />
+        {canMountEditor && detail && (
+          <div
+            className="mc-editor-content"
+            data-ready={contentReady}
+            aria-hidden={!contentReady}
+            inert={!contentReady}
+          >
+            <LoadedPanel
+              key={detail.id}
+              {...props}
+              initial={detail}
+              container={container}
+              requestCloseRef={requestClose}
+              onClose={finish}
+              visible={contentReady}
+              onReady={() => setContentReadyId(detail.id)}
+            />
+          </div>
+        )}
+        {(!contentReady || loaderRetiredId !== detailId) && (
+          <div
+            className="mc-editor-loading"
+            data-retiring={contentReady}
+            aria-hidden={contentReady}
+            inert={contentReady}
+          >
+            <PostPanelLoading
+              message={error || "Opening your draft…"}
+              error={!!error}
+              onClose={props.id ? () => requestClose.current() : undefined}
+            />
+          </div>
         )}
       </div>
     </div>
@@ -207,6 +262,8 @@ function LoadedPanel({
   onClose,
   onOpen,
   onChange,
+  visible,
+  onReady,
 }: {
   initial: Detail;
   container: RefObject<HTMLDivElement | null>;
@@ -217,6 +274,8 @@ function LoadedPanel({
   onClose: () => void;
   onOpen?: (id: string) => void;
   onChange: (post: Post, assets?: Asset[]) => void;
+  visible: boolean;
+  onReady: () => void;
 }) {
   const router = useRouter();
   const [savedPost, setSavedPost] = useState(initial.post),
@@ -253,6 +312,10 @@ function LoadedPanel({
     };
   }, []);
   const post = { ...savedPost, ...pendingPatch };
+  useEffect(() => {
+    // Recovery replaces the caption editor, so it must release the loading view.
+    if (post.deletedAt) onReady();
+  }, [post.deletedAt, onReady]);
   const localCopyKey = `masca-calendar-deleted-copy:${user.id}:${post.id}`;
   const [localCopy, setLocalCopy] = useState(() => {
     try {
@@ -474,11 +537,12 @@ function LoadedPanel({
     };
   });
   useEffect(() => {
-    const target = initial.post.deletedAt
+    if (!visible) return;
+    const target = post.deletedAt
       ? panel.current?.querySelector<HTMLElement>("button:not(:disabled)")
       : panel.current;
     target?.focus({ preventScroll: true });
-  }, [panel, initial.post.deletedAt]);
+  }, [panel, post.deletedAt, visible]);
   const workflow = async (
     action: string,
     extra: Record<string, unknown> = {},
@@ -749,6 +813,7 @@ function LoadedPanel({
             user={user}
             disabled={locked}
             onPost={receive}
+            onReady={onReady}
             onCaption={setCaption}
           />
           <details className="mc-details">
