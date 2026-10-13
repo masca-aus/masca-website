@@ -10,7 +10,7 @@ import {
   saveMembership,
 } from "@/features/access/delegatedAccess";
 import {
-  committeeScopes,
+  knownWorkspace,
   type CommitteeAccount,
   type CommitteeScope,
 } from "@/features/access/committeePolicy";
@@ -32,10 +32,10 @@ async function actor(request: Request) {
   if (!user) throw new APIError("Sign in to manage committee access.", 401);
   return withCommitteeMode(user as unknown as CommitteeAccount);
 }
-function scope(value: unknown): CommitteeScope {
+function scope(value: unknown, user:CommitteeAccount): CommitteeScope {
   if (
     typeof value !== "string" ||
-    !(committeeScopes as readonly string[]).includes(value as CommitteeScope)
+    !knownWorkspace(value,user.accessCatalog)
   )
     throw new APIError("Choose a committee.", 400);
   return value as CommitteeScope;
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
     return reply({
       committees: managedCommittees(user),
       ...(committee
-        ? { people: await listPeople(user, scope(committee)) }
+        ? { people: await listPeople(user, scope(committee,user)) }
         : {}),
     });
   } catch (error) {
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
     if (data.email !== undefined && typeof data.email !== "string")
       throw new APIError("Choose a valid email.", 400);
     return reply(
-      await saveMembership(user, { ...data, committee: scope(data.committee) }),
+      await saveMembership(user, { ...data, committee: scope(data.committee,user) }),
     );
   } catch (error) {
     return fail(error);

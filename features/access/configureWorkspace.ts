@@ -169,6 +169,7 @@ export function configureWorkspace(
             },
           },
           { name: "email", type: "email", required: true, unique: true },
+          {name:"displayName",label:"Name",type:"text",maxLength:80},
           {
             name: "role",
             access: {
