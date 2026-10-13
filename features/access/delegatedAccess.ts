@@ -27,6 +27,7 @@ export function workspaceTable(name: string) {
   if (
     ![
       "users",
+      "access_workspaces",
       "committee_access_audit",
       "committee_access_reminders",
       "events",
