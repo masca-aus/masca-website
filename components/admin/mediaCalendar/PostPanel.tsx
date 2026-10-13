@@ -38,27 +38,14 @@ import { MediaDropzone } from "./MediaDropzone";
 import { InstagramPreview } from "./InstagramPreview";
 import { useUploads } from "./useUploads";
 import type { CaptionHandle } from "./CaptionEditor";
-const CaptionEditor = dynamic(
-  () => import("./CaptionEditor").then((m) => m.CaptionEditor),
-  {
-    ssr: false,
-    loading: () => (
-      <section className="mc-caption" aria-busy="true">
-        <div className="mc-section-label">
-          <h3>Caption</h3>
-          <span role="status">Opening caption…</span>
-        </div>
-        <div className="mc-presence" aria-hidden="true" />
-        <div className="mc-caption-input">
-          <div className="mc-caption-skeleton" />
-        </div>
-        <div className="mc-caption-meta">
-          <small>Preparing your caption editor</small>
-        </div>
-      </section>
-    ),
-  },
-);
+import { CaptionLoading, PostPanelLoading } from "./ComposerLoading";
+export { PostPanelLoading } from "./ComposerLoading";
+const loadCaptionEditor = () =>
+  import("./CaptionEditor").then((m) => m.CaptionEditor);
+const CaptionEditor = dynamic(loadCaptionEditor, {
+  ssr: false,
+  loading: CaptionLoading,
+});
 type Detail = {
   post: Post;
   assets: Asset[];
@@ -86,6 +73,10 @@ export function PostPanel(props: {
     [closing, setClosing] = useState(false);
   const container = useRef<HTMLDivElement>(null);
   const requestClose = useRef<() => void>(() => {});
+  useEffect(() => {
+    // Fetch the caption chunk alongside the draft rather than after it arrives.
+    void loadCaptionEditor().catch(() => {});
+  }, []);
   const detail = useMemo(
     () =>
       loaded?.id === props.id
@@ -206,39 +197,6 @@ export function PostPanel(props: {
   );
 }
 
-export function PostPanelLoading({
-  message = "Creating your draft…",
-  error = false,
-  onClose,
-}: {
-  message?: string;
-  error?: boolean;
-  onClose?: () => void;
-}) {
-  return (
-    <>
-      <header className="mc-panel-header">
-        <span className="mc-eyebrow">INSTAGRAM · DRAFT</span>
-        {
-          <button aria-label="Close post" disabled={!onClose} onClick={onClose}>
-            <X size={22} />
-          </button>
-        }
-      </header>
-      <div className="mc-composer-skeleton">
-        <p role={error ? "alert" : "status"}>{message}</p>
-        {!error && (
-          <>
-            <div className="mc-skeleton mc-skeleton-title" />
-            <div className="mc-skeleton mc-skeleton-meta" />
-            <div className="mc-skeleton mc-skeleton-media" />
-            <div className="mc-skeleton mc-skeleton-caption" />
-          </>
-        )}
-      </div>
-    </>
-  );
-}
 function LoadedPanel({
   initial,
   container,
