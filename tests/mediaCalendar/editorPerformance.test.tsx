@@ -24,10 +24,13 @@ vi.mock("next/navigation", () => ({
 // CodeMirror requires layout APIs that jsdom does not provide. Keep the actual
 // calendar/composer and HTTP boundary; only replace the caption layout widget.
 vi.mock("next/dynamic", () => ({
-  default: () => (props: { onPost: (p: Post) => void }) => {
-    editor.onPost = props.onPost;
-    return <div>Caption editor</div>;
-  },
+  default:
+    () => (props: { onPost: (p: Post) => void; onReady: () => void }) => {
+      const { onReady } = props;
+      React.useLayoutEffect(() => onReady(), [onReady]);
+      editor.onPost = props.onPost;
+      return <div>Caption editor</div>;
+    },
 }));
 const user: CalendarUser = {
   id: "1",

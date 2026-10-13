@@ -7,7 +7,7 @@ import { newPost, applyAction } from "../../features/mediaCalendar/service";
 import type { Post, CalendarUser } from "../../features/mediaCalendar/types";
 const callbacks = vi.hoisted(() => ({ onPost: null as unknown as (p: Post) => void }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push() {} }) }));
-vi.mock("next/dynamic", () => ({ default: () => (props: {onPost: (p: Post) => void}) => { callbacks.onPost = props.onPost; return <div>Caption ready</div>; } }));
+vi.mock("next/dynamic", () => ({ default: () => (props: {onPost: (p: Post) => void; onReady: () => void}) => { const { onReady } = props; React.useLayoutEffect(() => onReady(), [onReady]); callbacks.onPost = props.onPost; return <div>Caption ready</div>; } }));
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); localStorage.clear(); });
 const user: CalendarUser = { id: "1", email: "test@masca.org.au", role: "administrator", status: "active" };
 it("retains an edited hold reason and reports a conflict after a teammate changes it", async () => {

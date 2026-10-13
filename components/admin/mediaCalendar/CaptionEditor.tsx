@@ -46,6 +46,7 @@ export function CaptionEditor({
   disabled,
   onPost,
   onCaption,
+  onReady,
   ref,
 }: {
   post: Post;
@@ -53,6 +54,7 @@ export function CaptionEditor({
   disabled: boolean;
   onPost: (p: Post) => void;
   onCaption: (caption: string) => void;
+  onReady?: () => void;
   ref?: Ref<CaptionHandle>;
 }) {
   const editableSlot = useRef(new Compartment());
@@ -63,11 +65,11 @@ export function CaptionEditor({
     flush = useRef<() => Promise<void>>(async () => {}),
     retainLocal = useRef<() => boolean>(() => true),
     postRef = useRef(post),
-    callbacks = useRef({ onPost, onCaption }),
+    callbacks = useRef({ onPost, onCaption, onReady }),
     disabledRef = useRef(disabled);
   useEffect(() => {
     postRef.current = post;
-    callbacks.current = { onPost, onCaption };
+    callbacks.current = { onPost, onCaption, onReady };
     disabledRef.current = disabled;
   });
   const [saving, setSaving] = useState("Saved"),
@@ -98,6 +100,8 @@ export function CaptionEditor({
       idle: ReturnType<typeof setTimeout> | undefined,
       max: ReturnType<typeof setTimeout> | undefined,
       remote: ReturnType<typeof setTimeout> | undefined;
+    let readyFrame: number | undefined;
+    let readyTimer: ReturnType<typeof setTimeout> | undefined;
     const saved = localStorage.getItem(key);
     if (saved) {
       try {
@@ -263,6 +267,15 @@ export function CaptionEditor({
       }),
     });
     editor.current = view;
+    const reportReady = () => {
+      if (alive) callbacks.current.onReady?.();
+    };
+    // Let CodeMirror mount and perform its first layout before revealing the form.
+    if (window.requestAnimationFrame) {
+      readyFrame = window.requestAnimationFrame(() => {
+        readyFrame = window.requestAnimationFrame(reportReady);
+      });
+    } else readyTimer = setTimeout(reportReady, 0);
     const seen = new Map<number, number>();
     let connected = true;
     const poll = async () => {
@@ -396,6 +409,8 @@ export function CaptionEditor({
     callbacks.current.onCaption(d.getText("caption").toString());
     return () => {
       alive = false;
+      if (readyFrame !== undefined) window.cancelAnimationFrame(readyFrame);
+      clearTimeout(readyTimer);
       clearTimeout(idle);
       clearTimeout(max);
       clearTimeout(remote);
