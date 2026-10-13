@@ -7,6 +7,18 @@ const editor: ApprovedAccount = { email: 'member@masca.org.au', status: 'active'
     media: { view: true, edit: false, scopes: [] }, sponsors: { view: false, edit: false, scopes: [] },
   } };
 describe('team dashboard personalisation', () => {
+  it('offers active viewer and manager memberships and defaults to one committee',()=>{
+    const account:ApprovedAccount={...editor,accessModel:'committee',committeeAccessReviewedAt:'2026-10-13T00:00:00Z',committeeMemberships:[
+      {id:'q',committee:'QLD',expiresAt:'2099-01-01T00:00:00Z',manager:false,roles:{events:['viewer']}},
+      {id:'v',committee:'VIC',expiresAt:'2099-01-01T00:00:00Z',manager:true,roles:{}},
+      {id:'expired',committee:'WA',expiresAt:'2020-01-01T00:00:00Z',manager:true,roles:{events:['editor']}},
+    ]};
+    expect(dashboardContext(account,'all')).toMatchObject({branches:['QLD','VIC'],branch:'QLD'});
+    expect(orderedAreas(account,'QLD')).toEqual(['events']);
+    expect(orderedAreas(account,'VIC')).toEqual([]);
+    expect(areaScopes(account,'events','QLD')).toEqual(['QLD']);
+    expect(defaultCreationScope(account,'events','QLD')).toBeUndefined();
+  });
   it('combines department priorities without duplicates and hides inaccessible tools', () => {
     expect(orderedAreas(editor)).toEqual(['careers', 'media', 'events']);
     expect(orderedAreas({ ...editor, departments: ['amplifies', 'careers', 'amplifies'] })).toEqual(['media', 'events', 'careers']);

@@ -5,6 +5,8 @@ import { CareerChoiceField as CareerChoiceField_b571a13772d70ef4b785a0c59e796355
 import { CareerDateField as CareerDateField_59404842b3b8e6cda85bec35a9da686f } from '../../../components/admin/CareerDateField'
 import { CareerLifecycleCell as CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34 } from '../../../components/admin/CareerLifecycleCell'
 import { CareerEditorFooter as CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
+import { RecordSharing as RecordSharing_e6ebf7555f2f2b8bdbbec7db566efda5 } from '../../../components/admin/RecordSharing'
+import { CommitteeReview as CommitteeReview_0efdea4e0a9f2e1f01b6a0106fbedd99 } from '../../../components/admin/CommitteeReview'
 import { CareerPublicationStatusCell as CareerPublicationStatusCell_f07b37ac41f692f48fee9d222ed514bf } from '../../../components/admin/CareerStatusCell'
 import { LifecycleEmptyState as LifecycleEmptyState_42d71d9f34a8cf4069fbd1a94b7c2615 } from '../../../components/admin/LifecycleEmptyState'
 import { CareerListTools as CareerListTools_425c2154b5081b2b75b2a41486007d14 } from '../../../components/admin/CareerListTools'
@@ -13,6 +15,7 @@ import { CareerPublishControl as CareerPublishControl_57c74453f1f49818c0cb8c1e92
 import { CareerSaveControl as CareerSaveControl_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
 import { CareerEditorView as CareerEditorView_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
 import { CollectionBackLink as CollectionBackLink_b7eb021eac5b101e7ce71970147e89df } from '../../../components/admin/DocumentBackLink'
+import { CommitteeMemberships as CommitteeMemberships_85361f3159d03a7c3fa4c03923b8455d } from '../../../components/admin/CommitteeMemberships'
 import { AccountPhoto as AccountPhoto_19077e57c0b53719868a754215553c8a } from '../../../components/admin/AccountPhoto'
 import { CalendarPermissions as CalendarPermissions_0e5e8be3be6243394165b6acda0870b9 } from '../../../components/admin/mediaCalendar/CalendarPermissions'
 import { ContentPermissionsField as ContentPermissionsField_d1257e98ee6e87bc3a795e8f49bc774e } from '../../../components/admin/ContentPermissionsField'
@@ -55,6 +58,7 @@ import { LoginWelcome as LoginWelcome_a8cc6f5d2dc08727fd6734a3818ec46d } from '.
 import { AdminNavigationEnhancements as AdminNavigationEnhancements_2cf824608624f2d905c46bce1dbb1759 } from '../../../components/admin/AdminNavigationEnhancements'
 import { ImageUploadCompression as ImageUploadCompression_52256fb23a13326be6c2f32a1fd1e14f } from '../../../components/admin/ImageUploadCompression'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
+import { PeopleAccess as PeopleAccess_8a46ae4e8250d32f7a4dab945aa77239 } from '../../../components/admin/PeopleAccess'
 import { MediaCalendar as MediaCalendar_a19d5cde59da8da8e3c41e65a240e08a } from '../../../components/admin/mediaCalendar/MediaCalendar'
 import { MascaDashboard as MascaDashboard_72c4387a9706020af1c627168ef507af } from '../../../components/admin/MascaDashboard'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -68,6 +72,8 @@ export const importMap = {
   "/components/admin/CareerDateField#CareerDateField": CareerDateField_59404842b3b8e6cda85bec35a9da686f,
   "/components/admin/CareerLifecycleCell#CareerLifecycleCell": CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34,
   "/components/admin/CareerEditor#CareerEditorFooter": CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236,
+  "/components/admin/RecordSharing#RecordSharing": RecordSharing_e6ebf7555f2f2b8bdbbec7db566efda5,
+  "/components/admin/CommitteeReview#CommitteeReview": CommitteeReview_0efdea4e0a9f2e1f01b6a0106fbedd99,
   "/components/admin/CareerStatusCell#CareerPublicationStatusCell": CareerPublicationStatusCell_f07b37ac41f692f48fee9d222ed514bf,
   "/components/admin/LifecycleEmptyState#LifecycleEmptyState": LifecycleEmptyState_42d71d9f34a8cf4069fbd1a94b7c2615,
   "/components/admin/CareerListTools#CareerListTools": CareerListTools_425c2154b5081b2b75b2a41486007d14,
@@ -76,6 +82,7 @@ export const importMap = {
   "/components/admin/CareerEditor#CareerSaveControl": CareerSaveControl_57c74453f1f49818c0cb8c1e92524236,
   "/components/admin/CareerEditor#CareerEditorView": CareerEditorView_57c74453f1f49818c0cb8c1e92524236,
   "/components/admin/DocumentBackLink#CollectionBackLink": CollectionBackLink_b7eb021eac5b101e7ce71970147e89df,
+  "/components/admin/CommitteeMemberships#CommitteeMemberships": CommitteeMemberships_85361f3159d03a7c3fa4c03923b8455d,
   "/components/admin/AccountPhoto#AccountPhoto": AccountPhoto_19077e57c0b53719868a754215553c8a,
   "/components/admin/mediaCalendar/CalendarPermissions#CalendarPermissions": CalendarPermissions_0e5e8be3be6243394165b6acda0870b9,
   "/components/admin/ContentPermissionsField#ContentPermissionsField": ContentPermissionsField_d1257e98ee6e87bc3a795e8f49bc774e,
@@ -118,6 +125,7 @@ export const importMap = {
   "/components/admin/AdminNavigationEnhancements#AdminNavigationEnhancements": AdminNavigationEnhancements_2cf824608624f2d905c46bce1dbb1759,
   "/components/admin/ImageUploadCompression#ImageUploadCompression": ImageUploadCompression_52256fb23a13326be6c2f32a1fd1e14f,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
+  "/components/admin/PeopleAccess#PeopleAccess": PeopleAccess_8a46ae4e8250d32f7a4dab945aa77239,
   "/components/admin/mediaCalendar/MediaCalendar#MediaCalendar": MediaCalendar_a19d5cde59da8da8e3c41e65a240e08a,
   "/components/admin/MascaDashboard#MascaDashboard": MascaDashboard_72c4387a9706020af1c627168ef507af,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

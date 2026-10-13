@@ -1,6 +1,7 @@
 import config from "@payload-config";
 import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
+import {committeeAccessEnabled} from '@/features/access/committeeEnvironment';
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,6 +17,7 @@ export async function GET(request: NextRequest) {
       where: {
         and: [
           { listed: { equals: true } },
+          ...(committeeAccessEnabled() ? [{_status:{equals:"published"}}] : []),
           { or: [
             { name: { contains: term } },
             { abbreviation: { contains: term } },

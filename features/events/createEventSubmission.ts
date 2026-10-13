@@ -10,7 +10,8 @@ export interface EventSubmissionPayload {
     | {
         collection: "media";
         overrideAccess: true;
-        data: { alt: string };
+        data: { alt: string; owningScope:"National" };
+        context:{publicEventSubmission:symbol};
         file: PayloadFile;
       }
     | {
@@ -44,7 +45,8 @@ export async function createEventSubmission({
     const media = await payload.create({
       collection: "media",
       overrideAccess: true,
-      data: { alt: data.title },
+      data: { alt: data.title,owningScope:"National" },
+      context:{publicEventSubmission},
       file: {
         data: Buffer.from(await poster.arrayBuffer()),
         mimetype: poster.type,

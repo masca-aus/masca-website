@@ -59,7 +59,7 @@ async function getPublicEvents(now: Date, past: boolean): Promise<Event[]> {
     },
     select: publicEventSelect,
     // The storage plugin builds `url` from `filename` during afterRead.
-    populate: { media: { filename: true, url: true } },
+    populate: { media: { filename: true, url: true, prefix:true } },
   });
 
   return docs.map(doc => eventToPublicCard(doc, past));

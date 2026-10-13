@@ -1,14 +1,21 @@
 import * as Y from "yjs";
 import { randomUUID } from "node:crypto";
 import type { CalendarUser, Post } from "./types.ts";
-import { mayApprove, mayUseCalendar } from "./policy.ts";
-import { CalendarError, patchSchema, type Action } from "./validation.ts";
+import { mayApprove, mayAccessPost, mayManagePost } from "./policy.ts";
+import {
+  CalendarError,
+  patchSchema,
+  createSchema,
+  type Action,
+} from "./validation.ts";
 export function newPost(user: CalendarUser, input: unknown): Post {
-  if (!mayUseCalendar(user, "edit"))
+  const { owningScope = "National", ...patch } = createSchema.parse(input);
+  if (!mayManagePost(user, { owningScope }, "create"))
     throw new CalendarError("Calendar editing access is required.", 403);
-  const patch = patchSchema.parse(input),
-    now = new Date().toISOString();
+  const now = new Date().toISOString();
   return {
+    owningScope,
+    sharedWith: [],
     id: randomUUID(),
     title: "Untitled post",
     type: "feed",
@@ -59,16 +66,46 @@ function contentChanged(p: Post, user: CalendarUser) {
 }
 /** Must run while holding the database row lock. Asset ownership/completion is checked by repository. */
 export function applyAction(p: Post, user: CalendarUser, a: Action): boolean {
-  if (!mayUseCalendar(user, "view"))
-    throw new CalendarError("Calendar access is required.", 403);
+  if (!mayAccessPost(user, p, "view"))
+    throw new CalendarError("This post is not available to your account.", 403);
   const isDiscussion = a.action === "comment" || a.action === "resolve";
+  const permission = isDiscussion
+    ? "comment"
+    : a.action === "share"
+      ? "share"
+      : ["approve", "changes"].includes(a.action)
+        ? "approve"
+        : "edit";
+  if (!mayAccessPost(user, p, permission))
+    throw new CalendarError(
+      "Calendar editing or review access is required for this action.",
+      403,
+    );
   if (
-    !isDiscussion &&
-    a.action !== "approve" &&
-    a.action !== "changes" &&
-    !mayUseCalendar(user, "edit")
+    ![
+      "patch",
+      "caption",
+      "comment",
+      "resolve",
+      "approve",
+      "changes",
+      "share",
+    ].includes(a.action) &&
+    !mayManagePost(user, p, "edit")
   )
-    throw new CalendarError("Calendar editing access is required.", 403);
+    throw new CalendarError(
+      "Only an owning committee editor can change the workflow.",
+      403,
+    );
+  if (
+    a.action === "patch" &&
+    ["owner", "collaborators"].some((k) => Object.hasOwn(a.patch, k)) &&
+    !mayManagePost(user, p, "edit")
+  )
+    throw new CalendarError(
+      "Only an owning committee editor can assign responsibility.",
+      403,
+    );
   const now = new Date().toISOString();
   let changed = true;
   if (p.deletedAt && a.action !== "restore")
@@ -76,7 +113,15 @@ export function applyAction(p: Post, user: CalendarUser, a: Action): boolean {
       "This post was deleted. Restore it before making changes.",
       409,
     );
-  if (a.action === "draft" || a.action === "delete" || a.action === "restore") {
+  if (a.action === "share") {
+    if (p.version !== a.expectedVersion)
+      throw new CalendarError("This post changed. Reload before sharing.", 409);
+    p.sharedWith = a.sharedWith;
+  } else if (
+    a.action === "draft" ||
+    a.action === "delete" ||
+    a.action === "restore"
+  ) {
     if (p.version !== a.expectedVersion)
       throw new CalendarError(
         "This post changed. Reload it before trying again.",
@@ -161,7 +206,7 @@ export function applyAction(p: Post, user: CalendarUser, a: Action): boolean {
   } else if (a.action === "resolve") {
     const c = p.comments.find((c) => c.id === a.commentId);
     if (!c) throw new CalendarError("Comment not found.", 404);
-    if (c.author !== String(user.id) && !mayUseCalendar(user, "edit"))
+    if (c.author !== String(user.id) && !mayAccessPost(user, p, "edit"))
       throw new CalendarError(
         "Only the author or an editor can resolve this comment.",
         403,
@@ -214,7 +259,7 @@ export function applyAction(p: Post, user: CalendarUser, a: Action): boolean {
         p.status = "draft";
         break;
       case "changes":
-        if (!mayUseCalendar(user, "approve"))
+        if (!mayAccessPost(user, p, "approve"))
           throw new CalendarError("Review access is required.", 403);
         if (p.status !== "in_review" || !a.message?.trim())
           throw new CalendarError(

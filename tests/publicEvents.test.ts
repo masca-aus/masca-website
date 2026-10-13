@@ -73,7 +73,7 @@ describe("approved upcoming Payload events", () => {
       ticketURL: true,
       poster: true,
     });
-    expect(find.mock.calls[0][0].populate).toEqual({ media: { filename: true, url: true } });
+    expect(find.mock.calls[0][0].populate).toEqual({ media: { filename: true, url: true, prefix:true } });
   });
 
   it("keeps events with an end date until they end, including those already started", async () => {

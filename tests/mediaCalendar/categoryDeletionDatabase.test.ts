@@ -50,10 +50,10 @@ describe.runIf(!!url)(
         globalThis as typeof globalThis & { calendarPool?: pg.Pool }
       ).calendarPool = db;
       await db.query(
-        "CREATE SCHEMA IF NOT EXISTS cms_calendar_preview; CREATE TABLE IF NOT EXISTS cms_calendar_preview.users(id text PRIMARY KEY,email text,status text,role text,calendar_access jsonb)",
+        "CREATE SCHEMA IF NOT EXISTS cms_calendar_preview; CREATE TABLE IF NOT EXISTS cms_calendar_preview.users(id text PRIMARY KEY,email text,status text,role text,calendar_access jsonb,committee_memberships jsonb,committee_access_reviewed_at timestamptz,committee_access_reviewed_by text)",
       );
       await db.query(
-        "INSERT INTO cms_calendar_preview.users VALUES('1','qa@masca.org.au','active','administrator',null),('2','view@masca.org.au','active','editor','{\"view\":true,\"edit\":false,\"approve\":false,\"designation\":null}') ON CONFLICT(id) DO NOTHING",
+        "INSERT INTO cms_calendar_preview.users(id,email,status,role,calendar_access) VALUES('1','qa@masca.org.au','active','administrator',null),('2','view@masca.org.au','active','editor','{\"view\":true,\"edit\":false,\"approve\":false,\"designation\":null}') ON CONFLICT(id) DO NOTHING",
       );
       await db.query(calendarSchemaSQL("media_calendar_preview"));
     });

@@ -1,3 +1,4 @@
+import { withCommitteeMode } from "./committeeEnvironment.ts";
 import { createHmac } from 'node:crypto';
 import { jwtVerify, SignJWT } from "jose";
 import { parseCookies, type AuthStrategy } from "payload";
@@ -39,7 +40,7 @@ export const workspaceStrategy: AuthStrategy = {
       )
         return { user: null };
       return {
-        user: { ...user, collection: "users", _strategy: "workspace-google" },
+        user: { ...user, accessModel:withCommitteeMode(user as unknown as ApprovedAccount).accessModel, collection: "users", _strategy: "workspace-google" },
       };
     } catch {
       return { user: null };

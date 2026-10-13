@@ -1,4 +1,5 @@
 import type { ApprovedAccount } from "../access/workspacePolicy";
+import type { CommitteeScope, SharingGrant } from "../access/committeePolicy";
 export type CalendarAccess = {
   view: boolean;
   edit: boolean;
@@ -11,6 +12,7 @@ export type CalendarUser = Omit<ApprovedAccount, "grants"> & {
   calendarAccess?: CalendarAccess | null;
 };
 export type Category = {
+  owningScope?: CommitteeScope;
   id: string;
   name: string;
   color: string;
@@ -39,6 +41,8 @@ export type Comment = {
   createdAt: string;
 };
 export type Post = {
+  owningScope?: CommitteeScope;
+  sharedWith?: SharingGrant[];
   deletedAt?: string | null;
   id: string;
   title: string;
@@ -78,6 +82,8 @@ export type Card = Pick<
   | "onHold"
   | "version"
   | "owner"
+  | "owningScope"
+  | "sharedWith"
 > & { thumbnail: string | null };
 export type CalendarNotification = {
   id: string;

@@ -1,7 +1,20 @@
-import {validCalendarAccess} from "../mediaCalendar/policy.ts";
+import {
+  auditMembershipChange,
+  lockMembershipRecord,
+} from "./committeeAudit.ts";
+import { committeeContent, committeeFilter } from "./committeeContent.ts";
+import {
+  committeeAccessEnabled,
+  withCommitteeMode,
+} from "./committeeEnvironment.ts";
+import { validMemberships } from "./committeePolicy.ts";
+import { validCalendarAccess } from "../mediaCalendar/policy.ts";
 import { COMMITTEE_DEPARTMENTS } from "../../utils/committeeDepartments.js";
 import { defaultCreationScope } from "../dashboard/teamDashboard.ts";
-import { publicEventSubmission, publicCareerSubmission } from "./publicSubmissionContext.ts";
+import {
+  publicEventSubmission,
+  publicCareerSubmission,
+} from "./publicSubmissionContext.ts";
 import { randomUUID } from "node:crypto";
 import {
   APIError,
@@ -12,7 +25,10 @@ import {
 } from "payload";
 import {
   contentAreas,
-  mayView, mayEditArea, permissionsFor, validPermissions,
+  mayView,
+  mayEditArea,
+  permissionsFor,
+  validPermissions,
   ownershipScopes,
   mayManage,
   mayManagePeople,
@@ -41,7 +57,7 @@ function scopeFilter(
 export function configureWorkspace(
   collections: CollectionConfig[],
 ): CollectionConfig[] {
-  return collections.map((collection) => {
+  const configured = collections.map<CollectionConfig>((collection) => {
     if (collection.slug === "users")
       return {
         ...collection,
@@ -73,62 +89,178 @@ export function configureWorkspace(
           unlock: () => false,
         },
         fields: [
-          { name: "accountPhoto", type: "ui", admin: { components: { Field: "/components/admin/AccountPhoto#AccountPhoto" } } },
-          { name: "calendarAccess", type: "json", label: "Media calendar", access: {create: ({req}) => mayManagePeople(accountOf(req.user)), update: ({req}) => mayManagePeople(accountOf(req.user))}, validate: (value) => validCalendarAccess(value) || "Choose consistent calendar permissions and a media member or chair for approval.", admin: {components: {Field: "/components/admin/mediaCalendar/CalendarPermissions#CalendarPermissions"}, description: "National team only. Separate from the public media library."}},
+          {
+            name: "accessModel",
+            type: "text",
+            virtual: true,
+            admin: { hidden: true },
+            access: { create: () => false, update: () => false },
+          },
+          {
+            name: "committeeAccessRevision",
+            type: "text",
+            defaultValue: () => randomUUID(),
+            admin: { hidden: true, readOnly: true },
+            access: { create: admin, update: admin },
+          },
+          {
+            name: "committeeMemberships",
+            type: "json",
+            defaultValue: [],
+            label: "Committee memberships",
+            access: {
+              create: admin,
+              update: admin,
+              read: ({ req }) => !!req.user,
+            },
+            validate: (value) =>
+              validMemberships(value ?? []) ||
+              "Choose valid committee memberships with explicit expiry dates.",
+            admin: {
+              components: {
+                Field:
+                  "/components/admin/CommitteeMemberships#CommitteeMemberships",
+              },
+            },
+          },
+          {
+            name: "committeeAccessReviewedAt",
+            type: "date",
+            admin: { readOnly: true },
+            access: { create: () => false, update: () => false },
+          },
+          {
+            name: "committeeAccessReviewedBy",
+            type: "text",
+            admin: { readOnly: true },
+            access: { create: () => false, update: () => false },
+          },
+          {
+            name: "accountPhoto",
+            type: "ui",
+            admin: {
+              components: {
+                Field: "/components/admin/AccountPhoto#AccountPhoto",
+              },
+            },
+          },
+          {
+            name: "calendarAccess",
+            type: "json",
+            label: "Media calendar",
+            access: {
+              create: ({ req }) => mayManagePeople(accountOf(req.user)),
+              update: ({ req }) => mayManagePeople(accountOf(req.user)),
+            },
+            validate: (value) =>
+              validCalendarAccess(value) ||
+              "Choose consistent calendar permissions and a media member or chair for approval.",
+            admin: {
+              condition: (_data, _siblings, {user}) => user?.accessModel !== "committee",
+              components: {
+                Field:
+                  "/components/admin/mediaCalendar/CalendarPermissions#CalendarPermissions",
+              },
+              description:
+                "National team only. Separate from the public media library.",
+            },
+          },
           { name: "email", type: "email", required: true, unique: true },
           {
             name: "role",
-            access: { create: ({ req }) => mayManagePeople(accountOf(req.user)), update: ({ req }) => mayManagePeople(accountOf(req.user)) },
+            access: {
+              create: ({ req }) => mayManagePeople(accountOf(req.user)),
+              update: ({ req }) => mayManagePeople(accountOf(req.user)),
+            },
             type: "select",
             required: true,
             defaultValue: "editor",
             options: [
-              { label: "Administrator", value: "administrator" },
-              { label: "Editor", value: "editor" },
+              { label: "Platform administrator", value: "administrator" },
+              { label: "Committee member", value: "editor" },
             ],
           },
           {
             name: "status",
-            access: { create: ({ req }) => mayManagePeople(accountOf(req.user)), update: ({ req }) => mayManagePeople(accountOf(req.user)) },
+            access: {
+              create: ({ req }) => mayManagePeople(accountOf(req.user)),
+              update: ({ req }) => mayManagePeople(accountOf(req.user)),
+            },
             type: "select",
             required: true,
             defaultValue: "invited",
             options: ["invited", "active", "suspended"],
           },
           {
-            name: "departments", label: "Departments", type: "select", hasMany: true,
-            options: COMMITTEE_DEPARTMENTS.map(({ label, value }) => ({ label, value })),
-            access: { create: ({ req }) => mayManagePeople(accountOf(req.user)), update: ({ req }) => mayManagePeople(accountOf(req.user)) },
-            admin: { description: "Personalises the dashboard. Content permissions below control access." },
+            name: "departments",
+            label: "Departments",
+            type: "select",
+            hasMany: true,
+            options: COMMITTEE_DEPARTMENTS.map(({ label, value }) => ({
+              label,
+              value,
+            })),
+            access: {
+              create: ({ req }) => mayManagePeople(accountOf(req.user)),
+              update: ({ req }) => mayManagePeople(accountOf(req.user)),
+            },
+            admin: {
+              description:
+                "Personalises the dashboard. Content permissions below control access.",
+            },
           },
           {
             name: "allContentAccess",
-            access: { create: ({ req }) => mayManagePeople(accountOf(req.user)), update: ({ req }) => mayManagePeople(accountOf(req.user)) },
+            access: {
+              create: ({ req }) => mayManagePeople(accountOf(req.user)),
+              update: ({ req }) => mayManagePeople(accountOf(req.user)),
+            },
             type: "checkbox",
             label: "Edit all content",
             defaultValue: false,
             admin: {
-              condition: (_, data) => data.role === "editor",
+              condition: (_, data, {user}) => user?.accessModel !== "committee" && data.role === "editor",
               description:
                 "Manage all departments and states, including Organisations and Media. Account management remains restricted to administrators.",
             },
           },
           {
             name: "permissions",
-            access: { create: ({ req }) => mayManagePeople(accountOf(req.user)), update: ({ req }) => mayManagePeople(accountOf(req.user)) },
+            access: {
+              create: ({ req }) => mayManagePeople(accountOf(req.user)),
+              update: ({ req }) => mayManagePeople(accountOf(req.user)),
+            },
             type: "json",
             label: "Content permissions",
-            validate: (value) => validPermissions(value) || "Choose viewing access and at least one editing team for editable sections.",
+            validate: (value) =>
+              validPermissions(value) ||
+              "Choose viewing access and at least one editing team for editable sections.",
             admin: {
-              condition: (_, data) => data.role === "editor" && !data.allContentAccess,
-              components: { Field: "/components/admin/ContentPermissionsField#ContentPermissionsField" },
+              condition: (_, data, {user}) =>
+                user?.accessModel !== "committee" && data.role === "editor" && !data.allContentAccess,
+              components: {
+                Field:
+                  "/components/admin/ContentPermissionsField#ContentPermissionsField",
+              },
             },
           },
           {
-            name: "grants", type: "array", admin: { hidden: true },
+            name: "grants",
+            type: "array",
+            admin: { hidden: true },
             fields: [
-              { name: "area", type: "select", required: true, options: [...contentAreas] },
-              { name: "scope", type: "select", required: true, options: [...ownershipScopes] },
+              {
+                name: "area",
+                type: "select",
+                required: true,
+                options: [...contentAreas],
+              },
+              {
+                name: "scope",
+                type: "select",
+                required: true,
+                options: [...ownershipScopes],
+              },
             ],
           },
           {
@@ -150,7 +282,31 @@ export function configureWorkspace(
           },
         ] as Field[],
         hooks: {
-          afterRead: [({ doc }) => ({ ...doc, permissions: permissionsFor(doc as ApprovedAccount) })],
+          beforeOperation: [
+            async ({ args, operation }) => {
+              if (operation === "update") {
+                if (!("id" in args) || args.id == null)
+                  throw new APIError("Edit people individually so access changes remain consistent.", 403);
+                await lockMembershipRecord(
+                  args.req,
+                  args.id as string | number,
+                );
+              }
+              return args;
+            },
+          ],
+          afterChange: [
+            async ({ doc, previousDoc, req }) => {
+              await auditMembershipChange(req, previousDoc, doc);
+              return doc;
+            },
+          ],
+          afterRead: [
+            ({ doc }) => {
+              const account = withCommitteeMode(doc as ApprovedAccount);
+              return { ...account, permissions: permissionsFor(account) };
+            },
+          ],
           refresh: [
             async ({ args, user }) => {
               const current = await args.req.payload.findByID({
@@ -182,7 +338,7 @@ export function configureWorkspace(
             },
           ],
           beforeChange: [
-            ({ data, originalDoc, req, context }) => {
+            ({ data, originalDoc, req, context, operation }) => {
               if (!isWorkspaceEmail(data.email ?? originalDoc?.email ?? ""))
                 throw new APIError("Use an exact @masca.org.au email.", 400);
               data.email = (data.email ?? originalDoc?.email)
@@ -213,6 +369,41 @@ export function configureWorkspace(
                   "The recovery administrator must remain active.",
                   400,
                 );
+              if ("committeeMemberships" in data) {
+                if (
+                  operation === "update" &&
+                  originalDoc &&
+                  JSON.stringify(data.committeeMemberships) !==
+                    JSON.stringify(originalDoc.committeeMemberships ?? []) &&
+                  data.committeeAccessRevision !==
+                    originalDoc.committeeAccessRevision
+                )
+                  throw new APIError(
+                    "Committee access changed. Reload this person before saving.",
+                    409,
+                  );
+                data.committeeAccessRevision = randomUUID();
+                if (!validMemberships(data.committeeMemberships))
+                  throw new APIError(
+                    "Choose valid committee memberships.",
+                    400,
+                  );
+                // Collection create access already rejects unauthenticated HTTP writes.
+                // Server bootstrap may receive the empty JSON field default; it grants nothing.
+                const emptyBootstrap =
+                  !req.user &&
+                  operation === "create" &&
+                  data.committeeMemberships.length === 0;
+                if (!emptyBootstrap) {
+                  if (!mayManagePeople(accountOf(req.user)))
+                    throw new APIError(
+                      "Only platform administrators can edit full membership records.",
+                      403,
+                    );
+                  data.committeeAccessReviewedAt = new Date().toISOString();
+                  data.committeeAccessReviewedBy = String(req.user!.id);
+                }
+              }
               if (!context.workspaceLogin) data.sessionRevision = randomUUID();
               return data;
             },
@@ -229,7 +420,11 @@ export function configureWorkspace(
         access: {
           ...collection.access,
           read: (args) =>
-            args.req.user ? mayView(accountOf(args.req.user), area) : read ? read(args) : true,
+            args.req.user
+              ? mayView(accountOf(args.req.user), area)
+              : read
+                ? read(args)
+                : true,
           create,
           update: scoped,
           delete: scoped,
@@ -242,7 +437,8 @@ export function configureWorkspace(
             label: "Managed by",
             type: "select",
             required: true,
-            defaultValue: ({ user, req }) => defaultCreationScope(accountOf(user), area, req?.query?.branch),
+            defaultValue: ({ user, req }) =>
+              defaultCreationScope(accountOf(user), area, req?.query?.branch),
             options: [...ownershipScopes],
             admin: {
               hidden: true,
@@ -257,9 +453,26 @@ export function configureWorkspace(
           beforeChange: [
             ...(collection.hooks?.beforeChange ?? []),
             ({ data, originalDoc, req, context, operation }) => {
-              if (area === "careers" && operation === "create" && context.publicCareerSubmission === publicCareerSubmission && data._status === "draft" && data.submittedForReview === true && data.owningScope === "National") return data;
-              if (area === "events" && operation === "create" && context.publicEventSubmission === publicEventSubmission && data._status === "draft" && data.reviewStatus === "pending" && data.owningScope === "National") return data;
               if (
+                area === "careers" &&
+                operation === "create" &&
+                context.publicCareerSubmission === publicCareerSubmission &&
+                data._status === "draft" &&
+                data.submittedForReview === true &&
+                data.owningScope === "National"
+              )
+                return data;
+              if (
+                area === "events" &&
+                operation === "create" &&
+                context.publicEventSubmission === publicEventSubmission &&
+                data._status === "draft" &&
+                data.reviewStatus === "pending" &&
+                data.owningScope === "National"
+              )
+                return data;
+              if (
+                !committeeAccessEnabled() &&
                 !mayManage(
                   accountOf(req.user),
                   area,
@@ -284,21 +497,32 @@ export function configureWorkspace(
         ...collection,
         access: {
           ...collection.access,
-          read: ({ req }) => mayView(accountOf(req.user), area),
+          read: ({ req }) =>
+            committeeAccessEnabled()
+              ? lifecycleCommitteeFilter(req, area, false)
+              : mayView(accountOf(req.user), area),
           readVersions: ({ req }) =>
-            mayView(accountOf(req.user), area),
+            committeeAccessEnabled()
+              ? lifecycleCommitteeFilter(req, area, true)
+              : mayView(accountOf(req.user), area),
         },
       };
     }
     if (["media", "organisations"].includes(collection.slug)) {
       const area = collection.slug as "media" | "organisations";
       const originalRead = collection.access?.read;
-      const shared: Access = ({ req }) => mayEditArea(accountOf(req.user), area);
+      const shared: Access = ({ req }) =>
+        mayEditArea(accountOf(req.user), area);
       return {
         ...collection,
         access: {
           ...collection.access,
-          read: (args) => args.req.user ? mayView(accountOf(args.req.user), area) : originalRead ? originalRead(args) : true,
+          read: (args) =>
+            args.req.user
+              ? mayView(accountOf(args.req.user), area)
+              : originalRead
+                ? originalRead(args)
+                : true,
           create: shared,
           update: shared,
           delete: shared,
@@ -306,7 +530,8 @@ export function configureWorkspace(
         },
       };
     }
-    if (["listing-emails", "listing-change-requests"].includes(collection.slug)) return collection;
+    if (["listing-emails", "listing-change-requests"].includes(collection.slug))
+      return collection;
     // Any future settings collections stay administrator-only.
     return {
       ...collection,
@@ -319,4 +544,29 @@ export function configureWorkspace(
       },
     };
   });
+  return configured.map((collection) =>
+    [...contentAreas, "media", "organisations"].includes(collection.slug)
+      ? committeeContent(collection)
+      : collection,
+  );
+}
+async function lifecycleCommitteeFilter(
+  req: import("payload").PayloadRequest,
+  area: "events" | "careers",
+  versions: boolean,
+): Promise<boolean | Where> {
+  const filter = await committeeFilter(req, area);
+  if (filter === false) return false;
+  const result = await req.payload.find({
+    collection: area,
+    req,
+    overrideAccess: false,
+    depth: 0,
+    limit: 0,
+    pagination: false,
+  });
+  return {
+    [`${versions ? "version." : ""}${area === "events" ? "event" : "career"}`]:
+      { in: result.docs.map((d) => d.id) },
+  };
 }

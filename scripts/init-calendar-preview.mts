@@ -1,3 +1,4 @@
+import { committeeAccessSchemaSQL } from "../features/access/committeeSchema.ts";
 import { accountPhotoSchemaSQL } from "../features/account/photoSchema.ts";
 import pg from "pg";
 import { calendarSchemaSQL } from "../features/mediaCalendar/schema.ts";
@@ -5,7 +6,7 @@ import { submissionSchemaSQL } from "../features/submissions/schema.ts";
 import { reviewSchemaSQL } from "../features/submissions/reviewSchema.ts";
 import { listingEmailSchemaSQL } from "../features/submissions/emailSchema.ts";
 import { changeRequestSchemaSQL } from "../features/submissions/changeRequestSchema.ts";
-import {departmentSchemaSQL} from "../features/dashboard/departmentSchema.ts";
+import { departmentSchemaSQL } from "../features/dashboard/departmentSchema.ts";
 const previewSchema = process.env.WORKSPACE_PREVIEW_SCHEMA;
 if (
   process.env.VERCEL_ENV === "production" ||
@@ -60,6 +61,10 @@ if (exists.rows.length && !committeeStatus.rows.length) {
     COMMIT;
   `);
 }
+if (exists.rows.length)
+  await c.query(
+    committeeAccessSchemaSQL(previewSchema, "media_calendar_preview"),
+  );
 await c.end();
 process.env.WORKSPACE_INIT_SCHEMA = exists.rows.length ? "false" : "true";
 Object.assign(process.env, { NODE_ENV: "development" });
@@ -101,6 +106,9 @@ for (const schema of [
   changeRequestSchemaSQL,
 ])
   await connection.query(schema(previewSchema));
+await connection.query(
+  committeeAccessSchemaSQL(previewSchema, "media_calendar_preview"),
+);
 // Preview-only QA accounts cannot authenticate against production or other preview schemas.
 if (process.env.CALENDAR_PREVIEW_TESTS === "true") {
   for (const [email, id, role] of [

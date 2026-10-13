@@ -213,6 +213,35 @@ export interface Career {
   internalNotes?: string | null;
   sourceKey?: string | null;
   lifecycle?: string | null;
+  sharedWith?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessCreator?: string | null;
+  accessContributors?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessPublished?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -282,6 +311,19 @@ export interface CareerLifecycle {
  */
 export interface User {
   id: number;
+  accessModel?: string | null;
+  committeeAccessRevision?: string | null;
+  committeeMemberships?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  committeeAccessReviewedAt?: string | null;
+  committeeAccessReviewedBy?: string | null;
   /**
    * National team only. Separate from the public media library.
    */
@@ -335,6 +377,7 @@ export interface User {
  */
 export interface Organisation {
   id: number;
+  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
   name: string;
   abbreviation?: string | null;
   university?: string | null;
@@ -354,8 +397,38 @@ export interface Organisation {
   sourceCheckedAt?: string | null;
   verificationNotes?: string | null;
   directoryKey?: string | null;
+  sharedWith?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessCreator?: string | null;
+  accessContributors?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessPublished?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -432,6 +505,35 @@ export interface Event {
    * Publishing automatically approves this event. Choose Rejected to keep a submission off the website.
    */
   reviewStatus: 'pending' | 'approved' | 'rejected';
+  sharedWith?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessCreator?: string | null;
+  accessContributors?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessPublished?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -444,7 +546,38 @@ export interface Event {
  */
 export interface Media {
   id: number;
+  owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
   alt?: string | null;
+  sharedWith?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessCreator?: string | null;
+  accessContributors?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessPublished?: boolean | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -522,6 +655,35 @@ export interface Committee {
    * Required before publishing. Use the member’s LinkedIn profile URL.
    */
   linkedin_url: string;
+  sharedWith?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessCreator?: string | null;
+  accessContributors?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessPublished?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -550,8 +712,38 @@ export interface Sponsor {
    * Choose an existing logo or upload an image. Large JPEG and PNG images are automatically compressed. A transparent background works best.
    */
   logo: number | Media;
+  sharedWith?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessCreator?: string | null;
+  accessContributors?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  accessPublished?: boolean | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -677,6 +869,11 @@ export interface CareersSelect<T extends boolean = true> {
   internalNotes?: T;
   sourceKey?: T;
   lifecycle?: T;
+  sharedWith?: T;
+  accessCreator?: T;
+  accessContributors?: T;
+  accessReview?: T;
+  accessPublished?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -732,6 +929,7 @@ export interface CareerLifecycleSelect<T extends boolean = true> {
  * via the `definition` "organisations_select".
  */
 export interface OrganisationsSelect<T extends boolean = true> {
+  owningScope?: T;
   name?: T;
   abbreviation?: T;
   university?: T;
@@ -742,8 +940,14 @@ export interface OrganisationsSelect<T extends boolean = true> {
   sourceCheckedAt?: T;
   verificationNotes?: T;
   directoryKey?: T;
+  sharedWith?: T;
+  accessCreator?: T;
+  accessContributors?: T;
+  accessReview?: T;
+  accessPublished?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -763,6 +967,11 @@ export interface EventLifecycleSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  accessModel?: T;
+  committeeAccessRevision?: T;
+  committeeMemberships?: T;
+  committeeAccessReviewedAt?: T;
+  committeeAccessReviewedBy?: T;
   calendarAccess?: T;
   email?: T;
   role?: T;
@@ -787,7 +996,14 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  owningScope?: T;
   alt?: T;
+  sharedWith?: T;
+  accessCreator?: T;
+  accessContributors?: T;
+  accessReview?: T;
+  accessPublished?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -831,6 +1047,11 @@ export interface CommitteeSelect<T extends boolean = true> {
   portrait?: T;
   bio?: T;
   linkedin_url?: T;
+  sharedWith?: T;
+  accessCreator?: T;
+  accessContributors?: T;
+  accessReview?: T;
+  accessPublished?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -844,8 +1065,14 @@ export interface SponsorsSelect<T extends boolean = true> {
   name?: T;
   date?: T;
   logo?: T;
+  sharedWith?: T;
+  accessCreator?: T;
+  accessContributors?: T;
+  accessReview?: T;
+  accessPublished?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -876,6 +1103,11 @@ export interface EventsSelect<T extends boolean = true> {
   internalNotes?: T;
   reviewedAt?: T;
   reviewStatus?: T;
+  sharedWith?: T;
+  accessCreator?: T;
+  accessContributors?: T;
+  accessReview?: T;
+  accessPublished?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

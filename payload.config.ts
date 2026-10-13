@@ -1,3 +1,5 @@
+import {committeeAccessEnabled} from "./features/access/committeeEnvironment.ts";
+import {libraryBucket, libraryFileURL, privateMediaPrefix, guardLibraryUpload} from "./features/access/committeeMedia.ts";
 import { ListingChangeRequests } from './collections/ListingChangeRequests.ts';
 import { ListingEmails } from './collections/ListingEmails.ts';
 import { workspaceSchema, workspaceSchemaPush } from "./features/access/workspaceEnvironment.ts";
@@ -156,6 +158,7 @@ export default buildConfig({
         Icon: "/components/admin/MascaBrand#MascaIcon",
       },
       views: {
+        peopleAccess: {Component: "/components/admin/PeopleAccess#PeopleAccess",path:"/people-access",exact:true},
         mediaCalendar: {Component: "/components/admin/mediaCalendar/MediaCalendar#MediaCalendar", path: "/media-calendar", exact: true},
         dashboard: {
           Component: "/components/admin/MascaDashboard#MascaDashboard",
@@ -186,14 +189,16 @@ export default buildConfig({
   },
   plugins: [
     s3Storage({
-      bucket: s3Bucket,
+      bucket: libraryBucket(),
+      alwaysInsertFields:true,
       collections: {
         media: {
+          prefix: committeeAccessEnabled() ? privateMediaPrefix : undefined,
           // Serve files straight from the public bucket URL — Payload never
           // proxies file bytes, so images survive redeploys and cost no
           // serverless time.
           disablePayloadAccessControl: true,
-          generateFileURL: ({ filename }) => publicFileURL(filename),
+          generateFileURL: ({ filename, prefix }) => libraryFileURL(filename,prefix,publicFileURL),
         },
       },
       config: {
@@ -270,7 +275,9 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
       access: {
         read: () => true,
       },
+      hooks: { beforeValidate: [({data,originalDoc,req,operation}) => guardLibraryUpload(data??{},originalDoc,!!req.file,operation,committeeAccessEnabled())] },
       fields: [
+        {name:"prefix",type:"text",admin:{hidden:true,readOnly:true}},
         {
           name: "alt",
           label: "Alt text",
@@ -289,7 +296,7 @@ function workspaceCollections(): import("payload").CollectionConfig[] { return [
         adminThumbnail: ({ doc }) => {
           const sizes = doc.sizes as { "admin-preview"?: { filename?: string } } | undefined;
           const filename = sizes?.["admin-preview"]?.filename || doc.filename;
-          return typeof filename === 'string' && filename ? publicFileURL(filename) : null;
+          return typeof filename === 'string' && filename ? libraryFileURL(filename,doc.prefix as string | undefined,publicFileURL) : null;
         },
         imageSizes: [
           {

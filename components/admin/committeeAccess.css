@@ -1,0 +1,115 @@
+.committee-access {
+  --mc-bg: var(--theme-bg, #fff);
+  --mc-text: var(--theme-text, #292a30);
+  --mc-line: var(--theme-elevation-150, #e6e6eb);
+  --mc-muted: var(--theme-elevation-550, #74747c);
+  --mc-soft: var(--theme-elevation-50, #f7f7fa);
+  --mc-primary: #09055f;
+  color: var(--mc-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.committee-access fieldset {
+  border-radius: 14px;
+  min-width: 0;
+  background: var(--mc-bg);
+}
+.committee-access legend {
+  font-weight: 650;
+  padding: 0 8px;
+}
+.committee-access button,
+.committee-access input {
+  font: inherit;
+  color: inherit;
+}
+.committee-access button {
+  border: 1px solid var(--mc-line);
+  border-radius: 9px;
+  padding: 9px 12px;
+  background: var(--mc-bg);
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    opacity 140ms ease;
+}
+.committee-access button:hover {
+  background: var(--mc-soft);
+}
+.committee-access button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.committee-access input[type="email"] {
+  border: 1px solid var(--mc-line);
+  border-radius: 9px;
+  padding: 10px 12px;
+  background: var(--mc-bg);
+  width: min(100%, 360px);
+}
+.committee-access .mc-select-trigger,
+.committee-access .mc-date-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+  min-height: 40px;
+}
+.committee-access .mc-select {
+  min-width: 190px;
+}
+.committee-access .access-role-row {
+  display: grid;
+  grid-template-columns: 1fr minmax(190px, 260px);
+  align-items: center;
+  gap: 18px;
+}
+.committee-access .access-term {
+  display: grid;
+  grid-template-columns: 1fr minmax(190px, 260px);
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 18px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--mc-line);
+}
+.committee-access .access-help {
+  font-size: 13px;
+  color: var(--mc-muted);
+  margin: 16px 0;
+}
+.committee-access .access-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.committee-access table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+.committee-access td,
+.committee-access th {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--mc-line);
+}
+@media (max-width: 560px) {
+  .committee-access .access-role-row,
+  .committee-access .access-term {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .committee-access .mc-select {
+    min-width: 0;
+  }
+  .committee-access table {
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .committee-access button {
+    transition: none;
+  }
+}

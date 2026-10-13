@@ -14,11 +14,13 @@ const colours = [
 ];
 
 export function InlineContentType({
+  owningScope,
   onCreated,
   onCancel,
   initial,
   focusColour = false,
 }: {
+  owningScope?: import("@/features/access/committeePolicy").CommitteeScope;
   onCreated: (category: Category) => void;
   onCancel: () => void;
   initial?: Category;
@@ -57,6 +59,9 @@ export function InlineContentType({
         create: !initial,
         category: {
           id: id.current,
+          ...((initial?.owningScope ?? owningScope)
+            ? { owningScope: initial?.owningScope ?? owningScope }
+            : {}),
           name: name.trim(),
           color: colour,
           archived: false,

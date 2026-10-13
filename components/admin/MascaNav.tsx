@@ -4,7 +4,9 @@ import {clearCalendarRecovery} from "@/features/mediaCalendar/localRecovery";
 import type {CalendarUser} from "@/features/mediaCalendar/types";
 
 import { NavToggler, useNav, useAuth } from "@payloadcms/ui";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import {committeeMode, accessibleCommittees, rolesFor,type CommitteeAccount,type CommitteeArea} from '@/features/access/committeePolicy';
+import {managedCommittees} from '@/features/access/delegatedAccessClient';
 import { useEffect, useState, type CSSProperties } from "react";
 import { BriefcaseBusiness, CalendarDays, Handshake, House, Images, Building2, Users, UserRound, PanelLeftClose, PanelLeftOpen, ShieldCheck, LogOut, type LucideIcon } from "lucide-react";
 
@@ -31,6 +33,9 @@ const groups: { label: string; items: { slug: string; label: string; icon: Lucid
 export function MascaNav({ visibleEntities }: { visibleEntities: { collections: string[] } }) {
   const pathname = usePathname();
   const {user} = useAuth();
+  const query=useSearchParams(),account=user as unknown as CommitteeAccount;
+  const committees=committeeMode(account)?accessibleCommittees(account):[];
+  const branch=committees.find(scope=>scope===query.get('branch'))??committees[0];
   const { navOpen, navRef, hydrated, shouldAnimate, setNavOpen } = useNav();
   const dashboard = pathname === "/admin" || pathname === "/admin/";
 
@@ -60,12 +65,13 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
         <nav aria-label="CMS navigation" className="masca-nav__links">
           {<Link restoreContext href="/admin" aria-current={dashboard ? "page" : undefined} className="masca-nav__link"><span className="masca-nav__icon"><House size={18} /></span>Dashboard</Link>}
           {groups.map(group => {
-            const items = group.items.filter(item => item.slug === "media-calendar" ? mayUseCalendar(user as unknown as CalendarUser, "view") : visibleEntities.collections.includes(item.slug));
+            const items = group.items.filter(item => item.slug === "media-calendar" ? mayUseCalendar(user as unknown as CalendarUser, "view") : visibleEntities.collections.includes(item.slug) && (!committeeMode(account) || (!!branch && rolesFor(account,branch,item.slug as CommitteeArea).length>0)));
             return items.length ? <section key={group.label} aria-label={group.label}>
               <h2>{group.label}</h2>
               {items.map(({ slug, label, icon: Icon, color, href: destination }) => {
-                const href = destination ?? `/admin/collections/${slug}`;
-                const active = pathname === href || pathname.startsWith(`${href}/`);
+                const base = destination ?? `/admin/collections/${slug}`;
+                const href = committeeMode(account) && branch ? `${base}?branch=${branch}${destination?'':`&where[owningScope][equals]=${branch}`}` : base;
+                const active = pathname === base || pathname.startsWith(`${base}/`);
                 return <Link restoreContext={!destination} key={slug} href={href} className="masca-nav__link" aria-current={active ? "page" : undefined} style={{ "--section-accent": color } as CSSProperties}><span className="masca-nav__icon"><Icon size={18} /></span>{label}</Link>;
               })}
             </section> : null;
@@ -73,7 +79,8 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
           <div className="masca-nav__account">
             <h2>Settings</h2>
             <div className="masca-nav__theme"><ThemeToggle /></div>
-            {visibleEntities.collections.includes("users") && <Link restoreContext href="/admin/collections/users" className="masca-nav__link" aria-current={pathname.startsWith("/admin/collections/users") ? "page" : undefined}><ShieldCheck size={19} />People & access</Link>}
+            {(committeeMode(account)?managedCommittees(account).length>0:visibleEntities.collections.includes("users")) && <Link restoreContext href={committeeMode(account)?'/admin/people-access':'/admin/collections/users'} className="masca-nav__link" aria-current={pathname.startsWith("/admin/people-access") || pathname.startsWith("/admin/collections/users") ? "page" : undefined}><ShieldCheck size={19} />People & access</Link>}
+            {committeeMode(account) && account?.role==='administrator' && <Link href="/admin/collections/users" className="masca-nav__link">Platform accounts</Link>}
             <Link href="/admin/account" className="masca-nav__link" aria-current={pathname === "/admin/account" ? "page" : undefined}><UserRound size={19} />My account</Link>
             <Link href="/admin/logout" onClick={() => {try {clearCalendarRecovery(localStorage);} catch { /* Storage denial must not block sign-out. */ }}} prefetch={false} className="masca-nav__link"><LogOut size={19} />Log out</Link>
           </div>

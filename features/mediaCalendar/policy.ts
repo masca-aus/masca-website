@@ -1,3 +1,11 @@
+import {
+  committeeMode,
+  accessibleCommittees,
+  activeMemberships,
+  mayAccessResource,
+  type CommitteeAction,
+  type CommitteeScope,
+} from "../access/committeePolicy.ts";
 import { isWorkspaceEmail } from "../access/workspacePolicy.ts";
 import type { CalendarAccess, CalendarUser } from "./types.ts";
 export function mayUseCalendar(
@@ -6,6 +14,18 @@ export function mayUseCalendar(
 ): boolean {
   if (!user || user.status !== "active" || !isWorkspaceEmail(user.email))
     return false;
+  if (committeeMode(user))
+    return (
+      accessibleCommittees(
+        user,
+        "mediaCalendar",
+        capability === "view"
+          ? "view"
+          : capability === "edit"
+            ? "edit"
+            : "approve",
+      ).length > 0
+    );
   if (capability === "approve")
     return (
       user.calendarAccess?.view === true &&
@@ -20,8 +40,23 @@ export function mayUseCalendar(
 }
 export function mayApprove(
   user: CalendarUser,
-  post: { creator: string; contributors: string[] },
+  post: {
+    creator: string;
+    contributors: string[];
+    owningScope?: CommitteeScope;
+    sharedWith?: import("../access/committeePolicy").SharingGrant[];
+  },
 ) {
+  if (committeeMode(user))
+    return mayAccessResource(
+      user,
+      {
+        ...post,
+        area: "mediaCalendar",
+        owningScope: post.owningScope ?? "National",
+      },
+      "approve",
+    );
   return (
     mayUseCalendar(user, "approve") &&
     String(user.id) !== post.creator &&
@@ -39,4 +74,45 @@ export function validCalendarAccess(value: unknown): boolean {
     (!v.edit || v.view) &&
     (!v.approve || (v.view && !!v.designation))
   );
+}
+
+/** Broad admission permits explicit shared records; authority is always checked per record. */
+export function mayEnterCalendar(user: CalendarUser | null | undefined) {
+  return committeeMode(user)
+    ? activeMemberships(user).length > 0
+    : mayUseCalendar(user, "view");
+}
+export function mayAccessPost(
+  user: CalendarUser,
+  post: {
+    owningScope?: CommitteeScope;
+    sharedWith?: import("../access/committeePolicy").SharingGrant[];
+    creator?: string;
+    contributors?: string[];
+  },
+  action: CommitteeAction,
+) {
+  if (committeeMode(user))
+    return mayAccessResource(
+      user,
+      {
+        ...post,
+        area: "mediaCalendar",
+        owningScope: post.owningScope ?? "National",
+      },
+      action,
+    );
+  return action === "approve" || action === "publish"
+    ? mayUseCalendar(user, "approve")
+    : mayUseCalendar(
+        user,
+        ["view", "comment"].includes(action) ? "view" : "edit",
+      );
+}
+export function mayManagePost(
+  user: CalendarUser,
+  post: { owningScope?: CommitteeScope },
+  action: CommitteeAction = "edit",
+) {
+  return mayAccessPost(user, { owningScope: post.owningScope }, action);
 }

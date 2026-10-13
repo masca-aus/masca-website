@@ -1,5 +1,11 @@
 "use client";
 import {
+  committeeMode,
+  accessibleCommittees,
+  type CommitteeScope,
+} from "@/features/access/committeePolicy";
+import { CalendarSelect } from "./CalendarSelect";
+import {
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -30,7 +36,7 @@ import type {
   Post,
   Asset,
 } from "@/features/mediaCalendar/types";
-import { mayUseCalendar } from "@/features/mediaCalendar/policy";
+import { mayManagePost, mayAccessPost } from "@/features/mediaCalendar/policy";
 import {
   calendarDays,
   dayKey,
@@ -83,6 +89,8 @@ function withSavedPost(
     onHold: post.onHold,
     version: post.version,
     owner: post.owner,
+    owningScope: post.owningScope,
+    sharedWith: post.sharedWith,
     thumbnail,
   };
   return previous
@@ -92,6 +100,12 @@ function withSavedPost(
 export function CalendarView({ user }: { user: CalendarUser }) {
   const query = useSearchParams();
   const queryPostId = query.get("post");
+  const workspaces = accessibleCommittees(user, "mediaCalendar");
+  const [owningScope, setOwningScope] = useState<CommitteeScope>(() =>
+    workspaces.includes(query.get("owningScope") as CommitteeScope)
+      ? (query.get("owningScope") as CommitteeScope)
+      : (workspaces[0] ?? "National"),
+  );
   const [postId, setPostId] = useState(queryPostId);
   const [initialPost, setInitialPost] = useState<Post | null>(null);
   useEffect(() => {
@@ -146,12 +160,12 @@ export function CalendarView({ user }: { user: CalendarUser }) {
     writeGeneration = useRef(0),
     epoch = useRef(0),
     dragging = useRef(false),
-    editable = mayUseCalendar(user, "edit");
+    editable = mayManagePost(user, { owningScope }, "create");
   const days = useMemo(() => calendarDays(day, view), [day, view]);
   const rangeURL = useMemo(
     () =>
-      `${calendarAPI}?from=${encodeURIComponent(new Date(`${days[0]}T00:00:00+10:00`).toISOString())}&to=${encodeURIComponent(new Date(`${addDays(days.at(-1)!, 1)}T00:00:00+10:00`).toISOString())}`,
-    [days],
+      `${calendarAPI}?${committeeMode(user) ? `owningScope=${owningScope}&` : ""}from=${encodeURIComponent(new Date(`${days[0]}T00:00:00+10:00`).toISOString())}&to=${encodeURIComponent(new Date(`${addDays(days.at(-1)!, 1)}T00:00:00+10:00`).toISOString())}`,
+    [days, owningScope, user],
   );
   const load = useCallback(
     async (force = false) => {
@@ -231,7 +245,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           adjacent = date.toISOString().slice(0, 10);
         }
         const range = calendarDays(adjacent, view);
-        const url = `${calendarAPI}?from=${encodeURIComponent(new Date(`${range[0]}T00:00:00+10:00`).toISOString())}&to=${encodeURIComponent(new Date(`${addDays(range.at(-1)!, 1)}T00:00:00+10:00`).toISOString())}`;
+        const url = `${calendarAPI}?${committeeMode(user) ? `owningScope=${owningScope}&` : ""}from=${encodeURIComponent(new Date(`${range[0]}T00:00:00+10:00`).toISOString())}&to=${encodeURIComponent(new Date(`${addDays(range.at(-1)!, 1)}T00:00:00+10:00`).toISOString())}`;
         if (!cache.current.has(url))
           void api<Overview>(url)
             .then((result) => {
@@ -249,18 +263,24 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       alive = false;
       clearTimeout(timer);
     };
-  }, [day, view]);
+  }, [day, view, owningScope, user]);
   const open = (id: string, createdPost?: Post) => {
     window.history.pushState(
       null,
       "",
-      `/admin/media-calendar?post=${encodeURIComponent(id)}`,
+      `/admin/media-calendar?${committeeMode(user) ? `owningScope=${owningScope}&` : ""}post=${encodeURIComponent(id)}`,
     );
     setPostId(id);
     setInitialPost(createdPost ?? null);
   };
   const closeEditor = () => {
-    window.history.pushState(null, "", "/admin/media-calendar");
+    window.history.pushState(
+      null,
+      "",
+      committeeMode(user)
+        ? `/admin/media-calendar?owningScope=${owningScope}`
+        : "/admin/media-calendar",
+    );
     setPostId(null);
     setInitialPost(null);
   };
@@ -272,6 +292,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
     try {
       const result = await api<{ post: Post }>(calendarAPI, {
         action: "create",
+        ...(committeeMode(user) ? { owningScope } : {}),
         patch: {
           plannedAt: date ? moveToDay(null, date) : null,
           ...(category !== "all" ? { category } : {}),
@@ -462,6 +483,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
     const p = data.posts.find((p) => p.id === id);
     if (
       !p ||
+      !mayAccessPost(user, p, "edit") ||
       p.status === "posted" ||
       pending.current ||
       (date ? p.plannedAt && dayKey(p.plannedAt) === date : !p.plannedAt)
@@ -566,11 +588,12 @@ export function CalendarView({ user }: { user: CalendarUser }) {
       key={p.id}
       post={p}
       category={data.categories.find((c) => c.id === p.category)}
-      editable={editable}
+      editable={mayManagePost(user, p, "edit")}
       landed={landed === p.id}
       moving={busy === p.id || drag.visual?.post.id === p.id}
       onPickUp={(e, p) => {
-        if (!pending.current) drag.pickUp(e, p);
+        if (!pending.current && mayAccessPost(user, p, "edit"))
+          drag.pickUp(e, p);
       }}
       onAction={(a) => void action(p, a)}
       open={() => {
@@ -587,7 +610,37 @@ export function CalendarView({ user }: { user: CalendarUser }) {
     >
       <header className="mc-heading">
         <h1>Media calendar</h1>
-        <RoomPresence />
+        {committeeMode(user) && workspaces.length > 0 && (
+          <CalendarSelect
+            label="Committee workspace"
+            value={owningScope}
+            options={workspaces.map((value) => ({ value, label: value }))}
+            onChange={(value) => {
+              cache.current.clear();
+              savedPosts.current.clear();
+              setData({
+                posts: [],
+                categories: [],
+                members: [],
+                notifications: [],
+                next: null,
+              });
+              setCategory("all");
+              setOwner("all");
+              setOwningScope(value as CommitteeScope);
+              window.history.pushState(
+                null,
+                "",
+                `/admin/media-calendar?owningScope=${value}${postId ? `&post=${postId}` : ""}`,
+              );
+            }}
+          />
+        )}
+        {(!committeeMode(user) || workspaces.includes(owningScope)) && (
+          <RoomPresence
+            owningScope={committeeMode(user) ? owningScope : undefined}
+          />
+        )}
         <div className="mc-heading-actions">
           <button
             className="mc-notification-button"
@@ -646,6 +699,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           members={data.members}
           userId={String(user.id)}
           editable={editable}
+          owningScope={committeeMode(user) ? owningScope : undefined}
           loading={initialLoading}
           mobileOpen={filtersOpen}
           onClose={() => setFiltersOpen(false)}

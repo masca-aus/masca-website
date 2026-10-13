@@ -1,8 +1,21 @@
+import { withCommitteeMode } from "../access/committeeEnvironment.ts";
+import {
+  committeeMode,
+  activeMemberships,
+  accessibleCommittees,
+  type CommitteeScope,
+} from "../access/committeePolicy.ts";
 import pg from "pg";
 import { randomUUID } from "node:crypto";
 import { calendarSchema } from "./schema.ts";
 import { workspaceSchema } from "../access/workspaceEnvironment.ts";
-import { mayUseCalendar } from "./policy.ts";
+import {
+  mayUseCalendar,
+  mayEnterCalendar,
+  mayAccessPost,
+  mayApprove,
+  mayManagePost,
+} from "./policy.ts";
 import { applyAction, newPost } from "./service.ts";
 import { CalendarError, type Action } from "./validation.ts";
 import type { Asset, CalendarUser, Post, Category } from "./types.ts";
@@ -26,14 +39,17 @@ export async function transaction<T>(
   try {
     await c.query("BEGIN");
     const { rows } = await c.query(
-      `SELECT id,email,status,role,calendar_access FROM "${workspaceSchema()}".users WHERE id=$1`,
+      `SELECT id,email,status,role,calendar_access,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM "${workspaceSchema()}".users WHERE id=$1 FOR SHARE`,
       [actor.id],
     );
     const row = rows[0],
-      user = row
-        ? { ...actor, ...row, calendarAccess: row.calendar_access }
-        : null;
-    if (!mayUseCalendar(user, capability))
+      user = row ? calendarAccount(row) : null;
+    if (
+      !user ||
+      !(committeeMode(user)
+        ? mayEnterCalendar(user)
+        : mayUseCalendar(user, capability))
+    )
       throw new CalendarError(
         "Your calendar access has changed. Please contact an administrator.",
         403,
@@ -47,6 +63,63 @@ export async function transaction<T>(
   } finally {
     c.release();
   }
+}
+export function calendarAccount(row: Record<string, unknown>): CalendarUser {
+  return withCommitteeMode({
+    ...row,
+    calendarAccess: row.calendar_access,
+    committeeMemberships: row.committee_memberships ?? [],
+    committeeAccessReviewedAt: row.committee_access_reviewed_at,
+    committeeAccessReviewedBy: row.committee_access_reviewed_by,
+  } as CalendarUser);
+}
+export function requirePostAccess(
+  user: CalendarUser,
+  p: Post,
+  action: import("../access/committeePolicy").CommitteeAction = "view",
+) {
+  if (!mayAccessPost(user, p, action))
+    throw new CalendarError("This post is not available to your account.", 403);
+}
+export async function membersFor(
+  c: pg.PoolClient,
+  user: CalendarUser,
+  resource: { owningScope?: CommitteeScope; sharedWith?: Post["sharedWith"] },
+) {
+  const { rows } = await c.query(
+    `SELECT id,email,status,role,calendar_access,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM "${workspaceSchema()}".users`,
+  );
+  return rows
+    .map(calendarAccount)
+    .filter((r) => mayAccessPost(r, resource, "view"))
+    .map((r) => ({
+      id: String(r.id),
+      name: r.email.split("@")[0].replace(/[._]/g, " "),
+      edit: mayAccessPost(r, resource, "edit"),
+      approve: mayAccessPost(r, resource, "approve"),
+    }));
+}
+export async function sharingTargets(actor: CalendarUser, id: string) {
+  return transaction(actor, "view", async (c, user) => {
+    const p = await lockedPost(c, id);
+    requirePostAccess(user, p, "share");
+    const { rows } = await c.query(
+      `SELECT id,email,status,role,calendar_access,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM "${workspaceSchema()}".users`,
+    );
+    return rows
+      .map(calendarAccount)
+      .filter((r) =>
+        committeeMode(user)
+          ? activeMemberships(r).length > 0
+          : mayUseCalendar(r, "view"),
+      )
+      .map((r) => ({
+        id: String(r.id),
+        name: r.email.split("@")[0].replace(/[._]/g, " "),
+        edit: false,
+        approve: false,
+      }));
+  });
 }
 export async function savePost(c: pg.PoolClient, p: Post) {
   await c.query(
@@ -72,13 +145,20 @@ export async function checkRelations(
   c: pg.PoolClient,
   p: Post,
   validatePeople = true,
+  user?: CalendarUser,
 ) {
+  if (user) requirePostAccess(user, p);
   if (p.category) {
     const r = await c.query(
       `SELECT data FROM ${table("categories")} WHERE id=$1 FOR KEY SHARE`,
       [p.category],
     );
-    if (!r.rows.length) throw new CalendarError("Choose an existing category.");
+    if (
+      !r.rows.length ||
+      (r.rows[0].data.owningScope ?? "National") !==
+        (p.owningScope ?? "National")
+    )
+      throw new CalendarError("Choose an existing category in this committee.");
   }
   if (p.assets.length) {
     const { rows } = await c.query(
@@ -107,15 +187,12 @@ export async function checkRelations(
   const people = Array.from(new Set([p.owner, ...p.collaborators]));
   if (validatePeople && people.length) {
     const { rows } = await c.query(
-      `SELECT id,email,status,role,calendar_access FROM "${workspaceSchema()}".users WHERE id::text=ANY($1::text[])`,
+      `SELECT id,email,status,role,calendar_access,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM "${workspaceSchema()}".users WHERE id::text=ANY($1::text[])`,
       [people],
     );
     if (
       rows.length !== people.length ||
-      rows.some(
-        (r) =>
-          !mayUseCalendar({ ...r, calendarAccess: r.calendar_access }, "view"),
-      )
+      rows.some((r) => !mayAccessPost(calendarAccount(r), p, "view"))
     )
       throw new CalendarError("Choose current calendar members.");
   }
@@ -147,15 +224,13 @@ async function notify(
     message = "";
   if (a.action === "review") {
     const r = await c.query(
-      `SELECT id,email,status,role,calendar_access FROM "${workspaceSchema()}".users`,
+      `SELECT id,email,status,role,calendar_access,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM "${workspaceSchema()}".users`,
     );
     recipients = r.rows
       .filter(
         (r) =>
-          mayUseCalendar(
-            { ...r, calendarAccess: r.calendar_access },
-            "approve",
-          ) && !p.contributors.includes(String(r.id)),
+          mayApprove(calendarAccount(r), p) &&
+          !p.contributors.includes(String(r.id)),
       )
       .map((r) => String(r.id));
     message = `Review requested: ${p.title}`;
@@ -168,8 +243,12 @@ async function notify(
     recipients = a.mentions;
     message = `You were mentioned: ${p.title}`;
   }
+  if (!recipients.length) return;
+  const eligible = await membersFor(c, user, p);
   for (const recipient of new Set(
-    recipients.filter((r) => r !== String(user.id)),
+    recipients.filter(
+      (r) => r !== String(user.id) && eligible.some((m) => m.id === r),
+    ),
   ))
     await c.query(
       `INSERT INTO ${table("notifications")}(id,recipient,post_id,message) VALUES($1,$2,$3,$4)`,
@@ -179,7 +258,7 @@ async function notify(
 export async function createPost(actor: CalendarUser, input: unknown) {
   return transaction(actor, "edit", async (c, user) => {
     const p = newPost(user, input);
-    await checkRelations(c, p);
+    await checkRelations(c, p, true, user);
     await savePost(c, p);
     await checkpoint(c, p, user, "create");
     return p;
@@ -188,13 +267,47 @@ export async function createPost(actor: CalendarUser, input: unknown) {
 export async function mutatePost(actor: CalendarUser, id: string, a: Action) {
   return transaction(actor, "view", async (c, user) => {
     const p = await lockedPost(c, id, a.action === "restore");
+    requirePostAccess(user, p);
+    if (a.action === "share") {
+      requirePostAccess(user, p, "share");
+      // Removing/downgrading old grants must remain possible after their members expire.
+      const changedGrants=a.sharedWith.filter(grant=>!(p.sharedWith??[]).some(old=>old.userId===grant.userId&&(old.role===grant.role||old.role==='editor'&&grant.role==='viewer')));
+      const { rows } = await c.query(
+        `SELECT id,email,status,role,calendar_access,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM "${workspaceSchema()}".users WHERE id::text=ANY($1::text[]) FOR SHARE`,
+        [changedGrants.map((g) => g.userId)],
+      );
+      if (
+        rows.length !== changedGrants.length ||
+        rows
+          .map(calendarAccount)
+          .some((r) =>
+            committeeMode(user)
+              ? !activeMemberships(r).length
+              : !mayUseCalendar(r, "view"),
+          )
+      )
+        throw new CalendarError("Choose active approved MASCA members.");
+    }
+    if (a.action === "comment" && a.mentions.length) {
+      const eligible = await membersFor(c, user, p);
+      if (a.mentions.some((id) => !eligible.some((m) => m.id === id)))
+        throw new CalendarError(
+          "Mentions must already have access to this post.",
+        );
+    }
     if (a.action === "duplicate") {
+      if (!mayManagePost(user, p, "create"))
+        throw new CalendarError(
+          "An owning committee editor must duplicate this post.",
+          403,
+        );
       if (a.expectedRevision !== p.contentRevision)
         throw new CalendarError(
           "The content changed. Reopen the post before duplicating.",
           409,
         );
       const copy = newPost(user, {
+        owningScope: p.owningScope ?? "National",
         title: `${p.title} (copy)`,
         type: p.type,
         category: p.category,
@@ -245,6 +358,7 @@ export async function mutatePost(actor: CalendarUser, id: string, a: Action) {
         a.action === "patch" &&
           (Object.hasOwn(a.patch, "owner") ||
             Object.hasOwn(a.patch, "collaborators")),
+        user,
       );
     if (changed) {
       await checkpoint(c, p, user, a.action);
@@ -255,11 +369,14 @@ export async function mutatePost(actor: CalendarUser, id: string, a: Action) {
   });
 }
 export async function detail(actor: CalendarUser, id: string) {
-  return transaction(actor, "view", async (c) => {
+  return transaction(actor, "view", async (c, user) => {
     // One MVCC snapshot keeps the post, assets and history consistent without
     // locking the post against a teammate's save. Writes still use lockedPost.
     const { rows } = await c.query(
       `SELECT p.data AS post,
+        COALESCE((SELECT jsonb_agg(c.data ORDER BY c.data->>'name') FROM ${table("categories")} c
+          WHERE COALESCE(c.data->>'owningScope','National')=COALESCE(p.data->>'owningScope','National')
+          AND (NOT $2::boolean OR COALESCE(p.data->>'owningScope','National')=ANY($3::text[]) OR c.id=p.category)),'[]'::jsonb) AS categories,
         COALESCE((SELECT jsonb_agg(a.data ORDER BY array_position(
           ARRAY(SELECT jsonb_array_elements_text(p.data->'assets')),a.id::text))
           FROM ${table("assets")} a WHERE a.post_id=p.id AND p.data->'assets' ? a.id::text),'[]'::jsonb) AS assets,
@@ -272,10 +389,13 @@ export async function detail(actor: CalendarUser, id: string) {
           FROM ${table("revisions")} r WHERE post_id=p.id ORDER BY created_at DESC,r.id DESC LIMIT 30
         ) h),'[]'::jsonb) AS history
        FROM ${table("posts")} p WHERE p.id=$1 AND p.data->>'deletedAt' IS NULL`,
-      [id],
+      [id, committeeMode(user), accessibleCommittees(user, "mediaCalendar")],
     );
     if (!rows.length) throw new CalendarError("Post not found.", 404);
-    return rows[0] as {
+    requirePostAccess(user, rows[0].post);
+    return { ...rows[0], members: await membersFor(c, user, rows[0].post) } as {
+      members: import("./types").Member[];
+      categories: Category[];
       post: Post;
       assets: Asset[];
       pendingUploads: Asset[];
@@ -294,11 +414,25 @@ export async function overview(
   from: string,
   to: string,
   offset = 0,
+  owningScope: CommitteeScope = "National",
 ) {
-  return transaction(actor, "view", async (c) => {
+  return transaction(actor, "view", async (c, user) => {
+    const strict = committeeMode(user),
+      owned = mayAccessPost(user, { owningScope }, "view"),
+      shared = activeMemberships(user).length > 0;
+    const scopeSQL = `(NOT $4::boolean OR (COALESCE(data->>'owningScope','National')=$5 AND $6::boolean) OR ($7::boolean AND data->'sharedWith' @> $8::jsonb))`;
     const posts = await c.query(
-      `SELECT data FROM ${table("posts")} WHERE data->>'deletedAt' IS NULL AND (planned_at IS NULL OR (planned_at>=$1 AND planned_at<$2)) ORDER BY planned_at NULLS LAST,id LIMIT 201 OFFSET $3`,
-      [from, to, offset],
+      `SELECT data FROM ${table("posts")} WHERE data->>'deletedAt' IS NULL AND (planned_at IS NULL OR (planned_at>=$1 AND planned_at<$2)) AND ${scopeSQL} ORDER BY planned_at NULLS LAST,id LIMIT 201 OFFSET $3`,
+      [
+        from,
+        to,
+        offset,
+        strict,
+        owningScope,
+        owned,
+        shared,
+        JSON.stringify([{ userId: String(user.id) }]),
+      ],
     );
     const thumbnails = await c.query(
       `SELECT id FROM ${table("assets")} WHERE post_id=ANY($1::uuid[]) AND data->>'thumbnailKey' IS NOT NULL`,
@@ -306,47 +440,49 @@ export async function overview(
     );
     const previewIds = new Set(thumbnails.rows.map((r) => r.id));
     const categories = await c.query(
-      `SELECT data FROM ${table("categories")} ORDER BY data->>'name'`,
-    );
-    const members = await c.query(
-      `SELECT id,email,status,role,calendar_access FROM "${workspaceSchema()}".users`,
+      `SELECT data FROM ${table("categories")} WHERE NOT $1::boolean OR (COALESCE(data->>'owningScope','National')=$2 AND $3::boolean) ORDER BY data->>'name'`,
+      [strict, owningScope, owned],
     );
     const notifications = await c.query(
-      `SELECT id,post_id AS "postId",message,read,created_at AS "createdAt" FROM ${table("notifications")} WHERE recipient=$1 ORDER BY created_at DESC LIMIT 50`,
-      [String(actor.id)],
+      `SELECT n.id,n.post_id AS "postId",n.message,n.read,n.created_at AS "createdAt",p.data AS post FROM ${table("notifications")} n JOIN ${table("posts")} p ON p.id=n.post_id WHERE n.recipient=$1 AND p.data->>'deletedAt' IS NULL AND (NOT $2::boolean OR COALESCE(p.data->>'owningScope','National')=ANY($3::text[]) OR ($4::boolean AND p.data->'sharedWith' @> $5::jsonb)) ORDER BY n.created_at DESC LIMIT 50`,
+      [
+        String(user.id),
+        strict,
+        accessibleCommittees(user, "mediaCalendar"),
+        shared,
+        JSON.stringify([{ userId: String(user.id) }]),
+      ],
     );
     return {
-      posts: posts.rows.slice(0, 200).map(({ data: p }: { data: Post }) => ({
-        id: p.id,
-        title: p.title,
-        type: p.type,
-        category: p.category,
-        plannedAt: p.plannedAt,
-        status: p.status,
-        onHold: p.onHold,
-        version: p.version,
-        owner: p.owner,
-        thumbnail: p.assets.find((id) => previewIds.has(id)) ?? null,
-      })),
+      posts: posts.rows
+        .slice(0, 200)
+        .filter(({ data: p }: { data: Post }) => mayAccessPost(user, p, "view"))
+        .map(({ data: p }: { data: Post }) => ({
+          id: p.id,
+          title: p.title,
+          type: p.type,
+          category: p.category,
+          plannedAt: p.plannedAt,
+          status: p.status,
+          onHold: p.onHold,
+          version: p.version,
+          owner: p.owner,
+          owningScope: p.owningScope ?? "National",
+          sharedWith: p.sharedWith ?? [],
+          thumbnail: p.assets.find((id) => previewIds.has(id)) ?? null,
+        })),
       next: posts.rows.length > 200 ? offset + 200 : null,
       categories: categories.rows.map((r) => r.data as Category),
-      members: members.rows
-        .filter((r) =>
-          mayUseCalendar({ ...r, calendarAccess: r.calendar_access }, "view"),
-        )
+      members: owned ? await membersFor(c, user, { owningScope }) : [],
+      notifications: notifications.rows
+        .filter((r) => mayAccessPost(user, r.post, "view"))
         .map((r) => ({
-          id: String(r.id),
-          name: r.email.split("@")[0].replace(/[._]/g, " "),
-          edit: mayUseCalendar(
-            { ...r, calendarAccess: r.calendar_access },
-            "edit",
-          ),
-          approve: mayUseCalendar(
-            { ...r, calendarAccess: r.calendar_access },
-            "approve",
-          ),
+          id: r.id,
+          postId: r.postId,
+          message: r.message,
+          read: r.read,
+          createdAt: r.createdAt,
         })),
-      notifications: notifications.rows,
     };
   });
 }
@@ -355,7 +491,24 @@ export async function saveCategory(
   category: Category,
   create = false,
 ) {
-  return transaction(actor, "edit", async (c) => {
+  return transaction(actor, "edit", async (c, user) => {
+    if (committeeMode(user) && !mayManagePost(user, category, "edit"))
+      throw new CalendarError(
+        "Editing access in this committee is required.",
+        403,
+      );
+    if (!create) {
+      const existing = await c.query(
+        `SELECT data FROM ${table("categories")} WHERE id=$1 FOR UPDATE`,
+        [category.id],
+      );
+      if (
+        existing.rows.length &&
+        (existing.rows[0].data.owningScope ?? "National") !==
+          (category.owningScope ?? "National")
+      )
+        throw new CalendarError("Category ownership cannot change.", 403);
+    }
     const result = create
       ? await c.query(
           `INSERT INTO ${table("categories")}(id,data) VALUES($1,$2) ON CONFLICT(id) DO NOTHING RETURNING data`,
@@ -388,13 +541,18 @@ export async function saveCategory(
   });
 }
 export async function deleteCategory(actor: CalendarUser, id: string) {
-  return transaction(actor, "edit", async (c) => {
+  return transaction(actor, "edit", async (c, user) => {
     const result = await c.query(
       `SELECT data FROM ${table("categories")} WHERE id=$1 FOR UPDATE`,
       [id],
     );
     if (!result.rows.length)
       throw new CalendarError("Content type not found.", 404);
+    if (!mayManagePost(user, result.rows[0].data, "delete"))
+      throw new CalendarError(
+        "Editing access in this committee is required.",
+        403,
+      );
     if (!result.rows[0].data.archived)
       throw new CalendarError("Move this type to Deleted types first.", 409);
     const used = await c.query(
@@ -411,7 +569,14 @@ export async function deleteCategory(actor: CalendarUser, id: string) {
   });
 }
 export async function readNotification(actor: CalendarUser, id: string) {
-  return transaction(actor, "view", async (c) => {
+  return transaction(actor, "view", async (c, user) => {
+    const current = await c.query(
+      `SELECT p.data FROM ${table("notifications")} n JOIN ${table("posts")} p ON p.id=n.post_id WHERE n.id=$1 AND n.recipient=$2`,
+      [id, String(user.id)],
+    );
+    if (!current.rows.length)
+      throw new CalendarError("Notification not found.", 404);
+    requirePostAccess(user, current.rows[0].data);
     await c.query(
       `UPDATE ${table("notifications")} SET read=true WHERE id=$1 AND recipient=$2`,
       [id, String(actor.id)],

@@ -1,3 +1,4 @@
+import {committeeAccessSchemaSQL} from "../features/access/committeeSchema.ts";
 import { accountPhotoSchemaSQL } from "../features/account/photoSchema.ts";
 import {changeRequestSchemaSQL} from '../features/submissions/changeRequestSchema.ts';
 import { listingEmailSchemaSQL } from '../features/submissions/emailSchema.ts';
@@ -28,6 +29,7 @@ if (tables.rows[0].count > 0) await connection.query(reviewSchemaSQL("cms_auth_p
 if (tables.rows[0].count > 0) await connection.query(listingEmailSchemaSQL("cms_auth_preview"));
 if (tables.rows[0].count > 0) await connection.query(changeRequestSchemaSQL("cms_auth_preview"));
 if (tables.rows[0].count > 0) await connection.query(departmentSchemaSQL("cms_auth_preview"));
+if(tables.rows[0].count>0) await connection.query(committeeAccessSchemaSQL("cms_auth_preview","media_calendar_preview"));
 await connection.end();
 process.env.WORKSPACE_INIT_SCHEMA =
   tables.rows[0].count === 0 ? "true" : "false";
@@ -41,6 +43,7 @@ if (payload.db.schemaName !== "cms_auth_preview")
 const postInitConnection = new pg.Client({connectionString:process.env.DATABASE_URI});
 await postInitConnection.connect();
 try {
+  await postInitConnection.query(committeeAccessSchemaSQL("cms_auth_preview","media_calendar_preview"));
   await postInitConnection.query(accountPhotoSchemaSQL("cms_auth_preview"));
   await postInitConnection.query(departmentSchemaSQL("cms_auth_preview"));
 } finally {
