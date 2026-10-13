@@ -18,6 +18,13 @@ export type InlineEditorState = (
       manager?: boolean;
     }
   | {
+      kind: "renew" | "remove";
+      workspaceId: string;
+      personId: string;
+      area?: CommitteeArea;
+      areaOnly?: boolean;
+    }
+  | {
       kind: "details";
       workspaceId?: string;
       area?: CommitteeArea;

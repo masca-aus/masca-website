@@ -4,6 +4,7 @@ import { AdminLink as Link } from "./AdminNavigationContext";
 type Reminder = {
   id: string;
   committee: string;
+  workspaceName?: string;
   name: string;
   expiresAt: string;
   daysBefore: number;
@@ -39,7 +40,7 @@ export function CommitteeTermReminders() {
       <ul>
         {items.map((r) => (
           <li key={r.id}>
-            {r.name} · {r.committee} · term ends{" "}
+            {r.name} · {r.workspaceName??r.committee} · term ends{" "}
             {new Date(r.expiresAt).toLocaleDateString("en-AU")}
           </li>
         ))}

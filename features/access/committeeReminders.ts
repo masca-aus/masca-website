@@ -87,7 +87,7 @@ export async function termReminders(actor: CommitteeAccount) {
           .filter((m) => m.manager)
           .map((m) => m.committee);
   const reminders = await pool().query(
-    `SELECT r.id,r.committee,r.expires_at AS "expiresAt",r.days_before AS "daysBefore",split_part(u.email,'@',1) AS name FROM "${workspaceSchema()}".committee_access_reminders r JOIN "${workspaceSchema()}".users u ON u.id::text=r.member_id WHERE r.recipient=$1 AND r.read=false AND r.expires_at>now() AND ($2::text[] IS NULL OR r.committee=ANY($2::text[])) AND EXISTS(SELECT 1 FROM jsonb_array_elements(COALESCE(u.committee_memberships,'[]')) m WHERE m->>'id'=r.membership_id AND (m->>'expiresAt')::timestamptz=r.expires_at) ORDER BY r.expires_at LIMIT 50`,
+    `SELECT r.id,r.committee,w.name AS "workspaceName",r.expires_at AS "expiresAt",r.days_before AS "daysBefore",split_part(u.email,'@',1) AS name FROM "${workspaceSchema()}".committee_access_reminders r JOIN "${workspaceSchema()}".access_workspaces w ON w.id=r.committee JOIN "${workspaceSchema()}".users u ON u.id::text=r.member_id WHERE r.recipient=$1 AND r.read=false AND r.expires_at>now() AND ($2::text[] IS NULL OR r.committee=ANY($2::text[])) AND EXISTS(SELECT 1 FROM jsonb_array_elements(COALESCE(u.committee_memberships,'[]')) m WHERE m->>'id'=r.membership_id AND (m->>'expiresAt')::timestamptz=r.expires_at) ORDER BY r.expires_at LIMIT 50`,
     [String(user.id), scopes],
   );
   return reminders.rows;

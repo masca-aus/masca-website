@@ -7,19 +7,26 @@ import {
 } from "@/features/access/memberPresentation";
 import type { AccessGraphSnapshot } from "@/features/access/workspaces/types";
 import type { CommitteeArea } from "@/features/access/committeePolicy";
+import { AccessHistory } from "./AccessHistory";
 export function InlineMemberDetails({
   snapshot,
   personId,
   workspaceId,
+  area,
   onCancel,
   onEdit,
+  onRenew,
+  onRemove,
   children,
 }: {
   snapshot: AccessGraphSnapshot;
   personId: string;
   workspaceId?: string;
+  area?: CommitteeArea;
   onCancel: () => void;
   onEdit: (workspaceId: string) => void;
+  onRenew: (workspaceId: string) => void;
+  onRemove: (workspaceId: string, areaOnly: boolean) => void;
   children?: React.ReactNode;
 }) {
   const p = snapshot.people.find((p) => p.id === personId)!;
@@ -27,6 +34,9 @@ export function InlineMemberDetails({
     (m) =>
       m.userId === personId && (!workspaceId || m.committee === workspaceId),
   );
+  const editable =
+    snapshot.mode === "active" &&
+    (snapshot.viewer.appoint || snapshot.viewer.id !== personId);
   return (
     <section
       className="ag-inline"
@@ -76,19 +86,55 @@ export function InlineMemberDetails({
             {Date.parse(m.expiresAt) <= Date.now() ? "Expired" : "Access ends"}{" "}
             {memberTermLabel(m.expiresAt)}
           </p>
-          {snapshot.mode === "active" && (
-            <button
-              type="button"
-              className="ag-text"
-              onClick={() => onEdit(m.committee)}
-            >
-              Edit area access
-            </button>
-          )}
+          {editable &&
+            snapshot.workspaces.find((w) => w.id === m.committee)?.status ===
+              "active" && (
+              <div className="ag-detail-actions">
+                <button
+                  type="button"
+                  className="ag-text"
+                  onClick={() => onEdit(m.committee)}
+                >
+                  Edit area access
+                </button>
+                <button
+                  type="button"
+                  className="ag-text"
+                  onClick={() => onRenew(m.committee)}
+                >
+                  Renew term
+                </button>
+                {area && (
+                  <button
+                    type="button"
+                    className="ag-text"
+                    onClick={() => onRemove(m.committee, true)}
+                  >
+                    Remove this area
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="ag-text"
+                  onClick={() => onRemove(m.committee, false)}
+                >
+                  Remove workspace membership
+                </button>
+              </div>
+            )}
+          <AccessHistory workspaceId={m.committee} personId={personId} />
         </div>
       ))}
       {!memberships.length && (
         <p>No workspace access. Assign a membership to give content access.</p>
+      )}
+      {snapshot.viewer.appoint && (
+        <a
+          href={`/admin/collections/users/${encodeURIComponent(personId)}`}
+          className="ag-text"
+        >
+          Account settings
+        </a>
       )}
       {children}
     </section>

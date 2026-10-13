@@ -17,6 +17,9 @@ import { InlineMemberDetails } from "./InlineMemberDetails";
 import { AccessSaveError, type InlineEditorState } from "./inlineTypes";
 import { useInlineMotion } from "./useInlineMotion";
 import { useMemberDrag } from "./useMemberDrag";
+import { MembershipRenewal } from "./MembershipRenewal";
+import { MembershipRemoval } from "./MembershipRemoval";
+import { SharedAccessSection } from "./SharedAccessSection";
 import "./accessGraph.css";
 import "../mediaCalendar/calendar.css";
 async function writeMutation(input: AccessMutation) {
@@ -47,7 +50,8 @@ export function AccessGraph({
     [archived, setArchived] = useState(false),
     [editor, setEditor] = useState<InlineEditorState | null>(null),
     [busy, setBusy] = useState(false),
-    [notice, setNotice] = useState("");
+    [notice, setNotice] = useState(""),
+    [instructions, setInstructions] = useState("");
   const root = useRef<HTMLElement>(null),
     trigger = useRef<HTMLElement | null>(null),
     candidate = useRef<HTMLElement | null>(null),
@@ -97,6 +101,10 @@ export function AccessGraph({
     try {
       const result = await onMutation(input);
       applySnapshot(result.snapshot);
+      if (input.type === "addPerson")
+        setInstructions(
+          `Sign in to MASCA CMS at ${window.location.origin}/admin using ${input.email.trim().toLowerCase()} and your individual MASCA Google account. Workspace access is assigned separately by your access manager.`,
+        );
       if (generation.current === requestGeneration) close();
       setNotice(
         input.type === "addPerson"
@@ -115,18 +123,46 @@ export function AccessGraph({
     open({ kind: "member", snapshot, workspaceId: id, area, personId });
   });
   const active = snapshot?.mode === "active";
-  const details = (state: InlineEditorState) =>
-    state.kind === "details" ? (
-      <InlineMemberDetails
-        snapshot={state.snapshot}
-        personId={state.personId}
-        workspaceId={state.workspaceId}
-        onCancel={close}
-        onEdit={(id) =>
-          setEditor({ ...state, kind: "member", workspaceId: id })
-        }
-      />
-    ) : null;
+  const renderEditor = (state: InlineEditorState) => {
+    if (state.kind === "member")
+      return (
+        <InlineMemberEditor
+          context={state}
+          manager={state.manager}
+          {...props}
+        />
+      );
+    if (state.kind === "renew")
+      return <MembershipRenewal context={state} {...props} />;
+    if (state.kind === "remove")
+      return (
+        <MembershipRemoval
+          context={state}
+          areaOnly={state.areaOnly}
+          {...props}
+        />
+      );
+    if (state.kind === "details")
+      return (
+        <InlineMemberDetails
+          snapshot={state.snapshot}
+          personId={state.personId}
+          workspaceId={state.workspaceId}
+          area={state.area}
+          onCancel={close}
+          onEdit={(id) =>
+            setEditor({ ...state, kind: "member", workspaceId: id })
+          }
+          onRenew={(id) =>
+            setEditor({ ...state, kind: "renew", workspaceId: id })
+          }
+          onRemove={(id, areaOnly) =>
+            setEditor({ ...state, kind: "remove", workspaceId: id, areaOnly })
+          }
+        />
+      );
+    return null;
+  };
   const draggedPerson = snapshot?.people.find((p) => p.id === drag.drag?.id);
   return (
     <main
@@ -186,6 +222,25 @@ export function AccessGraph({
         <p className="ag-notice" role="status">
           {notice}
         </p>
+      )}
+      {instructions && (
+        <div className="ag-signin-instructions">
+          <p>{instructions}</p>
+          <button
+            type="button"
+            className="ag-text"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(instructions);
+                setNotice("Sign-in instructions copied.");
+              } catch {
+                setNotice("Copy the sign-in instructions shown here.");
+              }
+            }}
+          >
+            Copy sign-in instructions
+          </button>
+        </div>
       )}
       {snapshot && !loading && (
         <>
@@ -252,12 +307,7 @@ export function AccessGraph({
                     })
                   }
                 />
-                {editor?.group === "table" &&
-                  (editor.kind === "details" ? (
-                    details(editor)
-                  ) : editor.kind === "member" ? (
-                    <InlineMemberEditor context={editor} {...props} />
-                  ) : null)}
+                {editor?.group === "table" && renderEditor(editor)}
               </>
             ) : (
               <div className="ag-workspaces">
@@ -359,9 +409,14 @@ export function AccessGraph({
                             {...props}
                           />
                         )}
+                        {inside &&
+                          (inside.kind === "renew" ||
+                            inside.kind === "remove") &&
+                          !inside.area &&
+                          renderEditor(inside)}
                         {inside?.kind === "details" &&
                           !inside.area &&
-                          details(inside)}
+                          renderEditor(inside)}
                         <div className="ag-areas">
                           {w.areas.map((a) => (
                             <AreaBubble
@@ -403,21 +458,13 @@ export function AccessGraph({
                                   : undefined
                               }
                             >
-                              {inside &&
-                              "area" in inside &&
-                              inside.area === a ? (
-                                inside.kind === "member" ? (
-                                  <InlineMemberEditor
-                                    context={inside}
-                                    {...props}
-                                  />
-                                ) : inside.kind === "details" ? (
-                                  details(inside)
-                                ) : null
-                              ) : undefined}
+                              {inside && "area" in inside && inside.area === a
+                                ? renderEditor(inside)
+                                : undefined}
                             </AreaBubble>
                           ))}
                         </div>
+                        {active && <SharedAccessSection workspaceId={w.id} />}
                         {!w.areas.length && (
                           <p>
                             No tools enabled yet. Enabling a tool assigns no
@@ -463,12 +510,7 @@ export function AccessGraph({
                   </button>
                 )}
               {editor?.kind === "person" && <InlinePersonEditor {...props} />}
-              {editor?.group === "people" &&
-                (editor.kind === "details" ? (
-                  details(editor)
-                ) : editor.kind === "member" ? (
-                  <InlineMemberEditor context={editor} {...props} />
-                ) : null)}
+              {editor?.group === "people" && renderEditor(editor)}
             </PeopleTray>
           </section>
         </>
