@@ -34,7 +34,10 @@ for (const [id, scope, roles] of [
     [id, "fixture" + id + "@masca.org.au", JSON.stringify([membership])],
   );
 }
-const payload = await getPayload({ config });
+// Exercising activated conditional collections must not rewrite staged generated types.
+const qaConfig = await config;
+qaConfig.typescript.autoGenerate = false;
+const payload = await getPayload({ config: qaConfig });
 try {
   const person = async (id: number) => ({
     ...(await payload.findByID({
@@ -200,7 +203,7 @@ try {
         },
       ],
     }),
-    data: { name: "Directory QA", owningScope: "QLD", _status: "draft" },
+    data: { name: "Directory QA", owningScope: "QLD" },
   });
   const orgReview = (
     payload.collections.organisations.config.endpoints as any[]

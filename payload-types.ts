@@ -428,7 +428,6 @@ export interface Organisation {
   accessPublished?: boolean | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -547,6 +546,7 @@ export interface Event {
 export interface Media {
   id: number;
   owningScope: 'National' | 'QLD' | 'NSW' | 'VIC' | 'ACT' | 'SA' | 'WA' | 'TAS' | 'NT';
+  prefix?: string | null;
   alt?: string | null;
   sharedWith?:
     | {
@@ -577,7 +577,6 @@ export interface Media {
     | boolean
     | null;
   accessPublished?: boolean | null;
-  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -743,7 +742,6 @@ export interface Sponsor {
   accessPublished?: boolean | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -947,7 +945,6 @@ export interface OrganisationsSelect<T extends boolean = true> {
   accessPublished?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -997,13 +994,13 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   owningScope?: T;
+  prefix?: T;
   alt?: T;
   sharedWith?: T;
   accessCreator?: T;
   accessContributors?: T;
   accessReview?: T;
   accessPublished?: T;
-  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1072,7 +1069,6 @@ export interface SponsorsSelect<T extends boolean = true> {
   accessPublished?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
