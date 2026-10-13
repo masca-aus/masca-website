@@ -1,3 +1,5 @@
+import {loadWorkspaceCatalog} from "./workspaces/repository.ts";
+import {withWorkspaceAuthority} from "./workspaces/policyContext.ts";
 import {
   auditMembershipChange,
   lockMembershipRecord,
@@ -114,8 +116,8 @@ export function configureWorkspace(
               update: admin,
               read: ({ req }) => !!req.user,
             },
-            validate: (value) =>
-              validMemberships(value ?? []) ||
+            validate: (value, { req }) =>
+              validMemberships(value ?? [], (req?.user as unknown as ApprovedAccount)?.accessCatalog) ||
               "Choose valid committee memberships with explicit expiry dates.",
             admin: {
               components: {
@@ -173,7 +175,7 @@ export function configureWorkspace(
               create: ({ req }) => mayManagePeople(accountOf(req.user)),
               update: ({ req }) => mayManagePeople(accountOf(req.user)),
             },
-            type: "select",
+            type: "text",
             required: true,
             defaultValue: "editor",
             options: [
@@ -187,7 +189,7 @@ export function configureWorkspace(
               create: ({ req }) => mayManagePeople(accountOf(req.user)),
               update: ({ req }) => mayManagePeople(accountOf(req.user)),
             },
-            type: "select",
+            type: "text",
             required: true,
             defaultValue: "invited",
             options: ["invited", "active", "suspended"],
@@ -260,8 +262,7 @@ export function configureWorkspace(
                 name: "scope",
                 type: "select",
                 required: true,
-                options: [...ownershipScopes],
-              },
+                  },
             ],
           },
           {
@@ -303,8 +304,9 @@ export function configureWorkspace(
             },
           ],
           afterRead: [
-            ({ doc }) => {
-              const account = withCommitteeMode(doc as ApprovedAccount);
+            async ({ doc }) => {
+              const current = withCommitteeMode(doc as ApprovedAccount);
+              const account = committeeAccessEnabled()?withWorkspaceAuthority(current,await loadWorkspaceCatalog()):current;
               return { ...account, permissions: permissionsFor(account) };
             },
           ],
@@ -340,6 +342,7 @@ export function configureWorkspace(
           ],
           beforeChange: [
             ({ data, originalDoc, req, context, operation }) => {
+              delete data.accessCatalog;
               if (!isWorkspaceEmail(data.email ?? originalDoc?.email ?? ""))
                 throw new APIError("Use an exact @masca.org.au email.", 400);
               data.email = (data.email ?? originalDoc?.email)
@@ -384,7 +387,7 @@ export function configureWorkspace(
                     409,
                   );
                 data.committeeAccessRevision = randomUUID();
-                if (!validMemberships(data.committeeMemberships))
+                if (!validMemberships(data.committeeMemberships,(req.user as unknown as ApprovedAccount)?.accessCatalog))
                   throw new APIError(
                     "Choose valid committee memberships.",
                     400,
@@ -436,11 +439,10 @@ export function configureWorkspace(
           {
             name: "owningScope",
             label: "Managed by",
-            type: "select",
+            type: "text",
             required: true,
             defaultValue: ({ user, req }) =>
               defaultCreationScope(accountOf(user), area, req?.query?.branch),
-            options: [...ownershipScopes],
             admin: {
               hidden: true,
               description:
@@ -454,6 +456,7 @@ export function configureWorkspace(
           beforeChange: [
             ...(collection.hooks?.beforeChange ?? []),
             ({ data, originalDoc, req, context, operation }) => {
+              delete data.accessCatalog;
               if (
                 area === "careers" &&
                 operation === "create" &&

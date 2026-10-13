@@ -1,3 +1,5 @@
+import {loadWorkspaceCatalog} from "./workspaces/repository.ts";
+import {withWorkspaceAuthority} from "./workspaces/policyContext.ts";
 import pg from "pg";
 import { randomUUID } from "node:crypto";
 import { workspaceSchema } from "./workspaceEnvironment.ts";
@@ -30,12 +32,13 @@ export async function generateTermReminders(now = Date.now()) {
     const { rows } = await c.query(
       `SELECT id,email,status,role,committee_memberships,committee_access_reviewed_at FROM "${workspaceSchema()}".users`,
     );
+    const catalog=await loadWorkspaceCatalog(c);
     const people = rows.map((r) =>
-      withCommitteeMode({
+      withWorkspaceAuthority(withCommitteeMode({
         ...r,
         committeeMemberships: r.committee_memberships,
         committeeAccessReviewedAt: r.committee_access_reviewed_at,
-      }),
+      }),catalog),
     );
     for (const reminder of remindersDue(people, now)) {
       const result = await c.query(
@@ -67,13 +70,14 @@ export async function termReminders(actor: CommitteeAccount) {
     `SELECT id,email,status,role,committee_memberships,committee_access_reviewed_at FROM "${workspaceSchema()}".users WHERE id::text=$1`,
     [String(actor.id)],
   );
+  const catalog=await loadWorkspaceCatalog();
   const r = rows[0],
     user = r
-      ? withCommitteeMode({
+      ? withWorkspaceAuthority(withCommitteeMode({
           ...r,
           committeeMemberships: r.committee_memberships,
           committeeAccessReviewedAt: r.committee_access_reviewed_at,
-        })
+        }),catalog)
       : null;
   if (!approvedAccount(user)) return [];
   const scopes =

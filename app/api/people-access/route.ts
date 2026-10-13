@@ -35,7 +35,7 @@ async function actor(request: Request) {
 function scope(value: unknown): CommitteeScope {
   if (
     typeof value !== "string" ||
-    !committeeScopes.includes(value as CommitteeScope)
+    !(committeeScopes as readonly string[]).includes(value as CommitteeScope)
   )
     throw new APIError("Choose a committee.", 400);
   return value as CommitteeScope;

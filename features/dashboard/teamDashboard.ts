@@ -39,7 +39,7 @@ export function collectionLink(area: PermissionArea, where?: Where) {
   return `/admin/collections/${area}${params.size ? `?${params}` : ''}`;
 }
 export function defaultCreationScope(account: ApprovedAccount | null | undefined, area: ContentArea, requestedBranch?: unknown): OwnershipScope | undefined {
-  if (typeof requestedBranch === 'string' && ownershipScopes.includes(requestedBranch as OwnershipScope) && mayManage(account, area, requestedBranch as OwnershipScope)) return requestedBranch as OwnershipScope;
+  if (typeof requestedBranch === 'string' && (ownershipScopes as readonly string[]).includes(requestedBranch as OwnershipScope) && mayManage(account, area, requestedBranch as OwnershipScope)) return requestedBranch as OwnershipScope;
   if (mayManageSharedContent(account)) return 'National';
   return permissionsFor(account)[area]?.scopes.find(scope => mayManage(account, area, scope));
 }

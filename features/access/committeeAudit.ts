@@ -3,7 +3,6 @@ import { APIError, type PayloadRequest } from "payload";
 import { sql, type PostgresAdapter } from "@payloadcms/db-postgres";
 import { workspaceTable } from "./delegatedAccess.ts";
 import {
-  committeeScopes,
   type CommitteeMembership,
   type CommitteeScope,
 } from "./committeePolicy.ts";
@@ -39,7 +38,7 @@ export async function auditMembershipChange(
     old: unknown;
     updated: unknown;
     action: string;
-  }[] = committeeScopes.flatMap((committee) => {
+  }[] = [...new Set([...previous,...next].map(m=>m.committee))].flatMap((committee) => {
     const old = previous.find((m) => m.committee === committee),
       updated = next.find((m) => m.committee === committee);
     return JSON.stringify(old) === JSON.stringify(updated)

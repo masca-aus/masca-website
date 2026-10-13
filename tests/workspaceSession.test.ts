@@ -7,6 +7,7 @@ import {
   beginGoogleLogin,
   finishGoogleLogin,
 } from "../features/access/googleOIDC";
+vi.mock("../features/access/workspaces/repository",()=>({loadWorkspaceCatalog:vi.fn(async()=>[{id:"QLD",status:"active",areas:["events"]}])}));
 const secret = "test-signature-secret-for-workspace";
 const user = {
   id: 3,

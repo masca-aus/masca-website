@@ -54,7 +54,7 @@ export function legacyMembershipProposal(account: ApprovedAccount) {
           `${area}: broad viewing access needs committee assignment.`,
         );
       for (const committee of p.scopes ?? [])
-        if (committeeScopes.includes(committee))
+        if ((committeeScopes as readonly string[]).includes(committee))
           grant(committee, area as CommitteeArea, p.edit ? "editor" : "viewer");
     }
   } else for (const g of account.grants ?? []) grant(g.scope, g.area, "editor");
@@ -87,7 +87,7 @@ export function activationIssues(
       const issues: string[] = [];
       if (!a.committeeAccessReviewedAt)
         issues.push("Legacy access has not been reviewed.");
-      if (!validMemberships(a.committeeMemberships))
+      if (!validMemberships(a.committeeMemberships,a.accessCatalog))
         issues.push(
           "Memberships need valid committee roles and actual term dates.",
         );

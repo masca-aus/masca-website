@@ -391,19 +391,8 @@ export function committeeContent(
         ? [
             {
               name: "owningScope",
-              type: "select",
+              type: "text",
               required: true,
-              options: [
-                "National",
-                "QLD",
-                "NSW",
-                "VIC",
-                "ACT",
-                "SA",
-                "WA",
-                "TAS",
-                "NT",
-              ],
               defaultValue: ({
                 user,
                 req,

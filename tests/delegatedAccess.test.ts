@@ -49,7 +49,7 @@ describe("bounded delegation", () => {
   it("locks fresh authority, preserves foreign grants, audits and rotates sessions atomically", async () => {
     vi.stubEnv("COMMITTEE_ACCESS_ENABLED", "true");
     const query = vi.fn(async (sql: string) => ({
-        rows: sql.includes("SELECT id,email")
+        rows: sql.includes("access_workspaces") ? [{id:"QLD",status:"active",areas:["events"]},{id:"VIC",status:"active",areas:["events"]}] : sql.includes("SELECT id,email")
           ? [
               {
                 id: 1,
@@ -84,7 +84,7 @@ describe("bounded delegation", () => {
     ) as unknown as [string, unknown[]];
     expect(update[0]).toContain("session_revision");
     expect(JSON.parse(update[1][0] as string)).toEqual([v]);
-    expect(query.mock.calls[1][0]).toContain("ORDER BY id FOR UPDATE");
+    expect(query.mock.calls.some(c=>c[0].includes("ORDER BY id FOR UPDATE"))).toBe(true);
     expect(
       query.mock.calls.some((c) => c[0].includes("committee_access_audit")),
     ).toBe(true);

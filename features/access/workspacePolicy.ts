@@ -24,7 +24,7 @@ export const ownershipScopes = [
   "NT",
 ] as const;
 export type ContentArea = (typeof contentAreas)[number];
-export type OwnershipScope = (typeof ownershipScopes)[number];
+export type OwnershipScope = string;
 export const permissionAreas = [
   ...contentAreas,
   "organisations",
@@ -51,6 +51,7 @@ export type ApprovedAccount = {
   googleSubject?: string | null;
   id?: string | number;
   accessModel?: "legacy" | "committee";
+  accessCatalog?: import("./workspaces/types.ts").PolicyWorkspace[];
   committeeAccessReviewedAt?: string | null;
   committeeAccessReviewedBy?: string | null;
   committeeMemberships?: CommitteeMembership[] | null;
@@ -75,6 +76,7 @@ export function mayManage(
     return false;
   if (committeeMode(account))
     return mayAccessResource(account, { area, owningScope: scope }, "edit");
+  if (!(ownershipScopes as readonly string[]).includes(scope)) return false;
   return (
     account.role === "administrator" ||
     account.allContentAccess === true ||
@@ -211,7 +213,7 @@ export function validPermissions(value: unknown): boolean {
       (!p.edit || p.view) &&
       Array.isArray(p.scopes) &&
       p.scopes.every((scope: OwnershipScope) =>
-        ownershipScopes.includes(scope),
+        (ownershipScopes as readonly string[]).includes(scope),
       ) &&
       (!p.edit ||
         !contentAreas.includes(area as ContentArea) ||

@@ -15,6 +15,6 @@ export function validateWorkspace(value:unknown):WorkspaceInput{
  return {name:v.name.trim(),kind:v.kind,areas:v.areas,termEnd:(v.termEnd as string)??null,sponsorId:(v.sponsorId as string)??null};
 }
 export async function loadWorkspaceCatalog(client?:pg.PoolClient):Promise<AccessWorkspace[]>{
- const {rows}=await (client??accessPool()).query(`SELECT id,name,kind,status,areas,term_end,sponsor_id,revision FROM ${workspaceTable('access_workspaces')} ORDER BY created_at,id`);
+ const {rows}=await (client??accessPool()).query(`SELECT id,name,kind,status,areas,term_end,sponsor_id,revision FROM ${workspaceTable('access_workspaces')} ORDER BY created_at,id${client?" FOR SHARE":""}`);
  return rows.map(r=>({id:r.id,name:r.name,kind:r.kind,status:r.status,areas:r.areas,termEnd:r.term_end?.toISOString()??null,sponsorId:r.sponsor_id,revision:r.revision}));
 }
