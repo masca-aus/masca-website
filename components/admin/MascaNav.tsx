@@ -79,8 +79,8 @@ export function MascaNav({ visibleEntities }: { visibleEntities: { collections: 
           <div className="masca-nav__account">
             <h2>Settings</h2>
             <div className="masca-nav__theme"><ThemeToggle /></div>
-            {(committeeMode(account)?managedCommittees(account).length>0:visibleEntities.collections.includes("users")) && <Link restoreContext href={committeeMode(account)?'/admin/people-access':'/admin/collections/users'} className="masca-nav__link" aria-current={pathname.startsWith("/admin/people-access") || pathname.startsWith("/admin/collections/users") ? "page" : undefined}><ShieldCheck size={19} />People & access</Link>}
-            {committeeMode(account) && account?.role==='administrator' && <Link href="/admin/collections/users" className="masca-nav__link">Platform accounts</Link>}
+            {(committeeMode(account)?managedCommittees(account).length>0:visibleEntities.collections.includes("users")) && <Link restoreContext href="/admin/people-access" className="masca-nav__link" aria-current={pathname.startsWith("/admin/people-access") || pathname.startsWith("/admin/collections/users") ? "page" : undefined}><ShieldCheck size={19} />People & access</Link>}
+            {account?.role==='administrator' && <Link href="/admin/collections/users" className="masca-nav__link">Platform accounts</Link>}
             <Link href="/admin/account" className="masca-nav__link" aria-current={pathname === "/admin/account" ? "page" : undefined}><UserRound size={19} />My account</Link>
             <Link href="/admin/logout" onClick={() => {try {clearCalendarRecovery(localStorage);} catch { /* Storage denial must not block sign-out. */ }}} prefetch={false} className="masca-nav__link"><LogOut size={19} />Log out</Link>
           </div>
