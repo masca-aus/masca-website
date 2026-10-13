@@ -1,12 +1,15 @@
-import {committeeAreas,committeeScopes} from '../committeePolicy.ts';
-export function workspaceCatalogSchemaSQL(schema:'public'|'cms_auth_preview'|'cms_calendar_preview',calendar:'media_calendar'|'media_calendar_preview'){
- const tools=JSON.stringify(committeeAreas);
- return `DO $person_name$ BEGIN IF to_regclass('"${schema}".users') IS NOT NULL THEN ALTER TABLE "${schema}".users ADD COLUMN IF NOT EXISTS display_name varchar(80); END IF; END $person_name$;
+import { committeeAreas, committeeScopes } from "../committeePolicy.ts";
+export function workspaceCatalogSchemaSQL(
+  schema: "public" | "cms_auth_preview" | "cms_calendar_preview",
+  calendar: "media_calendar" | "media_calendar_preview",
+) {
+  const tools = JSON.stringify(committeeAreas);
+  return `DO $person_name$ BEGIN IF to_regclass('"${schema}".users') IS NOT NULL THEN ALTER TABLE "${schema}".users ADD COLUMN IF NOT EXISTS display_name varchar(80); END IF; END $person_name$;
  CREATE TABLE IF NOT EXISTS "${schema}".access_workspaces(
  id text PRIMARY KEY,name text NOT NULL CHECK(length(trim(name)) BETWEEN 1 AND 80),kind text NOT NULL CHECK(kind IN('committee','project')),status text NOT NULL DEFAULT 'active' CHECK(status IN('active','archived')),
  areas jsonb NOT NULL DEFAULT '[]' CHECK(jsonb_typeof(areas)='array' AND areas <@ '${tools}'::jsonb),term_end timestamptz,sponsor_id text REFERENCES "${schema}".access_workspaces(id),revision text NOT NULL DEFAULT gen_random_uuid()::text,created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now());
  CREATE UNIQUE INDEX IF NOT EXISTS access_workspace_name ON "${schema}".access_workspaces(lower(trim(name)));
- INSERT INTO "${schema}".access_workspaces(id,name,kind,areas) VALUES ${committeeScopes.map(id=>`('${id}','${id}','committee','${tools}')`).join(',')} ON CONFLICT(id) DO NOTHING;
+ INSERT INTO "${schema}".access_workspaces(id,name,kind,areas) VALUES ${committeeScopes.map((id) => `('${id}','${id}','committee','${tools}')`).join(",")} ON CONFLICT(id) DO NOTHING;
  ALTER TABLE "${schema}".access_workspaces ENABLE ROW LEVEL SECURITY;
  REVOKE ALL ON "${schema}".access_workspaces FROM PUBLIC;
  CREATE OR REPLACE FUNCTION "${schema}".immutable_workspace_id() RETURNS trigger LANGUAGE plpgsql AS $fn$ BEGIN IF NEW.id<>OLD.id THEN RAISE EXCEPTION 'Workspace IDs are immutable'; END IF; RETURN NEW; END $fn$;
