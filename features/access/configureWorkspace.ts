@@ -2,6 +2,7 @@ import {
   auditMembershipChange,
   lockMembershipRecord,
 } from "./committeeAudit.ts";
+import {configureMemberEditor} from "./configureMemberEditor.ts";
 import { committeeContent, committeeFilter } from "./committeeContent.ts";
 import {
   committeeAccessEnabled,
@@ -59,7 +60,7 @@ export function configureWorkspace(
 ): CollectionConfig[] {
   const configured = collections.map<CollectionConfig>((collection) => {
     if (collection.slug === "users")
-      return {
+      return configureMemberEditor({
         ...collection,
         labels: { singular: "Person", plural: "People & access" },
         admin: {
@@ -409,7 +410,7 @@ export function configureWorkspace(
             },
           ],
         },
-      };
+      });
     if (contentAreas.includes(collection.slug as ContentArea)) {
       const area = collection.slug as ContentArea;
       const read = collection.access?.read;

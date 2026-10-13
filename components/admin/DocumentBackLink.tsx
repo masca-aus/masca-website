@@ -12,24 +12,25 @@ import { adminBackTarget } from './adminBackTarget';
 export function DocumentBackLink() {
   const { title, setDocumentTitle } = useDocumentTitle();
   const { data } = useDocumentInfo();
-  useEffect(() => {
-    if (title === '[Untitled]' && !data?.title) setDocumentTitle('Untitled');
-  }, [title, data?.title, setDocumentTitle]);
   const pathname = usePathname();
+  const placeholder = pathname === "/admin/collections/users/create" ? "Add member" : "Untitled";
+  useEffect(() => {
+    if (["[Untitled]", "Untitled"].includes(title) && !data?.title) setDocumentTitle(placeholder);
+  }, [title, data?.title, placeholder, setDocumentTitle]);
   useEffect(() => {
     // Event's nested edit view has a separate title context from the page header.
     const cleanPlaceholder = () => {
       const heading = document.querySelector<HTMLElement>('.doc-header__title');
-      if (heading?.textContent?.trim() === '[Untitled]') {
-        heading.textContent = 'Untitled';
-        heading.setAttribute('title', 'Untitled');
+      if (heading && heading.textContent?.trim() !== placeholder && ['[Untitled]', 'Untitled'].includes(heading.textContent?.trim() || '')) {
+        heading.textContent = placeholder;
+        heading.setAttribute('title', placeholder);
       }
     };
     cleanPlaceholder();
     const observer = new MutationObserver(cleanPlaceholder);
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
     return () => observer.disconnect();
-  }, [pathname]);
+  }, [pathname, placeholder]);
   const linkRef = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
     const controls = linkRef.current?.closest('.doc-controls');

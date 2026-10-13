@@ -191,7 +191,7 @@ function DatePopover({
       className="mc-date-popover"
       style={position}
       role="dialog"
-      aria-label={dateOnly ? "Choose deadline" : dialogLabel}
+      aria-label={dateOnly && dialogLabel === "Choose publishing date" ? "Choose deadline" : dialogLabel}
       onKeyDown={(e) => {
         e.stopPropagation();
         if (e.key === "Escape") {
