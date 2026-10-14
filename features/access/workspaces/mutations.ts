@@ -150,7 +150,7 @@ async function findPerson(
   if (input.targetId && input.email)
     throw new APIError("Choose a person or enter an email.", 400);
   const { rows } = await c.query(
-    `SELECT * FROM ${workspaceTable("users")} WHERE ${input.targetId ? "id::text=$1" : "email=$1"} FOR UPDATE`,
+    `SELECT * FROM ${workspaceTable("users")} WHERE ${input.targetId ? "id::text=$1" : "lower(trim(email))=$1"} FOR UPDATE`,
     [input.targetId ?? input.email],
   );
   if (rows[0]) {

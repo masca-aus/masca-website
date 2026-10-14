@@ -1,13 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
 import { it, expect, afterEach, vi } from "vitest";
-import {
-  render,
-  screen,
-  fireEvent,
-  cleanup,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { AccessGraph } from "../components/admin/access/AccessGraph";
 import { accessFixture } from "./helpers/accessFixture";
 afterEach(() => {
@@ -56,4 +50,22 @@ it("shows actual expiry and suspension independently", () => {
   fireEvent.click(screen.getByRole("button", { name: "Open Queensland" }));
   expect(screen.getAllByText("Suspended").length).toBeGreaterThan(0);
   expect(screen.getByText("Expired")).toBeTruthy();
+});
+
+it("keeps initials when a private account photo is unavailable", () => {
+  render(
+    <AccessGraph
+      initialSnapshot={{
+        ...accessFixture,
+        people: [
+          { ...accessFixture.people[0], photoURL: "/api/account/photo?id=1" },
+        ],
+      }}
+    />,
+  );
+  const photo = document.querySelector<HTMLImageElement>(".ag-avatar img")!;
+  expect(photo).toBeTruthy();
+  fireEvent.error(photo);
+  expect(document.querySelector(".ag-avatar img")).toBeNull();
+  expect(document.querySelector(".ag-avatar")?.textContent).toBeTruthy();
 });

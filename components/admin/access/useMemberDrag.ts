@@ -5,7 +5,9 @@ export function useMemberDrag(
   onDrop: (personId: string, workspaceId: string, area?: CommitteeArea) => void,
 ) {
   const callback = useRef(onDrop);
-  callback.current = onDrop;
+  useEffect(() => {
+    callback.current = onDrop;
+  }, [onDrop]);
   const pending = useRef<{
       id: string;
       x: number;

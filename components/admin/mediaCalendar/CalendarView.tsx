@@ -699,6 +699,7 @@ export function CalendarView({ user }: { user: CalendarUser }) {
           members={data.members}
           userId={String(user.id)}
           editable={editable}
+          workspaceName={user.workspaceNames?.[owningScope]}
           owningScope={committeeMode(user) ? owningScope : undefined}
           loading={initialLoading}
           mobileOpen={filtersOpen}

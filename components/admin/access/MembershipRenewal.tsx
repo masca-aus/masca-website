@@ -6,6 +6,7 @@ import {
   memberTermInstant,
   memberTermLabel,
 } from "@/features/access/memberPresentation";
+import { useAccessClock } from "./useAccessClock";
 import { InlineFrame } from "./InlineFrame";
 import type { InlineContext, EditorProps } from "./inlineTypes";
 export function MembershipRenewal({
@@ -15,6 +16,7 @@ export function MembershipRenewal({
   onReview,
   busy,
 }: { context: InlineContext } & EditorProps) {
+  const now = useAccessClock();
   const w = context.snapshot.workspaces.find(
       (w) => w.id === context.workspaceId,
     )!,
@@ -41,8 +43,7 @@ export function MembershipRenewal({
       busy={busy}
       saveLabel="Renew term"
       onSubmit={async () => {
-        if (Date.parse(term) <= Date.now())
-          throw Error("Choose a future term end.");
+        if (Date.parse(term) <= now) throw Error("Choose a future term end.");
         if (limit && Date.parse(term) > Date.parse(limit))
           throw Error("The membership cannot outlast your manager term.");
         await onSave({

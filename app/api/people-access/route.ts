@@ -1,3 +1,4 @@
+import { sameWorkspaceOrigin } from "@/features/access/workspaceOrigin";
 import { getPayload, APIError } from "payload";
 import config from "@payload-config";
 import {
@@ -32,11 +33,8 @@ async function actor(request: Request) {
   if (!user) throw new APIError("Sign in to manage committee access.", 401);
   return withCommitteeMode(user as unknown as CommitteeAccount);
 }
-function scope(value: unknown, user:CommitteeAccount): CommitteeScope {
-  if (
-    typeof value !== "string" ||
-    !knownWorkspace(value,user.accessCatalog)
-  )
+function scope(value: unknown, user: CommitteeAccount): CommitteeScope {
+  if (typeof value !== "string" || !knownWorkspace(value, user.accessCatalog))
     throw new APIError("Choose a committee.", 400);
   return value as CommitteeScope;
 }
@@ -58,7 +56,7 @@ export async function GET(request: Request) {
     return reply({
       committees: managedCommittees(user),
       ...(committee
-        ? { people: await listPeople(user, scope(committee,user)) }
+        ? { people: await listPeople(user, scope(committee, user)) }
         : {}),
     });
   } catch (error) {
@@ -67,7 +65,7 @@ export async function GET(request: Request) {
 }
 export async function POST(request: Request) {
   try {
-    if (request.headers.get("origin") !== new URL(request.url).origin)
+    if (!sameWorkspaceOrigin(request))
       throw new APIError("Open this action inside the CMS.", 403);
     const user = await actor(request),
       data = await request.json();
@@ -90,7 +88,10 @@ export async function POST(request: Request) {
     if (data.email !== undefined && typeof data.email !== "string")
       throw new APIError("Choose a valid email.", 400);
     return reply(
-      await saveMembership(user, { ...data, committee: scope(data.committee,user) }),
+      await saveMembership(user, {
+        ...data,
+        committee: scope(data.committee, user),
+      }),
     );
   } catch (error) {
     return fail(error);

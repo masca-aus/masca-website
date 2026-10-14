@@ -19,3 +19,14 @@ it('legacy broad access never falls back to private project authority',()=>{
  expect(mayAccessPost(legacy,{owningScope:'ws-masa'},'view')).toBe(false);
  expect(mayApprove({...legacy,calendarAccess:{view:true,edit:true,approve:true,designation:'chair'}},{owningScope:'ws-masa',creator:'other',contributors:[]})).toBe(false);
 });
+import {vi,afterEach} from 'vitest';
+import {committeeContent,guardCommitteeChange} from '../features/access/committeeContent';
+afterEach(()=>vi.unstubAllEnvs());
+it('keeps private project sponsors/media out of public legacy reads',async()=>{
+ vi.stubEnv('COMMITTEE_ACCESS_ENABLED','false');
+ for(const slug of ['sponsors','organisations','media']){
+ const c=committeeContent({slug,fields:[],access:{read:()=>true}});
+ expect(await c.access!.read!({req:{user:null}} as never)).toEqual({accessPublished:{equals:true}});
+ }
+ expect(guardCommitteeChange('sponsors',{owningScope:'National'},undefined,null).accessPublished).toBe(true);
+});

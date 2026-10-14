@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
       where: {
         and: [
           { listed: { equals: true } },
+          {accessPublished:{equals:true}},
           ...(committeeAccessEnabled() ? [{_status:{equals:"published"}}] : []),
           { or: [
             { name: { contains: term } },

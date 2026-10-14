@@ -17,7 +17,8 @@ export function configureMemberEditor(
       return [field];
     });
   }
-  const email = take(["email"])[0];
+  const identityFields = take(["email", "displayName"]);
+  const email = identityFields[0];
   if (email)
     email.admin = {
       ...email.admin,
@@ -69,7 +70,7 @@ export function configureMemberEditor(
           disableListColumn: true,
         },
       },
-      ...(email ? [email] : []),
+      ...identityFields,
       ...take(["committeeMemberships"]),
       {
         type: "collapsible",

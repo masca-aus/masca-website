@@ -9,8 +9,6 @@ export function useAccessGraph(initialSnapshot?: AccessGraphSnapshot) {
   useEffect(() => {
     if (initialSnapshot) return;
     const c = new AbortController();
-    setLoading(true);
-    setError("");
     fetch("/api/workspace-access", { cache: "no-store", signal: c.signal })
       .then(async (r) => {
         const body = await r.json();
@@ -36,7 +34,11 @@ export function useAccessGraph(initialSnapshot?: AccessGraphSnapshot) {
     snapshot,
     loading,
     error,
-    retry: () => setAttempt((v) => v + 1),
+    retry: () => {
+      setLoading(true);
+      setError("");
+      setAttempt((v) => v + 1);
+    },
     applySnapshot: setSnapshot,
   };
 }

@@ -319,6 +319,7 @@ export interface User {
    * Use an individual MASCA Google account. Shared inboxes should not be used for sign-in.
    */
   email: string;
+  displayName?: string | null;
   committeeMemberships?:
     | {
         [k: string]: unknown;
@@ -368,7 +369,6 @@ export interface User {
   departments?: ('chairs' | 'secretariat' | 'treasury' | 'amplifies' | 'careers' | 'cares' | 'unites')[] | null;
   committeeAccessReviewedAt?: string | null;
   committeeAccessReviewedBy?: string | null;
-  displayName?: string | null;
   updatedAt: string;
   createdAt: string;
   collection: 'users';
@@ -973,6 +973,7 @@ export interface UsersSelect<T extends boolean = true> {
   googleSubject?: T;
   sessionRevision?: T;
   email?: T;
+  displayName?: T;
   committeeMemberships?: T;
   calendarAccess?: T;
   allContentAccess?: T;
@@ -989,7 +990,6 @@ export interface UsersSelect<T extends boolean = true> {
   departments?: T;
   committeeAccessReviewedAt?: T;
   committeeAccessReviewedBy?: T;
-  displayName?: T;
   updatedAt?: T;
   createdAt?: T;
 }

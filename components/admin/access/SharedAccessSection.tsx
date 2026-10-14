@@ -9,7 +9,6 @@ export function SharedAccessSection({ workspaceId }: { workspaceId: string }) {
   useEffect(() => {
     if (!open) return;
     const c = new AbortController();
-    setError("");
     fetch(
       `/api/workspace-access/sharing?workspace=${encodeURIComponent(workspaceId)}`,
       { cache: "no-store", signal: c.signal },
@@ -31,7 +30,10 @@ export function SharedAccessSection({ workspaceId }: { workspaceId: string }) {
         type="button"
         className="ag-text"
         aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setError("");
+          setOpen((v) => !v);
+        }}
       >
         Shared records
       </button>
@@ -48,7 +50,10 @@ export function SharedAccessSection({ workspaceId }: { workspaceId: string }) {
               <button
                 type="button"
                 className="ag-text"
-                onClick={() => setAttempt((v) => v + 1)}
+                onClick={() => {
+                  setError("");
+                  setAttempt((v) => v + 1);
+                }}
               >
                 Retry shared records
               </button>

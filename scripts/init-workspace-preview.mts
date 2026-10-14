@@ -1,9 +1,10 @@
-import {committeeAccessSchemaSQL} from "../features/access/committeeSchema.ts";
+import { workspaceCatalogSchemaSQL } from "../features/access/workspaces/schema.ts";
+import { committeeAccessSchemaSQL } from "../features/access/committeeSchema.ts";
 import { accountPhotoSchemaSQL } from "../features/account/photoSchema.ts";
-import {changeRequestSchemaSQL} from '../features/submissions/changeRequestSchema.ts';
-import { listingEmailSchemaSQL } from '../features/submissions/emailSchema.ts';
+import { changeRequestSchemaSQL } from "../features/submissions/changeRequestSchema.ts";
+import { listingEmailSchemaSQL } from "../features/submissions/emailSchema.ts";
 import { departmentSchemaSQL } from "../features/dashboard/departmentSchema.ts";
-import { reviewSchemaSQL } from '../features/submissions/reviewSchema.ts';
+import { reviewSchemaSQL } from "../features/submissions/reviewSchema.ts";
 // One-time initialization of the isolated authentication preview only.
 import pg from "pg";
 import { submissionSchemaSQL } from "../features/submissions/schema.ts";
@@ -24,12 +25,24 @@ if (tables.rows[0].count > 0)
   await connection.query(
     "ALTER TABLE cms_auth_preview.users ADD COLUMN IF NOT EXISTS all_content_access boolean DEFAULT false, ADD COLUMN IF NOT EXISTS permissions jsonb",
   );
-if (tables.rows[0].count > 0) await connection.query(submissionSchemaSQL("cms_auth_preview"));
-if (tables.rows[0].count > 0) await connection.query(reviewSchemaSQL("cms_auth_preview"));
-if (tables.rows[0].count > 0) await connection.query(listingEmailSchemaSQL("cms_auth_preview"));
-if (tables.rows[0].count > 0) await connection.query(changeRequestSchemaSQL("cms_auth_preview"));
-if (tables.rows[0].count > 0) await connection.query(departmentSchemaSQL("cms_auth_preview"));
-if(tables.rows[0].count>0) await connection.query(committeeAccessSchemaSQL("cms_auth_preview","media_calendar_preview"));
+if (tables.rows[0].count > 0)
+  await connection.query(submissionSchemaSQL("cms_auth_preview"));
+if (tables.rows[0].count > 0)
+  await connection.query(reviewSchemaSQL("cms_auth_preview"));
+if (tables.rows[0].count > 0)
+  await connection.query(listingEmailSchemaSQL("cms_auth_preview"));
+if (tables.rows[0].count > 0)
+  await connection.query(changeRequestSchemaSQL("cms_auth_preview"));
+if (tables.rows[0].count > 0)
+  await connection.query(departmentSchemaSQL("cms_auth_preview"));
+if (tables.rows[0].count > 0)
+  await connection.query(
+    committeeAccessSchemaSQL("cms_auth_preview", "media_calendar_preview"),
+  );
+if (tables.rows[0].count > 0)
+  await connection.query(
+    workspaceCatalogSchemaSQL("cms_auth_preview", "media_calendar_preview"),
+  );
 await connection.end();
 process.env.WORKSPACE_INIT_SCHEMA =
   tables.rows[0].count === 0 ? "true" : "false";
@@ -40,10 +53,17 @@ const { default: config } = await import("../payload.config.ts");
 const payload = await getPayload({ config });
 if (payload.db.schemaName !== "cms_auth_preview")
   throw new Error("Wrong schema");
-const postInitConnection = new pg.Client({connectionString:process.env.DATABASE_URI});
+const postInitConnection = new pg.Client({
+  connectionString: process.env.DATABASE_URI,
+});
 await postInitConnection.connect();
 try {
-  await postInitConnection.query(committeeAccessSchemaSQL("cms_auth_preview","media_calendar_preview"));
+  await postInitConnection.query(
+    committeeAccessSchemaSQL("cms_auth_preview", "media_calendar_preview"),
+  );
+  await postInitConnection.query(
+    workspaceCatalogSchemaSQL("cms_auth_preview", "media_calendar_preview"),
+  );
   await postInitConnection.query(accountPhotoSchemaSQL("cms_auth_preview"));
   await postInitConnection.query(departmentSchemaSQL("cms_auth_preview"));
 } finally {
@@ -69,7 +89,8 @@ console.log("Isolated preview schema and initial administrator are ready.");
 const { verifyWorkspacePreview } =
   await import("./verify-workspace-preview.mts");
 await verifyWorkspacePreview(payload);
-const { verifyPublicSubmissions } = await import("./verify-public-submissions.mts");
+const { verifyPublicSubmissions } =
+  await import("./verify-public-submissions.mts");
 await verifyPublicSubmissions(payload);
 await payload.destroy();
 // Payload's adapter destroy resets its schema but leaves pool handles alive.

@@ -1,3 +1,4 @@
+import { workspaceCatalogSchemaSQL } from "../features/access/workspaces/schema.ts";
 import { committeeAccessSchemaSQL } from "../features/access/committeeSchema.ts";
 import { accountPhotoSchemaSQL } from "../features/account/photoSchema.ts";
 import pg from "pg";
@@ -65,6 +66,10 @@ if (exists.rows.length)
   await c.query(
     committeeAccessSchemaSQL(previewSchema, "media_calendar_preview"),
   );
+if (exists.rows.length)
+  await c.query(
+    workspaceCatalogSchemaSQL(previewSchema, "media_calendar_preview"),
+  );
 await c.end();
 process.env.WORKSPACE_INIT_SCHEMA = exists.rows.length ? "false" : "true";
 Object.assign(process.env, { NODE_ENV: "development" });
@@ -108,6 +113,9 @@ for (const schema of [
   await connection.query(schema(previewSchema));
 await connection.query(
   committeeAccessSchemaSQL(previewSchema, "media_calendar_preview"),
+);
+await connection.query(
+  workspaceCatalogSchemaSQL(previewSchema, "media_calendar_preview"),
 );
 // Preview-only QA accounts cannot authenticate against production or other preview schemas.
 if (process.env.CALENDAR_PREVIEW_TESTS === "true") {

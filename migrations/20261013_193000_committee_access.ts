@@ -10,6 +10,6 @@ export async function up({ db }: MigrateUpArgs) {
 }
 export async function down() {
   throw new Error(
-    "Disable COMMITTEE_ACCESS_ENABLED to roll back; preserve memberships and audit history.",
+    "Retain workspace-aware ownership enforcement on rollback; preserve memberships and audit history. Use a compatible build.",
   );
 }

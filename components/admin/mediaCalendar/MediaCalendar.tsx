@@ -43,6 +43,8 @@ export function MediaCalendar(props: AdminViewServerProps) {
           role: user.role,
           calendarAccess: user.calendarAccess,
           accessModel: user.accessModel,
+          accessCatalog:user.accessCatalog,
+          workspaceNames:user.workspaceNames,
           committeeMemberships: user.committeeMemberships,
           committeeAccessReviewedAt: user.committeeAccessReviewedAt,
           committeeAccessReviewedBy: user.committeeAccessReviewedBy,

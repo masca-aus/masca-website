@@ -19,6 +19,7 @@ export type CalendarScope = "all" | "mine" | "review" | "ideas";
 export function CalendarSidebar({
   scope,
   owningScope,
+  workspaceName,
   category,
   owner,
   format,
@@ -44,6 +45,7 @@ export function CalendarSidebar({
   onTypePurged,
 }: {
   scope: CalendarScope;
+  workspaceName?:string;
   owningScope?: import("@/features/access/committeePolicy").CommitteeScope;
   category: string;
   owner: string;
@@ -243,7 +245,7 @@ export function CalendarSidebar({
           </span>
           <div>
             <strong>Instagram</strong>
-            <small>{owningScope ?? "National"} media team</small>
+            <small>{workspaceName??(owningScope?.startsWith("ws-")?"Project":owningScope??"National")} media team</small>
           </div>
           <button
             className="mc-sidebar-close"

@@ -2,9 +2,11 @@
 import type { AccessGraphSnapshot } from "@/features/access/workspaces/types";
 import { memberAreaLabels } from "@/features/access/memberPresentation";
 export function AccessTable({
+  now,
   snapshot,
   onInspect,
 }: {
+  now: number;
   snapshot: AccessGraphSnapshot;
   onInspect?: (workspaceId: string, userId: string) => void;
 }) {
@@ -61,7 +63,7 @@ export function AccessTable({
                     ? "Suspended account"
                     : w?.status === "archived"
                       ? "Archived workspace"
-                      : Date.parse(m.expiresAt) <= Date.now()
+                      : Date.parse(m.expiresAt) <= now
                         ? "Expired"
                         : p?.status === "invited"
                           ? "Awaiting sign-in"

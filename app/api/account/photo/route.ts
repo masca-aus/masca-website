@@ -1,3 +1,4 @@
+import { sameWorkspaceOrigin } from "@/features/access/workspaceOrigin";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { isWorkspaceEmail } from "@/features/access/workspacePolicy";
@@ -33,7 +34,7 @@ async function actor(request: Request) {
   return current;
 }
 function sameOrigin(request: Request) {
-  if (request.headers.get("origin") !== new URL(request.url).origin)
+  if (!sameWorkspaceOrigin(request))
     throw new AccountPhotoError("Open this action inside the CMS.", 403);
 }
 function failure(error: unknown) {

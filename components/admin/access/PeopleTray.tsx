@@ -1,6 +1,9 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- Private profile images must be fetched directly by the authenticated browser. */
+import { useState } from "react";
 import type { AccessPerson } from "@/features/access/workspaces/types";
 export function PersonAvatar({ person }: { person: AccessPerson }) {
+  const [failedPhoto, setFailedPhoto] = useState<string | null>(null);
   return (
     <span className="ag-avatar">
       <span>
@@ -11,13 +14,11 @@ export function PersonAvatar({ person }: { person: AccessPerson }) {
           .join("")
           .toUpperCase()}
       </span>
-      {person.photoURL && (
+      {person.photoURL && failedPhoto !== person.photoURL && (
         <img
           src={person.photoURL}
           alt=""
-          onError={(e) => {
-            e.currentTarget.hidden = true;
-          }}
+          onError={() => setFailedPhoto(person.photoURL!)}
         />
       )}
     </span>

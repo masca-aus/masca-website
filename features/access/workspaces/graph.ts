@@ -80,7 +80,7 @@ export async function accessSnapshot(
     const people = rows.map((r) => ({
       id: String(r.id),
       email: r.email,
-      name: r.display_name || r.email.split("@")[0],
+      name: r.display_name?.trim() || r.email.split("@")[0],
       status: r.status,
       revision: r.committee_access_revision ?? "",
       photoURL: `/api/account/photo?id=${r.id}`,

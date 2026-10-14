@@ -1,3 +1,4 @@
+import { sameWorkspaceOrigin } from "@/features/access/workspaceOrigin";
 import { withCommitteeMode } from "@/features/access/committeeEnvironment";
 import { getPayload } from "payload";
 import config from "@payload-config";
@@ -68,7 +69,7 @@ export function safeError(e: unknown) {
   );
 }
 export function requireOrigin(request: Request) {
-  if (request.headers.get("origin") !== new URL(request.url).origin)
+  if (!sameWorkspaceOrigin(request))
     throw new CalendarError("Open this action inside the CMS.", 403);
 }
 export async function GET(request: Request) {
@@ -108,7 +109,9 @@ export async function GET(request: Request) {
         to,
         offset,
         z
-          .string().min(1).max(100)
+          .string()
+          .min(1)
+          .max(100)
           .parse(url.searchParams.get("owningScope") ?? "National"),
       ),
     );

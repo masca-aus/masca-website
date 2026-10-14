@@ -1,5 +1,5 @@
-import {rowAuthority} from "./workspaces/graph.ts";
-import type {PolicyWorkspace} from "./workspaces/types.ts";
+import { rowAuthority } from "./workspaces/graph.ts";
+import type { PolicyWorkspace } from "./workspaces/types.ts";
 import { createHash } from "node:crypto";
 import {
   APIError,
@@ -106,8 +106,13 @@ export function guardCommitteeChange(
   draftOnly = false,
 ): Doc {
   if (!committeeAccessEnabled()) {
-    const owner=original?.owningScope??data.owningScope;
-    if(owner && !(committeeScopes as readonly string[]).includes(owner))throw new APIError("Project work requires workspace-aware enforcement.",403);
+    const owner = original?.owningScope ?? data.owningScope;
+    if (owner && !(committeeScopes as readonly string[]).includes(owner))
+      throw new APIError(
+        "Project work requires workspace-aware enforcement.",
+        403,
+      );
+    if(!original&&["sponsors","organisations","media"].includes(area))data.accessPublished=true;
     return data;
   }
   const account = actor ? withCommitteeMode(actor) : null,
@@ -207,17 +212,27 @@ export function guardCommitteeChange(
   if (!original) data.accessCreator = String(account.id);
   return data;
 }
-async function refreshRequestAuthority(req:PayloadRequest){
- if(!req.user)return;
- const tx=(req.payload.db as unknown as PostgresAdapter).sessions[String(await req.transactionID)]?.db;
- if(!tx)throw new APIError("Workspace writes require a transaction.",503);
- const catalogue=await tx.execute(sql`SELECT id,status,areas FROM ${sql.raw(workspaceTable("access_workspaces"))} ORDER BY id FOR SHARE`);
- const users=await tx.execute(sql`SELECT id,email,status,role,committee_memberships,committee_access_reviewed_at FROM ${sql.raw(workspaceTable("users"))} WHERE id=${req.user.id} FOR SHARE`);
- const row=users.rows[0];
- if(!row)throw new APIError("Your access has changed.",403);
- const current=rowAuthority(row as unknown as import("./workspaces/graph.ts").AccountRow,catalogue.rows as PolicyWorkspace[]);
- if(!approvedAccount(current))throw new APIError("Your access has changed.",403);
- req.user={...req.user,...current} as typeof req.user;
+async function refreshRequestAuthority(req: PayloadRequest) {
+  if (!req.user) return;
+  const tx = (req.payload.db as unknown as PostgresAdapter).sessions[
+    String(await req.transactionID)
+  ]?.db;
+  if (!tx) throw new APIError("Workspace writes require a transaction.", 503);
+  const catalogue = await tx.execute(
+    sql`SELECT id,status,areas FROM ${sql.raw(workspaceTable("access_workspaces"))} ORDER BY id FOR SHARE`,
+  );
+  const users = await tx.execute(
+    sql`SELECT id,email,status,role,committee_memberships,committee_access_reviewed_at FROM ${sql.raw(workspaceTable("users"))} WHERE id=${req.user.id} FOR SHARE`,
+  );
+  const row = users.rows[0];
+  if (!row) throw new APIError("Your access has changed.", 403);
+  const current = rowAuthority(
+    row as unknown as import("./workspaces/graph.ts").AccountRow,
+    catalogue.rows as PolicyWorkspace[],
+  );
+  if (!approvedAccount(current))
+    throw new APIError("Your access has changed.", 403);
+  req.user = { ...req.user, ...current } as typeof req.user;
 }
 async function lockContent(
   req: PayloadRequest,
@@ -307,7 +322,9 @@ export async function committeeFilter(
         JSON.stringify([
           { userId: String(actor.id), ...(role ? { role } : {}) },
         ]),
-        actor.accessCatalog?.filter(w=>w.status==="active"&&w.areas.includes(area)).map(w=>w.id)??[...committeeScopes],
+        actor.accessCatalog
+          ?.filter((w) => w.status === "active" && w.areas.includes(area))
+          .map((w) => w.id) ?? [...committeeScopes],
       ],
     );
     if (rows.length)
@@ -413,7 +430,12 @@ export function committeeContent(
             {
               name: "owningScope",
               type: "text",
-              admin:{components:{Field:"/components/admin/access/WorkspaceOwner#WorkspaceOwner"}},
+              admin: {
+                components: {
+                  Field:
+                    "/components/admin/access/WorkspaceOwner#WorkspaceOwner",
+                },
+              },
               required: true,
               defaultValue: ({
                 user,
@@ -436,11 +458,17 @@ export function committeeContent(
     access: {
       ...collection.access,
       read: async (args) => {
-        if (!committeeAccessEnabled())
-          {const base=originalRead?await originalRead(args):true;
-           if(!args.req.user||base===false)return base;
-           const legacy:Where={owningScope:{in:[...committeeScopes]}};
-           return base===true?legacy:{and:[base,legacy]};}
+        if (!committeeAccessEnabled()) {
+          const base = originalRead ? await originalRead(args) : true;
+          if(base===false)return false;
+          if(!args.req.user){
+            if(!["sponsors","organisations","media"].includes(area))return base;
+            const published:Where={accessPublished:{equals:true}};
+            return base===true?published:{and:[base,published]};
+          }
+          const legacy: Where = { owningScope: { in: [...committeeScopes] } };
+          return base === true ? legacy : { and: [base, legacy] };
+        }
         if (area === "media") {
           const base = args.req.user
             ? await committeeFilter(args.req, area)
@@ -483,7 +511,7 @@ export function committeeContent(
       readVersions: (args) =>
         committeeAccessEnabled()
           ? committeeFilter(args.req, area, "view", true)
-          : legacyWrite(collection.access?.readVersions?.(args) ?? false,true),
+          : legacyWrite(collection.access?.readVersions?.(args) ?? false, true),
     },
     endpoints: [
       ...(collection.endpoints || []),
@@ -502,12 +530,14 @@ export function committeeContent(
               throw new APIError("Open this action inside the CMS.", 403);
             const id = String(req.routeParams?.id);
             let account = withCommitteeMode(
-                req.user as unknown as CommitteeAccount,
-              );
+              req.user as unknown as CommitteeAccount,
+            );
             if (method === "post") {
               ownsTransaction = await initTransaction(req);
               await lockContent(req, area, id);
-              account=withCommitteeMode(req.user as unknown as CommitteeAccount);
+              account = withCommitteeMode(
+                req.user as unknown as CommitteeAccount,
+              );
             }
             const doc = (await req.payload.findByID({
               collection: area as CMSArea,
@@ -764,7 +794,11 @@ export function committeeContent(
                 ? draftWrite
                 : undefined;
           }
-          if(committeeAccessEnabled() && (operation==="create"||operation==="delete"))await refreshRequestAuthority(args.req);
+          if (
+            committeeAccessEnabled() &&
+            (operation === "create" || operation === "delete")
+          )
+            await refreshRequestAuthority(args.req);
           return args;
         },
       ],
@@ -873,8 +907,16 @@ export function committeeContent(
   };
 }
 
-async function legacyWrite(base: boolean | Where | Promise<boolean | Where>,versions=false):Promise<boolean | Where>{
- const result=await base;if(result===false)return false;
- const owner:Where={[versions?"version.owningScope":"owningScope"]:{in:[...committeeScopes]}};
- return result===true?owner:{and:[result,owner]};
+async function legacyWrite(
+  base: boolean | Where | Promise<boolean | Where>,
+  versions = false,
+): Promise<boolean | Where> {
+  const result = await base;
+  if (result === false) return false;
+  const owner: Where = {
+    [versions ? "version.owningScope" : "owningScope"]: {
+      in: [...committeeScopes],
+    },
+  };
+  return result === true ? owner : { and: [result, owner] };
 }

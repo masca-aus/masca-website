@@ -61,7 +61,7 @@ export async function loadWorkspaceCatalog(
   client?: pg.PoolClient,
 ): Promise<AccessWorkspace[]> {
   const { rows } = await (client ?? accessPool()).query(
-    `SELECT id,name,kind,status,areas,term_end,sponsor_id,revision FROM ${workspaceTable("access_workspaces")} ORDER BY created_at,id${client ? " FOR SHARE" : ""}`,
+    `SELECT id,name,kind,status,areas,term_end,sponsor_id,revision FROM ${workspaceTable("access_workspaces")} ORDER BY CASE WHEN id='National' THEN 0 ELSE 1 END,created_at,id${client ? " FOR SHARE" : ""}`,
   );
   return rows.map((r) => ({
     id: r.id,

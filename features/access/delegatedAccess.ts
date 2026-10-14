@@ -1,6 +1,6 @@
-import {loadWorkspaceCatalog} from "./workspaces/repository.ts";
-import {withWorkspaceAuthority} from "./workspaces/policyContext.ts";
-import type {PolicyWorkspace} from "./workspaces/types.ts";
+import { loadWorkspaceCatalog } from "./workspaces/repository.ts";
+import { withWorkspaceAuthority } from "./workspaces/policyContext.ts";
+import type { PolicyWorkspace } from "./workspaces/types.ts";
 import pg from "pg";
 import { randomUUID } from "node:crypto";
 import { APIError } from "payload";
@@ -56,14 +56,14 @@ export function membershipChange(
   targetId: string,
 ) {
   if (
-    !knownWorkspace(committee,actor.accessCatalog) ||
+    !knownWorkspace(committee, actor.accessCatalog) ||
     (membership && membership.committee !== committee)
   )
     throw new APIError("Choose one committee membership.", 400);
   const next = before
     .filter((m) => m.committee !== committee)
     .concat(membership ? [membership] : []);
-  if (!validMemberships(next,actor.accessCatalog))
+  if (!validMemberships(next, actor.accessCatalog))
     throw new APIError(
       "Choose valid roles and an explicit term end date.",
       400,
@@ -81,15 +81,15 @@ function account(
     committee_access_reviewed_at?: string;
     committee_access_reviewed_by?: string;
   },
-  catalog?:PolicyWorkspace[],
+  catalog?: PolicyWorkspace[],
 ): CommitteeAccount {
-  const current=withCommitteeMode({
+  const current = withCommitteeMode({
     ...row,
     committeeMemberships: row.committee_memberships ?? [],
     committeeAccessReviewedAt: row.committee_access_reviewed_at,
     committeeAccessReviewedBy: row.committee_access_reviewed_by,
   });
-  return catalog?withWorkspaceAuthority(current,catalog):current;
+  return catalog ? withWorkspaceAuthority(current, catalog) : current;
 }
 /** Re-read and lock current authority and target; never trust stale browser grants. */
 export async function saveMembership(
@@ -104,7 +104,7 @@ export async function saveMembership(
   const c = await accessPool().connect();
   try {
     await c.query("BEGIN");
-    const catalog=await loadWorkspaceCatalog(c);
+    const catalog = await loadWorkspaceCatalog(c);
     const { rows } = await c.query(
       `SELECT id,email,role,status,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM ${workspaceTable("users")} WHERE id::text=ANY($1::text[]) ORDER BY id FOR UPDATE`,
       [[String(actor.id), ...(input.targetId ? [input.targetId] : [])]],
@@ -112,11 +112,11 @@ export async function saveMembership(
     const current = rows.find((r) => String(r.id) === String(actor.id));
     if (
       !current ||
-      !approvedAccount(account(current,catalog)) ||
-      !mayManageCommittee(account(current,catalog), input.committee)
+      !approvedAccount(account(current, catalog)) ||
+      !mayManageCommittee(account(current, catalog), input.committee)
     )
       throw new APIError("Your access management authority has changed.", 403);
-    const manager = account(current,catalog);
+    const manager = account(current, catalog);
     let target = input.targetId
       ? rows.find((r) => String(r.id) === input.targetId)
       : null;
@@ -134,7 +134,7 @@ export async function saveMembership(
         );
       await c.query("SELECT pg_advisory_xact_lock(hashtext($1))", [email]);
       const existing = await c.query(
-        `SELECT id,email,role,status,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM ${workspaceTable("users")} WHERE email=$1 FOR UPDATE`,
+        `SELECT id,email,role,status,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM ${workspaceTable("users")} WHERE lower(trim(email))=$1 FOR UPDATE`,
         [email],
       );
       target = existing.rows[0];
@@ -217,8 +217,8 @@ export async function listPeople(
     `SELECT id,email,role,status,committee_memberships,committee_access_reviewed_at,committee_access_reviewed_by FROM ${workspaceTable("users")} WHERE id=$1`,
     [actor.id],
   );
-  const catalog=await loadWorkspaceCatalog();
-  const manager = actors[0] ? account(actors[0],catalog) : null;
+  const catalog = await loadWorkspaceCatalog();
+  const manager = actors[0] ? account(actors[0], catalog) : null;
   if (!mayManageCommittee(manager, committee))
     throw new APIError("You cannot manage this committee.", 403);
   const { rows } = await accessPool().query(
@@ -236,7 +236,9 @@ export async function listPeople(
 export const managedCommittees = (actor: CommitteeAccount) =>
   approvedAccount(actor)
     ? actor.role === "administrator"
-      ? (actor.accessCatalog?.filter(w=>w.status==="active").map(w=>w.id)??[...committeeScopes])
+      ? (actor.accessCatalog
+          ?.filter((w) => w.status === "active")
+          .map((w) => w.id) ?? [...committeeScopes])
       : activeMemberships(actor)
           .filter((m) => m.manager)
           .map((m) => m.committee)

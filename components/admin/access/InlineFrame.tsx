@@ -69,7 +69,9 @@ export function InlineFrame({
           <X size={17} />
         </button>
       </header>
-      {children}
+      <fieldset className="ag-form-fields" disabled={busy}>
+        {children}
+      </fieldset>
       {error && (
         <p className="ag-inline-error" role="alert">
           {error}

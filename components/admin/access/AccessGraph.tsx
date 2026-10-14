@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, LayoutGrid, Table2, Plus, ShieldCheck } from "lucide-react";
+import { MascaMark } from "../MascaBrand";
 import type { AccessGraphSnapshot } from "@/features/access/workspaces/types";
 import type { AccessMutation } from "@/features/access/workspaces/mutations";
 import { useAccessGraph } from "./useAccessGraph";
@@ -15,6 +16,7 @@ import { InlinePersonEditor } from "./InlinePersonEditor";
 import { InlineToolsEditor } from "./InlineToolsEditor";
 import { InlineMemberDetails } from "./InlineMemberDetails";
 import { AccessSaveError, type InlineEditorState } from "./inlineTypes";
+import { useAccessClock } from "./useAccessClock";
 import { useInlineMotion } from "./useInlineMotion";
 import { useMemberDrag } from "./useMemberDrag";
 import { MembershipRenewal } from "./MembershipRenewal";
@@ -52,6 +54,7 @@ export function AccessGraph({
     [busy, setBusy] = useState(false),
     [notice, setNotice] = useState(""),
     [instructions, setInstructions] = useState("");
+  const now = useAccessClock();
   const root = useRef<HTMLElement>(null),
     trigger = useRef<HTMLElement | null>(null),
     candidate = useRef<HTMLElement | null>(null),
@@ -145,6 +148,7 @@ export function AccessGraph({
     if (state.kind === "details")
       return (
         <InlineMemberDetails
+          now={now}
           snapshot={state.snapshot}
           personId={state.personId}
           workspaceId={state.workspaceId}
@@ -253,7 +257,9 @@ export function AccessGraph({
           )}
           <section className="ag-boundary">
             <header className="ag-boundary-heading">
-              <img src="/logo/logo.webp" alt="MASCA" width="32" height="32" />
+              <span className="ag-brand">
+                <MascaMark />
+              </span>
               <div>
                 <h2>CMS administration</h2>
                 <p>Platform management is separate from content access.</p>
@@ -296,6 +302,7 @@ export function AccessGraph({
             {view === "table" ? (
               <>
                 <AccessTable
+                  now={now}
                   snapshot={snapshot}
                   onInspect={(id, personId) =>
                     open({
@@ -420,6 +427,7 @@ export function AccessGraph({
                         <div className="ag-areas">
                           {w.areas.map((a) => (
                             <AreaBubble
+                              now={now}
                               key={a}
                               area={a}
                               members={members}

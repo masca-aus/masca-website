@@ -68,7 +68,6 @@ export function AccessHistory({
   useEffect(() => {
     if (!open) return;
     const c = new AbortController();
-    setError("");
     fetch(
       `/api/workspace-access/history?${new URLSearchParams({ workspace: workspaceId, ...(personId ? { person: personId } : {}) })}`,
       { cache: "no-store", signal: c.signal },
@@ -90,7 +89,10 @@ export function AccessHistory({
         type="button"
         className="ag-text"
         aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setError("");
+          setOpen((v) => !v);
+        }}
       >
         Access history
       </button>
@@ -102,7 +104,10 @@ export function AccessHistory({
               <button
                 type="button"
                 className="ag-text"
-                onClick={() => setAttempt((v) => v + 1)}
+                onClick={() => {
+                  setError("");
+                  setAttempt((v) => v + 1);
+                }}
               >
                 Retry history
               </button>

@@ -709,3 +709,50 @@
 .ag-history small {
   color: var(--ag-muted);
 }
+.ag-inline > .ag-form-fields {
+  display: block;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+.ag-drag-avatar {
+  background: var(--theme-elevation-0, #fff);
+  color: var(--theme-text, #333);
+}
+.ag-brand,
+.ag-brand img {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+/* Reused pickers retain their theme outside the media calendar shell. */
+.access-graph {
+  --mc-bg: var(--ag-bg);
+  --mc-text: var(--ag-ink);
+  --mc-line: var(--ag-border);
+  --mc-muted: var(--ag-muted);
+  --mc-soft: var(--ag-soft);
+  --mc-primary: #09055f;
+}
+.ag-inline .mc-select-trigger,
+.ag-inline .mc-date-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--ag-border);
+  border-radius: 8px;
+  background: var(--ag-bg);
+  text-align: left;
+}
+.ag-inline .mc-select-trigger {
+  justify-content: space-between;
+}
+.ag-inline .ag-fields-row > label {
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 7px;
+}

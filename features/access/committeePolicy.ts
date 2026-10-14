@@ -1,4 +1,4 @@
-import type {PolicyWorkspace,WorkspaceId} from "./workspaces/types.ts";
+import type { PolicyWorkspace, WorkspaceId } from "./workspaces/types.ts";
 /** Shared, fail-closed authority for committee work. No browser value grants access. */
 export const committeeScopes = [
   "National",
@@ -95,7 +95,7 @@ export function validMemberships(
       !m.id ||
       m.id.length > 100 ||
       ids.has(m.id) ||
-      !knownWorkspace(m.committee,catalog) ||
+      !knownWorkspace(m.committee, catalog) ||
       scopes.has(m.committee) ||
       typeof m.manager !== "boolean" ||
       typeof m.expiresAt !== "string" ||
@@ -112,6 +112,11 @@ export function validMemberships(
       ([area, roles]) =>
         known(committeeAreas, area) &&
         Array.isArray(roles) &&
+        (!catalog ||
+          !roles.length ||
+          catalog
+            .find((w) => w.id === m.committee)
+            ?.areas.includes(area as CommitteeArea)) &&
         roles.every((r) => known(committeeRoles, r)) &&
         new Set(roles).size === roles.length,
     );
@@ -138,8 +143,12 @@ export function activeMemberships(
   now = Date.now(),
 ): CommitteeMembership[] {
   return approvedAccount(account) &&
-    validMemberships(account.committeeMemberships,account.accessCatalog)
-    ? account.committeeMemberships.filter((m) => Date.parse(m.expiresAt) > now && activeWorkspace(m.committee,account.accessCatalog))
+    validMemberships(account.committeeMemberships, account.accessCatalog)
+    ? account.committeeMemberships.filter(
+        (m) =>
+          Date.parse(m.expiresAt) > now &&
+          activeWorkspace(m.committee, account.accessCatalog),
+      )
     : [];
 }
 export function rolesFor(
@@ -148,7 +157,7 @@ export function rolesFor(
   area: CommitteeArea,
   now = Date.now(),
 ): CommitteeRole[] {
-  if (!activeWorkspace(committee,account?.accessCatalog,area)) return [];
+  if (!activeWorkspace(committee, account?.accessCatalog, area)) return [];
   return (
     activeMemberships(account, now).find((m) => m.committee === committee)
       ?.roles[area] ?? []
@@ -162,7 +171,11 @@ export function mayAccessResource(
 ): boolean {
   if (
     !approvedAccount(account) ||
-    !activeWorkspace(resource.owningScope,account.accessCatalog,resource.area) ||
+    !activeWorkspace(
+      resource.owningScope,
+      account.accessCatalog,
+      resource.area,
+    ) ||
     !known(committeeAreas, resource.area)
   )
     return false;
@@ -214,7 +227,8 @@ export function mayManageCommittee(
   now = Date.now(),
 ): boolean {
   return (
-    approvedAccount(account) && activeWorkspace(committee,account.accessCatalog) &&
+    approvedAccount(account) &&
+    activeWorkspace(committee, account.accessCatalog) &&
     (account.role === "administrator" ||
       activeMemberships(account, now).some(
         (m) => m.committee === committee && m.manager,
@@ -230,13 +244,13 @@ export function mayDelegateMemberships(
 ): boolean {
   if (
     !approvedAccount(actor) ||
-    !validMemberships(before,actor.accessCatalog) ||
-    !validMemberships(next,actor.accessCatalog)
+    !validMemberships(before, actor.accessCatalog) ||
+    !validMemberships(next, actor.accessCatalog)
   )
     return false;
   if (actor.role === "administrator") return true;
   if (String(actor.id) === targetId) return false;
-  for (const scope of new Set([...before,...next].map(m=>m.committee))) {
+  for (const scope of new Set([...before, ...next].map((m) => m.committee))) {
     const old = before.find((m) => m.committee === scope),
       updated = next.find((m) => m.committee === scope);
     if (JSON.stringify(old) === JSON.stringify(updated)) continue;
@@ -255,12 +269,22 @@ export function mayDelegateMemberships(
 }
 
 /** Without a catalogue, only legacy IDs can be interpreted; custom IDs fail closed. */
-export function knownWorkspace(id:unknown,catalog?:PolicyWorkspace[]):id is string {
- return typeof id==='string' && (catalog?catalog.some(w=>w.id===id):known(committeeScopes,id));
+export function knownWorkspace(
+  id: unknown,
+  catalog?: PolicyWorkspace[],
+): id is string {
+  return (
+    typeof id === "string" &&
+    (catalog ? catalog.some((w) => w.id === id) : known(committeeScopes, id))
+  );
 }
-export function activeWorkspace(id:unknown,catalog?:PolicyWorkspace[],area?:CommitteeArea):boolean {
- if(!knownWorkspace(id,catalog))return false;
- if(!catalog)return true;
- const w=catalog.find(w=>w.id===id);
- return w?.status==='active' && (!area||w.areas.includes(area));
+export function activeWorkspace(
+  id: unknown,
+  catalog?: PolicyWorkspace[],
+  area?: CommitteeArea,
+): boolean {
+  if (!knownWorkspace(id, catalog)) return false;
+  if (!catalog) return true;
+  const w = catalog.find((w) => w.id === id);
+  return w?.status === "active" && (!area || w.areas.includes(area));
 }

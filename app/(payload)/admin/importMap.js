@@ -63,7 +63,7 @@ import { LoginWelcome as LoginWelcome_a8cc6f5d2dc08727fd6734a3818ec46d } from '.
 import { AdminNavigationEnhancements as AdminNavigationEnhancements_2cf824608624f2d905c46bce1dbb1759 } from '../../../components/admin/AdminNavigationEnhancements'
 import { ImageUploadCompression as ImageUploadCompression_52256fb23a13326be6c2f32a1fd1e14f } from '../../../components/admin/ImageUploadCompression'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
-import { PeopleAccess as PeopleAccess_8a46ae4e8250d32f7a4dab945aa77239 } from '../../../components/admin/PeopleAccess'
+import { PeopleAccessPage as PeopleAccessPage_de81eb200318f1a20781fc55bb88bd6c } from '../../../components/admin/access/PeopleAccessPage'
 import { MediaCalendar as MediaCalendar_a19d5cde59da8da8e3c41e65a240e08a } from '../../../components/admin/mediaCalendar/MediaCalendar'
 import { MascaDashboard as MascaDashboard_72c4387a9706020af1c627168ef507af } from '../../../components/admin/MascaDashboard'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
@@ -135,7 +135,7 @@ export const importMap = {
   "/components/admin/AdminNavigationEnhancements#AdminNavigationEnhancements": AdminNavigationEnhancements_2cf824608624f2d905c46bce1dbb1759,
   "/components/admin/ImageUploadCompression#ImageUploadCompression": ImageUploadCompression_52256fb23a13326be6c2f32a1fd1e14f,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
-  "/components/admin/PeopleAccess#PeopleAccess": PeopleAccess_8a46ae4e8250d32f7a4dab945aa77239,
+  "/components/admin/access/PeopleAccessPage#PeopleAccessPage": PeopleAccessPage_de81eb200318f1a20781fc55bb88bd6c,
   "/components/admin/mediaCalendar/MediaCalendar#MediaCalendar": MediaCalendar_a19d5cde59da8da8e3c41e65a240e08a,
   "/components/admin/MascaDashboard#MascaDashboard": MascaDashboard_72c4387a9706020af1c627168ef507af,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

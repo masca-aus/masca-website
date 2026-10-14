@@ -158,7 +158,7 @@ export default buildConfig({
         Icon: "/components/admin/MascaBrand#MascaIcon",
       },
       views: {
-        peopleAccess: {Component: "/components/admin/PeopleAccess#PeopleAccess",path:"/people-access",exact:true},
+        peopleAccess: {Component: "/components/admin/access/PeopleAccessPage#PeopleAccessPage",path:"/people-access",exact:true},
         mediaCalendar: {Component: "/components/admin/mediaCalendar/MediaCalendar#MediaCalendar", path: "/media-calendar", exact: true},
         dashboard: {
           Component: "/components/admin/MascaDashboard#MascaDashboard",

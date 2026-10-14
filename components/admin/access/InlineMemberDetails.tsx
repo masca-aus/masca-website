@@ -9,6 +9,7 @@ import type { AccessGraphSnapshot } from "@/features/access/workspaces/types";
 import type { CommitteeArea } from "@/features/access/committeePolicy";
 import { AccessHistory } from "./AccessHistory";
 export function InlineMemberDetails({
+  now,
   snapshot,
   personId,
   workspaceId,
@@ -19,6 +20,7 @@ export function InlineMemberDetails({
   onRemove,
   children,
 }: {
+  now: number;
   snapshot: AccessGraphSnapshot;
   personId: string;
   workspaceId?: string;
@@ -83,7 +85,7 @@ export function InlineMemberDetails({
               .join(" · ") || "No content roles"}
           </p>
           <p>
-            {Date.parse(m.expiresAt) <= Date.now() ? "Expired" : "Access ends"}{" "}
+            {Date.parse(m.expiresAt) <= now ? "Expired" : "Access ends"}{" "}
             {memberTermLabel(m.expiresAt)}
           </p>
           {editable &&

@@ -1,10 +1,10 @@
-import {loadWorkspaceCatalog} from "./workspaces/repository.ts";
-import {withWorkspaceAuthority} from "./workspaces/policyContext.ts";
+import { loadWorkspaceCatalog } from "./workspaces/repository.ts";
+import { withWorkspaceAuthority } from "./workspaces/policyContext.ts";
 import {
   auditMembershipChange,
   lockMembershipRecord,
 } from "./committeeAudit.ts";
-import {configureMemberEditor} from "./configureMemberEditor.ts";
+import { configureMemberEditor } from "./configureMemberEditor.ts";
 import { committeeContent, committeeFilter } from "./committeeContent.ts";
 import {
   committeeAccessEnabled,
@@ -117,7 +117,10 @@ export function configureWorkspace(
               read: ({ req }) => !!req.user,
             },
             validate: (value, { req }) =>
-              validMemberships(value ?? [], (req?.user as unknown as ApprovedAccount)?.accessCatalog) ||
+              validMemberships(
+                value ?? [],
+                (req?.user as unknown as ApprovedAccount)?.accessCatalog,
+              ) ||
               "Choose valid committee memberships with explicit expiry dates.",
             admin: {
               components: {
@@ -159,7 +162,8 @@ export function configureWorkspace(
               validCalendarAccess(value) ||
               "Choose consistent calendar permissions and a media member or chair for approval.",
             admin: {
-              condition: (_data, _siblings, {user}) => user?.accessModel !== "committee",
+              condition: (_data, _siblings, { user }) =>
+                user?.accessModel !== "committee",
               components: {
                 Field:
                   "/components/admin/mediaCalendar/CalendarPermissions#CalendarPermissions",
@@ -169,7 +173,7 @@ export function configureWorkspace(
             },
           },
           { name: "email", type: "email", required: true, unique: true },
-          {name:"displayName",label:"Name",type:"text",maxLength:80},
+          { name: "displayName", label: "Name", type: "text", maxLength: 80 },
           {
             name: "role",
             access: {
@@ -223,7 +227,8 @@ export function configureWorkspace(
             label: "Edit all content",
             defaultValue: false,
             admin: {
-              condition: (_, data, {user}) => user?.accessModel !== "committee" && data.role === "editor",
+              condition: (_, data, { user }) =>
+                user?.accessModel !== "committee" && data.role === "editor",
               description:
                 "Manage all departments and states, including Organisations and Media. Account management remains restricted to administrators.",
             },
@@ -240,8 +245,10 @@ export function configureWorkspace(
               validPermissions(value) ||
               "Choose viewing access and at least one editing team for editable sections.",
             admin: {
-              condition: (_, data, {user}) =>
-                user?.accessModel !== "committee" && data.role === "editor" && !data.allContentAccess,
+              condition: (_, data, { user }) =>
+                user?.accessModel !== "committee" &&
+                data.role === "editor" &&
+                !data.allContentAccess,
               components: {
                 Field:
                   "/components/admin/ContentPermissionsField#ContentPermissionsField",
@@ -264,7 +271,7 @@ export function configureWorkspace(
                 type: "select",
                 required: true,
                 options: [...ownershipScopes],
-                  },
+              },
             ],
           },
           {
@@ -290,7 +297,10 @@ export function configureWorkspace(
             async ({ args, operation }) => {
               if (operation === "update") {
                 if (!("id" in args) || args.id == null)
-                  throw new APIError("Edit people individually so access changes remain consistent.", 403);
+                  throw new APIError(
+                    "Edit people individually so access changes remain consistent.",
+                    403,
+                  );
                 await lockMembershipRecord(
                   args.req,
                   args.id as string | number,
@@ -308,8 +318,25 @@ export function configureWorkspace(
           afterRead: [
             async ({ doc }) => {
               const current = withCommitteeMode(doc as ApprovedAccount);
-              const catalog=committeeAccessEnabled()?await loadWorkspaceCatalog():[];
-              const account = committeeAccessEnabled()?{...withWorkspaceAuthority(current,catalog),workspaceNames:Object.fromEntries(catalog.filter(w=>current.role==="administrator"||current.committeeMemberships?.some(m=>m.committee===w.id)).map(w=>[w.id,w.name]))}:current;
+              const catalog = committeeAccessEnabled()
+                ? await loadWorkspaceCatalog()
+                : [];
+              const account = committeeAccessEnabled()
+                ? {
+                    ...withWorkspaceAuthority(current, catalog),
+                    workspaceNames: Object.fromEntries(
+                      catalog
+                        .filter(
+                          (w) =>
+                            current.role === "administrator" ||
+                            current.committeeMemberships?.some(
+                              (m) => m.committee === w.id,
+                            ),
+                        )
+                        .map((w) => [w.id, w.name]),
+                    ),
+                  }
+                : current;
               return { ...account, permissions: permissionsFor(account) };
             },
           ],
@@ -352,7 +379,10 @@ export function configureWorkspace(
               data.email = (data.email ?? originalDoc?.email)
                 .trim()
                 .toLowerCase();
-              if (originalDoc?.id != null && data.email !== originalDoc.email)
+              if (
+                originalDoc?.id != null &&
+                data.email !== originalDoc.email.trim().toLowerCase()
+              )
                 throw new APIError(
                   "Create a new invitation to change an approved email.",
                   400,
@@ -391,7 +421,12 @@ export function configureWorkspace(
                     409,
                   );
                 data.committeeAccessRevision = randomUUID();
-                if (!validMemberships(data.committeeMemberships,(req.user as unknown as ApprovedAccount)?.accessCatalog))
+                if (
+                  !validMemberships(
+                    data.committeeMemberships,
+                    (req.user as unknown as ApprovedAccount)?.accessCatalog,
+                  )
+                )
                   throw new APIError(
                     "Choose valid committee memberships.",
                     400,
@@ -448,7 +483,9 @@ export function configureWorkspace(
             defaultValue: ({ user, req }) =>
               defaultCreationScope(accountOf(user), area, req?.query?.branch),
             admin: {
-              components:{Field:"/components/admin/access/WorkspaceOwner#WorkspaceOwner"},
+              components: {
+                Field: "/components/admin/access/WorkspaceOwner#WorkspaceOwner",
+              },
               description:
                 "The team responsible for this record. Independent of the public event/job location.",
             },

@@ -1,3 +1,4 @@
+import {workspaceCatalogSchemaSQL} from "../features/access/workspaces/schema.ts";
 import assert from "node:assert/strict";
 import pg from "pg";
 import { committeeAccessSchemaSQL } from "../features/access/committeeSchema.ts";
@@ -96,6 +97,7 @@ try {
   await db.query(
     committeeAccessSchemaSQL("cms_calendar_preview", "media_calendar_preview"),
   );
+  await db.query(workspaceCatalogSchemaSQL("cms_calendar_preview","media_calendar_preview"));
   const m = (committee, manager = false) => ({
     id: randomUUID(),
     committee,

@@ -248,21 +248,28 @@ describe.runIf(!!uri)("transactional workspace access", () => {
       name: "New",
       email: " New@masca.org.au ",
     });
+    await db.query(
+      "UPDATE cms_calendar_preview.users SET email=upper(email) WHERE lower(email)='new@masca.org.au'",
+    );
     await mutateAccess(admin, {
       type: "addPerson",
       name: "New",
       email: "new@masca.org.au",
     });
     const s = await accessSnapshot(admin);
-    const p = s.people.find((p) => p.email === "new@masca.org.au")!;
+    const p = s.people.find(
+      (p) => p.email.toLowerCase() === "new@masca.org.au",
+    )!;
     expect(
-      s.people.filter((person) => person.email === "new@masca.org.au"),
+      s.people.filter(
+        (person) => person.email.toLowerCase() === "new@masca.org.au",
+      ),
     ).toHaveLength(1);
     expect(s.memberships.some((m) => m.userId === p.id)).toBe(false);
     expect(
       (
         await db.query(
-          "SELECT count(*)::int n FROM cms_calendar_preview.users WHERE email='new@masca.org.au'",
+          "SELECT count(*)::int n FROM cms_calendar_preview.users WHERE lower(email)='new@masca.org.au'",
         )
       ).rows[0].n,
     ).toBe(1);

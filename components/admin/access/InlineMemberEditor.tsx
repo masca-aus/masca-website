@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { CalendarSelect } from "../mediaCalendar/CalendarSelect";
 import { CalendarDatePicker } from "../mediaCalendar/CalendarDatePicker";
 import {
@@ -16,6 +16,7 @@ import type {
   CommitteeRole,
 } from "@/features/access/committeePolicy";
 import type { InlineContext, EditorProps } from "./inlineTypes";
+import { useAccessClock } from "./useAccessClock";
 import { InlineFrame } from "./InlineFrame";
 export function InlineMemberEditor({
   context,
@@ -25,6 +26,7 @@ export function InlineMemberEditor({
   onReview,
   busy,
 }: { context: InlineContext; manager?: boolean } & EditorProps) {
+  const now = useAccessClock();
   const w = context.snapshot.workspaces.find(
     (w) => w.id === context.workspaceId,
   )!;
@@ -35,20 +37,12 @@ export function InlineMemberEditor({
     m = context.snapshot.memberships.find(
       (m) => m.userId === personId && m.committee === w.id,
     );
-  const [roles, setRoles] = useState<CommitteeMembership["roles"]>(
-      () => m?.roles ?? {},
-    ),
-    [areaRoles, setAreaRoles] = useState<CommitteeRole[]>(
-      context.area ? (m?.roles[context.area] ?? ["viewer"]) : ["viewer"],
-    ),
-    [expiresAt, setExpiry] = useState(m?.expiresAt ?? w.termEnd ?? "");
-  const touched = useRef(new Set<CommitteeArea>());
-  useEffect(() => {
-    setRoles((old) => ({
-      ...m?.roles,
-      ...Object.fromEntries([...touched.current].map((a) => [a, old[a]])),
-    }));
-  }, [p?.revision]);
+  const [roleEdits, setRoleEdits] = useState<CommitteeMembership["roles"]>({});
+  const roles = { ...m?.roles, ...roleEdits };
+  const [areaRoles, setAreaRoles] = useState<CommitteeRole[]>(
+    context.area ? (m?.roles[context.area] ?? ["viewer"]) : ["viewer"],
+  );
+  const [expiresAt, setExpiry] = useState(m?.expiresAt ?? w.termEnd ?? "");
   const roleValue = (r: CommitteeRole[]) =>
     r.includes("editor") && r.includes("approver")
       ? "editor+approver"
@@ -56,11 +50,11 @@ export function InlineMemberEditor({
   const parseRoles = (value: string) => value.split("+") as CommitteeRole[];
   const choosePerson = (id: string) => {
     setPerson(id);
-    touched.current.clear();
+    setRoleEdits({});
     const m = context.snapshot.memberships.find(
       (m) => m.userId === id && m.committee === w.id,
     );
-    setRoles(m?.roles ?? {});
+
     setAreaRoles(
       context.area ? (m?.roles[context.area] ?? ["viewer"]) : ["viewer"],
     );
@@ -71,7 +65,7 @@ export function InlineMemberEditor({
     const normal = email.trim().toLowerCase();
     if (!personId && !/^[^\s@]+@masca\.org\.au$/.test(normal))
       throw Error("Use an individual @masca.org.au email.");
-    if (!effectiveExpiry || Date.parse(effectiveExpiry) <= Date.now())
+    if (!effectiveExpiry || Date.parse(effectiveExpiry) <= now)
       throw Error("Confirm a future term end date.");
     if (!personId && name.length > 80) throw Error("Use a shorter name.");
     const base = {
@@ -194,9 +188,8 @@ export function InlineMemberEditor({
                   type="checkbox"
                   checked={!!roles[a]?.length}
                   onChange={(e) => {
-                    touched.current.add(a);
-                    setRoles({
-                      ...roles,
+                    setRoleEdits({
+                      ...roleEdits,
                       [a]: e.target.checked ? ["viewer"] : [],
                     });
                   }}
@@ -209,8 +202,7 @@ export function InlineMemberEditor({
                   value={roleValue(roles[a] ?? [])}
                   options={memberRolePresets}
                   onChange={(v) => {
-                    touched.current.add(a);
-                    setRoles({ ...roles, [a]: parseRoles(v) });
+                    setRoleEdits({ ...roles, [a]: parseRoles(v) });
                   }}
                 />
               )}

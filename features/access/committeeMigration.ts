@@ -57,7 +57,13 @@ export function legacyMembershipProposal(account: ApprovedAccount) {
         if ((committeeScopes as readonly string[]).includes(committee))
           grant(committee, area as CommitteeArea, p.edit ? "editor" : "viewer");
     }
-  } else for (const g of account.grants ?? []) grant(g.scope, g.area, "editor");
+  } else
+    for (const g of account.grants ?? []) {
+      if ((committeeScopes as readonly string[]).includes(g.scope))
+        grant(g.scope, g.area, "editor");
+      else
+        reviewReasons.push(`Unknown legacy owner ${g.scope} requires review.`);
+    }
   if (account.calendarAccess?.view) {
     grant(
       "National",
@@ -85,9 +91,13 @@ export function activationIssues(
     .filter((a) => ["active", "invited"].includes(a.status))
     .flatMap((a) => {
       const issues: string[] = [];
+      if (!/^[^\s@]+@masca\.org\.au$/.test(a.email.trim().toLowerCase()))
+        issues.push(
+          "Use an individual MASCA account or suspend the legacy identity.",
+        );
       if (!a.committeeAccessReviewedAt)
         issues.push("Legacy access has not been reviewed.");
-      if (!validMemberships(a.committeeMemberships,a.accessCatalog))
+      if (!validMemberships(a.committeeMemberships, a.accessCatalog))
         issues.push(
           "Memberships need valid committee roles and actual term dates.",
         );

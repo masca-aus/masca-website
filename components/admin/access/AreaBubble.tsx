@@ -9,6 +9,7 @@ import type {
 import { memberAreaLabels } from "@/features/access/memberPresentation";
 import { PersonAvatar } from "./PeopleTray";
 export function AreaBubble({
+  now,
   area,
   members,
   people,
@@ -18,6 +19,7 @@ export function AreaBubble({
   dropProps = {},
   children,
 }: {
+  now: number;
   area: CommitteeArea;
   members: GraphMembership[];
   people: AccessPerson[];
@@ -74,9 +76,7 @@ export function AreaBubble({
                           ?.map((r) => r[0].toUpperCase() + r.slice(1))
                           .join(" · ")}
                       </small>
-                      {Date.parse(m.expiresAt) <= Date.now() && (
-                        <small>Expired</small>
-                      )}
+                      {Date.parse(m.expiresAt) <= now && <small>Expired</small>}
                       {p.status === "suspended" && <small>Suspended</small>}
                     </span>
                   </button>
