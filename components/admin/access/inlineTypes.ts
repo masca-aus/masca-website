@@ -9,7 +9,7 @@ export type InlineContext = {
 };
 export type InlineEditorState = (
   | { kind: "workspace" | "person" }
-  | { kind: "tools"; workspaceId: string }
+  | { kind: "tools"; workspaceId: string; startArchive?: boolean }
   | {
       kind: "member";
       workspaceId: string;

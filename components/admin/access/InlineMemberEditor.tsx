@@ -106,6 +106,7 @@ export function InlineMemberEditor({
   };
   return (
     <InlineFrame
+      reveal
       title={
         manager
           ? "Appoint access manager"

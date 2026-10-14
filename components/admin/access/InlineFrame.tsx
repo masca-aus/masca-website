@@ -11,6 +11,7 @@ export function InlineFrame({
   onReview,
   children,
   saveLabel = "Save access",
+  reveal = false,
 }: {
   title: string;
   label: string;
@@ -20,13 +21,25 @@ export function InlineFrame({
   onReview?: () => Promise<unknown>;
   children: React.ReactNode;
   saveLabel?: string;
+  reveal?: boolean;
 }) {
   const form = useRef<HTMLFormElement>(null);
   useEffect(() => {
-    form.current
-      ?.querySelector<HTMLElement>("header button")
-      ?.focus({ preventScroll: true });
-  }, []);
+    const heading = form.current?.querySelector<HTMLElement>("header button");
+    heading?.focus({ preventScroll: true });
+    if (reveal && heading) {
+      const rect = form.current!.getBoundingClientRect();
+      if (rect.top < 0 || rect.bottom > window.innerHeight) {
+        const reduced =
+          typeof matchMedia === "function" &&
+          matchMedia("(prefers-reduced-motion: reduce)").matches;
+        form.current?.scrollIntoView?.({
+          block: "nearest",
+          behavior: reduced ? "auto" : "smooth",
+        });
+      }
+    }
+  }, [reveal]);
   const [error, setError] = useState(""),
     [conflict, setConflict] = useState(false),
     [reviewing, setReviewing] = useState(false);

@@ -210,7 +210,10 @@ export function AccessGraph({
       <header className="ag-page-heading">
         <div>
           <h1>People & access</h1>
-          <p>Choose a workspace to see who can use each tool.</p>
+          <p>
+            Open a workspace, then use + beside a tool to assign access. Use ⋯
+            for workspace actions.
+          </p>
         </div>
         <div className="ag-view-toggle">
           <button
@@ -276,7 +279,7 @@ export function AccessGraph({
             <p className="ag-staged">
               Workspace access is staged. Memberships shown here will take
               effect after the rollout review; current legacy access remains in
-              use.
+              use. Changes unlock after the access rollout review.
             </p>
           )}
           <section className="ag-boundary">
@@ -386,23 +389,44 @@ export function AccessGraph({
                           )
                         }
                         onAdd={
-                          active && w.status === "active"
-                            ? () =>
+                          w.status === "active"
+                            ? () => {
+                                if (editor) return navigate(() => {});
+                                setWorkspaceId(w.id);
                                 open({
                                   kind: "member",
                                   snapshot,
                                   workspaceId: w.id,
-                                })
+                                });
+                              }
                             : undefined
                         }
                         onTools={
-                          active && snapshot.viewer.configure
-                            ? () =>
+                          snapshot.viewer.configure
+                            ? () => {
+                                if (editor) return navigate(() => {});
+                                setWorkspaceId(w.id);
                                 open({
                                   kind: "tools",
                                   snapshot,
                                   workspaceId: w.id,
-                                })
+                                });
+                              }
+                            : undefined
+                        }
+                        actionsDisabled={!active}
+                        onArchive={
+                          snapshot.viewer.configure
+                            ? () => {
+                                if (editor) return navigate(() => {});
+                                setWorkspaceId(w.id);
+                                open({
+                                  kind: "tools",
+                                  snapshot,
+                                  workspaceId: w.id,
+                                  startArchive: true,
+                                });
+                              }
                             : undefined
                         }
                       >
@@ -427,6 +451,7 @@ export function AccessGraph({
                           )}
                         {inside?.kind === "tools" && (
                           <InlineToolsEditor
+                            startArchive={inside.startArchive}
                             workspace={inside.snapshot.workspaces.find(
                               (x) => x.id === w.id,
                             )!}

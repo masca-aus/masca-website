@@ -12,21 +12,29 @@ import { InlineFrame } from "./InlineFrame";
 import type { EditorProps } from "./inlineTypes";
 export function InlineToolsEditor({
   workspace,
+  startArchive = false,
   onSave,
   onCancel,
   onReview,
   busy,
-}: { workspace: AccessWorkspace } & EditorProps) {
+}: { workspace: AccessWorkspace; startArchive?: boolean } & EditorProps) {
   const [areas, setAreas] = useState(workspace.areas),
     [name, setName] = useState(workspace.name),
     [term, setTerm] = useState(workspace.termEnd ?? ""),
-    [archive, setArchive] = useState(workspace.status === "archived");
+    [archive, setArchive] = useState(
+      startArchive || workspace.status === "archived",
+    );
   const added = areas.filter((a) => !workspace.areas.includes(a)),
     removed = workspace.areas.filter((a) => !areas.includes(a));
   return (
     <InlineFrame
-      title={`Manage tools · ${workspace.name}`}
-      label="Manage workspace tools"
+      title={`${startArchive && workspace.status !== "archived" ? "Delete workspace" : "Manage tools"} · ${workspace.name}`}
+      label={
+        startArchive && workspace.status !== "archived"
+          ? "Delete workspace"
+          : "Manage workspace tools"
+      }
+      reveal={startArchive}
       onCancel={onCancel}
       onReview={onReview}
       busy={busy}
@@ -34,7 +42,9 @@ export function InlineToolsEditor({
         archive
           ? workspace.status === "archived"
             ? "Restore workspace"
-            : "Confirm archive"
+            : startArchive
+              ? "Delete workspace"
+              : "Confirm archive"
           : "Save tools"
       }
       onSubmit={() =>
@@ -65,7 +75,7 @@ export function InlineToolsEditor({
         <div className="ag-summary">
           {workspace.status === "archived"
             ? `Restore ${workspace.name}. Existing expiry dates stay unchanged; expired memberships are not renewed.`
-            : `Archive ${workspace.name}. Private work, sharing and collaboration will stop. Published website content keeps its current visibility.`}
+            : `Remove ${workspace.name} from active workspaces. It will be archived and can be restored. Private work, sharing and collaboration will stop. Published website content keeps its current visibility.`}
         </div>
       ) : (
         <>
