@@ -24,6 +24,7 @@ import type { CommitteeArea } from "@/features/access/committeePolicy";
 import type { InlineEditorState } from "./inlineTypes";
 import { AreaBubble } from "./AreaBubble";
 import { PersonAvatar } from "./PeopleTray";
+import { SharedAccessSection } from "./SharedAccessSection";
 import { AccessHistory } from "./AccessHistory";
 import { WorkspaceActionHeader } from "./WorkspaceActionHeader";
 import { FloatingMenu, type MenuItem } from "../mediaCalendar/FloatingMenu";
@@ -521,6 +522,7 @@ export function AccessManagement({
                   </AreaBubble>
                 ))}
               </div>
+              {active && <SharedAccessSection key={w.id} workspaceId={w.id} />}
               {!w.areas.length && (
                 <p className="ag-list-empty">No tools enabled yet.</p>
               )}

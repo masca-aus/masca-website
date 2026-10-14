@@ -28,16 +28,12 @@ export function PeopleTray({
   people,
   selected,
   onSelect,
-  onPointerDown,
-  suppressClick,
   children,
 }: {
   people: AccessPerson[];
   selected: string | null;
   onSelect: (id: string | null) => void;
   children?: React.ReactNode;
-  onPointerDown?: (e: React.PointerEvent, id: string) => void;
-  suppressClick?: () => boolean;
 }) {
   return (
     <section className="ag-people" aria-label="People">
@@ -54,9 +50,8 @@ export function PeopleTray({
             key={p.id}
             className={`ag-person ${selected === p.id ? "is-selected" : ""}`}
             aria-pressed={selected === p.id}
-            onPointerDown={(e) => onPointerDown?.(e, p.id)}
             onClick={() => {
-              if (!suppressClick?.()) onSelect(selected === p.id ? null : p.id);
+              onSelect(selected === p.id ? null : p.id);
             }}
           >
             <PersonAvatar person={p} />

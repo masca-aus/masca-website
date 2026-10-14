@@ -13,9 +13,15 @@ it("expands cached workspace areas without another request and shares a table sn
   vi.stubGlobal("fetch", fetch);
   render(<AccessGraph initialView="bubbles" />);
   fireEvent.click(await screen.findByRole("button", { name: "Open MASA" }));
-  expect(screen.getByRole("heading", { name: "Media calendar" })).toBeTruthy();
+  fireEvent.click(
+    screen.getByRole("button", { name: "View Media calendar access" }),
+  );
+  expect(
+    screen.getByRole("region", { name: "Media calendar members" }),
+  ).toBeTruthy();
   expect(screen.getByText("Editor")).toBeTruthy();
   expect(fetch).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole("button", { name: "Manage access" }));
   fireEvent.click(screen.getByRole("button", { name: "Table view" }));
   expect(screen.getByRole("table")).toBeTruthy();
   expect(screen.getByRole("cell", { name: "Syed" })).toBeTruthy();
@@ -43,12 +49,18 @@ it("uses stable IDs on rename and explains staged access", () => {
   fireEvent.click(
     screen.getByRole("button", { name: "Open MASA organising team" }),
   );
-  expect(screen.getByRole("heading", { name: "Media calendar" })).toBeTruthy();
+  fireEvent.click(
+    screen.getByRole("button", { name: "View Media calendar access" }),
+  );
+  expect(
+    screen.getByRole("region", { name: "Media calendar members" }),
+  ).toBeTruthy();
   expect(screen.getByText(/staged/i)).toBeTruthy();
 });
 it("shows actual expiry and suspension independently", () => {
   render(<AccessGraph initialView="bubbles" initialSnapshot={accessFixture} />);
   fireEvent.click(screen.getByRole("button", { name: "Open Queensland" }));
+  fireEvent.click(screen.getByRole("button", { name: "View Events access" }));
   expect(screen.getAllByText("Suspended").length).toBeGreaterThan(0);
   expect(screen.getByText("Expired")).toBeTruthy();
 });
@@ -64,6 +76,10 @@ it("keeps initials when a private account photo is unavailable", () => {
         ],
       }}
     />,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
+  fireEvent.click(
+    screen.getByRole("button", { name: "View Media calendar access" }),
   );
   const photo = document.querySelector<HTMLImageElement>(".ag-avatar img")!;
   expect(photo).toBeTruthy();

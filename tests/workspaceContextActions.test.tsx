@@ -12,8 +12,8 @@ import { AccessGraph } from "../components/admin/access/AccessGraph";
 import { accessFixture } from "./helpers/accessFixture";
 afterEach(cleanup);
 it("opens workspace actions by right click and assigns access inline", () => {
-  render(<AccessGraph initialView="bubbles" initialSnapshot={accessFixture} />);
-  fireEvent.contextMenu(screen.getByRole("button", { name: "Open MASA" }), {
+  render(<AccessGraph initialView="manage" initialSnapshot={accessFixture} />);
+  fireEvent.contextMenu(screen.getByRole("heading", { name: "MASA" }), {
     clientX: 100,
     clientY: 100,
   });
@@ -21,7 +21,7 @@ it("opens workspace actions by right click and assigns access inline", () => {
   expect(
     screen
       .getByRole("form", { name: "Add workspace member" })
-      .closest('[aria-label="MASA workspace"]'),
+      .closest('[aria-label="MASA access management"]'),
   ).toBeTruthy();
 });
 it("shows visible actions and reviews deletion before archiving", async () => {
@@ -31,7 +31,7 @@ it("shows visible actions and reviews deletion before archiving", async () => {
   });
   render(
     <AccessGraph
-      initialView="bubbles"
+      initialView="manage"
       initialSnapshot={accessFixture}
       onMutation={save}
     />,
@@ -41,7 +41,7 @@ it("shows visible actions and reviews deletion before archiving", async () => {
   );
   fireEvent.click(screen.getByRole("menuitem", { name: "Archive workspace" }));
   const form = screen.getByRole("form", { name: "Archive workspace" });
-  expect(form.closest('[aria-label="MASA workspace"]')).toBeTruthy();
+  expect(form.closest('[aria-label="MASA access management"]')).toBeTruthy();
   expect(screen.getByText(/can be restored/)).toBeTruthy();
   expect(save).not.toHaveBeenCalled();
   fireEvent.submit(form);
@@ -56,7 +56,7 @@ it("cancels deletion without changing workspace or access", async () => {
   const save = vi.fn();
   render(
     <AccessGraph
-      initialView="bubbles"
+      initialView="manage"
       initialSnapshot={accessFixture}
       onMutation={save}
     />,
@@ -86,9 +86,12 @@ it("offers restore for archived workspaces and retains revision checks", async (
     return { snapshot: s };
   });
   render(
-    <AccessGraph initialView="bubbles" initialSnapshot={s} onMutation={save} />,
+    <AccessGraph initialView="manage" initialSnapshot={s} onMutation={save} />,
   );
   fireEvent.click(screen.getByRole("button", { name: "Show archived" }));
+  fireEvent.click(
+    screen.getByRole("button", { name: "Select workspace MASA" }),
+  );
   fireEvent.click(
     screen.getByRole("button", { name: "Workspace actions for MASA" }),
   );
@@ -104,7 +107,7 @@ it("makes staged controls discoverable but cannot write or hide the reason", () 
   const save = vi.fn();
   render(
     <AccessGraph
-      initialView="bubbles"
+      initialView="manage"
       initialSnapshot={{ ...accessFixture, mode: "staged" }}
       onMutation={save}
     />,
@@ -127,7 +130,7 @@ it("makes staged controls discoverable but cannot write or hide the reason", () 
 it("does not offer workspace deletion to access managers", () => {
   render(
     <AccessGraph
-      initialView="bubbles"
+      initialView="manage"
       initialSnapshot={{
         ...accessFixture,
         viewer: {
@@ -166,7 +169,7 @@ it("brings an inline deletion review into view without selecting any text", () =
     });
   try {
     render(
-      <AccessGraph initialView="bubbles" initialSnapshot={accessFixture} />,
+      <AccessGraph initialView="manage" initialSnapshot={accessFixture} />,
     );
     fireEvent.click(
       screen.getByRole("button", { name: "Workspace actions for MASA" }),

@@ -34,8 +34,8 @@ it("loads scoped history only when requested and renders access metadata", async
     });
   });
   vi.stubGlobal("fetch", fetch);
-  render(<AccessGraph initialView="bubbles" initialSnapshot={accessFixture} />);
-  fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
+  render(<AccessGraph initialView="manage" initialSnapshot={accessFixture} />);
+  fireEvent.click(screen.getByRole("tab", { name: "Tools" }));
   fireEvent.click(
     screen.getByRole("button", { name: "View Syed in Media calendar" }),
   );
@@ -52,12 +52,12 @@ it("membership removal is explicit and scoped to one workspace", async () => {
   });
   render(
     <AccessGraph
-      initialView="bubbles"
+      initialView="manage"
       initialSnapshot={accessFixture}
       onMutation={save}
     />,
   );
-  fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
+  fireEvent.click(screen.getByRole("tab", { name: "Tools" }));
   fireEvent.click(
     screen.getByRole("button", { name: "View Syed in Media calendar" }),
   );
@@ -78,8 +78,8 @@ it("membership removal is explicit and scoped to one workspace", async () => {
   });
 });
 it("shows an explicit renewal affecting every role in that workspace", () => {
-  render(<AccessGraph initialView="bubbles" initialSnapshot={accessFixture} />);
-  fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
+  render(<AccessGraph initialView="manage" initialSnapshot={accessFixture} />);
+  fireEvent.click(screen.getByRole("tab", { name: "Tools" }));
   fireEvent.click(
     screen.getByRole("button", { name: "View Syed in Media calendar" }),
   );
@@ -105,8 +105,8 @@ it("labels shared records separately and fetches them lazily", async () => {
     });
   });
   vi.stubGlobal("fetch", fetch);
-  render(<AccessGraph initialView="bubbles" initialSnapshot={accessFixture} />);
-  fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
+  render(<AccessGraph initialView="manage" initialSnapshot={accessFixture} />);
+  fireEvent.click(screen.getByRole("tab", { name: "Tools" }));
   expect(fetch).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "Shared records" }));
   expect(await screen.findByText("Events record #12")).toBeTruthy();
