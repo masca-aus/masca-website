@@ -348,6 +348,31 @@ body:has(.masca-dashboard-menu) .template-default__wrap { padding-top: 56px; }
 .masca-nav__link > svg { margin-inline: 5px; }
 .masca-nav__account { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--theme-elevation-150); }
 .masca-nav :is(a, button):focus-visible { outline: 2px solid var(--masca-yellow); outline-offset: 3px; }
+/* Keep the opener, MASCA mark and breadcrumbs on one shared centre line. */
+.app-header__step-nav-wrapper { min-width: 0; flex: 1; }
+.app-header__step-nav { min-width: 0; max-width: 100%; gap: 10px; line-height: 1.3; font-size: 13px; }
+.app-header .step-nav__home:has(.masca-admin-home) { width: 36px; height: 36px; flex: none; align-items: center; justify-content: center; }
+.app-header .step-nav__home > span:has(.masca-admin-home) { display: inline-flex; align-items: center; max-width: none; overflow: visible; }
+.app-header .masca-admin-home { min-height: 36px; align-items: center; }
+.app-header .masca-admin-home__mark { display: inline-flex; align-items: center; }
+.app-header .masca-admin-icon { width: 28px; height: 28px; max-width: none; flex: none; }
+.app-header .step-nav__last { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+.app-header__actions-wrapper, .app-header__account { flex-shrink: 0; }
+@media (min-width: 769px) {
+  body:has(.masca-nav:not(.nav--nav-open)) .template-default__nav-toggler-wrapper { width: calc(var(--gutter-h) + 36px); justify-content: flex-end; }
+  body:has(.masca-nav:not(.nav--nav-open)) .app-header__content { padding-inline-start: calc(var(--gutter-h) + 48px); }
+}
+@media (max-width: 768px) {
+  .app-header__wrapper { gap: 10px; }
+  .app-header__mobile-nav-toggler { flex-shrink: 0; }
+}
+@media (max-width: 600px) {
+  .app-header__step-nav > a:not(.step-nav__home),
+  .app-header__step-nav > span:not(.step-nav__last) { display: none; }
+  .app-header__step-nav > .step-nav__home + span { display: block; flex: none; }
+  .app-header__step-nav .step-nav__last { flex: 1; }
+}
+
 /* The sidebar supplies its own close control while open. */
 body:has(.masca-nav.nav--nav-open) .template-default__nav-toggler-wrapper { display: none; }
 /* Account controls have one visible home, including on the dashboard. */
