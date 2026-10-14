@@ -33,6 +33,7 @@
 .masca-dashboard__content-row { display: flex; align-items: center; gap: 16px; padding: 18px 0; min-height: 88px; border-bottom: 1px solid var(--theme-elevation-150); }
 .masca-dashboard__content-icon { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 9px; background: color-mix(in srgb, var(--section-accent, var(--theme-elevation-400)) 30%, var(--theme-elevation-0)); }
 .masca-dashboard [data-area="careers"] { --section-accent: #ffcc00; }
+.masca-dashboard [data-area="media-calendar"] { --section-accent: #b7b1eb; }
 .masca-dashboard [data-area="events"] { --section-accent: #ef476f; }
 .masca-dashboard [data-area="committee"] { --section-accent: #9bdd9b; }
 .masca-dashboard [data-area="sponsors"] { --section-accent: #86b8ef; }
@@ -43,7 +44,7 @@
 .masca-dashboard__row-actions a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; text-decoration: none; color: var(--theme-text); font-size: 14px; }
 .masca-dashboard__manage { font-weight: 500; }
 .masca-dashboard__add { padding: 8px 14px; border: 1px solid var(--theme-elevation-250); border-radius: 8px; }
-.masca-dashboard__add:hover { background: #ffcc00; color: #202020; border-color: #ffcc00; }
+.masca-dashboard__add:hover { background: var(--theme-elevation-100); border-color: var(--theme-elevation-400); }
 .masca-dashboard :is(a,button,select,summary):focus-visible { outline: 3px solid #ffcc00; outline-offset: 3px; border-radius: 4px; }
  .masca-dashboard__content-label a:hover, .masca-dashboard__manage:hover, .masca-dashboard__stat-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
 @container (max-width: 640px) { .masca-dashboard__stats { grid-template-columns: 1fr; } }
@@ -101,7 +102,6 @@
 .masca-dashboard__row-actions a { font-size:12px; }
 .masca-dashboard__manage { color:var(--theme-elevation-650)!important; font-weight:400; }
 .masca-dashboard__add { border-radius:6px; padding:7px 12px; border-color:var(--theme-elevation-200); min-width:132px; }
-.masca-dashboard__section[aria-label="Content"] .masca-dashboard__content-row:first-child .masca-dashboard__add { background:#ffcc00; border-color:#ffcc00; color:#202124; font-weight:600; }
 @media (hover:hover) { .masca-dashboard__content-row:hover { background:var(--theme-elevation-50); } }
 @media(min-width:851px) and (max-width:1200px) { .masca-dashboard__heading { flex-wrap:wrap; gap:16px; } }
 @media(max-width:650px) { .masca-dashboard { padding-top:28px; gap:26px; } .masca-dashboard h1 { font-size:28px; } .masca-dashboard__row-actions { padding-left:50px; gap:20px; } .masca-dashboard__branch .masca-report-field { width:auto; } .masca-dashboard__stat-links a { min-height:44px; } }
