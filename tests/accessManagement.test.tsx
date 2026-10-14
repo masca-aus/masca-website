@@ -249,3 +249,75 @@ it("keeps an area editor recoverable if that tool is removed during conflict rev
   fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
   expect(screen.queryByRole("form")).toBeNull();
 });
+
+for (const change of ["removed", "renamed", "replaced"] as const) {
+  it(`preserves a recoverable dirty member editor when latest membership is ${change}`, async () => {
+    const { AccessSaveError } =
+      await import("../components/admin/access/inlineTypes");
+    const latest = {
+      ...accessFixture,
+      people: accessFixture.people.map((p) =>
+        p.id === "2"
+          ? {
+              ...p,
+              revision: "p-new",
+              ...(change === "renamed"
+                ? { name: "New name", email: "new@masca.org.au" }
+                : {}),
+            }
+          : p,
+      ),
+      memberships:
+        change === "removed"
+          ? accessFixture.memberships.filter((m) => m.id !== "m2")
+          : accessFixture.memberships.map((m) =>
+              m.id === "m2" && change === "replaced"
+                ? { ...m, id: "replacement" }
+                : m,
+            ),
+    };
+    vi.stubGlobal("fetch", async () => Response.json(latest));
+    render(
+      <AccessGraph
+        initialSnapshot={accessFixture}
+        onMutation={async () => {
+          throw new AccessSaveError("Changed access", 409);
+        }}
+      />,
+    );
+    fireEvent.change(
+      screen.getByRole("searchbox", { name: "Search members" }),
+      { target: { value: "syed" } },
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "View access for Syed" }),
+    );
+    fireEvent.click(screen.getByRole("button", { name: /^Edit access$/ }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Events" }));
+    fireEvent.submit(screen.getByRole("form"));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Review latest access" }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("alert").textContent).toContain(
+        change === "removed" ? "no longer available" : "Latest access loaded",
+      ),
+    );
+    expect(screen.getByRole("checkbox", { name: "Events" })).toHaveProperty(
+      "checked",
+      true,
+    );
+    expect(screen.getByRole("button", { name: "Save access" })).toHaveProperty(
+      "disabled",
+      change === "removed",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByRole("form")).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Select workspace Queensland" }),
+    );
+    expect(
+      screen.getByRole("table", { name: "Queensland members" }),
+    ).toBeTruthy();
+  });
+}

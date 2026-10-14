@@ -112,7 +112,7 @@ export function InlineMemberEditor({
           ? "Appoint access manager"
           : context.area
             ? `Add access · ${memberAreaLabels[context.area]}`
-            : `Add member · ${w.name}`
+            : `${m ? "Edit access" : "Add member"} · ${w.name}`
       }
       label={
         context.area

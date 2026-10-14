@@ -383,10 +383,14 @@ export function AccessManagement({
                     </thead>
                     <tbody>
                       {people
-                        .filter(({ p }) =>
-                          `${p.name} ${p.email}`
-                            .toLowerCase()
-                            .includes(query.trim().toLowerCase()),
+                        .filter(
+                          ({ p }) =>
+                            (inside &&
+                              "personId" in inside &&
+                              inside.personId === p.id) ||
+                            `${p.name} ${p.email}`
+                              .toLowerCase()
+                              .includes(query.trim().toLowerCase()),
                         )
                         .map(({ m, p }) => {
                           const rowEditor =
@@ -414,7 +418,7 @@ export function AccessManagement({
                               p.id !== snapshot.viewer.id);
                           return (
                             <MemberRow
-                              key={m.id}
+                              key={`${w.id}:${p.id}`}
                               person={p}
                               membership={m}
                               status={status}
@@ -434,10 +438,14 @@ export function AccessManagement({
                         })}
                     </tbody>
                   </table>
-                  {!people.some(({ p }) =>
-                    `${p.name} ${p.email}`
-                      .toLowerCase()
-                      .includes(query.trim().toLowerCase()),
+                  {!people.some(
+                    ({ p }) =>
+                      (inside &&
+                        "personId" in inside &&
+                        inside.personId === p.id) ||
+                      `${p.name} ${p.email}`
+                        .toLowerCase()
+                        .includes(query.trim().toLowerCase()),
                   ) && <p className="ag-list-empty">No matching members.</p>}
                 </div>
               ) : (

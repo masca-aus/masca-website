@@ -117,8 +117,16 @@ export function AccessGraph({
         );
       const personId = "personId" in opened ? opened.personId : undefined;
       const person = !personId || latest.people.some((p) => p.id === personId);
+      const needsMembership =
+        ["renew", "remove", "details"].includes(opened.kind) ||
+        (opened.kind === "member" &&
+          opened.group === "manage" &&
+          !!personId &&
+          opened.snapshot.memberships.some(
+            (m) => m.committee === opened.workspaceId && m.userId === personId,
+          ));
       const membership =
-        !["renew", "remove", "details"].includes(opened.kind) ||
+        !needsMembership ||
         latest.memberships.some(
           (m) => m.committee === opened.workspaceId && m.userId === personId,
         );
@@ -178,9 +186,9 @@ export function AccessGraph({
     if (state.kind === "tools")
       return (
         <InlineToolsEditor
-          workspace={state.snapshot.workspaces.find(
-            (w) => w.id === state.workspaceId,
-          )!}
+          workspace={
+            state.snapshot.workspaces.find((w) => w.id === state.workspaceId)!
+          }
           startArchive={state.startArchive}
           {...props}
         />
@@ -513,9 +521,11 @@ export function AccessGraph({
                           {inside?.kind === "tools" && (
                             <InlineToolsEditor
                               startArchive={inside.startArchive}
-                              workspace={inside.snapshot.workspaces.find(
-                                (x) => x.id === w.id,
-                              )!}
+                              workspace={
+                                inside.snapshot.workspaces.find(
+                                  (x) => x.id === w.id,
+                                )!
+                              }
                               {...props}
                             />
                           )}
