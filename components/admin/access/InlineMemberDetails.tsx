@@ -19,6 +19,7 @@ export function InlineMemberDetails({
   onRenew,
   onRemove,
   children,
+  editLabel = "Edit area access",
 }: {
   now: number;
   snapshot: AccessGraphSnapshot;
@@ -30,6 +31,7 @@ export function InlineMemberDetails({
   onRenew: (workspaceId: string) => void;
   onRemove: (workspaceId: string, areaOnly: boolean) => void;
   children?: React.ReactNode;
+  editLabel?: string;
 }) {
   const p = snapshot.people.find((p) => p.id === personId)!;
   const memberships = snapshot.memberships.filter(
@@ -97,7 +99,7 @@ export function InlineMemberDetails({
                   className="ag-text"
                   onClick={() => onEdit(m.committee)}
                 >
-                  Edit area access
+                  {editLabel}
                 </button>
                 <button
                   type="button"

@@ -34,7 +34,7 @@ it("loads scoped history only when requested and renders access metadata", async
     });
   });
   vi.stubGlobal("fetch", fetch);
-  render(<AccessGraph initialSnapshot={accessFixture} />);
+  render(<AccessGraph initialView="bubbles" initialSnapshot={accessFixture} />);
   fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
   fireEvent.click(
     screen.getByRole("button", { name: "View Syed in Media calendar" }),
@@ -50,7 +50,13 @@ it("membership removal is explicit and scoped to one workspace", async () => {
     void input;
     return { snapshot: accessFixture };
   });
-  render(<AccessGraph initialSnapshot={accessFixture} onMutation={save} />);
+  render(
+    <AccessGraph
+      initialView="bubbles"
+      initialSnapshot={accessFixture}
+      onMutation={save}
+    />,
+  );
   fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
   fireEvent.click(
     screen.getByRole("button", { name: "View Syed in Media calendar" }),
@@ -72,7 +78,7 @@ it("membership removal is explicit and scoped to one workspace", async () => {
   });
 });
 it("shows an explicit renewal affecting every role in that workspace", () => {
-  render(<AccessGraph initialSnapshot={accessFixture} />);
+  render(<AccessGraph initialView="bubbles" initialSnapshot={accessFixture} />);
   fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
   fireEvent.click(
     screen.getByRole("button", { name: "View Syed in Media calendar" }),
@@ -99,7 +105,7 @@ it("labels shared records separately and fetches them lazily", async () => {
     });
   });
   vi.stubGlobal("fetch", fetch);
-  render(<AccessGraph initialSnapshot={accessFixture} />);
+  render(<AccessGraph initialView="bubbles" initialSnapshot={accessFixture} />);
   fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
   expect(fetch).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "Shared records" }));

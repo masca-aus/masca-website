@@ -9,6 +9,7 @@ import { useAccessGraph } from "./useAccessGraph";
 import { WorkspaceBubble } from "./WorkspaceBubble";
 import { AreaBubble } from "./AreaBubble";
 import { PeopleTray, PersonAvatar } from "./PeopleTray";
+import { AccessManagement } from "./AccessManagement";
 import { AccessTable } from "./AccessTable";
 import { InlineMemberEditor } from "./InlineMemberEditor";
 import { InlineWorkspaceEditor } from "./InlineWorkspaceEditor";
@@ -37,9 +38,11 @@ async function writeMutation(input: AccessMutation) {
 }
 export function AccessGraph({
   initialSnapshot,
+  initialView = "manage",
   onMutation = writeMutation,
 }: {
   initialSnapshot?: AccessGraphSnapshot;
+  initialView?: "manage" | "bubbles" | "table";
   onMutation?: (
     input: AccessMutation,
   ) => Promise<{ snapshot: AccessGraphSnapshot }>;
@@ -48,7 +51,7 @@ export function AccessGraph({
       useAccessGraph(initialSnapshot),
     [workspaceId, setWorkspaceId] = useState<string | null>(null),
     [selectedPerson, setPerson] = useState<string | null>(null),
-    [view, setView] = useState<"bubbles" | "table">("bubbles"),
+    [view, setView] = useState<"manage" | "bubbles" | "table">(initialView),
     [archived, setArchived] = useState(false),
     [editor, setEditor] = useState<InlineEditorState | null>(null),
     [busy, setBusy] = useState(false),
@@ -62,14 +65,18 @@ export function AccessGraph({
     saving = useRef(false);
   useInlineMotion(root, { editor, workspaceId, view, snapshot });
   const navigate = (action: () => void) => {
-    if (editor) {
+    if (editor && editor.kind !== "details") {
       setNotice("Finish or cancel the current change first.");
       return;
+    }
+    if (editor?.kind === "details") {
+      generation.current++;
+      setEditor(null);
     }
     action();
   };
   const open = (state: InlineEditorState) => {
-    if (editor) {
+    if (editor && editor.kind !== "details") {
       setNotice("Finish or cancel the current change first.");
       return;
     }
@@ -99,6 +106,15 @@ export function AccessGraph({
       const workspace = latest.workspaces.find(
         (w) => w.id === opened.workspaceId,
       );
+      if (
+        workspace &&
+        "area" in opened &&
+        opened.area &&
+        !workspace.areas.includes(opened.area)
+      )
+        throw Error(
+          "This tool is no longer enabled. Close this form and review the workspace tools.",
+        );
       const personId = "personId" in opened ? opened.personId : undefined;
       const person = !personId || latest.people.some((p) => p.id === personId);
       const membership =
@@ -151,6 +167,24 @@ export function AccessGraph({
   });
   const active = snapshot?.mode === "active";
   const renderEditor = (state: InlineEditorState) => {
+    if (state.kind === "workspace")
+      return (
+        <InlineWorkspaceEditor
+          workspaces={state.snapshot.workspaces}
+          {...props}
+        />
+      );
+    if (state.kind === "person") return <InlinePersonEditor {...props} />;
+    if (state.kind === "tools")
+      return (
+        <InlineToolsEditor
+          workspace={state.snapshot.workspaces.find(
+            (w) => w.id === state.workspaceId,
+          )!}
+          startArchive={state.startArchive}
+          {...props}
+        />
+      );
     if (state.kind === "member")
       return (
         <InlineMemberEditor
@@ -173,6 +207,7 @@ export function AccessGraph({
       return (
         <InlineMemberDetails
           now={now}
+          editLabel={state.group === "manage" ? "Edit access" : undefined}
           snapshot={state.snapshot}
           personId={state.personId}
           workspaceId={state.workspaceId}
@@ -210,12 +245,18 @@ export function AccessGraph({
       <header className="ag-page-heading">
         <div>
           <h1>People & access</h1>
-          <p>
-            Open a workspace, then use + beside a tool to assign access. Use ⋯
-            for workspace actions.
-          </p>
+          <p>Manage members and tool access by workspace.</p>
         </div>
         <div className="ag-view-toggle">
+          <button
+            type="button"
+            aria-label="Manage access"
+            aria-pressed={view === "manage"}
+            onClick={() => navigate(() => setView("manage"))}
+          >
+            <Table2 size={17} />
+            Manage
+          </button>
           <button
             type="button"
             aria-label="Bubble view"
@@ -223,15 +264,19 @@ export function AccessGraph({
             onClick={() => navigate(() => setView("bubbles"))}
           >
             <LayoutGrid size={17} />
+            Overview
           </button>
-          <button
-            type="button"
-            aria-label="Table view"
-            aria-pressed={view === "table"}
-            onClick={() => navigate(() => setView("table"))}
-          >
-            <Table2 size={17} />
-          </button>
+          {view !== "manage" && (
+            <button
+              type="button"
+              aria-label="Table view"
+              aria-pressed={view === "table"}
+              onClick={() => navigate(() => setView("table"))}
+            >
+              <Table2 size={17} />
+              All memberships
+            </button>
+          )}
         </div>
       </header>
       {loading && (
@@ -282,294 +327,311 @@ export function AccessGraph({
               use. Changes unlock after the access rollout review.
             </p>
           )}
-          <section className="ag-boundary">
-            <header className="ag-boundary-heading">
-              <span className="ag-brand">
-                <MascaMark />
-              </span>
-              <div>
-                <h2>CMS administration</h2>
-                <p>Platform management is separate from content access.</p>
-              </div>
-              <div className="ag-cms-actions">
-                {active && snapshot.viewer.create && (
-                  <button
-                    type="button"
-                    className="ag-text"
-                    onClick={() => {
-                      navigate(() => setView("bubbles"));
-                      open({ kind: "workspace", snapshot });
-                    }}
-                  >
-                    <Plus size={16} />
-                    Add workspace
-                  </button>
-                )}
-                {snapshot.workspaces.some((w) => w.status === "archived") && (
-                  <button
-                    type="button"
-                    className="ag-text"
-                    onClick={() => navigate(() => setArchived((v) => !v))}
-                  >
-                    {archived ? "Hide archived" : "Show archived"}
-                  </button>
-                )}
-              </div>
-            </header>
-            {workspaceId && (
-              <button
-                type="button"
-                className="ag-text ag-back"
-                onClick={() => navigate(() => setWorkspaceId(null))}
-              >
-                <ArrowLeft size={15} />
-                All workspaces
-              </button>
-            )}
-            {view === "table" ? (
-              <>
-                <AccessTable
-                  now={now}
-                  snapshot={snapshot}
-                  onInspect={(id, personId) =>
+          {view === "manage" ? (
+            <AccessManagement
+              snapshot={snapshot}
+              now={now}
+              workspaceId={workspaceId}
+              onWorkspace={setWorkspaceId}
+              archived={archived}
+              onArchived={() => setArchived((v) => !v)}
+              editor={editor}
+              onOpen={open}
+              onNavigate={navigate}
+              renderEditor={renderEditor}
+            />
+          ) : (
+            <section className="ag-boundary">
+              <header className="ag-boundary-heading">
+                <span className="ag-brand">
+                  <MascaMark />
+                </span>
+                <div>
+                  <h2>CMS administration</h2>
+                  <p>Platform management is separate from content access.</p>
+                </div>
+                <div className="ag-cms-actions">
+                  {active && snapshot.viewer.create && (
+                    <button
+                      type="button"
+                      className="ag-text"
+                      onClick={() => {
+                        navigate(() => setView("bubbles"));
+                        open({ kind: "workspace", snapshot });
+                      }}
+                    >
+                      <Plus size={16} />
+                      Add workspace
+                    </button>
+                  )}
+                  {snapshot.workspaces.some((w) => w.status === "archived") && (
+                    <button
+                      type="button"
+                      className="ag-text"
+                      onClick={() => navigate(() => setArchived((v) => !v))}
+                    >
+                      {archived ? "Hide archived" : "Show archived"}
+                    </button>
+                  )}
+                </div>
+              </header>
+              {workspaceId && (
+                <button
+                  type="button"
+                  className="ag-text ag-back"
+                  onClick={() => navigate(() => setWorkspaceId(null))}
+                >
+                  <ArrowLeft size={15} />
+                  All workspaces
+                </button>
+              )}
+              {view === "table" ? (
+                <>
+                  <AccessTable
+                    now={now}
+                    snapshot={snapshot}
+                    onInspect={(id, personId) =>
+                      open({
+                        kind: "details",
+                        snapshot,
+                        workspaceId: id,
+                        personId,
+                        group: "table",
+                      })
+                    }
+                  />
+                  {editor?.group === "table" && renderEditor(editor)}
+                </>
+              ) : (
+                <div className="ag-workspaces">
+                  {editor?.kind === "workspace" && (
+                    <InlineWorkspaceEditor
+                      workspaces={snapshot.workspaces}
+                      {...props}
+                    />
+                  )}
+                  {snapshot.workspaces
+                    .filter((w) => archived || w.status === "active")
+                    .map((w) => {
+                      const members = snapshot.memberships.filter(
+                          (m) => m.committee === w.id,
+                        ),
+                        inside =
+                          editor &&
+                          "workspaceId" in editor &&
+                          editor.workspaceId === w.id &&
+                          !editor.group
+                            ? editor
+                            : null;
+                      return (
+                        <WorkspaceBubble
+                          key={w.id}
+                          workspace={w}
+                          expanded={workspaceId === w.id}
+                          connected={members.some(
+                            (m) => m.userId === selectedPerson,
+                          )}
+                          count={members.length}
+                          dropProps={
+                            active && w.status === "active"
+                              ? {
+                                  "data-drop-workspace": w.id,
+                                  ...(drag.target === `${w.id}:`
+                                    ? { "data-drop-active": "true" }
+                                    : {}),
+                                }
+                              : undefined
+                          }
+                          onOpen={() =>
+                            navigate(() =>
+                              setWorkspaceId(
+                                workspaceId === w.id ? null : w.id,
+                              ),
+                            )
+                          }
+                          onAdd={
+                            w.status === "active"
+                              ? () => {
+                                  if (editor) return navigate(() => {});
+                                  setWorkspaceId(w.id);
+                                  open({
+                                    kind: "member",
+                                    snapshot,
+                                    workspaceId: w.id,
+                                  });
+                                }
+                              : undefined
+                          }
+                          onTools={
+                            snapshot.viewer.configure
+                              ? () => {
+                                  if (editor) return navigate(() => {});
+                                  setWorkspaceId(w.id);
+                                  open({
+                                    kind: "tools",
+                                    snapshot,
+                                    workspaceId: w.id,
+                                  });
+                                }
+                              : undefined
+                          }
+                          actionsDisabled={!active}
+                          onArchive={
+                            snapshot.viewer.configure
+                              ? () => {
+                                  if (editor) return navigate(() => {});
+                                  setWorkspaceId(w.id);
+                                  open({
+                                    kind: "tools",
+                                    snapshot,
+                                    workspaceId: w.id,
+                                    startArchive: true,
+                                  });
+                                }
+                              : undefined
+                          }
+                        >
+                          {active &&
+                            snapshot.viewer.appoint &&
+                            w.status === "active" && (
+                              <button
+                                type="button"
+                                className="ag-text"
+                                onClick={() =>
+                                  open({
+                                    kind: "member",
+                                    snapshot,
+                                    workspaceId: w.id,
+                                    manager: true,
+                                  })
+                                }
+                              >
+                                <ShieldCheck size={15} />
+                                Appoint access manager
+                              </button>
+                            )}
+                          {inside?.kind === "tools" && (
+                            <InlineToolsEditor
+                              startArchive={inside.startArchive}
+                              workspace={inside.snapshot.workspaces.find(
+                                (x) => x.id === w.id,
+                              )!}
+                              {...props}
+                            />
+                          )}
+                          {inside?.kind === "member" && !inside.area && (
+                            <InlineMemberEditor
+                              context={inside}
+                              manager={inside.manager}
+                              {...props}
+                            />
+                          )}
+                          {inside &&
+                            (inside.kind === "renew" ||
+                              inside.kind === "remove") &&
+                            !inside.area &&
+                            renderEditor(inside)}
+                          {inside?.kind === "details" &&
+                            !inside.area &&
+                            renderEditor(inside)}
+                          <div className="ag-areas">
+                            {w.areas.map((a) => (
+                              <AreaBubble
+                                now={now}
+                                key={a}
+                                area={a}
+                                members={members}
+                                people={snapshot.people}
+                                selectedPerson={selectedPerson}
+                                onPerson={(personId) => {
+                                  setPerson(personId);
+                                  open({
+                                    kind: "details",
+                                    snapshot,
+                                    workspaceId: w.id,
+                                    area: a,
+                                    personId,
+                                  });
+                                }}
+                                onAdd={
+                                  active && w.status === "active"
+                                    ? () =>
+                                        open({
+                                          kind: "member",
+                                          snapshot,
+                                          workspaceId: w.id,
+                                          area: a,
+                                        })
+                                    : undefined
+                                }
+                                dropProps={
+                                  active && w.status === "active"
+                                    ? {
+                                        "data-drop-workspace": w.id,
+                                        "data-drop-area": a,
+                                        ...(drag.target === `${w.id}:${a}`
+                                          ? { "data-drop-active": "true" }
+                                          : {}),
+                                      }
+                                    : undefined
+                                }
+                              >
+                                {inside && "area" in inside && inside.area === a
+                                  ? renderEditor(inside)
+                                  : undefined}
+                              </AreaBubble>
+                            ))}
+                          </div>
+                          {active && <SharedAccessSection workspaceId={w.id} />}
+                          {!w.areas.length && (
+                            <p>
+                              No tools enabled yet. Enabling a tool assigns no
+                              access.
+                            </p>
+                          )}
+                        </WorkspaceBubble>
+                      );
+                    })}
+                  {!snapshot.workspaces.length && <p>No workspaces yet</p>}
+                </div>
+              )}
+              <PeopleTray
+                people={snapshot.people}
+                selected={selectedPerson}
+                onSelect={(id) => {
+                  if (editor) {
+                    setNotice("Finish or cancel the current change first.");
+                    return;
+                  }
+                  setPerson(id);
+                  if (id)
                     open({
                       kind: "details",
                       snapshot,
-                      workspaceId: id,
-                      personId,
-                      group: "table",
-                    })
-                  }
-                />
-                {editor?.group === "table" && renderEditor(editor)}
-              </>
-            ) : (
-              <div className="ag-workspaces">
-                {editor?.kind === "workspace" && (
-                  <InlineWorkspaceEditor
-                    workspaces={snapshot.workspaces}
-                    {...props}
-                  />
-                )}
-                {snapshot.workspaces
-                  .filter((w) => archived || w.status === "active")
-                  .map((w) => {
-                    const members = snapshot.memberships.filter(
-                        (m) => m.committee === w.id,
-                      ),
-                      inside =
-                        editor &&
-                        "workspaceId" in editor &&
-                        editor.workspaceId === w.id &&
-                        !editor.group
-                          ? editor
-                          : null;
-                    return (
-                      <WorkspaceBubble
-                        key={w.id}
-                        workspace={w}
-                        expanded={workspaceId === w.id}
-                        connected={members.some(
-                          (m) => m.userId === selectedPerson,
-                        )}
-                        count={members.length}
-                        dropProps={
-                          active && w.status === "active"
-                            ? {
-                                "data-drop-workspace": w.id,
-                                ...(drag.target === `${w.id}:`
-                                  ? { "data-drop-active": "true" }
-                                  : {}),
-                              }
-                            : undefined
-                        }
-                        onOpen={() =>
-                          navigate(() =>
-                            setWorkspaceId(workspaceId === w.id ? null : w.id),
-                          )
-                        }
-                        onAdd={
-                          w.status === "active"
-                            ? () => {
-                                if (editor) return navigate(() => {});
-                                setWorkspaceId(w.id);
-                                open({
-                                  kind: "member",
-                                  snapshot,
-                                  workspaceId: w.id,
-                                });
-                              }
-                            : undefined
-                        }
-                        onTools={
-                          snapshot.viewer.configure
-                            ? () => {
-                                if (editor) return navigate(() => {});
-                                setWorkspaceId(w.id);
-                                open({
-                                  kind: "tools",
-                                  snapshot,
-                                  workspaceId: w.id,
-                                });
-                              }
-                            : undefined
-                        }
-                        actionsDisabled={!active}
-                        onArchive={
-                          snapshot.viewer.configure
-                            ? () => {
-                                if (editor) return navigate(() => {});
-                                setWorkspaceId(w.id);
-                                open({
-                                  kind: "tools",
-                                  snapshot,
-                                  workspaceId: w.id,
-                                  startArchive: true,
-                                });
-                              }
-                            : undefined
-                        }
-                      >
-                        {active &&
-                          snapshot.viewer.appoint &&
-                          w.status === "active" && (
-                            <button
-                              type="button"
-                              className="ag-text"
-                              onClick={() =>
-                                open({
-                                  kind: "member",
-                                  snapshot,
-                                  workspaceId: w.id,
-                                  manager: true,
-                                })
-                              }
-                            >
-                              <ShieldCheck size={15} />
-                              Appoint access manager
-                            </button>
-                          )}
-                        {inside?.kind === "tools" && (
-                          <InlineToolsEditor
-                            startArchive={inside.startArchive}
-                            workspace={inside.snapshot.workspaces.find(
-                              (x) => x.id === w.id,
-                            )!}
-                            {...props}
-                          />
-                        )}
-                        {inside?.kind === "member" && !inside.area && (
-                          <InlineMemberEditor
-                            context={inside}
-                            manager={inside.manager}
-                            {...props}
-                          />
-                        )}
-                        {inside &&
-                          (inside.kind === "renew" ||
-                            inside.kind === "remove") &&
-                          !inside.area &&
-                          renderEditor(inside)}
-                        {inside?.kind === "details" &&
-                          !inside.area &&
-                          renderEditor(inside)}
-                        <div className="ag-areas">
-                          {w.areas.map((a) => (
-                            <AreaBubble
-                              now={now}
-                              key={a}
-                              area={a}
-                              members={members}
-                              people={snapshot.people}
-                              selectedPerson={selectedPerson}
-                              onPerson={(personId) => {
-                                setPerson(personId);
-                                open({
-                                  kind: "details",
-                                  snapshot,
-                                  workspaceId: w.id,
-                                  area: a,
-                                  personId,
-                                });
-                              }}
-                              onAdd={
-                                active && w.status === "active"
-                                  ? () =>
-                                      open({
-                                        kind: "member",
-                                        snapshot,
-                                        workspaceId: w.id,
-                                        area: a,
-                                      })
-                                  : undefined
-                              }
-                              dropProps={
-                                active && w.status === "active"
-                                  ? {
-                                      "data-drop-workspace": w.id,
-                                      "data-drop-area": a,
-                                      ...(drag.target === `${w.id}:${a}`
-                                        ? { "data-drop-active": "true" }
-                                        : {}),
-                                    }
-                                  : undefined
-                              }
-                            >
-                              {inside && "area" in inside && inside.area === a
-                                ? renderEditor(inside)
-                                : undefined}
-                            </AreaBubble>
-                          ))}
-                        </div>
-                        {active && <SharedAccessSection workspaceId={w.id} />}
-                        {!w.areas.length && (
-                          <p>
-                            No tools enabled yet. Enabling a tool assigns no
-                            access.
-                          </p>
-                        )}
-                      </WorkspaceBubble>
-                    );
-                  })}
-                {!snapshot.workspaces.length && <p>No workspaces yet</p>}
-              </div>
-            )}
-            <PeopleTray
-              people={snapshot.people}
-              selected={selectedPerson}
-              onSelect={(id) => {
-                if (editor) {
-                  setNotice("Finish or cancel the current change first.");
-                  return;
-                }
-                setPerson(id);
-                if (id)
-                  open({
-                    kind: "details",
-                    snapshot,
-                    personId: id,
-                    group: "people",
-                  });
-              }}
-              onPointerDown={active ? drag.begin : undefined}
-              suppressClick={drag.suppressClick}
-            >
-              {active &&
-                snapshot.viewer.create &&
-                editor?.kind !== "person" && (
-                  <button
-                    type="button"
-                    className="ag-person"
-                    onClick={() => open({ kind: "person", snapshot })}
-                  >
-                    <Plus size={17} />
-                    Add person
-                  </button>
-                )}
-              {editor?.kind === "person" && <InlinePersonEditor {...props} />}
-              {editor?.group === "people" && renderEditor(editor)}
-            </PeopleTray>
-          </section>
+                      personId: id,
+                      group: "people",
+                    });
+                }}
+                onPointerDown={active ? drag.begin : undefined}
+                suppressClick={drag.suppressClick}
+              >
+                {active &&
+                  snapshot.viewer.create &&
+                  editor?.kind !== "person" && (
+                    <button
+                      type="button"
+                      className="ag-person"
+                      onClick={() => open({ kind: "person", snapshot })}
+                    >
+                      <Plus size={17} />
+                      Add person
+                    </button>
+                  )}
+                {editor?.kind === "person" && <InlinePersonEditor {...props} />}
+                {editor?.group === "people" && renderEditor(editor)}
+              </PeopleTray>
+            </section>
+          )}
         </>
       )}
       {drag.drag &&

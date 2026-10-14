@@ -30,6 +30,9 @@ const actions: Record<string, string> = {
   "change-or-renew": "Membership changed or renewed",
   createWorkspace: "Workspace created",
   configureWorkspace: "Workspace configured",
+  "create-workspace": "Workspace created",
+  archiveWorkspace: "Workspace archived",
+  restoreWorkspace: "Workspace restored",
 };
 function summary(value: unknown) {
   if (!value || typeof value !== "object") return "No membership";
@@ -37,7 +40,22 @@ function summary(value: unknown) {
     roles?: Partial<Record<CommitteeArea, CommitteeRole[]>>;
     expiresAt?: string;
     manager?: boolean;
+    name?: string;
+    areas?: string[];
+    status?: string;
+    termEnd?: string | null;
   };
+  if (Array.isArray(v.areas))
+    return [
+      v.name,
+      ...v.areas
+        .filter((a) => (committeeAreas as readonly string[]).includes(a))
+        .map((a) => memberAreaLabels[a as CommitteeArea]),
+      v.status === "archived" ? "Archived" : "Active",
+      v.termEnd ? `Default term ${memberTermLabel(v.termEnd)}` : "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
   return [
     v.manager ? "Access manager" : "",
     ...Object.entries(v.roles ?? {})
@@ -57,11 +75,13 @@ function summary(value: unknown) {
 export function AccessHistory({
   workspaceId,
   personId,
+  initialOpen = false,
 }: {
   workspaceId: string;
   personId?: string;
+  initialOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false),
+  const [open, setOpen] = useState(initialOpen),
     [entries, setEntries] = useState<Entry[] | null>(null),
     [error, setError] = useState(""),
     [attempt, setAttempt] = useState(0);

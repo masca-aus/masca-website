@@ -34,7 +34,13 @@ it("does not restore an unrelated removed role after reviewing a whole-membershi
     .fn()
     .mockRejectedValueOnce(new AccessSaveError("Changed", 409))
     .mockResolvedValue({ snapshot: latest });
-  render(<AccessGraph initialSnapshot={accessFixture} onMutation={save} />);
+  render(
+    <AccessGraph
+      initialView="bubbles"
+      initialSnapshot={accessFixture}
+      onMutation={save}
+    />,
+  );
   fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
   fireEvent.click(screen.getByRole("button", { name: "Add member" }));
   fireEvent.click(screen.getByRole("button", { name: "Person" }));
@@ -65,6 +71,7 @@ it("keeps renewal safely blocked if membership or person disappears during confl
   );
   render(
     <AccessGraph
+      initialView="bubbles"
       initialSnapshot={accessFixture}
       onMutation={async () => {
         throw new AccessSaveError("Changed", 409);
@@ -100,6 +107,7 @@ it("ignores an obsolete conflict refresh after closing and opening another edito
   );
   render(
     <AccessGraph
+      initialView="bubbles"
       initialSnapshot={accessFixture}
       onMutation={async () => {
         throw new AccessSaveError("Changed", 409);

@@ -16,6 +16,7 @@ export function AreaBubble({
   selectedPerson,
   onPerson,
   onAdd,
+  actionsDisabled = false,
   dropProps = {},
   children,
 }: {
@@ -26,6 +27,7 @@ export function AreaBubble({
   selectedPerson: string | null;
   onPerson: (id: string) => void;
   onAdd?: () => void;
+  actionsDisabled?: boolean;
   children?: React.ReactNode;
   dropProps?: Record<string, string>;
 }) {
@@ -45,6 +47,7 @@ export function AreaBubble({
             type="button"
             className="ag-icon"
             aria-label={`Add person to ${memberAreaLabels[area]}`}
+            disabled={actionsDisabled}
             onClick={onAdd}
           >
             <Plus size={17} />

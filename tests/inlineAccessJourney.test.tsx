@@ -19,7 +19,13 @@ it("opens the editor inside the clicked area and saves only after review", async
     void input;
     return { snapshot: accessFixture };
   });
-  render(<AccessGraph initialSnapshot={accessFixture} onMutation={save} />);
+  render(
+    <AccessGraph
+      initialView="bubbles"
+      initialSnapshot={accessFixture}
+      onMutation={save}
+    />,
+  );
   fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
   fireEvent.click(screen.getByRole("button", { name: "Add person to Events" }));
   const form = screen.getByRole("form", { name: "Add access to Events" });
@@ -43,7 +49,7 @@ it("opens the editor inside the clicked area and saves only after review", async
   expect(screen.queryByRole("form")).toBeNull();
 });
 it("cancel and Escape restore the original add control", async () => {
-  render(<AccessGraph initialSnapshot={accessFixture} />);
+  render(<AccessGraph initialView="bubbles" initialSnapshot={accessFixture} />);
   fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
   const add = screen.getByRole("button", { name: "Add person to Events" });
   fireEvent.click(add);
@@ -59,7 +65,13 @@ it("keeps a rejected save and user input inline", async () => {
     void input;
     throw Error("Your authority has changed.");
   });
-  render(<AccessGraph initialSnapshot={accessFixture} onMutation={save} />);
+  render(
+    <AccessGraph
+      initialView="bubbles"
+      initialSnapshot={accessFixture}
+      onMutation={save}
+    />,
+  );
   fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
   fireEvent.click(screen.getByRole("button", { name: "Add person to Events" }));
   fireEvent.click(screen.getByRole("button", { name: "Person" }));
@@ -78,7 +90,13 @@ it("creates workspace and tools inline without creating a membership", async () 
     void input;
     return { snapshot: accessFixture };
   });
-  render(<AccessGraph initialSnapshot={accessFixture} onMutation={save} />);
+  render(
+    <AccessGraph
+      initialView="bubbles"
+      initialSnapshot={accessFixture}
+      onMutation={save}
+    />,
+  );
   fireEvent.click(screen.getByRole("button", { name: "Add workspace" }));
   const f = screen.getByRole("form", { name: "Create workspace" });
   expect(f.closest(".ag-workspaces")).toBeTruthy();
@@ -99,7 +117,13 @@ it("rejects invalid email locally without losing input or writing access", async
     void input;
     return { snapshot: accessFixture };
   });
-  render(<AccessGraph initialSnapshot={accessFixture} onMutation={save} />);
+  render(
+    <AccessGraph
+      initialView="bubbles"
+      initialSnapshot={accessFixture}
+      onMutation={save}
+    />,
+  );
   fireEvent.click(screen.getByRole("button", { name: "Add person" }));
   fireEvent.change(screen.getByRole("textbox", { name: "Name" }), {
     target: { value: "New member" },
@@ -123,7 +147,13 @@ it("configures tools inside the workspace and leaves membership grants out of th
     void input;
     return { snapshot: accessFixture };
   });
-  render(<AccessGraph initialSnapshot={accessFixture} onMutation={save} />);
+  render(
+    <AccessGraph
+      initialView="bubbles"
+      initialSnapshot={accessFixture}
+      onMutation={save}
+    />,
+  );
   fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
   fireEvent.click(screen.getByRole("button", { name: "Manage tools" }));
   const f = screen.getByRole("form", { name: "Manage workspace tools" });
@@ -143,7 +173,13 @@ it("a pointer drop proposes inline access and can close without a write", async 
     void input;
     return { snapshot: accessFixture };
   });
-  render(<AccessGraph initialSnapshot={accessFixture} onMutation={save} />);
+  render(
+    <AccessGraph
+      initialView="bubbles"
+      initialSnapshot={accessFixture}
+      onMutation={save}
+    />,
+  );
   fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
   const area = screen.getByRole("region", { name: "Events access" });
   Object.defineProperty(document, "elementFromPoint", {
@@ -170,7 +206,13 @@ it("holds a conflict for explicit re-review and prevents a duplicate submit", as
     throw new AccessSaveError("Changed access. Review it.", 409);
   });
   vi.stubGlobal("fetch", async () => Response.json(accessFixture));
-  render(<AccessGraph initialSnapshot={accessFixture} onMutation={save} />);
+  render(
+    <AccessGraph
+      initialView="bubbles"
+      initialSnapshot={accessFixture}
+      onMutation={save}
+    />,
+  );
   fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
   fireEvent.click(screen.getByRole("button", { name: "Add person to Events" }));
   fireEvent.click(screen.getByRole("button", { name: "Person" }));
@@ -200,7 +242,13 @@ it("reviews workspace archiving inline before the explicit save", async () => {
     void input;
     return { snapshot: accessFixture };
   });
-  render(<AccessGraph initialSnapshot={accessFixture} onMutation={save} />);
+  render(
+    <AccessGraph
+      initialView="bubbles"
+      initialSnapshot={accessFixture}
+      onMutation={save}
+    />,
+  );
   fireEvent.click(screen.getByRole("button", { name: "Open MASA" }));
   fireEvent.click(screen.getByRole("button", { name: "Manage tools" }));
   fireEvent.click(screen.getByRole("button", { name: "Archive workspace" }));

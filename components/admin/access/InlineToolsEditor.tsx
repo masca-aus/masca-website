@@ -28,10 +28,10 @@ export function InlineToolsEditor({
     removed = workspace.areas.filter((a) => !areas.includes(a));
   return (
     <InlineFrame
-      title={`${startArchive && workspace.status !== "archived" ? "Delete workspace" : "Manage tools"} · ${workspace.name}`}
+      title={`${startArchive && workspace.status !== "archived" ? "Archive workspace" : "Manage tools"} · ${workspace.name}`}
       label={
         startArchive && workspace.status !== "archived"
-          ? "Delete workspace"
+          ? "Archive workspace"
           : "Manage workspace tools"
       }
       reveal={startArchive}
@@ -43,7 +43,7 @@ export function InlineToolsEditor({
           ? workspace.status === "archived"
             ? "Restore workspace"
             : startArchive
-              ? "Delete workspace"
+              ? "Archive workspace"
               : "Confirm archive"
           : "Save tools"
       }

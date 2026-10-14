@@ -30,7 +30,7 @@ export type InlineEditorState = (
       area?: CommitteeArea;
       personId: string;
     }
-) & { snapshot: AccessGraphSnapshot; group?: "people" | "table" };
+) & { snapshot: AccessGraphSnapshot; group?: "people" | "table" | "manage" };
 export type EditorProps = {
   onSave: (input: AccessMutation) => Promise<void>;
   onCancel: () => void;

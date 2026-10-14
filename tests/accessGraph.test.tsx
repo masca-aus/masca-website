@@ -11,7 +11,7 @@ afterEach(() => {
 it("expands cached workspace areas without another request and shares a table snapshot", async () => {
   const fetch = vi.fn(async () => Response.json(accessFixture));
   vi.stubGlobal("fetch", fetch);
-  render(<AccessGraph />);
+  render(<AccessGraph initialView="bubbles" />);
   fireEvent.click(await screen.findByRole("button", { name: "Open MASA" }));
   expect(screen.getByRole("heading", { name: "Media calendar" })).toBeTruthy();
   expect(screen.getByText("Editor")).toBeTruthy();
@@ -22,7 +22,7 @@ it("expands cached workspace areas without another request and shares a table sn
 });
 it("distinguishes failed loading from an empty catalogue", async () => {
   vi.stubGlobal("fetch", async () => new Response("bad", { status: 503 }));
-  render(<AccessGraph />);
+  render(<AccessGraph initialView="bubbles" />);
   expect(await screen.findByRole("alert")).toBeTruthy();
   expect(screen.queryByText("No workspaces yet")).toBeNull();
   expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy();
@@ -30,6 +30,7 @@ it("distinguishes failed loading from an empty catalogue", async () => {
 it("uses stable IDs on rename and explains staged access", () => {
   render(
     <AccessGraph
+      initialView="bubbles"
       initialSnapshot={{
         ...accessFixture,
         mode: "staged",
@@ -46,7 +47,7 @@ it("uses stable IDs on rename and explains staged access", () => {
   expect(screen.getByText(/staged/i)).toBeTruthy();
 });
 it("shows actual expiry and suspension independently", () => {
-  render(<AccessGraph initialSnapshot={accessFixture} />);
+  render(<AccessGraph initialView="bubbles" initialSnapshot={accessFixture} />);
   fireEvent.click(screen.getByRole("button", { name: "Open Queensland" }));
   expect(screen.getAllByText("Suspended").length).toBeGreaterThan(0);
   expect(screen.getByText("Expired")).toBeTruthy();
@@ -55,6 +56,7 @@ it("shows actual expiry and suspension independently", () => {
 it("keeps initials when a private account photo is unavailable", () => {
   render(
     <AccessGraph
+      initialView="bubbles"
       initialSnapshot={{
         ...accessFixture,
         people: [
