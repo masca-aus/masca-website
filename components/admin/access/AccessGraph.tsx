@@ -88,10 +88,34 @@ export function AccessGraph({
     });
   };
   const review = async () => {
+    const requestGeneration = generation.current;
+    const opened = editor;
     const r = await fetch("/api/workspace-access", { cache: "no-store" });
     const body = await r.json();
     if (!r.ok) throw Error(body.error ?? "Could not reload access.");
     const latest = body as AccessGraphSnapshot;
+    if (generation.current !== requestGeneration) return latest;
+    if (opened && "workspaceId" in opened) {
+      const workspace = latest.workspaces.find(
+        (w) => w.id === opened.workspaceId,
+      );
+      const personId = "personId" in opened ? opened.personId : undefined;
+      const person = !personId || latest.people.some((p) => p.id === personId);
+      const membership =
+        !["renew", "remove", "details"].includes(opened.kind) ||
+        latest.memberships.some(
+          (m) => m.committee === opened.workspaceId && m.userId === personId,
+        );
+      if (
+        !workspace ||
+        !person ||
+        !membership ||
+        (workspace.status !== "active" && opened.kind !== "tools")
+      )
+        throw Error(
+          "This membership or workspace is no longer available. Close this form and review current access.",
+        );
+    }
     applySnapshot(latest);
     setEditor((old) => (old ? { ...old, snapshot: latest } : null));
     return latest;

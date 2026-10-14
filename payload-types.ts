@@ -361,8 +361,8 @@ export interface User {
         id?: string | null;
       }[]
     | null;
-  role: string;
-  status: string;
+  role: 'administrator' | 'editor';
+  status: 'invited' | 'active' | 'suspended';
   /**
    * Personalises the dashboard. Content permissions below control access.
    */

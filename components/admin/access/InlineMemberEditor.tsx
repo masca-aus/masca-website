@@ -202,7 +202,7 @@ export function InlineMemberEditor({
                   value={roleValue(roles[a] ?? [])}
                   options={memberRolePresets}
                   onChange={(v) => {
-                    setRoleEdits({ ...roles, [a]: parseRoles(v) });
+                    setRoleEdits((edits) => ({ ...edits, [a]: parseRoles(v) }));
                   }}
                 />
               )}

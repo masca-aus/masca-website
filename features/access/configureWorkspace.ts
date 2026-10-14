@@ -180,7 +180,7 @@ export function configureWorkspace(
               create: ({ req }) => mayManagePeople(accountOf(req.user)),
               update: ({ req }) => mayManagePeople(accountOf(req.user)),
             },
-            type: "text",
+            type: "select",
             required: true,
             defaultValue: "editor",
             options: [
@@ -194,7 +194,7 @@ export function configureWorkspace(
               create: ({ req }) => mayManagePeople(accountOf(req.user)),
               update: ({ req }) => mayManagePeople(accountOf(req.user)),
             },
-            type: "text",
+            type: "select",
             required: true,
             defaultValue: "invited",
             options: ["invited", "active", "suspended"],
@@ -543,14 +543,8 @@ export function configureWorkspace(
         ...collection,
         access: {
           ...collection.access,
-          read: ({ req }) =>
-            committeeAccessEnabled()
-              ? lifecycleCommitteeFilter(req, area, false)
-              : mayView(accountOf(req.user), area),
-          readVersions: ({ req }) =>
-            committeeAccessEnabled()
-              ? lifecycleCommitteeFilter(req, area, true)
-              : mayView(accountOf(req.user), area),
+          read: ({ req }) => lifecycleCommitteeFilter(req, area, false),
+          readVersions: ({ req }) => lifecycleCommitteeFilter(req, area, true),
         },
       };
     }
@@ -601,8 +595,9 @@ async function lifecycleCommitteeFilter(
   area: "events" | "careers",
   versions: boolean,
 ): Promise<boolean | Where> {
-  const filter = await committeeFilter(req, area);
-  if (filter === false) return false;
+  if (committeeAccessEnabled()) {
+    if ((await committeeFilter(req, area)) === false) return false;
+  } else if (!mayView(accountOf(req.user), area)) return false;
   const result = await req.payload.find({
     collection: area,
     req,

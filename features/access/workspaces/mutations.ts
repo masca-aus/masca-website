@@ -10,6 +10,7 @@ import {
 } from "../delegatedAccess.ts";
 import { committeeAccessEnabled } from "../committeeEnvironment.ts";
 import {
+  isSubtractiveMembershipChange,
   committeeAreas,
   committeeRoles,
   mayManageCommittee,
@@ -361,7 +362,8 @@ export async function mutateAccess(actor: CommitteeAccount, value: unknown) {
         } else m = null;
         if (
           m &&
-          (Date.parse(m.expiresAt) <= Date.now() ||
+          ((Date.parse(m.expiresAt) <= Date.now() &&
+            !isSubtractiveMembershipChange(old, m)) ||
             Object.entries(m.roles).some(
               ([area, roles]) =>
                 roles?.length && !w.areas.includes(area as CommitteeArea),

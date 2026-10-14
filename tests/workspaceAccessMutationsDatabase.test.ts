@@ -210,6 +210,38 @@ describe.runIf(!!uri)("transactional workspace access", () => {
     ]);
     expect(after[0].expiresAt).toBe("2099-01-01T12:34:56.123Z");
   });
+  it("removes expired area roles without reactivating the remaining historical membership", async () => {
+    const expired = {
+      id: "expired-q",
+      committee: "QLD",
+      roles: { events: ["editor"], mediaCalendar: ["viewer"] },
+      manager: false,
+      expiresAt: "2020-01-01T00:00:00Z",
+    };
+    await db.query(
+      "UPDATE cms_calendar_preview.users SET committee_memberships=committee_memberships || $1::jsonb WHERE id=3",
+      [JSON.stringify([expired])],
+    );
+    const s = await accessSnapshot(admin),
+      w = s.workspaces.find((w) => w.id === "QLD")!,
+      p = s.people.find((p) => p.id === "3")!;
+    await mutateAccess(manager, {
+      type: "removeArea",
+      workspaceId: w.id,
+      expectedWorkspaceRevision: w.revision,
+      targetId: p.id,
+      expectedRevision: p.revision,
+      area: "events",
+    });
+    const remaining = (await accessSnapshot(admin)).memberships.find(
+      (m) => m.userId === "3" && m.committee === "QLD",
+    )!;
+    expect(remaining.roles).toEqual({ mediaCalendar: ["viewer"] });
+    expect(remaining.expiresAt).toBe(expired.expiresAt);
+    await db.query(
+      "UPDATE cms_calendar_preview.users SET committee_memberships=committee_memberships - (SELECT ordinal::int-1 FROM jsonb_array_elements(committee_memberships) WITH ORDINALITY AS m(value,ordinal) WHERE value->>'committee'='QLD') WHERE id=3",
+    );
+  });
   it("rejects stale manager authority and archive at save time", async () => {
     const s = await accessSnapshot(admin),
       w = s.workspaces.find((w) => w.id === "QLD")!,

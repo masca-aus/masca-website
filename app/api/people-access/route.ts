@@ -8,7 +8,6 @@ import {
 import {
   managedCommittees,
   listPeople,
-  saveMembership,
 } from "@/features/access/delegatedAccess";
 import {
   knownWorkspace,
@@ -67,31 +66,15 @@ export async function POST(request: Request) {
   try {
     if (!sameWorkspaceOrigin(request))
       throw new APIError("Open this action inside the CMS.", 403);
-    const user = await actor(request),
-      data = await request.json();
-    if (
-      !data ||
-      typeof data !== "object" ||
-      Object.keys(data).some(
-        (k) => !["targetId", "email", "committee", "membership"].includes(k),
-      )
-    )
-      throw new APIError(
-        "Only one committee membership can be changed here.",
-        400,
-      );
-    if (
-      data.targetId !== undefined &&
-      (typeof data.targetId !== "string" || !/^\d+$/.test(data.targetId))
-    )
-      throw new APIError("Choose a valid person.", 400);
-    if (data.email !== undefined && typeof data.email !== "string")
-      throw new APIError("Choose a valid email.", 400);
+    await actor(request);
+    // The old full-membership payload has no revision or explicit renewal intent.
+    // Never infer current revisions for a stale caller; the new endpoint owns writes.
     return reply(
-      await saveMembership(user, {
-        ...data,
-        committee: scope(data.committee, user),
-      }),
+      {
+        error:
+          "Refresh People & access before saving. Use the reviewed workspace access form.",
+      },
+      409,
     );
   } catch (error) {
     return fail(error);

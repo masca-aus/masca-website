@@ -235,6 +235,25 @@ export function mayManageCommittee(
       ))
   );
 }
+/** Removing roles never renews or widens an existing membership. */
+export function isSubtractiveMembershipChange(
+  before: CommitteeMembership | undefined,
+  next: CommitteeMembership,
+): boolean {
+  return (
+    !!before &&
+    before.id === next.id &&
+    before.committee === next.committee &&
+    before.manager === next.manager &&
+    before.expiresAt === next.expiresAt &&
+    Object.entries(next.roles).every(([area, roles]) =>
+      (roles ?? []).every((role) =>
+        before.roles[area as CommitteeArea]?.includes(role),
+      ),
+    )
+  );
+}
+
 export function mayDelegateMemberships(
   actor: CommitteeAccount,
   before: CommitteeMembership[],
@@ -260,6 +279,7 @@ export function mayDelegateMemberships(
     if (!manager || old?.manager || updated?.manager) return false;
     if (
       updated &&
+      !isSubtractiveMembershipChange(old, updated) &&
       (Date.parse(updated.expiresAt) <= now ||
         Date.parse(updated.expiresAt) > Date.parse(manager.expiresAt))
     )
