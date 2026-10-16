@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation"
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { requestAnniversaryReplay } from "@/utils/anniversaryReplay";
 
 import Button from "./Button";
 import styles from "./NavBar.module.css";
@@ -25,17 +26,55 @@ const navLinks = [
 type IsActive = (href: string) => boolean
 
 // Brand logo + wordmark, links home.
-function Logo() {
+function Logo({ anniversary, onReplay }: { anniversary: boolean; onReplay: () => void }) {
+  const badgeId = useId();
   return (
-    <Link href="/" className="col-1 justify-self-start relative z-20">
-      <div className="flex items-center gap-4">
-        <Image src="/logo/logo.png" alt="Masca logo" width={36} height={40} priority sizes="40px" className={`h-10 w-auto ${styles.brandMark}`} />
-        <div className="flex flex-col leading-none">
-          <span className={`text-xl font-bold tracking-wider text-blue-600 ${styles.brandTitle}`}>MASCA</span>
-          <span className={`text-xs font-semibold text-gray-700/80 uppercase ${styles.brandSubtitle}`}>malaysian students&apos; council</span>
+    <div className={`${styles.brand} ${anniversary ? styles.brandWithAnniversary : ""} col-1 justify-self-start relative z-20`}>
+      <Link href="/" className={styles.brandLink}>
+        <div className={styles.brandLinkInner}>
+          <Image src="/logo/logo.png" alt="Masca logo" width={36} height={40} priority sizes="40px" className={`h-10 w-auto ${styles.brandMark}`} />
+          <div className="flex flex-col leading-none">
+            <span className={`text-xl font-bold tracking-wider text-blue-600 ${styles.brandTitle}`}>MASCA</span>
+            <span className={`text-xs font-semibold text-gray-700/80 uppercase ${styles.brandSubtitle}`}>malaysian students&apos; council</span>
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+      {anniversary && <span className={styles.brandDivider} aria-hidden="true" />}
+      {anniversary && (
+        <button
+          type="button"
+          className={styles.anniversaryBadge}
+          aria-label="25 years, 2001–2026 — replay MASCA’s 25th anniversary intro"
+          aria-haspopup="dialog"
+          title="Replay anniversary intro"
+          onClick={onReplay}
+        >
+          <svg className={styles.badgeEmblem} viewBox="0 0 84 64" aria-hidden="true">
+            <defs>
+              <text id={`${badgeId}-number`} className={styles.badgeNumeral} x="40" y="51" textAnchor="middle">25</text>
+              <clipPath id={`${badgeId}-clip`} clipPathUnits="userSpaceOnUse">
+                <use href={`#${badgeId}-number`} />
+              </clipPath>
+              <linearGradient id={`${badgeId}-shine`} x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#fff9dc" stopOpacity="0" />
+                <stop offset="50%" stopColor="#fff9dc" stopOpacity=".95" />
+                <stop offset="100%" stopColor="#fff9dc" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <ellipse className={styles.badgeOrbit} cx="42" cy="33" rx="39" ry="23" transform="rotate(-19 42 33)" />
+            <use href={`#${badgeId}-number`} />
+            <use href={`#${badgeId}-number`} className={styles.badgeFill} />
+            <g clipPath={`url(#${badgeId}-clip)`}>
+              <rect className={styles.badgeShine} x="-30" y="0" width="24" height="64" fill={`url(#${badgeId}-shine)`} />
+            </g>
+          </svg>
+          <span className={styles.badgeCaption} aria-hidden="true">
+            <span className={styles.badgeTitle}>years</span>
+            <span className={styles.badgeDates}>2001–2026</span>
+          </span>
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -222,7 +261,10 @@ export default function NavBar() {
 
   return (
     <header ref={headerRef} data-transparent={transparent} className={`${styles.header} fixed top-0 left-0 w-full z-50 grid grid-cols-[auto_auto_auto] items-center py-2 md:py-4 px-6 md:px-16 bg-white backface-hidden will-change-transform`}>
-      <Logo />
+      <Logo anniversary={isHomepage} onReplay={() => {
+        setOpen(false);
+        requestAnniversaryReplay();
+      }} />
       <MenuToggle open={open} onToggle={() => setOpen((v) => !v)} />
       <DesktopNav isActive={isActive} />
       <DesktopActions />

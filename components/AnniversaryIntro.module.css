@@ -1,0 +1,102 @@
+.intro {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 24px;
+  border: 0;
+  overflow: hidden;
+  background: #010037;
+  color: #fff;
+  font-family: var(--font-primary);
+}
+.intro:not([open]) { display: none; }
+.intro[open] { display: grid; place-items: center; animation: revealPage var(--anniversary-duration) ease-in-out both; }
+.intro::backdrop { background: transparent; }
+
+.collage { position: absolute; inset: -8%; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px; transform: scale(1.08) rotate(-2deg); }
+.intro[open] .collage { animation: wallMove var(--anniversary-duration) cubic-bezier(.22, 1, .36, 1) both; }
+.photoSlot { position: relative; overflow: hidden; background: #010037; }
+.intro[open] .photoSlot { animation: tileSettle 800ms calc(var(--slot) * 45ms) cubic-bezier(.22, 1, .36, 1) both; }
+.photo { object-fit: cover; animation: photoIn 300ms ease-out both; }
+.shade { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 52%, #010037f2 0%, #010037d9 42%, #010037a6 100%); }
+.content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 20px; max-width: 100%; min-width: 0; transform: translateY(-12px); }
+.intro[open] .content { animation: markReveal var(--anniversary-duration) cubic-bezier(.22, 1, .36, 1) both; }
+.brand { display: flex; align-items: center; gap: 12px; color: #fff; font-size: 20px; font-weight: 750; letter-spacing: .08em; }
+.brandMark { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #fff8e7; }
+.brand img { width: 30px; height: 33px; object-fit: contain; }
+.anniversary { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 0; color: #ffcc00; line-height: 1; }
+.number { position: relative; display: block; width: min(82vw, 440px); aspect-ratio: 560 / 360; }
+.number > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.glyph { font-family: var(--font-crimson), Georgia, serif; font-size: 430px; font-weight: 600; letter-spacing: 0; }
+.orbit { fill: none; stroke: #ffdc61; stroke-width: 1; stroke-dasharray: 1; stroke-dashoffset: 1; animation: drawNumber 1100ms 100ms cubic-bezier(.3, 0, .2, 1) both; }
+.orbitLight { fill: none; stroke: #fff6cf; stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: .025 .975; animation: orbitTrace 1400ms 260ms cubic-bezier(.3, 0, .2, 1) both; }
+.numberBase { fill: #010037; }
+.outline { fill: none; stroke: #ffe6a0; stroke-width: 1.4; stroke-dasharray: 1800; stroke-dashoffset: 1800; animation: drawNumber 900ms 70ms cubic-bezier(.3, 0, .2, 1) both; }
+.gold { fill: #ffcc00; clip-path: inset(100% 0 0 0); animation: goldWipe 350ms 1500ms cubic-bezier(.2, .65, .25, 1) both; }
+.photoNumber { animation: photoNumberIn 350ms 100ms cubic-bezier(.2, .65, .25, 1) both; }
+.photoStrip { transition: transform 260ms cubic-bezier(.22, 1, .36, 1); }
+.sheen { animation: goldGlint 420ms 1780ms ease-in-out both; }
+.ordinal { position: absolute; top: 24%; right: 9%; color: #ffcc00; font-family: var(--font-secondary); font-size: clamp(23px, 5vw, 32px); font-style: italic; font-weight: 400; animation: labelIn 350ms 720ms ease-out both; }
+.anniversaryLabel { padding-left: .2em; color: #fff; font-family: var(--font-primary); font-size: clamp(13px, 3.5vw, 17px); font-weight: 500; letter-spacing: .2em; text-transform: uppercase; animation: labelIn 400ms 650ms ease-out both; }
+.dates { margin: 0; color: #fff; font-size: 13px; font-weight: 500; letter-spacing: .08em; animation: labelIn 400ms 800ms ease-out both; }
+
+.skip { position: absolute; z-index: 2; right: max(28px, env(safe-area-inset-right)); bottom: max(24px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 14px; min-height: 44px; padding: 8px 4px; border: 0; background: transparent; color: #fff; font: inherit; font-size: 11px; cursor: pointer; }
+.skip:hover { color: #ffcc00; }
+.skip:focus-visible { outline: 2px solid #ffcc00; outline-offset: 4px; }
+
+@keyframes wallMove {
+  0% { transform: scale(1.2) rotate(-4deg); }
+  46%, 77% { transform: scale(1.08) rotate(-2deg); filter: blur(0); }
+  100% { transform: scale(1.08) rotate(-2deg); }
+}
+@keyframes tileSettle {
+  from { opacity: .25; transform: translate(var(--entry-x), var(--entry-y)) scale(.92); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes markReveal {
+  0% { opacity: 0; transform: translateY(6px) scale(.97); }
+  18%, 83% { opacity: 1; transform: translateY(-12px) scale(1); }
+  100% { opacity: 0; transform: translateY(-18px) scale(1.02); }
+}
+@keyframes photoIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes photoNumberIn { from { opacity: 0; clip-path: inset(100% 0 0 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
+@keyframes orbitTrace {
+  0% { opacity: 0; stroke-dashoffset: 1; }
+  12%, 82% { opacity: 1; }
+  100% { opacity: 0; stroke-dashoffset: 0; }
+}
+@keyframes goldGlint {
+  0% { opacity: 0; transform: translateX(0) skewX(-18deg); }
+  20%, 75% { opacity: .85; }
+  100% { opacity: 0; transform: translateX(840px) skewX(-18deg); }
+}
+@keyframes drawNumber { to { stroke-dashoffset: 0; } }
+@keyframes goldWipe { to { clip-path: inset(0 0 0 0); } }
+@keyframes labelIn { from { opacity: 0; translate: 0 5px; } to { opacity: 1; translate: 0 0; } }
+@keyframes revealPage { 0%, 82% { opacity: 1; } 100% { opacity: 0; } }
+
+@media (max-width: 640px) {
+  .collage { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 6px; }
+  .content { gap: 20px; }
+  .brand { font-size: 18px; }
+  .skip { right: 24px; }
+}
+@media (max-height: 500px) {
+  .content { gap: 12px; }
+  .brand { font-size: 16px; }
+  .brandMark { width: 38px; height: 38px; }
+  .brand img { width: 24px; height: 26px; }
+  .number { width: min(54vw, 54svh); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro[open] { animation: none; }
+  .intro *, .intro[open] .collage, .intro[open] .photoSlot, .intro[open] .content { animation: none; }
+  .photoStrip { transition: none; }
+  .photoNumber, .orbitLight, .sheen { display: none; }
+  .gold { clip-path: none; }
+  .outline, .orbit { stroke-dashoffset: 0; }
+}

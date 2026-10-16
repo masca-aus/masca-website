@@ -12,6 +12,7 @@ import SponsorsSection from "./sections/sponsors";
 import FollowUsSection from "./sections/followUs";
 import PostOnOurPageSection from "./sections/postOnOurPage";
 import { getSponsors } from "@/utils/sponsors";
+import AnniversaryIntro from "@/components/AnniversaryIntro";
 
 // Refresh time-based event expiry between editor-triggered revalidations.
 export const revalidate = 60;
@@ -47,6 +48,7 @@ export default async function Home() {
 
   return (
    <main id="main" className="bg-white">
+      <AnniversaryIntro />
       <div className="flex min-h-svh flex-col bg-blue-600">
         <HeroSection />
       </div>

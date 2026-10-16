@@ -5,7 +5,45 @@
   transition: background-color var(--nav-transition), box-shadow var(--nav-transition);
 }
 .brandTitle, .brandSubtitle, .desktopNav a, .menuToggle { transition: color var(--nav-transition); }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brandWithAnniversary { gap: 16px; }
+.brandDivider { display: block; flex: none; width: 1px; height: 24px; background: currentColor; color: #010037; opacity: .22; }
+.brandLink { display: block; border-radius: 4px; }
+.brandLink:focus-visible { outline: 2px solid #31358e; outline-offset: 4px; }
+.brandLinkInner { display: flex; align-items: center; gap: 16px; }
+.anniversaryBadge { position: relative; display: flex; flex: none; align-items: center; gap: 5px; min-height: 44px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: #010037; font-family: var(--font-primary); cursor: pointer; }
+.anniversaryBadge:focus-visible { outline: 2px solid #31358e; outline-offset: 4px; }
+.badgeEmblem { display: block; flex: none; width: 54px; height: 44px; overflow: visible; color: #946b0e; transition: color .35s ease; }
+.badgeOrbit { fill: none; stroke: currentColor; stroke-width: .9; }
+.badgeNumeral { fill: currentColor; font-family: var(--font-secondary); font-size: 60px; font-weight: 600; letter-spacing: -3px; }
+.badgeFill { color: #ffcc00; clip-path: inset(100% 0 0 0); transition: clip-path .4s cubic-bezier(.2, .65, .25, 1); }
+.badgeShine { opacity: 0; }
+.badgeCaption { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; text-align: left; }
+.badgeTitle { font-size: 8px; font-weight: 650; line-height: 1; letter-spacing: .2em; text-transform: uppercase; }
+.badgeDates { font-size: 9px; font-weight: 550; line-height: 1; white-space: nowrap; }
+.anniversaryBadge:hover .badgeEmblem,
+.anniversaryBadge:focus-visible .badgeEmblem { color: #c9971c; }
+.anniversaryBadge:hover .badgeFill,
+.anniversaryBadge:focus-visible .badgeFill { clip-path: inset(0 0 0 0); }
+.anniversaryBadge:hover .badgeShine,
+.anniversaryBadge:focus-visible .badgeShine { animation: badgeGlint .6s .08s ease-out both; }
+@keyframes badgeGlint {
+  0% { opacity: 0; transform: translateX(0) skewX(-18deg); }
+  20%, 75% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(150px) skewX(-18deg); }
+}
 .brandMark { filter: brightness(1) invert(0); transition: filter var(--nav-transition); }
+@media (max-width: 1279px) {
+  .brandWithAnniversary { gap: 12px; }
+  .brandWithAnniversary .brandLinkInner { gap: 10px; }
+  .brandWithAnniversary .brandSubtitle { display: none; }
+}
+@media (max-width: 639px) {
+  .brandWithAnniversary { gap: 8px; }
+  .brandWithAnniversary .brandTitle { font-size: 18px; }
+  .anniversaryBadge { gap: 4px; }
+  .badgeEmblem { width: 44px; height: 40px; }
+}
 /* Keep the compact navigation white; only desktop overlays the hero. */
 @media (min-width: 1024px) {
   .header[data-transparent=true] { background-color: transparent; box-shadow: none; }
@@ -14,10 +52,17 @@
   .header[data-transparent=true] .desktopNav a,
   .header[data-transparent=true] .menuToggle { color: #fff; }
   .header[data-transparent=true] .brandSubtitle { color: rgba(255, 255, 255, .8); }
+  .header[data-transparent=true] .anniversaryBadge { color: #fff2c6; }
+  .header[data-transparent=true] .brandDivider { color: #fff2c6; }
+  .header[data-transparent=true] .badgeEmblem { color: #ffdc61; }
+  .header[data-transparent=true] .anniversaryBadge:hover .badgeEmblem,
+  .header[data-transparent=true] .anniversaryBadge:focus-visible .badgeEmblem { color: #fff1ab; }
   .header[data-transparent=true] .menuToggle:hover { background: rgba(255, 255, 255, .12); }
   .header[data-transparent=true] a:focus-visible,
   .header[data-transparent=true] button:focus-visible { outline-color: #ffcc00; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .header, .brandTitle, .brandSubtitle, .brandMark, .desktopNav a, .menuToggle { transition: none; }
+  .header, .brandTitle, .brandSubtitle, .brandMark, .desktopNav a, .menuToggle, .badgeEmblem, .badgeFill { transition: none; }
+  .anniversaryBadge:hover .badgeShine,
+  .anniversaryBadge:focus-visible .badgeShine { animation: none; }
 }
