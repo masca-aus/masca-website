@@ -18,6 +18,7 @@ const auth = vi.hoisted(() => ({
   },
 }));
 vi.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(),
   usePathname: () => "/admin/media-calendar",
 }));
 vi.mock("@payloadcms/ui", () => ({

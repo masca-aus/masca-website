@@ -8,6 +8,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "node:crypto";
 import {
   transaction,
+  requirePostAccess,
   table,
   lockedPost,
   savePost,
@@ -54,6 +55,7 @@ export async function initUpload(
   const { s3, bucket } = privateStorage();
   return transaction(actor, "edit", async (c, user) => {
     const p = await lockedPost(c, postId);
+    requirePostAccess(user, p, "edit");
     if (["in_review", "posted"].includes(p.status))
       throw new CalendarError(
         "This post is locked. Withdraw review or duplicate it before adding media.",
@@ -98,11 +100,13 @@ async function assetFor(
   id: string,
   capability: "view" | "edit",
 ) {
-  return transaction(actor, capability, async (c) => {
+  return transaction(actor, capability, async (c, user) => {
     const r = await c.query(`SELECT data FROM ${table("assets")} WHERE id=$1`, [
       id,
     ]);
     if (!r.rows.length) throw new CalendarError("Media not found.", 404);
+    const p = await lockedPost(c, r.rows[0].data.postId);
+    requirePostAccess(user, p, capability);
     return r.rows[0].data as Asset & { cancelled?: boolean };
   });
 }
@@ -116,7 +120,11 @@ export async function finishUpload(
     throw new CalendarError("This upload expired. Add the file again.");
   const { s3, bucket } = privateStorage();
   if (a.ready)
-    return transaction(actor, "edit", (c) => lockedPost(c, a.postId));
+    return transaction(actor, "edit", async (c, user) => {
+      const p = await lockedPost(c, a.postId);
+      requirePostAccess(user, p, "edit");
+      return p;
+    });
   const object = await s3.send(
     new GetObjectCommand({ Bucket: bucket, Key: a.key }),
   );
@@ -144,6 +152,7 @@ export async function finishUpload(
   }
   return transaction(actor, "edit", async (c, user) => {
     const p = await lockedPost(c, a.postId);
+    requirePostAccess(user, p, "edit");
     const current = await c.query(
       `SELECT data FROM ${table("assets")} WHERE id=$1 FOR UPDATE`,
       [id],
@@ -180,7 +189,7 @@ export async function finishUpload(
         ready: true,
       }),
     ]);
-    await checkRelations(c, p, false);
+    await checkRelations(c, p, false, user);
     await s3.send(
       new PutObjectCommand({
         Bucket: bucket,
@@ -207,7 +216,14 @@ export async function finishUpload(
   });
 }
 export async function cancelUpload(actor: CalendarUser, id: string) {
-  return transaction(actor, "edit", async (c) => {
+  return transaction(actor, "edit", async (c, user) => {
+    const initial = await c.query(
+      `SELECT data FROM ${table("assets")} WHERE id=$1`,
+      [id],
+    );
+    if (!initial.rows.length) throw new CalendarError("Media not found.", 404);
+    const p = await lockedPost(c, initial.rows[0].data.postId);
+    requirePostAccess(user, p, "edit");
     const r = await c.query(
       `SELECT data FROM ${table("assets")} WHERE id=$1 FOR UPDATE`,
       [id],

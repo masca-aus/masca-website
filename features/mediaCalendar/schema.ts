@@ -22,7 +22,7 @@ export function calendarSchemaSQL(
  CREATE INDEX IF NOT EXISTS calendar_revisions_post ON "${schema}".revisions(post_id,created_at);
  CREATE TABLE IF NOT EXISTS "${schema}".notifications (id uuid PRIMARY KEY, recipient text NOT NULL, post_id uuid NOT NULL REFERENCES "${schema}".posts(id), message text NOT NULL, read boolean NOT NULL DEFAULT false, created_at timestamptz NOT NULL DEFAULT now());
  CREATE INDEX IF NOT EXISTS calendar_notifications_recipient ON "${schema}".notifications(recipient,created_at);
- CREATE TABLE IF NOT EXISTS "${schema}".presence (client_id uuid PRIMARY KEY, user_id text NOT NULL, post_id uuid REFERENCES "${schema}".posts(id), cursor jsonb, expires_at timestamptz NOT NULL);
+ CREATE TABLE IF NOT EXISTS "${schema}".presence (client_id uuid PRIMARY KEY, user_id text NOT NULL, post_id uuid REFERENCES "${schema}".posts(id), cursor jsonb, expires_at timestamptz NOT NULL, owning_scope text NOT NULL DEFAULT 'National');
  CREATE INDEX IF NOT EXISTS calendar_presence_expiry ON "${schema}".presence(expires_at);
  ${["presence", "posts", "categories", "assets", "revisions", "notifications"].map((t) => `ALTER TABLE "${schema}".${t} ENABLE ROW LEVEL SECURITY; REVOKE ALL ON "${schema}".${t} FROM PUBLIC;`).join("\n")}
  IF seed_defaults THEN
@@ -36,7 +36,7 @@ export function calendarSchemaSQL(
  ]
    .map(
      ([name, color], i) =>
-       `('00000000-0000-4000-8000-00000000000${i + 1}', '${JSON.stringify({ id: `00000000-0000-4000-8000-00000000000${i + 1}`, name, color, archived: false })}'::jsonb)`,
+       `('00000000-0000-4000-8000-00000000000${i + 1}', '${JSON.stringify({ id: `00000000-0000-4000-8000-00000000000${i + 1}`, name, color, archived: false, owningScope: "National" })}'::jsonb)`,
    )
    .join(",")}
  ON CONFLICT (id) DO NOTHING;

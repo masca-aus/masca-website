@@ -2,7 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
-import { DefaultEditView, SaveButton, useDocumentInfo, useForm, useFormFields, useFormProcessing, useFormSubmitted, useFormModified } from '@payloadcms/ui';
+import { DefaultEditView, SaveButton, SaveDraftButton, useAuth, useDocumentInfo, useForm, useFormFields, useFormProcessing, useFormSubmitted, useFormModified } from '@payloadcms/ui';
+import { committeeMode, type CommitteeAccount } from '@/features/access/committeePolicy';
 import type { DocumentViewClientProps } from 'payload';
 import { SPONSOR_STEPS, sponsorFieldStep, sponsorStepErrors } from '@/features/sponsors/sponsorEditor';
 import { useMediaPreview } from './useEventPoster';
@@ -88,12 +89,14 @@ function SponsorReview({ image }: { image?: string }) {
   </div>;
 }
 export function SponsorEditorFooter() {
+  const {user} = useAuth();
+  const privateDrafts = committeeMode(user as unknown as CommitteeAccount);
   const { step, setStep, setError, nextRef, setAttemptedSave } = useSponsorEditor();
   const busy = useFormProcessing();
   const modified = useFormModified();
   const { id } = useDocumentInfo();
   return <footer className="masca-wizard-footer">
-    <div className="masca-wizard-save-actions"><Link href="/admin/collections/sponsors" className="masca-action masca-action--secondary">Cancel</Link><span className="masca-save-indicator" role="status">{busy ? 'Saving…' : id && !modified ? 'Saved' : 'Changes go live when saved'}</span></div>
-    <div>{step > 0 && <button type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}{step < 2 ? <button type="button" className="masca-wizard-primary" disabled={busy} onClick={() => nextRef.current?.()}>Continue</button> : <div onClickCapture={() => setAttemptedSave(true)}><SaveButton label="Save sponsor" /></div>}</div>
+    <div className="masca-wizard-save-actions"><Link href="/admin/collections/sponsors" className="masca-action masca-action--secondary">Cancel</Link><span className="masca-save-indicator" role="status">{busy ? 'Saving…' : id && !modified ? 'Saved' : privateDrafts ? 'Save a draft, then request review' : 'Changes go live when saved'}</span></div>
+    <div>{step > 0 && <button type="button" className="masca-wizard-secondary" disabled={busy} onClick={() => { setError(''); setStep(step - 1); }}>Back</button>}{step < 2 ? <button type="button" className="masca-wizard-primary" disabled={busy} onClick={() => nextRef.current?.()}>Continue</button> : <div onClickCapture={() => setAttemptedSave(true)}>{privateDrafts ? <SaveDraftButton /> : <SaveButton label="Save sponsor" />}</div>}</div>
   </footer>;
 }

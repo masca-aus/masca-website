@@ -28,7 +28,26 @@ export const patchSchema = z
   })
   .partial()
   .strict();
+export const createSchema = patchSchema.extend({
+  owningScope: z.string().min(1).max(100).optional(),
+});
+export const sharingSchema = z
+  .array(
+    z
+      .object({
+        userId: z.string().min(1).max(100),
+        role: z.enum(["viewer", "editor"]),
+      })
+      .strict(),
+  )
+  .max(100)
+  .refine((v) => new Set(v.map((g) => g.userId)).size === v.length);
 export const actionSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("share"),
+    expectedVersion: z.number().int().positive(),
+    sharedWith: sharingSchema,
+  }),
   z.object({
     action: z.literal("patch"),
     expectedVersion: z.number().int().positive(),

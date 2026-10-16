@@ -1,3 +1,5 @@
+import * as workspaceCatalog from "./20261014_010000_workspace_catalog.ts";
+import * as committeeAccess from "./20261013_193000_committee_access.ts";
 import * as accountPhotos from "./20261012_200000_account_photos";
 import * as calendar from './20261010_140000_media_calendar';
 import * as listingChanges from './20261008_140000_listing_changes';
@@ -101,4 +103,6 @@ export const migrations = [
     name: '20261008_033000_account_departments',
   },
   {up:accountPhotos.up,down:accountPhotos.down,name:"20261012_200000_account_photos"},
+  {up:committeeAccess.up,down:committeeAccess.down,name:"20261013_193000_committee_access"},
+  {up:workspaceCatalog.up,down:workspaceCatalog.down,name:"20261014_010000_workspace_catalog"},
 ];

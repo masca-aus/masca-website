@@ -28,9 +28,14 @@ import type {
   Member,
   Category,
 } from "@/features/mediaCalendar/types";
-import { mayApprove, mayUseCalendar } from "@/features/mediaCalendar/policy";
+import {
+  mayApprove,
+  mayAccessPost,
+  mayManagePost,
+} from "@/features/mediaCalendar/policy";
 import { CalendarDatePicker } from "./CalendarDatePicker";
 import { AddToCalendar } from "./AddToCalendar";
+import { PostSharing } from "./PostSharing";
 import { api, calendarAPI } from "./api";
 import { CalendarSelect } from "./CalendarSelect";
 import { statusLabels } from "./CalendarCard";
@@ -48,6 +53,8 @@ const CaptionEditor = dynamic(loadCaptionEditor, {
 });
 type Detail = {
   post: Post;
+  members?: Member[];
+  categories?: Category[];
   assets: Asset[];
   pendingUploads: Asset[];
   history: {
@@ -257,8 +264,8 @@ function LoadedPanel({
   container,
   requestCloseRef,
   user,
-  members,
-  categories,
+  members: workspaceMembers,
+  categories: workspaceCategories,
   onClose,
   onOpen,
   onChange,
@@ -278,6 +285,10 @@ function LoadedPanel({
   onReady: () => void;
 }) {
   const router = useRouter();
+  const [members, setMembers] = useState(initial.members ?? workspaceMembers);
+  const [categories, setCategories] = useState(
+    initial.categories ?? workspaceCategories,
+  );
   const [savedPost, setSavedPost] = useState(initial.post),
     [pendingPatch, setPendingPatch] = useState<Partial<Post>>({}),
     [assets, setAssets] = useState(initial.assets),
@@ -343,7 +354,8 @@ function LoadedPanel({
     localTitle.current = title;
     localLinks.current = linksDraft;
   });
-  const editable = mayUseCalendar(user, "edit"),
+  const editable = mayAccessPost(user, post, "edit"),
+    canManage = mayManagePost(user, post, "edit"),
     locked =
       !editable ||
       !!post.deletedAt ||
@@ -385,7 +397,10 @@ function LoadedPanel({
       holdVersion.current = p.version;
     }
     onChange(p);
-    if (JSON.stringify(p.assets) !== JSON.stringify(previous.assets))
+    if (
+      JSON.stringify(p.assets) !== JSON.stringify(previous.assets) ||
+      JSON.stringify(p.sharedWith) !== JSON.stringify(previous.sharedWith)
+    )
       void api<Detail>(`${calendarAPI}?id=${p.id}`)
         .then((d) => {
           if (
@@ -395,6 +410,8 @@ function LoadedPanel({
           )
             return;
           setAssets(d.assets);
+          if (d.members) setMembers(d.members);
+          if (d.categories) setCategories(d.categories);
           setPendingUploads(d.pendingUploads ?? []);
           setHistory(d.history);
           onChange(postRef.current, d.assets);
@@ -403,12 +420,14 @@ function LoadedPanel({
   };
   const uploads = useUploads(post, receive);
   useEffect(() => {
-    if (!historyOpen) return;
+    if (!historyOpen && user.accessModel !== "committee") return;
     let alive = true;
     void api<Detail>(`${calendarAPI}?id=${savedPost.id}`)
       .then((d) => {
         if (alive) {
           setHistory(d.history);
+          if (d.members) setMembers(d.members);
+          if (d.categories) setCategories(d.categories);
           setHistoryError("");
         }
       })
@@ -421,7 +440,7 @@ function LoadedPanel({
     return () => {
       alive = false;
     };
-  }, [historyOpen, savedPost.id, savedPost.checkpointAt]);
+  }, [historyOpen, savedPost.id, savedPost.checkpointAt, user.accessModel]);
   const act = async (action: Record<string, unknown>) => {
     setBusy(true);
     try {
@@ -738,6 +757,9 @@ function LoadedPanel({
           </label>
         </div>
         <small className="mc-muted">
+          {user.accessModel === "committee"
+            ? `${post.owningScope ?? "National"} · `
+            : ""}
           Australia/Brisbane · AEST · planned date only
         </small>
         <AddToCalendar
@@ -757,6 +779,8 @@ function LoadedPanel({
               void api<Detail>(`${calendarAPI}?id=${post.id}`).then((d) => {
                 receive(d.post);
                 setAssets(d.assets);
+                if (d.members) setMembers(d.members);
+                if (d.categories) setCategories(d.categories);
                 titleVersion.current = d.post.version;
                 linksVersion.current = d.post.version;
                 holdVersion.current = d.post.version;
@@ -825,7 +849,7 @@ function LoadedPanel({
                 Owner
                 <CalendarSelect
                   label="Post owner"
-                  disabled={!editable || post.status === "posted"}
+                  disabled={!canManage || post.status === "posted"}
                   value={post.owner}
                   onChange={(value) =>
                     void patch({ owner: value }).catch(() => {})
@@ -853,7 +877,7 @@ function LoadedPanel({
                     <label className="mc-check" key={m.id}>
                       <input
                         type="checkbox"
-                        disabled={!editable || post.status === "posted"}
+                        disabled={!canManage || post.status === "posted"}
                         checked={post.collaborators.includes(m.id)}
                         onChange={(e) =>
                           void patch({
@@ -1039,6 +1063,10 @@ function LoadedPanel({
               Add comment
             </button>
           </section>
+          {user.accessModel === "committee" &&
+            mayAccessPost(user, post, "share") && (
+              <PostSharing post={post} onChange={receive} />
+            )}
           <details
             className="mc-history"
             onToggle={(event) => setHistoryOpen(event.currentTarget.open)}
@@ -1088,7 +1116,7 @@ function LoadedPanel({
               </a>
             ))}
           </details>
-          {editable && (
+          {canManage && (
             <button
               onClick={() =>
                 void act({
@@ -1111,19 +1139,20 @@ function LoadedPanel({
           )}
         </div>
         <div>
-          {["draft", "changes_requested"].includes(post.status) && editable && (
-            <button
-              className="mc-primary"
-              disabled={busy || uploads.pending}
-              onClick={() => void workflow("review")}
-            >
-              <Send size={16} />
-              Request review
-            </button>
-          )}
+          {["draft", "changes_requested"].includes(post.status) &&
+            canManage && (
+              <button
+                className="mc-primary"
+                disabled={busy || uploads.pending}
+                onClick={() => void workflow("review")}
+              >
+                <Send size={16} />
+                Request review
+              </button>
+            )}
           {post.status === "in_review" && (
             <>
-              {editable && (
+              {canManage && (
                 <button
                   disabled={busy}
                   onClick={() => void workflow("withdraw")}
@@ -1131,7 +1160,7 @@ function LoadedPanel({
                   Withdraw review
                 </button>
               )}
-              {mayUseCalendar(user, "approve") && (
+              {canApprove && (
                 <button
                   disabled={busy}
                   onClick={() => setRequested(!requested)}
@@ -1154,7 +1183,7 @@ function LoadedPanel({
               )}
             </>
           )}
-          {post.status === "approved" && editable && (
+          {post.status === "approved" && canManage && (
             <button
               className="mc-primary"
               disabled={busy}

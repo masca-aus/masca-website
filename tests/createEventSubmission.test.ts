@@ -29,7 +29,8 @@ describe("createEventSubmission", () => {
     expect(payload.create).toHaveBeenNthCalledWith(1, {
       collection: "media",
       overrideAccess: true,
-      data: { alt: "Malaysian Students Welcome Night" },
+      data: { alt: "Malaysian Students Welcome Night",owningScope:"National" },
+      context:{publicEventSubmission},
       file: {
         data: Buffer.from("poster bytes"),
         mimetype: "image/webp",

@@ -35,12 +35,14 @@ export function CalendarDatePicker({
   onChange,
   disabled,
   dateOnly = false,
+  dialogLabel = "Choose publishing date",
 }: {
   label: string;
   value: string | null;
   onChange: (value: string | null) => void;
   disabled?: boolean;
   dateOnly?: boolean;
+  dialogLabel?: string;
 }) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const open = !!anchor;
@@ -77,6 +79,7 @@ export function CalendarDatePicker({
           anchor={anchor}
           value={value}
           dateOnly={dateOnly}
+          dialogLabel={dialogLabel}
           onClose={(focus = true) => {
             setAnchor(null);
             if (focus) trigger.current?.focus();
@@ -95,12 +98,14 @@ function DatePopover({
   anchor,
   value,
   dateOnly,
+  dialogLabel,
   onApply,
   onClose,
 }: {
   anchor: HTMLElement;
   value: string | null;
   dateOnly: boolean;
+  dialogLabel: string;
   onApply: (value: string | null) => void;
   onClose: (focus?: boolean) => void;
 }) {
@@ -186,7 +191,7 @@ function DatePopover({
       className="mc-date-popover"
       style={position}
       role="dialog"
-      aria-label={dateOnly ? "Choose deadline" : "Choose publishing date"}
+      aria-label={dateOnly && dialogLabel === "Choose publishing date" ? "Choose deadline" : dialogLabel}
       onKeyDown={(e) => {
         e.stopPropagation();
         if (e.key === "Escape") {

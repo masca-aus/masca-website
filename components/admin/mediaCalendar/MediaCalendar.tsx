@@ -1,12 +1,14 @@
+import { withCommitteeMode } from "@/features/access/committeeEnvironment";
 import { DefaultTemplate } from "@payloadcms/next/templates";
 import type { AdminViewServerProps } from "payload";
 import { redirect } from "next/navigation";
-import { mayUseCalendar } from "@/features/mediaCalendar/policy";
+import { mayEnterCalendar } from "@/features/mediaCalendar/policy";
 import type { CalendarUser } from "@/features/mediaCalendar/types";
 import { CalendarView } from "./CalendarView";
 export function MediaCalendar(props: AdminViewServerProps) {
   const { initPageResult } = props;
-  const user = initPageResult.req.user as unknown as CalendarUser;
+  const rawUser = initPageResult.req.user as unknown as CalendarUser;
+  const user = rawUser ? withCommitteeMode(rawUser) : rawUser;
   if (!user) redirect("/admin/login");
   if (
     process.env.MEDIA_CALENDAR_ENABLED !== "true" ||
@@ -18,7 +20,7 @@ export function MediaCalendar(props: AdminViewServerProps) {
         <p>This workspace has not enabled the private calendar yet.</p>
       </main>
     );
-  if (!mayUseCalendar(user, "view"))
+  if (!mayEnterCalendar(user))
     return (
       <main style={{ padding: 32 }}>
         <h1>Calendar access needed</h1>
@@ -40,6 +42,12 @@ export function MediaCalendar(props: AdminViewServerProps) {
           status: user.status,
           role: user.role,
           calendarAccess: user.calendarAccess,
+          accessModel: user.accessModel,
+          accessCatalog:user.accessCatalog,
+          workspaceNames:user.workspaceNames,
+          committeeMemberships: user.committeeMemberships,
+          committeeAccessReviewedAt: user.committeeAccessReviewedAt,
+          committeeAccessReviewedBy: user.committeeAccessReviewedBy,
         }}
       />
     </DefaultTemplate>
