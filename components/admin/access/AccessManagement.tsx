@@ -336,7 +336,7 @@ export function AccessManagement({
           role="tabpanel"
           aria-labelledby={w ? `ag-tab-${tab}` : undefined}
           className="ag-management-pane"
-          key={w?.id}
+          key={`${w?.id}:${tab}`}
         >
           {globalEditor && inside?.kind !== "member" && renderEditor(inside!)}
           {w && tab === "members" && (
@@ -365,10 +365,7 @@ export function AccessManagement({
                   Add member
                 </button>
               </div>
-              {globalEditor &&
-                inside?.kind === "member" &&
-                renderEditor(inside)}
-              {scoped.length ? (
+              {scoped.length || (globalEditor && inside?.kind === "member") ? (
                 <div className="ag-member-table-wrap">
                   <table className="ag-member-table">
                     <caption>{w.name} members</caption>
@@ -383,6 +380,11 @@ export function AccessManagement({
                       </tr>
                     </thead>
                     <tbody>
+                      {globalEditor && inside?.kind === "member" && (
+                        <tr className="ag-member-expanded ag-member-new">
+                          <td colSpan={4}>{renderEditor(inside)}</td>
+                        </tr>
+                      )}
                       {people
                         .filter(
                           ({ p }) =>
@@ -425,12 +427,16 @@ export function AccessManagement({
                               status={status}
                               access={accessLabel(m)}
                               editable={editable}
+                              expanded={!!rowEditor}
                               onOpen={(kind) =>
-                                open({
-                                  kind,
-                                  workspaceId: w.id,
-                                  personId: p.id,
-                                } as EditorIntent)
+                                kind === "details" &&
+                                rowEditor?.kind === "details"
+                                  ? onNavigate(() => {})
+                                  : open({
+                                      kind,
+                                      workspaceId: w.id,
+                                      personId: p.id,
+                                    } as EditorIntent)
                               }
                             >
                               {rowEditor && renderEditor(rowEditor)}
@@ -439,15 +445,16 @@ export function AccessManagement({
                         })}
                     </tbody>
                   </table>
-                  {!people.some(
-                    ({ p }) =>
-                      (inside &&
-                        "personId" in inside &&
-                        inside.personId === p.id) ||
-                      `${p.name} ${p.email}`
-                        .toLowerCase()
-                        .includes(query.trim().toLowerCase()),
-                  ) && <p className="ag-list-empty">No matching members.</p>}
+                  {people.length > 0 &&
+                    !people.some(
+                      ({ p }) =>
+                        (inside &&
+                          "personId" in inside &&
+                          inside.personId === p.id) ||
+                        `${p.name} ${p.email}`
+                          .toLowerCase()
+                          .includes(query.trim().toLowerCase()),
+                    ) && <p className="ag-list-empty">No matching members.</p>}
                 </div>
               ) : (
                 <div className="ag-list-empty">
@@ -545,6 +552,7 @@ function MemberRow({
   status,
   access,
   editable,
+  expanded,
   onOpen,
   children,
 }: {
@@ -553,17 +561,22 @@ function MemberRow({
   status: string;
   access: string;
   editable: boolean;
+  expanded: boolean;
   onOpen: (kind: "details" | "member" | "renew" | "remove") => void;
   children?: ReactNode;
 }) {
   return (
     <>
-      <tr data-motion-key={`member-${membership.id}`}>
+      <tr
+        className={expanded ? "is-expanded" : undefined}
+        data-motion-key={`member-${membership.id}`}
+      >
         <td>
           <button
             type="button"
             className="ag-member-person"
             aria-label={`View access for ${person.name}`}
+            aria-expanded={expanded}
             onClick={() => onOpen("details")}
           >
             <PersonAvatar person={person} />

@@ -1420,3 +1420,176 @@
 .ag-overview-tool strong {
   overflow-wrap: anywhere;
 }
+
+/* Manage: keep membership creation and editing anchored to the member list. */
+.ag-management .ag-inline {
+  border-radius: 12px;
+  padding: 20px;
+}
+.ag-management .ag-member-step {
+  display: block;
+  min-width: 0;
+  margin: 0;
+  padding: 18px 0;
+  border-top: 1px solid var(--ag-border);
+}
+.ag-management .ag-member-step legend {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ag-ink);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 12px 0 0;
+  margin: 0;
+}
+.ag-member-step legend > span {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--ag-soft);
+  color: var(--ag-muted);
+  font-size: 11px;
+}
+.ag-management .ag-field-hint {
+  font-size: 12px;
+  margin: 0 0 12px;
+}
+.ag-management .ag-term + .ag-field-hint {
+  margin-bottom: 0;
+}
+.ag-management .ag-tool-roles > div {
+  grid-template-columns: minmax(0, 1fr) minmax(125px, 180px);
+  gap: 4px 16px;
+  margin: 0;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ag-border);
+}
+.ag-management .ag-tool-roles > div:last-child {
+  border-bottom: 0;
+}
+.ag-management .ag-tool-roles label {
+  color: var(--ag-ink);
+  min-height: 40px;
+  font-weight: 500;
+}
+.ag-management .ag-role-hint {
+  grid-column: 1/-1;
+  color: var(--ag-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.ag-management .ag-no-access {
+  justify-self: end;
+  color: var(--ag-muted);
+  font-size: 12px;
+}
+.ag-selected-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 9px 0;
+}
+.ag-selected-person > span:nth-child(2),
+.ag-person-results button > span:last-child {
+  flex: 1;
+  min-width: 0;
+}
+.ag-selected-person strong,
+.ag-person-results strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+}
+.ag-selected-person small,
+.ag-person-results small {
+  display: block;
+  font-size: 11px;
+  color: var(--ag-muted);
+  overflow-wrap: anywhere;
+}
+.ag-selected-person > svg {
+  color: var(--ag-muted);
+  flex-shrink: 0;
+}
+.ag-selected-person .ag-text {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.ag-management .ag-person-picker .ag-member-search {
+  max-width: none;
+  display: flex;
+  margin-bottom: 10px;
+}
+.ag-management .ag-person-picker .ag-member-search input {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  min-height: 22px;
+  outline: 0;
+  box-shadow: none;
+}
+.ag-person-results {
+  display: grid;
+  gap: 3px;
+}
+.ag-person-results button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 8px;
+  min-height: 48px;
+  text-align: left;
+}
+.ag-person-results button:hover {
+  background: var(--ag-soft);
+}
+.ag-person-results p {
+  margin: 8px 0;
+  font-size: 12px;
+}
+.ag-management .ag-new-person {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  min-height: 40px;
+  margin-top: 5px;
+}
+.ag-member-person {
+  width: 100%;
+  border-radius: 7px;
+}
+.ag-member-person:hover strong {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ag-member-table tr.is-expanded > td {
+  background: var(--ag-soft);
+}
+.ag-member-new > td {
+  padding-top: 12px;
+}
+@media (max-width: 560px) {
+  .ag-management .ag-inline {
+    padding: 15px;
+  }
+  .ag-management .ag-tool-roles > div {
+    grid-template-columns: minmax(0, 1fr) minmax(110px, 145px);
+    gap: 4px 10px;
+  }
+  .ag-selected-person {
+    flex-wrap: wrap;
+  }
+  .ag-selected-person .ag-text {
+    margin-left: 40px;
+  }
+}

@@ -197,6 +197,7 @@ export function AccessGraph({
         <InlineMemberEditor
           context={state}
           manager={state.manager}
+          manage={state.group === "manage" && !state.area}
           {...props}
         />
       );

@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import { ManageMemberPerson } from "./ManageMemberPerson";
 import { CalendarSelect } from "../mediaCalendar/CalendarSelect";
 import { CalendarDatePicker } from "../mediaCalendar/CalendarDatePicker";
 import {
@@ -18,14 +19,42 @@ import type {
 import type { InlineContext, EditorProps } from "./inlineTypes";
 import { useAccessClock } from "./useAccessClock";
 import { InlineFrame } from "./InlineFrame";
+function MemberStep({
+  enabled,
+  number,
+  title,
+  children,
+}: {
+  enabled: boolean;
+  number: number;
+  title: string;
+  children: ReactNode;
+}) {
+  return enabled ? (
+    <fieldset className="ag-member-step">
+      <legend>
+        <span aria-hidden="true">{number}</span>
+        {title}
+      </legend>
+      {children}
+    </fieldset>
+  ) : (
+    <>{children}</>
+  );
+}
 export function InlineMemberEditor({
   context,
   manager = false,
+  manage = false,
   onSave,
   onCancel,
   onReview,
   busy,
-}: { context: InlineContext; manager?: boolean } & EditorProps) {
+}: {
+  context: InlineContext;
+  manager?: boolean;
+  manage?: boolean;
+} & EditorProps) {
   const now = useAccessClock();
   const w = context.snapshot.workspaces.find(
     (w) => w.id === context.workspaceId,
@@ -124,92 +153,141 @@ export function InlineMemberEditor({
       onSubmit={submit}
       onReview={onReview}
     >
-      <p className="ag-context">
-        {w.name}
-        {context.area ? ` / ${memberAreaLabels[context.area]}` : ""}
-      </p>
-      <div className="ag-fields-row">
-        <div>
-          <label>Person</label>
-          <CalendarSelect
-            label="Person"
-            value={personId}
-            options={[
-              { value: "", label: "Enter a MASCA email" },
-              ...context.snapshot.people
-                .filter((p) => p.status !== "suspended")
-                .map((p) => ({ value: p.id, label: p.name })),
-            ]}
-            onChange={choosePerson}
-          />
-        </div>
-        {context.area && (
-          <div>
-            <label>Role</label>
-            <CalendarSelect
-              label="Role"
-              value={roleValue(areaRoles)}
-              options={memberRolePresets}
-              onChange={(v) => setAreaRoles(parseRoles(v))}
-            />
-          </div>
-        )}
-      </div>
-      {!personId && (
-        <div className="ag-fields-row">
-          <label>
-            Name
-            <input
-              aria-label="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={80}
-              placeholder="Optional name"
-            />
-          </label>
-          <label>
-            MASCA email
-            <input
-              aria-label="MASCA email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@masca.org.au"
-              type="email"
-              autoComplete="off"
-            />
-          </label>
-        </div>
+      {!manage && (
+        <p className="ag-context">
+          {w.name}
+          {context.area ? ` / ${memberAreaLabels[context.area]}` : ""}
+        </p>
       )}
-      {!context.area && !manager && (
-        <div className="ag-tool-roles">
-          {w.areas.map((a) => (
-            <div key={a}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={!!roles[a]?.length}
-                  onChange={(e) => {
-                    setRoleEdits({
-                      ...roleEdits,
-                      [a]: e.target.checked ? ["viewer"] : [],
-                    });
-                  }}
-                />
-                {memberAreaLabels[a]}
-              </label>
-              {!!roles[a]?.length && (
+      <MemberStep enabled={manage} number={1} title="Person">
+        {manage ? (
+          <ManageMemberPerson
+            people={context.snapshot.people}
+            personId={personId}
+            fixed={!!context.personId}
+            name={name}
+            email={email}
+            onChoose={choosePerson}
+            onName={setName}
+            onEmail={setEmail}
+          />
+        ) : (
+          <>
+            <div className="ag-fields-row">
+              <div>
+                <label>Person</label>
                 <CalendarSelect
-                  label={`${memberAreaLabels[a]} role`}
-                  value={roleValue(roles[a] ?? [])}
-                  options={memberRolePresets}
-                  onChange={(v) => {
-                    setRoleEdits((edits) => ({ ...edits, [a]: parseRoles(v) }));
-                  }}
+                  label="Person"
+                  value={personId}
+                  options={[
+                    { value: "", label: "Enter a MASCA email" },
+                    ...context.snapshot.people
+                      .filter((p) => p.status !== "suspended")
+                      .map((p) => ({ value: p.id, label: p.name })),
+                  ]}
+                  onChange={choosePerson}
                 />
+              </div>
+              {context.area && (
+                <div>
+                  <label>Role</label>
+                  <CalendarSelect
+                    label="Role"
+                    value={roleValue(areaRoles)}
+                    options={memberRolePresets}
+                    onChange={(v) => setAreaRoles(parseRoles(v))}
+                  />
+                </div>
               )}
             </div>
-          ))}
-        </div>
+            {!personId && (
+              <div className="ag-fields-row">
+                <label>
+                  Name
+                  <input
+                    aria-label="Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    maxLength={80}
+                    placeholder="Optional name"
+                  />
+                </label>
+                <label>
+                  MASCA email
+                  <input
+                    aria-label="MASCA email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@masca.org.au"
+                    type="email"
+                    autoComplete="off"
+                  />
+                </label>
+              </div>
+            )}
+          </>
+        )}
+      </MemberStep>
+      {!context.area && !manager && (
+        <MemberStep enabled={manage} number={2} title="Tool access">
+          {manage && (
+            <p className="ag-field-hint">
+              Choose their tools, then set a role for each one.
+            </p>
+          )}
+          <div className="ag-tool-roles">
+            {w.areas.map((a) => (
+              <div key={a}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={!!roles[a]?.length}
+                    onChange={(e) => {
+                      setRoleEdits({
+                        ...roleEdits,
+                        [a]: e.target.checked ? ["viewer"] : [],
+                      });
+                    }}
+                  />
+                  {memberAreaLabels[a]}
+                </label>
+                {manage && !roles[a]?.length && (
+                  <span className="ag-no-access">No access</span>
+                )}
+                {!!roles[a]?.length && (
+                  <CalendarSelect
+                    label={`${memberAreaLabels[a]} role`}
+                    value={roleValue(roles[a] ?? [])}
+                    options={memberRolePresets}
+                    onChange={(v) => {
+                      setRoleEdits((edits) => ({
+                        ...edits,
+                        [a]: parseRoles(v),
+                      }));
+                    }}
+                  />
+                )}
+                {manage && !!roles[a]?.length && (
+                  <small className="ag-role-hint">
+                    {roles[a]?.includes("editor") &&
+                    roles[a]?.includes("approver")
+                      ? "Prepare content and review another person’s work."
+                      : roles[a]?.includes("approver")
+                        ? "Review and approve another person’s work."
+                        : roles[a]?.includes("editor")
+                          ? "Create and edit drafts, then request review."
+                          : "Read content and join discussions."}
+                  </small>
+                )}
+              </div>
+            ))}
+          </div>
+          {manage && !w.areas.length && (
+            <p className="ag-field-hint">
+              No tools are enabled. Cancel and add tools in the Tools tab first.
+            </p>
+          )}
+        </MemberStep>
       )}
       {manager && (
         <p>
@@ -217,20 +295,29 @@ export function InlineMemberEditor({
           only platform administrators appoint managers.
         </p>
       )}
-      <div className="ag-term">
-        <label>Term ends</label>
-        {m ? (
-          <strong>{memberTermLabel(m.expiresAt)}</strong>
-        ) : (
-          <CalendarDatePicker
-            label="Term end"
-            dateOnly
-            dialogLabel="Choose membership term end"
-            value={memberTermDay(expiresAt)}
-            onChange={(day) => setExpiry(memberTermInstant(day, expiresAt))}
-          />
+      <MemberStep enabled={manage} number={manager ? 2 : 3} title="Term">
+        <div className="ag-term">
+          <label>Term ends</label>
+          {m ? (
+            <strong>{memberTermLabel(m.expiresAt)}</strong>
+          ) : (
+            <CalendarDatePicker
+              label="Term end"
+              dateOnly
+              dialogLabel="Choose membership term end"
+              value={memberTermDay(expiresAt)}
+              onChange={(day) => setExpiry(memberTermInstant(day, expiresAt))}
+            />
+          )}
+        </div>
+        {manage && (
+          <p className="ag-field-hint">
+            {m
+              ? "The existing end date is preserved. Use Renew term to extend it."
+              : "Access ends at the end of this day (AEST). Choose the confirmed committee term."}
+          </p>
         )}
-      </div>
+      </MemberStep>
       <div className="ag-summary" aria-live="polite">
         <strong>
           {p?.name ?? (name.trim() || "This person")} → {w.name}
@@ -246,13 +333,17 @@ export function InlineMemberEditor({
                     ([a, r]) =>
                       `${memberAreaLabels[a as CommitteeArea]}: ${memberRoleLabel(r)}`,
                   )
-                  .join(" · ") || "Choose tools below"}
-          . Access ends {memberTermLabel(effectiveExpiry)}.
+                  .join(" · ") || "Choose tools above"}
+          .{" "}
+          {manage && !effectiveExpiry
+            ? "Set a term end date above."
+            : `Access ends ${memberTermLabel(effectiveExpiry)}.`}
         </p>
         {m && (
           <small>
-            Other area roles and the existing term stay unchanged. Renew the
-            term separately.
+            {manage
+              ? "Other workspace memberships stay unchanged. Renew the term separately."
+              : "Other area roles and the existing term stay unchanged. Renew the term separately."}
           </small>
         )}
         {!m && (

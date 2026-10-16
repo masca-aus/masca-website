@@ -42,8 +42,7 @@ it("does not restore an unrelated removed role after reviewing a whole-membershi
     />,
   );
   fireEvent.click(screen.getByRole("button", { name: "Add member" }));
-  fireEvent.click(screen.getByRole("button", { name: "Person" }));
-  fireEvent.click(screen.getByRole("option", { name: "Syed" }));
+  fireEvent.click(screen.getByRole("button", { name: "Choose Syed" }));
   fireEvent.click(screen.getByRole("checkbox", { name: "Events" }));
   fireEvent.click(screen.getByRole("button", { name: "Events role" }));
   fireEvent.click(screen.getByRole("option", { name: /^Editor$/ }));

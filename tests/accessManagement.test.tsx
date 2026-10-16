@@ -63,6 +63,7 @@ it("keeps the add-member form inline and prevents navigation from losing edits",
       .getByRole("form", { name: "Add workspace member" })
       .closest('[aria-label="MASA members panel"]'),
   ).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Add with MASCA email" }));
   fireEvent.change(screen.getByRole("textbox", { name: "Name" }), {
     target: { value: "Draft name" },
   });
@@ -212,8 +213,9 @@ it("switches workspace while viewing read-only member details", () => {
   ).toBeNull();
 });
 it("keeps an area editor recoverable if that tool is removed during conflict review", async () => {
-  const { AccessSaveError } =
-    await import("../components/admin/access/inlineTypes");
+  const { AccessSaveError } = await import(
+    "../components/admin/access/inlineTypes"
+  );
   vi.stubGlobal("fetch", async () =>
     Response.json({
       ...accessFixture,
@@ -252,8 +254,9 @@ it("keeps an area editor recoverable if that tool is removed during conflict rev
 
 for (const change of ["removed", "renamed", "replaced"] as const) {
   it(`preserves a recoverable dirty member editor when latest membership is ${change}`, async () => {
-    const { AccessSaveError } =
-      await import("../components/admin/access/inlineTypes");
+    const { AccessSaveError } = await import(
+      "../components/admin/access/inlineTypes"
+    );
     const latest = {
       ...accessFixture,
       people: accessFixture.people.map((p) =>
@@ -321,3 +324,147 @@ for (const change of ["removed", "renamed", "replaced"] as const) {
     ).toBeTruthy();
   });
 }
+
+it("places new membership creation inside the member list, including an empty workspace", () => {
+  render(
+    <AccessGraph
+      initialSnapshot={{
+        ...accessFixture,
+        memberships: accessFixture.memberships.filter(
+          (m) => m.committee !== "QLD",
+        ),
+      }}
+    />,
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Select workspace Queensland" }),
+  );
+  fireEvent.click(screen.getByRole("button", { name: /^Add member$/ }));
+  expect(
+    screen.getByRole("form", { name: "Add workspace member" }).closest("tbody"),
+  ).toBeTruthy();
+  expect(screen.queryByText("No members in this workspace yet")).toBeNull();
+  expect(screen.queryByText("No matching members.")).toBeNull();
+});
+it("finds an existing teammate inline and saves their access without creating another account", async () => {
+  const saved: unknown[] = [];
+  const fixture = {
+    ...accessFixture,
+    people: [
+      ...accessFixture.people,
+      {
+        id: "4",
+        name: "Alya",
+        email: "alya@masca.org.au",
+        status: "active" as const,
+        revision: "p4",
+      },
+    ],
+    workspaces: accessFixture.workspaces.map((w) => ({
+      ...w,
+      termEnd: "2099-12-31T14:00:00.000Z",
+    })),
+  };
+  render(
+    <AccessGraph
+      initialSnapshot={fixture}
+      onMutation={async (input) => {
+        saved.push(input);
+        return {
+          snapshot: {
+            ...fixture,
+            memberships: [
+              ...fixture.memberships,
+              {
+                id: "m4",
+                userId: "4",
+                committee: "ws-masa",
+                roles: { events: ["viewer"] },
+                manager: false,
+                expiresAt: "2099-12-31T14:00:00.000Z",
+              },
+            ],
+          },
+        };
+      }}
+    />,
+  );
+  const add = screen.getByRole("button", { name: /^Add member$/ });
+  fireEvent.click(add);
+  fireEvent.change(screen.getByRole("searchbox", { name: "Find a teammate" }), {
+    target: { value: "alya@masca.org.au" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Choose Alya" }));
+  fireEvent.click(screen.getByRole("checkbox", { name: "Events" }));
+  fireEvent.submit(screen.getByRole("form"));
+  await waitFor(() => expect(screen.queryByRole("form")).toBeNull());
+  expect(saved).toMatchObject([
+    {
+      type: "saveMembership",
+      targetId: "4",
+      expectedRevision: "p4",
+      membership: {
+        committee: "ws-masa",
+        roles: { events: ["viewer"] },
+        expiresAt: "2099-12-31T14:00:00.000Z",
+      },
+    },
+  ]);
+  expect(
+    screen.getByRole("button", { name: "View access for Alya" }),
+  ).toBeTruthy();
+  expect(document.activeElement).toBe(add);
+});
+it("keeps the identity fixed when editing a member and toggles their details in place", () => {
+  render(<AccessGraph initialSnapshot={accessFixture} />);
+  const person = screen.getByRole("button", { name: "View access for Syed" });
+  fireEvent.click(person);
+  expect(person.getAttribute("aria-expanded")).toBe("true");
+  fireEvent.click(person);
+  expect(
+    screen.queryByRole("region", { name: "Syed access details" }),
+  ).toBeNull();
+  fireEvent.click(person);
+  fireEvent.click(screen.getByRole("button", { name: /^Edit access$/ }));
+  const form = screen.getByRole("form");
+  expect(within(form).queryByRole("button", { name: "Person" })).toBeNull();
+  expect(within(form).getByText("syed@masca.org.au")).toBeTruthy();
+  expect(
+    within(form).queryByRole("searchbox", { name: "Find a teammate" }),
+  ).toBeNull();
+});
+
+it("does not submit a hidden new account after returning to teammate selection", async () => {
+  const submissions: unknown[] = [];
+  const fixture = {
+    ...accessFixture,
+    workspaces: accessFixture.workspaces.map((w) => ({
+      ...w,
+      termEnd: "2099-12-31T14:00:00.000Z",
+    })),
+  };
+  render(
+    <AccessGraph
+      initialSnapshot={fixture}
+      onMutation={async (input) => {
+        submissions.push(input);
+        return { snapshot: fixture };
+      }}
+    />,
+  );
+  fireEvent.click(screen.getByRole("button", { name: /^Add member$/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Add with MASCA email" }));
+  fireEvent.change(screen.getByRole("textbox", { name: "MASCA email" }), {
+    target: { value: "draft@masca.org.au" },
+  });
+  fireEvent.click(
+    screen.getByRole("button", { name: "Choose an existing teammate instead" }),
+  );
+  fireEvent.click(screen.getByRole("checkbox", { name: "Events" }));
+  fireEvent.submit(screen.getByRole("form"));
+  expect(await screen.findByRole("alert")).toBeTruthy();
+  expect(submissions).toEqual([]);
+  expect(
+    screen.getByRole("searchbox", { name: "Find a teammate" }),
+  ).toBeTruthy();
+});
