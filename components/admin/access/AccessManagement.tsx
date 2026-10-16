@@ -15,13 +15,10 @@ import type {
   AccessPerson,
   GraphMembership,
 } from "@/features/access/workspaces/types";
-import {
-  memberAreaLabels,
-  memberRoleLabel,
-  memberTermLabel,
-} from "@/features/access/memberPresentation";
-import type { CommitteeArea } from "@/features/access/committeePolicy";
+import { memberTermLabel } from "@/features/access/memberPresentation";
 import type { InlineEditorState } from "./inlineTypes";
+import type { AccessMutation } from "@/features/access/workspaces/mutations";
+import { MemberRoleList } from "./MemberRoleList";
 import { AreaBubble } from "./AreaBubble";
 import { PersonAvatar } from "./PeopleTray";
 import { SharedAccessSection } from "./SharedAccessSection";
@@ -100,17 +97,6 @@ function MemberActions({
     </>
   );
 }
-function accessLabel(m: GraphMembership) {
-  return (
-    Object.entries(m.roles)
-      .filter(([, roles]) => roles?.length)
-      .map(
-        ([area, roles]) =>
-          `${memberAreaLabels[area as CommitteeArea]} · ${memberRoleLabel(roles)}`,
-      )
-      .join(" / ") || "No content access"
-  );
-}
 export function AccessManagement({
   snapshot,
   now,
@@ -122,6 +108,9 @@ export function AccessManagement({
   onOpen,
   onNavigate,
   renderEditor,
+  busy,
+  onRoleSave,
+  onRoleReview,
 }: {
   snapshot: AccessGraphSnapshot;
   now: number;
@@ -133,6 +122,9 @@ export function AccessManagement({
   onOpen: (state: InlineEditorState) => void;
   onNavigate: (fn: () => void) => void;
   renderEditor: (state: InlineEditorState) => ReactNode;
+  busy: boolean;
+  onRoleSave: (input: AccessMutation) => Promise<void>;
+  onRoleReview: () => Promise<unknown>;
 }) {
   const [tab, setTab] = useState<"members" | "tools" | "activity">("members"),
     [query, setQuery] = useState("");
@@ -349,9 +341,9 @@ export function AccessManagement({
                     aria-label="Search members"
                     placeholder="Search members"
                     value={query}
-                    disabled={!!editor}
+                    disabled={!!editor || busy}
                     onChange={(e) => {
-                      if (!editor) setQuery(e.target.value);
+                      if (!editor && !busy) setQuery(e.target.value);
                     }}
                   />
                 </label>
@@ -425,7 +417,21 @@ export function AccessManagement({
                               person={p}
                               membership={m}
                               status={status}
-                              access={accessLabel(m)}
+                              access={
+                                <MemberRoleList
+                                  person={p}
+                                  membership={m}
+                                  workspace={w}
+                                  disabled={
+                                    !editable ||
+                                    !!editor ||
+                                    busy ||
+                                    Date.parse(m.expiresAt) <= now
+                                  }
+                                  onSave={onRoleSave}
+                                  onReview={onRoleReview}
+                                />
+                              }
                               editable={editable}
                               expanded={!!rowEditor}
                               onOpen={(kind) =>
@@ -559,7 +565,7 @@ function MemberRow({
   person: AccessPerson;
   membership: GraphMembership;
   status: string;
-  access: string;
+  access: ReactNode;
   editable: boolean;
   expanded: boolean;
   onOpen: (kind: "details" | "member" | "renew" | "remove") => void;

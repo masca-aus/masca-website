@@ -69,6 +69,10 @@ export function AccessGraph({
   }, [view, workspaceId]);
   useInlineMotion(root, { editor, workspaceId, view, snapshot });
   const navigate = (action: () => void) => {
+    if (saving.current) {
+      setNotice("Wait for the current access change to finish.");
+      return;
+    }
     if (editor && editor.kind !== "details") {
       setNotice("Finish or cancel the current change first.");
       return;
@@ -80,6 +84,10 @@ export function AccessGraph({
     action();
   };
   const open = (state: InlineEditorState) => {
+    if (saving.current) {
+      setNotice("Wait for the current access change to finish.");
+      return;
+    }
     if (editor && editor.kind !== "details") {
       setNotice("Finish or cancel the current change first.");
       return;
@@ -148,8 +156,11 @@ export function AccessGraph({
     setEditor((old) => (old ? { ...old, snapshot: latest } : null));
     return latest;
   };
-  const save = async (input: AccessMutation) => {
-    if (saving.current) return;
+  const save = async (input: AccessMutation, inlineRole = false) => {
+    if (saving.current)
+      throw Error("Wait for the current access change to finish.");
+    if (inlineRole && editor)
+      throw Error("Finish or cancel the current change first.");
     saving.current = true;
     setBusy(true);
     const requestGeneration = generation.current;
@@ -160,12 +171,25 @@ export function AccessGraph({
         setInstructions(
           `Sign in to MASCA CMS at ${window.location.origin}/admin using ${input.email.trim().toLowerCase()} and your individual MASCA Google account. Workspace access is assigned separately by your access manager.`,
         );
-      if (generation.current === requestGeneration) close();
-      setNotice(
-        input.type === "addPerson"
-          ? "Account ready. They can sign in with their MASCA Google account; assign workspace access separately."
-          : "Access saved.",
-      );
+      if (!inlineRole && generation.current === requestGeneration) close();
+      if (!inlineRole)
+        setNotice(
+          input.type === "addPerson"
+            ? "Account ready. They can sign in with their MASCA Google account; assign workspace access separately."
+            : "Access saved.",
+        );
+    } finally {
+      saving.current = false;
+      setBusy(false);
+    }
+  };
+  const reviewRoles = async () => {
+    if (saving.current || editor)
+      throw Error("Finish the current access change first.");
+    saving.current = true;
+    setBusy(true);
+    try {
+      return await review();
     } finally {
       saving.current = false;
       setBusy(false);
@@ -346,6 +370,9 @@ export function AccessGraph({
               onOpen={open}
               onNavigate={navigate}
               renderEditor={renderEditor}
+              busy={busy}
+              onRoleSave={(input) => save(input, true)}
+              onRoleReview={reviewRoles}
             />
           ) : view === "bubbles" ? (
             <AccessOverview
