@@ -11,6 +11,12 @@ import {
 } from "@testing-library/react";
 import { AccessGraph } from "../components/admin/access/AccessGraph";
 import { accessFixture } from "./helpers/accessFixture";
+function chooseRole(area: string, role = "Viewer") {
+  fireEvent.click(
+    screen.getByRole("button", { name: `${area} role` }),
+  );
+  fireEvent.click(screen.getByRole("option", { name: role }));
+}
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
@@ -42,7 +48,7 @@ it("expands an existing member in the same row and preserves expiry while editin
   fireEvent.click(screen.getByRole("button", { name: /^Edit access$/ }));
   const form = screen.getByRole("form", { name: "Add workspace member" });
   expect(form.closest("tr")).toBeTruthy();
-  fireEvent.click(screen.getByRole("checkbox", { name: "Events" }));
+  chooseRole("Events");
   fireEvent.submit(form);
   await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
   expect(save.mock.calls[0][0]).toMatchObject({
@@ -296,7 +302,7 @@ for (const change of ["removed", "renamed", "replaced"] as const) {
       screen.getByRole("button", { name: "View access for Syed" }),
     );
     fireEvent.click(screen.getByRole("button", { name: /^Edit access$/ }));
-    fireEvent.click(screen.getByRole("checkbox", { name: "Events" }));
+    chooseRole("Events");
     fireEvent.submit(screen.getByRole("form"));
     fireEvent.click(
       await screen.findByRole("button", { name: "Review latest access" }),
@@ -306,10 +312,9 @@ for (const change of ["removed", "renamed", "replaced"] as const) {
         change === "removed" ? "no longer available" : "Latest access loaded",
       ),
     );
-    expect(screen.getByRole("checkbox", { name: "Events" })).toHaveProperty(
-      "checked",
-      true,
-    );
+    expect(
+      screen.getByRole("button", { name: "Events role" }).textContent,
+    ).toContain("Viewer");
     expect(screen.getByRole("button", { name: "Save access" })).toHaveProperty(
       "disabled",
       change === "removed",
@@ -395,7 +400,7 @@ it("finds an existing teammate inline and saves their access without creating an
     target: { value: "alya@masca.org.au" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Choose Alya" }));
-  fireEvent.click(screen.getByRole("checkbox", { name: "Events" }));
+  chooseRole("Events");
   fireEvent.submit(screen.getByRole("form"));
   await waitFor(() => expect(screen.queryByRole("form")).toBeNull());
   expect(saved).toMatchObject([
@@ -460,7 +465,7 @@ it("does not submit a hidden new account after returning to teammate selection",
   fireEvent.click(
     screen.getByRole("button", { name: "Choose an existing teammate instead" }),
   );
-  fireEvent.click(screen.getByRole("checkbox", { name: "Events" }));
+  chooseRole("Events");
   fireEvent.submit(screen.getByRole("form"));
   expect(await screen.findByRole("alert")).toBeTruthy();
   expect(submissions).toEqual([]);

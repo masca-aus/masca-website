@@ -68,6 +68,9 @@ export function InlineMemberEditor({
     );
   const [roleEdits, setRoleEdits] = useState<CommitteeMembership["roles"]>({});
   const roles = { ...m?.roles, ...roleEdits };
+  const selectedToolCount = Object.values(roles).filter(
+    (r) => r?.length,
+  ).length;
   const [areaRoles, setAreaRoles] = useState<CommitteeRole[]>(
     context.area ? (m?.roles[context.area] ?? ["viewer"]) : ["viewer"],
   );
@@ -117,6 +120,7 @@ export function InlineMemberEditor({
       if (
         !manager &&
         !m?.manager &&
+        !(manage && m) &&
         !Object.values(roles).some((r) => r?.length)
       )
         throw Error("Choose at least one tool.");
@@ -135,6 +139,7 @@ export function InlineMemberEditor({
   };
   return (
     <InlineFrame
+      className={manage ? "ag-member-form" : undefined}
       reveal
       title={
         manager
@@ -232,56 +237,76 @@ export function InlineMemberEditor({
         <MemberStep enabled={manage} number={2} title="Tool access">
           {manage && (
             <p className="ag-field-hint">
-              Choose their tools, then set a role for each one.
+              Choose a role for each tool. Leave the rest at No access.
             </p>
           )}
           <div className="ag-tool-roles">
-            {w.areas.map((a) => (
-              <div key={a}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={!!roles[a]?.length}
-                    onChange={(e) => {
-                      setRoleEdits({
-                        ...roleEdits,
-                        [a]: e.target.checked ? ["viewer"] : [],
-                      });
-                    }}
-                  />
-                  {memberAreaLabels[a]}
-                </label>
-                {manage && !roles[a]?.length && (
-                  <span className="ag-no-access">No access</span>
-                )}
-                {!!roles[a]?.length && (
+            {w.areas.map((a) =>
+              manage ? (
+                <div key={a} data-enabled={!!roles[a]?.length}>
+                  <span className="ag-tool-name">{memberAreaLabels[a]}</span>
                   <CalendarSelect
                     label={`${memberAreaLabels[a]} role`}
-                    value={roleValue(roles[a] ?? [])}
-                    options={memberRolePresets}
-                    onChange={(v) => {
+                    value={roles[a]?.length ? roleValue(roles[a]!) : "none"}
+                    options={[
+                      { value: "none", label: "No access" },
+                      ...memberRolePresets,
+                    ]}
+                    onChange={(value) =>
                       setRoleEdits((edits) => ({
                         ...edits,
-                        [a]: parseRoles(v),
-                      }));
-                    }}
+                        [a]: value === "none" ? [] : parseRoles(value),
+                      }))
+                    }
                   />
-                )}
-                {manage && !!roles[a]?.length && (
-                  <small className="ag-role-hint">
-                    {roles[a]?.includes("editor") &&
-                    roles[a]?.includes("approver")
-                      ? "Prepare content and review another person’s work."
-                      : roles[a]?.includes("approver")
-                        ? "Review and approve another person’s work."
-                        : roles[a]?.includes("editor")
-                          ? "Create and edit drafts, then request review."
-                          : "Read content and join discussions."}
-                  </small>
-                )}
-              </div>
-            ))}
+                </div>
+              ) : (
+                <div key={a}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={!!roles[a]?.length}
+                      onChange={(e) =>
+                        setRoleEdits({
+                          ...roleEdits,
+                          [a]: e.target.checked ? ["viewer"] : [],
+                        })
+                      }
+                    />
+                    {memberAreaLabels[a]}
+                  </label>
+                  {!!roles[a]?.length && (
+                    <CalendarSelect
+                      label={`${memberAreaLabels[a]} role`}
+                      value={roleValue(roles[a] ?? [])}
+                      options={memberRolePresets}
+                      onChange={(v) =>
+                        setRoleEdits((edits) => ({
+                          ...edits,
+                          [a]: parseRoles(v),
+                        }))
+                      }
+                    />
+                  )}
+                </div>
+              ),
+            )}
           </div>
+          {manage && w.areas.length > 0 && (
+            <details className="ag-role-guide">
+              <summary>What do the roles mean?</summary>
+              <p>
+                <strong>Viewer</strong> · Read and comment.
+                <br />
+                <strong>Editor</strong> · Prepare drafts and request review.
+                <br />
+                <strong>Approver</strong> · Approve another person’s work.
+                <br />
+                <strong>Editor + Approver</strong> · Both responsibilities;
+                self-approval stays blocked.
+              </p>
+            </details>
+          )}
           {manage && !w.areas.length && (
             <p className="ag-field-hint">
               No tools are enabled. Cancel and add tools in the Tools tab first.
@@ -295,9 +320,13 @@ export function InlineMemberEditor({
           only platform administrators appoint managers.
         </p>
       )}
-      <MemberStep enabled={manage} number={manager ? 2 : 3} title="Term">
+      <MemberStep
+        enabled={manage}
+        number={manager ? 2 : 3}
+        title={manage ? "Term ends" : "Term"}
+      >
         <div className="ag-term">
-          <label>Term ends</label>
+          {!manage && <label>Term ends</label>}
           {m ? (
             <strong>{memberTermLabel(m.expiresAt)}</strong>
           ) : (
@@ -313,45 +342,52 @@ export function InlineMemberEditor({
         {manage && (
           <p className="ag-field-hint">
             {m
-              ? "The existing end date is preserved. Use Renew term to extend it."
-              : "Access ends at the end of this day (AEST). Choose the confirmed committee term."}
+              ? "Use Renew term to extend this date."
+              : "Through the selected day · AEST"}
           </p>
         )}
       </MemberStep>
-      <div className="ag-summary" aria-live="polite">
-        <strong>
-          {p?.name ?? (name.trim() || "This person")} → {w.name}
-        </strong>
-        <p>
-          {context.area
-            ? `${memberRoleLabel(areaRoles)} for ${memberAreaLabels[context.area]}`
-            : manager
+      {manage ? (
+        <div className="ag-member-review" aria-live="polite">
+          <span>
+            {manager
               ? "Workspace access manager"
-              : Object.entries(roles)
-                  .filter(([, r]) => r?.length)
-                  .map(
-                    ([a, r]) =>
-                      `${memberAreaLabels[a as CommitteeArea]}: ${memberRoleLabel(r)}`,
-                  )
-                  .join(" · ") || "Choose tools above"}
-          .{" "}
-          {manage && !effectiveExpiry
-            ? "Set a term end date above."
-            : `Access ends ${memberTermLabel(effectiveExpiry)}.`}
-        </p>
-        {m && (
-          <small>
-            {manage
-              ? "Other workspace memberships stay unchanged. Renew the term separately."
-              : "Other area roles and the existing term stay unchanged. Renew the term separately."}
-          </small>
-        )}
-        {!m && (
-          <small>
-            Account reuse preserves all other workspace memberships.
-          </small>
-        )}
-      </div>
+              : `${selectedToolCount} ${selectedToolCount === 1 ? "tool" : "tools"} selected`}
+          </span>
+          <span>Other workspaces stay unchanged.</span>
+        </div>
+      ) : (
+        <div className="ag-summary" aria-live="polite">
+          <strong>
+            {p?.name ?? (name.trim() || "This person")} → {w.name}
+          </strong>
+          <p>
+            {context.area
+              ? `${memberRoleLabel(areaRoles)} for ${memberAreaLabels[context.area]}`
+              : manager
+                ? "Workspace access manager"
+                : Object.entries(roles)
+                    .filter(([, r]) => r?.length)
+                    .map(
+                      ([a, r]) =>
+                        `${memberAreaLabels[a as CommitteeArea]}: ${memberRoleLabel(r)}`,
+                    )
+                    .join(" · ") || "Choose tools above"}
+            . {`Access ends ${memberTermLabel(effectiveExpiry)}.`}
+          </p>
+          {m && (
+            <small>
+              Other area roles and the existing term stay unchanged. Renew the
+              term separately.
+            </small>
+          )}
+          {!m && (
+            <small>
+              Account reuse preserves all other workspace memberships.
+            </small>
+          )}
+        </div>
+      )}
     </InlineFrame>
   );
 }

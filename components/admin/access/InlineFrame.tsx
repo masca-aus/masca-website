@@ -12,6 +12,7 @@ export function InlineFrame({
   children,
   saveLabel = "Save access",
   reveal = false,
+  className,
 }: {
   title: string;
   label: string;
@@ -22,6 +23,7 @@ export function InlineFrame({
   children: React.ReactNode;
   saveLabel?: string;
   reveal?: boolean;
+  className?: string;
 }) {
   const form = useRef<HTMLFormElement>(null);
   useEffect(() => {
@@ -46,7 +48,7 @@ export function InlineFrame({
   return (
     <form
       ref={form}
-      className="ag-inline"
+      className={className ? `ag-inline ${className}` : "ag-inline"}
       aria-label={label}
       noValidate
       onKeyDown={(e) => {

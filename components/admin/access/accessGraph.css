@@ -1593,3 +1593,129 @@
     margin-left: 40px;
   }
 }
+
+/* Compact membership rows use one role control, including No access. */
+.ag-management .ag-member-form {
+  padding: 16px;
+}
+.ag-member-form > header {
+  margin-bottom: 10px;
+}
+.ag-management .ag-member-form .ag-member-step {
+  padding: 10px 0;
+}
+.ag-member-form .ag-member-step legend {
+  font-size: 12px;
+}
+.ag-member-form .ag-member-step legend > span {
+  width: 19px;
+  height: 19px;
+  font-size: 10px;
+}
+.ag-management .ag-member-form .ag-field-hint {
+  margin: 0 0 6px;
+  font-size: 11px;
+}
+.ag-management .ag-member-form .ag-tool-roles > div {
+  grid-template-columns: minmax(0, 1fr) minmax(125px, 160px);
+  min-height: 40px;
+  padding: 3px 0;
+  gap: 8px;
+}
+.ag-member-form .ag-tool-name {
+  font-size: 12px;
+}
+.ag-member-form .ag-tool-roles .mc-select {
+  margin: 0;
+}
+.ag-member-form .ag-tool-roles .mc-select-trigger {
+  min-height: 33px;
+  padding: 5px 9px;
+  font-size: 12px;
+}
+.ag-member-form
+  .ag-tool-roles
+  [data-enabled="false"]
+  .mc-select-trigger
+  > span {
+  color: var(--ag-muted);
+}
+.ag-role-guide {
+  margin-top: 9px;
+  font-size: 11px;
+  line-height: 1.65;
+  color: var(--ag-muted);
+}
+.ag-role-guide summary {
+  cursor: pointer;
+  width: fit-content;
+}
+.ag-role-guide p {
+  margin: 7px 0 0;
+  animation: ag-pane-enter 150ms ease-out;
+}
+.ag-role-guide strong {
+  color: var(--ag-ink);
+  font-weight: 500;
+}
+.ag-member-form .ag-selected-person {
+  padding: 3px 0;
+}
+.ag-member-form .ag-person-results {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.ag-member-form .ag-person-results button {
+  min-height: 43px;
+  padding: 5px;
+}
+.ag-member-form .ag-person-results p {
+  grid-column: 1/-1;
+  margin: 4px 0;
+}
+.ag-member-form .ag-new-person {
+  margin-top: 0;
+  min-height: 32px;
+}
+.ag-member-form .ag-term {
+  margin: 2px 0 5px;
+  justify-content: flex-start;
+  min-height: 34px;
+}
+.ag-member-form .ag-term .mc-date-trigger {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.ag-member-review {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 16px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px solid var(--ag-border);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ag-muted);
+}
+.ag-member-review > span:first-child {
+  color: var(--ag-ink);
+}
+.ag-member-form footer {
+  margin-top: 10px;
+}
+@media (max-width: 560px) {
+  .ag-management .ag-member-form {
+    padding: 12px;
+  }
+  .ag-management .ag-member-form .ag-tool-roles > div {
+    grid-template-columns: minmax(0, 1fr) minmax(120px, 145px);
+    min-height: 44px;
+  }
+  .ag-member-form .ag-tool-roles .mc-select-trigger {
+    min-height: 38px;
+  }
+  .ag-member-form .ag-person-results {
+    grid-template-columns: 1fr;
+  }
+}
