@@ -185,9 +185,6 @@ function IntroAnimation() {
         </h2>
         <p className={styles.dates}>2001 — 2026</p>
       </div>
-      <button type="button" className={styles.skip} onClick={() => dialogRef.current?.close()}>
-        Skip intro <span aria-hidden="true">↗</span>
-      </button>
     </dialog>
   );
 }

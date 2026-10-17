@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { StrictMode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 
 import AnniversaryIntro from "@/components/AnniversaryIntro";
@@ -61,6 +61,7 @@ it("finishes a requested animation in 2.4 seconds and restores scrolling without
   render(<AnniversaryIntro />);
   replayIntro();
   expect(screen.queryByRole("dialog", { name: /25th anniversary/i })).not.toBeNull();
+  expect(screen.queryByRole("button", { name: /skip intro/i })).toBeNull();
   expect(document.documentElement.style.overflow).toBe("hidden");
   act(() => vi.advanceTimersByTime(2399));
   expect(screen.queryByRole("dialog")).not.toBeNull();
@@ -69,10 +70,10 @@ it("finishes a requested animation in 2.4 seconds and restores scrolling without
   expect(document.documentElement.style.overflow).toBe("auto");
 });
 
-it("lets visitors skip immediately and does not replay when returning in the same session", () => {
+it("cleans up after native dismissal and does not replay when returning", () => {
   const first = render(<AnniversaryIntro />);
   replayIntro();
-  fireEvent.click(screen.getByRole("button", { name: /skip intro/i }));
+  act(() => { (screen.getByRole("dialog") as HTMLDialogElement).close(); });
   expect(screen.queryByRole("dialog")).toBeNull();
   first.unmount();
   imageRequests.length = 0;
@@ -150,7 +151,7 @@ it("shows the anniversary immediately and only adds collage photos after decodin
   expect(firstLoad).toBeTypeOf("function");
   await act(async () => { firstLoad?.(); });
   expect(view.container.querySelectorAll('img[src^="/community/"]')).toHaveLength(1);
-  fireEvent.click(screen.getByRole("button", { name: /skip intro/i }));
+  act(() => { (screen.getByRole("dialog") as HTMLDialogElement).close(); });
   const beforeLateLoad = view.container.querySelectorAll('img[src^="/community/"]').length;
   await act(async () => { firstLoad?.(); });
   expect(view.container.querySelectorAll('img[src^="/community/"]')).toHaveLength(beforeLateLoad);
@@ -246,7 +247,7 @@ it("allows an explicit replay when storage is blocked", () => {
   render(<AnniversaryIntro />);
   act(() => { window.dispatchEvent(new Event("masca:replay-anniversary")); });
   expect(screen.queryByRole("dialog")).not.toBeNull();
-  fireEvent.click(screen.getByRole("button", { name: /skip intro/i }));
+  act(() => vi.advanceTimersByTime(2400));
   expect(screen.queryByRole("dialog")).toBeNull();
 });
 
