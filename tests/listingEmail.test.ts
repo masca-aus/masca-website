@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect } from 'vitest';
 import { buildListingEmail, sendOnce, approvalProblem, type SendRecord, type SendStore, type EmailContent } from '../features/submissions/listingEmail';
 const doc = { id: 7, title: '<Science night>', contactName: 'Ali', contactEmail: 'ali@example.com', organisation: 'Students', _status: 'published', reviewStatus: 'approved', startDate: '2026-10-20T08:00:00Z', state: 'QLD', venue: 'Hall' };
@@ -27,6 +28,16 @@ describe('listing emails', () => {
    if(kind==='receipt') expect(html).toContain('/email/review-tile.png');
    expect(html).toContain('https://www.masca.org.au/logo/logo.png');
   }
+ });
+ it('keeps the private change action inside a padded coloured table cell for email clients', () => {
+  const { html } = buildListingEmail('events', doc, 'receipt', { changeURL: 'https://example.invalid/change?id=7&key=demo' });
+  const document = new DOMParser().parseFromString(html, 'text/html');
+  document.querySelectorAll('style').forEach(style => style.remove());
+  const action = [...document.querySelectorAll('a')].find(link => link.textContent?.includes('Request a change'))!;
+  expect(action.getAttribute('href')).toBe('https://example.invalid/change?id=7&key=demo');
+  expect(action.closest('td')?.getAttribute('bgcolor')).toBe('#ffcc00');
+  expect(action.closest('table')?.getAttribute('cellspacing')).toBe('0');
+  expect([...document.querySelectorAll('table')].every(table => table.getAttribute('cellpadding') === '0' && table.getAttribute('cellspacing') === '0')).toBe(true);
  });
  it('refuses approval of drafts, archived records and missing contacts', () => {
   expect(approvalProblem('events', {...doc,_status:'draft'},true)).toBeTruthy();
