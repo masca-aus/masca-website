@@ -7,3 +7,27 @@
 @media(max-width:900px){.committee-content{padding:36px 32px 60px}.committee-profile-copy{padding:20px 16px}.committee-name{font-size:17px}}
 @media(max-width:700px){.committee-content{padding:24px 24px 44px}.committee-jump{gap:4px 20px}.committee-jump a{font-size:11px}.committee-member-grid{grid-template-columns:1fr;gap:16px}.committee-profile{height:265px}.committee-portrait{width:32%}.committee-profile-copy{padding:20px 17px}.committee-team-heading h2{font-size:25px}.committee-team-heading i{display:none}.committee-team-section{margin-bottom:40px}.committee-term{width:100%;justify-content:space-between}.committee-term-trigger{min-width:165px}.committee-dialog{width:calc(100% - 24px);border-radius:15px}.committee-dialog-body{padding:24px;flex-direction:column;align-items:flex-start;gap:24px}.committee-dialog-photo{width:200px;height:225px}.committee-person{width:100%}.committee-person h2{font-size:23px}.committee-dialog-header{padding:14px 20px}}
 @media(prefers-reduced-motion:reduce){.committee-directory *,.committee-directory *::before,.committee-dialog *{transition:none!important;animation:none!important}.committee-profile:hover,.committee-profile:hover img{transform:none}}
+
+/* Compact directory cards; the expanded profile retains the full identity. */
+.committee-member-grid{gap:18px}
+.committee-profile{height:224px;border-radius:16px;box-shadow:0 3px 14px #01006606;transition:transform .25s,box-shadow .25s,border-color .25s}
+.committee-profile:hover{transform:translateY(-3px);border-color:#01006630;box-shadow:0 12px 28px #01006612}
+.committee-portrait{width:35%;position:relative;display:block}
+.committee-portrait img{object-position:50% 28%;transform:scale(1.1);transform-origin:50% 28%}
+.committee-profile:hover img{transform:scale(1.14)}
+.committee-profile-copy{padding:26px 22px 20px}
+.committee-name{font-size:23px;line-height:1.15;letter-spacing:-.025em;margin:0;font-weight:750;overflow-wrap:break-word;text-wrap:balance}
+.committee-role{font-size:11px;font-weight:550;letter-spacing:0;text-transform:none;min-height:0;line-height:1.55;color:#55556c;margin-top:12px}
+.committee-view{font-size:11px;font-weight:650;color:#010066b8;align-items:center;padding-top:18px}
+.committee-view span{display:grid;place-items:center;width:28px;height:28px;border:1px solid #01006614;border-radius:50%;font-size:16px}
+.is-placeholder{background:color-mix(in srgb,var(--team-color,#010066) 7%,#fff);display:grid;place-items:center;isolation:isolate}
+.is-placeholder:before{content:'';position:absolute;width:160px;height:160px;border:1px solid color-mix(in srgb,var(--team-color,#010066) 11%,transparent);border-radius:50%;z-index:-1}
+.committee-initials{font-size:38px;font-weight:500;letter-spacing:-.045em;color:var(--team-color,#010066)}
+.committee-dialog-photo{position:relative;display:block}
+.committee-dialog-photo.is-placeholder{display:grid}
+.committee-dialog-photo .committee-initials{font-size:64px}
+.committee-dialog-photo img{object-position:50% 28%}
+@media(max-width:1100px){.committee-name{font-size:20px}.committee-profile-copy{padding:24px 18px 18px}.committee-profile{height:216px}.committee-role{font-size:11px}}
+@media(max-width:700px){.committee-profile{height:206px}.committee-portrait{width:35%}.committee-profile-copy{padding:24px 20px 16px}.committee-name{font-size:22px}.committee-role{margin-top:10px}.committee-jump{flex-wrap:nowrap;overflow-x:auto;gap:22px;padding-bottom:2px;margin-bottom:28px;scrollbar-width:thin;scroll-padding-inline:8px}.committee-jump a{white-space:nowrap;flex-shrink:0;padding:12px 0}.committee-team-section{scroll-margin-top:100px}.committee-initials{font-size:34px}}
+@media(max-width:380px){.committee-profile{height:196px}.committee-profile-copy{padding:20px 14px 14px}.committee-name{font-size:20px}.committee-role{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.committee-portrait img,.committee-profile:hover img{transform:none}}

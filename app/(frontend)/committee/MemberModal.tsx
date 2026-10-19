@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import type { CommitteeMember } from '@/utils/committee'
 import { COMMITTEE_DEPARTMENTS } from '@/utils/committeeDepartments'
+import CommitteePortrait from './CommitteePortrait'
 
 export default function MemberModal({ member, onClose }: { member: CommitteeMember; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null)
@@ -44,7 +45,7 @@ export default function MemberModal({ member, onClose }: { member: CommitteeMemb
   }}>
     <div className="committee-dialog-header"><span>Meet your committee</span><button type="button" autoFocus onClick={() => void close()} aria-label="Close profile">Close ×</button></div>
     <div className="committee-dialog-body">
-      <div className="committee-dialog-photo"><img src={member.img || '/committee/placeholder.svg'} alt={member.name} /></div>
+      <CommitteePortrait member={member} className="committee-dialog-photo" alt={member.name} />
       <div className="committee-person">
         <h2 id="committee-profile-name">{member.name}</h2>
         {(member.university || member.course) && <p className="committee-university">{member.university}{member.university && member.course && <br />}{member.course && <span>{member.course}</span>}</p>}
