@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { getPresentationGroups, getReadingSection } from '@/utils/committeePresentation'
 import type { CommitteeMember } from '@/utils/committee'
+import previewMembers from '@/app/(frontend)/committee-preview/members.json'
 const member = (id: string, role: string): CommitteeMember => ({ id, role, name: id, year: '2026/2027', department: 'amplifies', img: '' })
 describe('committee presentation', () => {
+  it('keeps department leadership first in the review snapshot', () => {
+    const groups = getPresentationGroups(previewMembers as CommitteeMember[])
+    for (const [id, expected] of Object.entries({ treasury: ['9', '10', '11', '12'], 'amplifies-digital': ['18', '19', '20'], careers: ['22', '23', '24', '25'] })) {
+      expect(groups.find(group => group.id === id)?.members.map(member => String(member.id))).toEqual(expected)
+    }
+  })
   it('splits Media and Digital without losing unmatched roles or changing member order', () => {
     const groups = getPresentationGroups([member('1', 'National Digital Director'), member('2', 'Media Executive'), member('3', 'Communications Officer'), member('4', 'Digital Executive')])
     expect(groups.map(g => [g.id, g.members.map(m => m.id)])).toEqual([['amplifies-media', ['2']], ['amplifies-digital', ['1','4']], ['amplifies', ['3']]])
