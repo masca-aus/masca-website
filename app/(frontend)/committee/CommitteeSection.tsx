@@ -25,7 +25,7 @@ export default function CommitteeSection({ members, years, overview = false }: {
     const nav = jump.current
     const link = nav?.querySelector<HTMLElement>('[aria-current="location"]')
     if (!nav || !link) return
-    const target = link.offsetLeft - nav.offsetLeft - (nav.clientWidth - link.offsetWidth) / 2
+    const target = link.getBoundingClientRect().left - nav.getBoundingClientRect().left + nav.scrollLeft - (nav.clientWidth - link.offsetWidth) / 2
     nav.scrollTo({ left: Math.max(0, target), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
   }, [active, overview])
   useEffect(() => {
