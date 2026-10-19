@@ -11,20 +11,24 @@ const members: CommitteeMember[] = [
   { id: '19', name: 'Jin Hong Pang', role: 'Deputy National Digital Director', department: 'amplifies', year: '2026/2027', img: '' },
 ]
 afterEach(cleanup)
-it('opens the original full profile from leadership and links a team to its matching details', () => {
+it('opens the original full profile from leadership and selects the matching team', () => {
   let opened: CommitteeMember | undefined
   let destination: string | undefined
-  render(<CommitteeOverview groups={getPresentationGroups(members)} onOpen={member => { opened = member }} onNavigate={id => { destination = id }} />)
+  render(<CommitteeOverview groups={getPresentationGroups(members)} onOpen={member => { opened = member }} onNavigate={id => { destination = id }} onViewAll={() => {}} />)
   fireEvent.click(screen.getByRole('button', { name: 'View Muhammad Shafi Ilham Bin Kamaruddin, National Chairperson' }))
   expect(opened?.id).toBe('3')
-  const team = screen.getByRole('link', { name: 'Explore Amplifies · Digital' })
-  expect(team.getAttribute('href')).toBe('#committee-amplifies-digital')
+  const team = screen.getByRole('button', { name: 'Meet Amplifies · Digital' })
   fireEvent.click(team)
   expect(destination).toBe('amplifies-digital')
 })
 it('provides one compact team summary rather than listing every executive in the chart', () => {
-  render(<CommitteeOverview groups={getPresentationGroups(members)} onOpen={() => {}} onNavigate={() => {}} />)
+  render(<CommitteeOverview groups={getPresentationGroups(members)} onOpen={() => {}} onNavigate={() => {}} onViewAll={() => {}} />)
   expect(screen.getAllByText('2 members').length).toBeGreaterThan(0)
   expect(screen.queryByText('Jin Hong Pang')).toBeNull()
-  expect(screen.queryByRole('link', { name: 'Explore Treasury' })).toBeNull()
+  expect(screen.queryByRole('button', { name: 'Meet Treasury' })).toBeNull()
+})
+
+it('uses the designated leader portrait on the team selection card', () => {
+  render(<CommitteeOverview groups={getPresentationGroups(members.map(member => member.id === '18' ? { ...member, img: '/syed.jpg' } : member))} onOpen={() => {}} onNavigate={() => {}} onViewAll={() => {}} />)
+  expect(screen.getByRole('button', { name: 'Meet Amplifies · Digital' }).querySelector('img')?.getAttribute('src')).toBe('/syed.jpg')
 })

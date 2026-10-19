@@ -14,6 +14,30 @@ export default function CommitteeSection({ members, years, overview = false }: {
   const currentYear = years.includes(year) ? year : years[0] || ''
   const [selected, setSelected] = useState<CommitteeMember | null>(null)
   const groups = useMemo(() => getPresentationGroups(members.filter(m => m.year === currentYear)), [members, currentYear])
+  const [requestedTeam, setRequestedTeam] = useState('chairs')
+  const [navigation, setNavigation] = useState(0)
+  const currentTeam = requestedTeam === 'all' ? 'all' : groups.some(group => group.id === requestedTeam) ? requestedTeam : groups[0]?.id || ''
+  const visibleGroups = useMemo(() => !overview || currentTeam === 'all' ? groups : groups.filter(group => group.id === currentTeam), [groups, overview, currentTeam])
+  useEffect(() => {
+    if (!overview) return
+    const readHash = () => {
+      const id = location.hash.replace('#committee-', '')
+      if (id === 'details' || groups.some(group => group.id === id)) {
+        setRequestedTeam(id === 'details' ? 'all' : id)
+        setNavigation(value => value + 1)
+      }
+    }
+    readHash()
+    window.addEventListener('hashchange', readHash)
+    return () => window.removeEventListener('hashchange', readHash)
+  }, [groups, overview])
+  useEffect(() => {
+    if (!overview || !navigation) return
+    const target = currentTeam === 'all' ? document.getElementById('committee-details') : document.getElementById(`committee-heading-${currentTeam}`)
+    if (!target) return
+    target.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' })
+    target.focus({ preventScroll: true })
+  }, [navigation, currentTeam, overview])
   const directory = useRef<HTMLDivElement>(null)
   const rail = useRef<HTMLElement>(null)
   const jump = useRef<HTMLElement>(null)
@@ -21,13 +45,13 @@ export default function CommitteeSection({ members, years, overview = false }: {
   const [railVisible, setRailVisible] = useState(false)
   const [inDirectory, setInDirectory] = useState(false)
   useEffect(() => {
-    if (!overview || !active) return
+    if (!overview || !currentTeam) return
     const nav = jump.current
-    const link = nav?.querySelector<HTMLElement>('[aria-current="location"]')
+    const link = nav?.querySelector<HTMLElement>('[aria-pressed="true"]')
     if (!nav || !link) return
     const target = link.getBoundingClientRect().left - nav.getBoundingClientRect().left + nav.scrollLeft - (nav.clientWidth - link.offsetWidth) / 2
     nav.scrollTo({ left: Math.max(0, target), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
-  }, [active, overview])
+  }, [currentTeam, overview])
   useEffect(() => {
     const root = directory.current
     if (!root) return
@@ -47,8 +71,9 @@ export default function CommitteeSection({ members, years, overview = false }: {
     const stop = () => { if (media.matches) animations.forEach(a => a.finish()) }
     media.addEventListener('change', stop)
     return () => { observer.disconnect(); media.removeEventListener('change', stop); animations.forEach(a => a.cancel()) }
-  }, [groups])
+  }, [visibleGroups])
   useEffect(() => {
+    if (overview) return
     const root = directory.current
     if (!root) return
     let awake = false, near = false, frame = 0, disposed = false
@@ -79,8 +104,14 @@ export default function CommitteeSection({ members, years, overview = false }: {
     void document.fonts?.ready.then(update)
     wake(); update()
     return () => { disposed = true; clearTimeout(timer); cancelAnimationFrame(frame); resize.disconnect(); window.removeEventListener('scroll', scroll); window.removeEventListener('pointermove', pointer); window.removeEventListener('resize', update); window.removeEventListener('scrollend', update); document.removeEventListener('focusin', focus); document.removeEventListener('focusout', focus) }
-  }, [groups])
+  }, [groups, overview])
   const navigate = (id: string) => {
+    if (overview) {
+      setRequestedTeam(id)
+      setNavigation(value => value + 1)
+      history.replaceState(null, '', id === 'all' ? '#committee-details' : `#committee-${id}`)
+      return
+    }
     const el = document.getElementById(`committee-${id}`)
     if (!el) return
     el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' })
@@ -89,12 +120,15 @@ export default function CommitteeSection({ members, years, overview = false }: {
   return <section className={`committee-directory${overview ? ' has-overview' : ''}`}>
     <div className="committee-content">
       <TermPicker years={years} value={currentYear} onChange={next => { setYear(next); setSelected(null) }} />
-      {overview && <CommitteeOverview groups={groups} onOpen={setSelected} onNavigate={navigate} />}
-      {overview && <div className="committee-details-heading"><div><span className="committee-org-eyebrow">Meet the people</span><h2>Every team. Every member.</h2></div><a href="#committee-overview">Back to overview ↑</a></div>}
-      <nav ref={jump} className="committee-jump" aria-label="Committee teams">{groups.map(g => <a key={g.id} href={`#committee-${g.id}`} aria-current={active === g.id ? 'location' : undefined} onClick={e => { e.preventDefault(); navigate(g.id) }}>{g.title}</a>)}</nav>
-      <div ref={directory}>
-        {groups.map(g => <section className="committee-team-section" id={`committee-${g.id}`} key={g.id} aria-labelledby={`committee-heading-${g.id}`} style={{ '--team-color': g.color } as CSSProperties}>
-          <div className="committee-team-heading"><span aria-hidden="true" /><h2 id={`committee-heading-${g.id}`}>{g.title}</h2><i aria-hidden="true" /></div>
+      {overview && <CommitteeOverview groups={groups} onOpen={setSelected} onNavigate={navigate} onViewAll={() => navigate('all')} selectedTeam={currentTeam} />}
+      {overview && <div className="committee-details-heading"><div><span className="committee-org-eyebrow">Meet the people</span><h2>{currentTeam === 'all' ? 'Meet the full council.' : 'Get to know your team.'}</h2></div><a href="#committee-overview">Back to overview ↑</a></div>}
+      {overview ? <nav ref={jump} className="committee-jump committee-team-picker" aria-label="Choose a team">
+        {groups.map(group => <button type="button" key={group.id} aria-pressed={currentTeam === group.id} aria-controls="committee-details" onClick={() => navigate(group.id)}>{group.title}</button>)}
+        <button type="button" aria-pressed={currentTeam === 'all'} aria-controls="committee-details" onClick={() => navigate('all')}>View all members</button>
+      </nav> : <nav ref={jump} className="committee-jump" aria-label="Committee teams">{groups.map(g => <a key={g.id} href={`#committee-${g.id}`} aria-current={active === g.id ? 'location' : undefined} onClick={e => { e.preventDefault(); navigate(g.id) }}>{g.title}</a>)}</nav>}
+      <div ref={directory} id={overview ? 'committee-details' : undefined} role={overview ? 'region' : undefined} aria-label={overview ? 'Team members' : undefined} tabIndex={overview ? -1 : undefined}>
+        {visibleGroups.map(g => <section className="committee-team-section" id={`committee-${g.id}`} key={g.id} aria-labelledby={`committee-heading-${g.id}`} style={{ '--team-color': g.color } as CSSProperties}>
+          <div className="committee-team-heading"><span aria-hidden="true" /><h2 tabIndex={overview ? -1 : undefined} id={`committee-heading-${g.id}`}>{g.title}</h2><i aria-hidden="true" /></div>
           <div className="committee-member-grid">{g.members.map(member => <CommitteeCard key={member.id} member={member} onOpen={setSelected} />)}</div>
         </section>)}
         {!groups.length && <p>No published profiles for this term yet.</p>}
