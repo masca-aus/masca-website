@@ -6,18 +6,28 @@ import { getPresentationGroups, getReadingSection } from '@/utils/committeePrese
 import CommitteeCard from './CommitteeCard'
 import MemberModal from './MemberModal'
 import TermPicker from './TermPicker'
+import CommitteeOverview from './CommitteeOverview'
 import './committee.css'
 
-export default function CommitteeSection({ members, years }: { members: CommitteeMember[]; years: string[] }) {
+export default function CommitteeSection({ members, years, overview = false }: { members: CommitteeMember[]; years: string[]; overview?: boolean }) {
   const [year, setYear] = useState(years[0] || '')
   const currentYear = years.includes(year) ? year : years[0] || ''
   const [selected, setSelected] = useState<CommitteeMember | null>(null)
   const groups = useMemo(() => getPresentationGroups(members.filter(m => m.year === currentYear)), [members, currentYear])
   const directory = useRef<HTMLDivElement>(null)
   const rail = useRef<HTMLElement>(null)
+  const jump = useRef<HTMLElement>(null)
   const [active, setActive] = useState('')
   const [railVisible, setRailVisible] = useState(false)
   const [inDirectory, setInDirectory] = useState(false)
+  useEffect(() => {
+    if (!overview || !active) return
+    const nav = jump.current
+    const link = nav?.querySelector<HTMLElement>('[aria-current="location"]')
+    if (!nav || !link) return
+    const target = link.offsetLeft - nav.offsetLeft - (nav.clientWidth - link.offsetWidth) / 2
+    nav.scrollTo({ left: Math.max(0, target), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
+  }, [active, overview])
   useEffect(() => {
     const root = directory.current
     if (!root) return
@@ -76,10 +86,12 @@ export default function CommitteeSection({ members, years }: { members: Committe
     el.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' })
     history.replaceState(null, '', `#committee-${id}`)
   }
-  return <section className="committee-directory">
+  return <section className={`committee-directory${overview ? ' has-overview' : ''}`}>
     <div className="committee-content">
       <TermPicker years={years} value={currentYear} onChange={next => { setYear(next); setSelected(null) }} />
-      <nav className="committee-jump" aria-label="Committee teams">{groups.map(g => <a key={g.id} href={`#committee-${g.id}`} aria-current={active === g.id ? 'location' : undefined} onClick={e => { e.preventDefault(); navigate(g.id) }}>{g.title}</a>)}</nav>
+      {overview && <CommitteeOverview groups={groups} onOpen={setSelected} onNavigate={navigate} />}
+      {overview && <div className="committee-details-heading"><div><span className="committee-org-eyebrow">Meet the people</span><h2>Every team. Every member.</h2></div><a href="#committee-overview">Back to overview ↑</a></div>}
+      <nav ref={jump} className="committee-jump" aria-label="Committee teams">{groups.map(g => <a key={g.id} href={`#committee-${g.id}`} aria-current={active === g.id ? 'location' : undefined} onClick={e => { e.preventDefault(); navigate(g.id) }}>{g.title}</a>)}</nav>
       <div ref={directory}>
         {groups.map(g => <section className="committee-team-section" id={`committee-${g.id}`} key={g.id} aria-labelledby={`committee-heading-${g.id}`} style={{ '--team-color': g.color } as CSSProperties}>
           <div className="committee-team-heading"><span aria-hidden="true" /><h2 id={`committee-heading-${g.id}`}>{g.title}</h2><i aria-hidden="true" /></div>
@@ -88,9 +100,9 @@ export default function CommitteeSection({ members, years }: { members: Committe
         {!groups.length && <p>No published profiles for this term yet.</p>}
       </div>
     </div>
-    <nav ref={rail} className={`committee-rail${railVisible ? ' is-visible' : ''}`} aria-label="Jump to committee team" inert={!inDirectory} aria-hidden={!inDirectory}>
+    {!overview && <nav ref={rail} className={`committee-rail${railVisible ? ' is-visible' : ''}`} aria-label="Jump to committee team" inert={!inDirectory} aria-hidden={!inDirectory}>
       {groups.map(g => <a key={g.id} href={`#committee-${g.id}`} aria-label={g.title} aria-current={active === g.id ? 'location' : undefined} style={{ '--team-color': g.color } as CSSProperties} onClick={e => { e.preventDefault(); navigate(g.id) }}><span className="committee-tick" aria-hidden="true" /><span className="committee-rail-label" aria-hidden="true">{g.title}</span></a>)}
-    </nav>
+    </nav>}
     {selected && <MemberModal member={selected} onClose={() => setSelected(null)} />}
   </section>
 }
