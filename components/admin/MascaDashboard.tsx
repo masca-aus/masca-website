@@ -1,3 +1,4 @@
+import {CommitteeTermReminders} from "./CommitteeTermReminders";
 import {mayUseCalendar} from "@/features/mediaCalendar/policy";
 import type {CalendarUser} from "@/features/mediaCalendar/types";
 import { AdminLink as Link } from './AdminNavigationContext';
@@ -15,6 +16,8 @@ import { loadWebsiteAnalytics } from '@/features/analytics/websiteAnalytics';
 import { WebsiteInsights, WebsiteInsightsLoading } from './WebsiteInsights';
 import { DashboardContentMetrics } from './DashboardContentMetrics';
 import './dashboard.css';
+import {committeeMode,mayAccessResource} from '@/features/access/committeePolicy';
+import {managedCommittees} from '@/features/access/delegatedAccessClient';
 
 const tools = {
   careers: { name: 'Careers', Icon: Briefcase, description: 'Opportunities and applications', action: 'Add opportunity' },
@@ -66,8 +69,8 @@ function SummaryCard({ title, caption, rows, kind }: { title: string; caption: s
 }
 function ContentRow({ area, account, context }: { area: PermissionArea; account?: ApprovedAccount; context: DashboardContext }) {
   const { name, Icon, description, action } = tools[area];
-  const scoped = contentAreas.includes(area as ContentArea);
-  const editable = !account || (scoped ? areaScopes(account, area as ContentArea, context.branch).length > 0 : mayEditArea(account, area));
+  const scoped = committeeMode(account) || contentAreas.includes(area as ContentArea);
+  const editable = !account || (committeeMode(account)?context.branch!=='all' && mayAccessResource(account,{area,owningScope:context.branch},'create'):(scoped ? areaScopes(account, area as ContentArea, context.branch).length > 0 : mayEditArea(account, area)));
   const href = collectionLink(area, scoped && context.branch !== 'all' ? { owningScope: { equals: context.branch } } : undefined);
   const createHref = `/admin/collections/${area}/create${scoped && context.branch !== 'all' ? `?branch=${context.branch}` : ''}`;
   return <div className="masca-dashboard__content-row"><span className="masca-dashboard__content-icon" data-area={area}><Icon size={21} aria-hidden="true" /></span><div className="masca-dashboard__content-label"><h3><Link href={href}>{name}</Link></h3><p>{description}</p></div><div className="masca-dashboard__row-actions"><Link className="masca-dashboard__manage" href={href}>{editable ? 'Manage' : 'Browse'}</Link>{editable && <Link className="masca-dashboard__add" href={createHref}>{action}</Link>}</div></div>;
@@ -76,14 +79,15 @@ function ContentRow({ area, account, context }: { area: PermissionArea; account?
 export function DashboardContent({ account, context = dashboardContext(account), tasks = [], content = [], view = 'workspace', websiteInsights, summary, contentMetrics }: {
   account?: ApprovedAccount; context?: DashboardContext; tasks?: DashboardTask[]; content?: DashboardContentCount[]; websiteInsights?: ReactNode; summary?: ReactNode; contentMetrics?: ReactNode; view?: 'workspace' | 'metrics';
 }) {
-  const areas = orderedAreas(account);
+  const areas = orderedAreas(account,context.branch);
   const isAdmin = !account || mayManagePeople(account);
-  const published = publishedRows(account, content);
+  const published = publishedRows(account, content,context);
   const calendarVisible = mayUseCalendar(account as CalendarUser, "view");
   const sections = [{ title: 'Content', areas: areas.filter(area => contentAreas.includes(area as ContentArea)) }, { title: 'Resources', areas: areas.filter(area => !contentAreas.includes(area as ContentArea)) }];
   return <DashboardTabs key={`${context.branch}:${view}`} initialView={view} branch={context.branch}
     metrics={<>{websiteInsights}{contentMetrics ?? <DashboardContentMetrics rows={published} branch={context.branch} />}</>}
     workspace={<>
+    {committeeMode(account) && managedCommittees(account).length>0 && <CommitteeTermReminders/>}
     {summary ?? <DashboardSummary account={account} context={context} tasks={tasks} content={content} />}
     {sections.filter(section => section.areas.length > 0 || (section.title === 'Content' && calendarVisible)).map(section => <section key={section.title} className="masca-dashboard__section" aria-label={section.title}><h2>{section.title}</h2><div className="masca-dashboard__content">{section.areas.map(area => <ContentRow key={area} area={area} account={account} context={context} />)}{section.title === 'Content' && calendarVisible && <div className="masca-dashboard__content-row"><span className="masca-dashboard__content-icon" data-area="media-calendar"><CalendarDays size={21} aria-hidden="true" /></span><div className="masca-dashboard__content-label"><h3><Link href="/admin/media-calendar">Media calendar</Link></h3><p>Posts, captions and team reviews.</p></div><div className="masca-dashboard__row-actions"><Link className="masca-dashboard__add" href="/admin/media-calendar">Open calendar</Link></div></div>}</div></section>)}
     {areas.length === 0 && !calendarVisible && <p>No content sections are assigned to this account. Contact your administrator.</p>}
@@ -91,8 +95,9 @@ export function DashboardContent({ account, context = dashboardContext(account),
     <header className="masca-dashboard__heading">
       <div><h1>Your workspace</h1><p>Manage your content and keep the website up to date.</p></div>
       <div className="masca-dashboard__header-controls">
-        {context.branches.length > 0 && <DashboardBranchPicker branches={context.branches} value={context.branch} view={view} />}
+        {context.branches.length > 0 && <DashboardBranchPicker branches={context.branches} value={context.branch} view={view} committeeOnly={committeeMode(account)} workspaceNames={account?.workspaceNames} />}
         <div className="masca-dashboard__actions">
+          {committeeMode(account) && managedCommittees(account).length>0 && <Link href="/admin/people-access" className="masca-action masca-action--secondary">People & access</Link>}
           <DashboardTutorial areas={areas} showEvents={(['events', 'careers'] as const).some(area => areaScopes(account, area, context.branch).length > 0)} isAdmin={isAdmin} />
           <Link href="/" className="masca-action masca-action--secondary masca-dashboard__website-link" target="_blank" rel="noopener noreferrer">View website<ArrowUpRight size={14} aria-hidden="true" /></Link>
         </div>
@@ -101,15 +106,15 @@ export function DashboardContent({ account, context = dashboardContext(account),
   </DashboardTabs>;
 }
 
-function publishedRows(account: ApprovedAccount | undefined, content: DashboardContentCount[]): SummaryRow[] {
-  return orderedAreas(account).filter(area => contentAreas.includes(area as ContentArea)).map(area => {
+function publishedRows(account: ApprovedAccount | undefined, content: DashboardContentCount[],context?:DashboardContext): SummaryRow[] {
+  return orderedAreas(account,context?.branch).filter(area => committeeMode(account)||contentAreas.includes(area as ContentArea)).map(area => {
     const row = content.find(item => item.area === area);
     return { area, count: row?.status === 'ready' ? row.count : undefined, href: row?.href ?? collectionLink(area) };
   });
 }
 export function DashboardSummary({ account, context, tasks, content }: { account?: ApprovedAccount; context: DashboardContext; tasks: DashboardTask[]; content: DashboardContentCount[] }) {
-  const areas = orderedAreas(account);
-  const published = publishedRows(account, content);
+  const areas = orderedAreas(account,context.branch);
+  const published = publishedRows(account, content,context);
   const work = tasks.filter(task => areas.includes(task.area) && areaScopes(account, task.area, context.branch).length > 0);
   return (
     <section className="masca-dashboard__stats" aria-label="Content summary">
@@ -120,7 +125,7 @@ export function DashboardSummary({ account, context, tasks, content }: { account
 }
 export function DashboardSummaryLoading({ account, context }: { account?: ApprovedAccount; context: DashboardContext }) {
   const titles = [
-    ...(orderedAreas(account).some(area => contentAreas.includes(area as ContentArea)) ? ['Published'] : []),
+    ...(orderedAreas(account,context.branch).some(area => contentAreas.includes(area as ContentArea)) ? ['Published'] : []),
     ...((['events','careers'] as const).some(area => areaScopes(account, area, context.branch).length > 0) ? ['Drafts','To review'] : []),
   ];
   if (!titles.length) return null;
@@ -133,5 +138,5 @@ async function StreamedSummary({ tasks, content, ...props }: { account?: Approve
   return <DashboardSummary {...props} tasks={resolvedTasks} content={resolvedContent} />;
 }
 async function StreamedContentMetrics({ account, context, content }: { account?: ApprovedAccount; context: DashboardContext; content: Promise<DashboardContentCount[]> }) {
-  return <DashboardContentMetrics rows={publishedRows(account, await content)} branch={context.branch} />;
+  return <DashboardContentMetrics rows={publishedRows(account, await content,context)} branch={context.branch} />;
 }

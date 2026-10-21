@@ -9,12 +9,14 @@ export function CalendarSelect({
   options,
   onChange,
   disabled,
+  placeholder = "Choose…",
 }: {
   label: string;
   value: string;
   options: SelectOption[];
   onChange: (value: string) => void;
   disabled?: boolean;
+  placeholder?: string;
 }) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const open = !!anchor;
@@ -45,7 +47,7 @@ export function CalendarSelect({
         {selected?.color && (
           <i className="mc-color-dot" style={{ background: selected.color }} />
         )}
-        <span>{selected?.label ?? "Choose…"}</span>
+        <span>{selected?.label ?? placeholder}</span>
         <ChevronDown size={15} />
       </button>
       {anchor && (

@@ -26,6 +26,7 @@ export async function getSponsors(): Promise<Sponsor[]> {
   const payload = await getPayload({ config })
   const { docs } = await payload.find({
     collection: "sponsors",
+    overrideAccess:false,
     sort: "-date",
     // A handful of sponsors at most — fetch them all.
     pagination: false,

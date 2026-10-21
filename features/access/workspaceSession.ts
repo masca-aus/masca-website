@@ -1,4 +1,7 @@
-import { createHmac } from 'node:crypto';
+import { loadWorkspaceCatalog } from "./workspaces/repository.ts";
+import { committeeAccessEnabled } from "./committeeEnvironment.ts";
+import { withCommitteeMode } from "./committeeEnvironment.ts";
+import { createHmac } from "node:crypto";
 import { jwtVerify, SignJWT } from "jose";
 import { parseCookies, type AuthStrategy } from "payload";
 import type { ApprovedAccount } from "./workspacePolicy.ts";
@@ -39,7 +42,23 @@ export const workspaceStrategy: AuthStrategy = {
       )
         return { user: null };
       return {
-        user: { ...user, collection: "users", _strategy: "workspace-google" },
+        user: {
+          ...user,
+          ...(committeeAccessEnabled()
+            ? {
+                accessCatalog:
+                  account.accessCatalog ??
+                  (await loadWorkspaceCatalog()).map(
+                    ({ id, status, areas }) => ({ id, status, areas }),
+                  ),
+                workspaceNames: account.workspaceNames ?? {},
+              }
+            : {}),
+          accessModel: withCommitteeMode(user as unknown as ApprovedAccount)
+            .accessModel,
+          collection: "users",
+          _strategy: "workspace-google",
+        },
       };
     } catch {
       return { user: null };
@@ -60,4 +79,8 @@ export async function signWorkspaceSession(
     .sign(sessionKey(secret));
 }
 
-function sessionKey(secret:string) { return createHmac("sha256", secret).update("masca-workspace-session-v1").digest(); }
+function sessionKey(secret: string) {
+  return createHmac("sha256", secret)
+    .update("masca-workspace-session-v1")
+    .digest();
+}

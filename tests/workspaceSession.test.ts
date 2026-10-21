@@ -7,6 +7,7 @@ import {
   beginGoogleLogin,
   finishGoogleLogin,
 } from "../features/access/googleOIDC";
+vi.mock("../features/access/workspaces/repository",()=>({loadWorkspaceCatalog:vi.fn(async()=>[{id:"QLD",status:"active",areas:["events"]}])}));
 const secret = "test-signature-secret-for-workspace";
 const user = {
   id: 3,
@@ -33,6 +34,14 @@ afterEach(() => {
   payload.findByID.mockResolvedValue(user);
 });
 describe("Google workspace sessions", () => {
+  it('decorates authenticated users with the actual server rollout mode',async()=>{
+    vi.stubEnv('GOOGLE_AUTH_ORIGIN','https://preview.example.com');
+    const token=await signWorkspaceSession(3,'r1',secret);
+    vi.stubEnv('COMMITTEE_ACCESS_ENABLED','true');
+    expect((await authenticate(token)).user).toHaveProperty('accessModel','committee');
+    vi.stubEnv('COMMITTEE_ACCESS_ENABLED','false');
+    expect((await authenticate(token)).user).toHaveProperty('accessModel','legacy');
+  });
   it("rejects suspended, revoked and tampered sessions", async () => {
     vi.stubEnv("GOOGLE_AUTH_ORIGIN", "https://preview.example.com");
     const token = await signWorkspaceSession(3, "r1", secret);

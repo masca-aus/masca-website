@@ -18,6 +18,8 @@ import { statusLabels } from "./CalendarCard";
 export type CalendarScope = "all" | "mine" | "review" | "ideas";
 export function CalendarSidebar({
   scope,
+  owningScope,
+  workspaceName,
   category,
   owner,
   format,
@@ -43,6 +45,8 @@ export function CalendarSidebar({
   onTypePurged,
 }: {
   scope: CalendarScope;
+  workspaceName?:string;
+  owningScope?: import("@/features/access/committeePolicy").CommitteeScope;
   category: string;
   owner: string;
   format: string;
@@ -241,7 +245,7 @@ export function CalendarSidebar({
           </span>
           <div>
             <strong>Instagram</strong>
-            <small>National media team</small>
+            <small>{workspaceName??(owningScope?.startsWith("ws-")?"Project":owningScope??"National")} media team</small>
           </div>
           <button
             className="mc-sidebar-close"
@@ -299,6 +303,7 @@ export function CalendarSidebar({
             <div>
               {adding && (
                 <InlineContentType
+                  owningScope={owningScope}
                   onCancel={finishAdding}
                   onCreated={(saved) => {
                     onTypeCreated(saved);

@@ -130,6 +130,7 @@ describe("toCommitteeMember (Payload doc → page shape)", () => {
     department: "chairs",
     portrait: {
       id: 1,
+      owningScope:"National",
       alt: "Ava Tan",
       url: "https://test-project.storage.supabase.co/storage/v1/object/public/media/ava.jpg",
       updatedAt: "2026-07-22T00:00:00.000Z",

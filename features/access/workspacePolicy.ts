@@ -1,3 +1,9 @@
+import {
+  committeeMode,
+  accessibleCommittees,
+  mayAccessResource,
+  type CommitteeMembership,
+} from "./committeePolicy.ts";
 /** Pure policy foundation; wire into every server entrypoint before enabling SSO. */
 export const workspaceDomain = "masca.org.au";
 export const contentAreas = [
@@ -18,11 +24,21 @@ export const ownershipScopes = [
   "NT",
 ] as const;
 export type ContentArea = (typeof contentAreas)[number];
-export type OwnershipScope = (typeof ownershipScopes)[number];
-export const permissionAreas = [...contentAreas, "organisations", "media"] as const;
+export type OwnershipScope = string;
+export const permissionAreas = [
+  ...contentAreas,
+  "organisations",
+  "media",
+] as const;
 export type PermissionArea = (typeof permissionAreas)[number];
-export type SectionPermission = { view: boolean; edit: boolean; scopes: OwnershipScope[] };
-export type ContentPermissions = Partial<Record<PermissionArea, SectionPermission>>;
+export type SectionPermission = {
+  view: boolean;
+  edit: boolean;
+  scopes: OwnershipScope[];
+};
+export type ContentPermissions = Partial<
+  Record<PermissionArea, SectionPermission>
+>;
 export type AccessGrant = { area: ContentArea; scope: OwnershipScope };
 export type ApprovedAccount = {
   email: string;
@@ -33,6 +49,13 @@ export type ApprovedAccount = {
   permissions?: ContentPermissions | null;
   allContentAccess?: boolean | null;
   googleSubject?: string | null;
+  id?: string | number;
+  accessModel?: "legacy" | "committee";
+  accessCatalog?: import("./workspaces/types.ts").PolicyWorkspace[];
+  workspaceNames?:Record<string,string>;
+  committeeAccessReviewedAt?: string | null;
+  committeeAccessReviewedBy?: string | null;
+  committeeMemberships?: CommitteeMembership[] | null;
   calendarAccess?: import("../mediaCalendar/types").CalendarAccess | null;
 };
 export function normalizedEmail(email: string) {
@@ -52,12 +75,19 @@ export function mayManage(
     !isWorkspaceEmail(account.email)
   )
     return false;
+  if (committeeMode(account))
+    return mayAccessResource(account, { area, owningScope: scope }, "edit");
+  if (!(ownershipScopes as readonly string[]).includes(scope)) return false;
   return (
     account.role === "administrator" ||
     account.allContentAccess === true ||
     (account.permissions != null
-      ? account.permissions[area]?.edit === true && account.permissions[area]?.view === true && account.permissions[area]?.scopes?.includes(scope) === true
-      : (account.grants ?? []).some((grant) => grant.area === area && grant.scope === scope))
+      ? account.permissions[area]?.edit === true &&
+        account.permissions[area]?.view === true &&
+        account.permissions[area]?.scopes?.includes(scope) === true
+      : (account.grants ?? []).some(
+          (grant) => grant.area === area && grant.scope === scope,
+        ))
   );
 }
 export function mayManagePeople(account: ApprovedAccount | null | undefined) {
@@ -101,33 +131,93 @@ export function mayManageSharedContent(
     !!account &&
     account.status === "active" &&
     isWorkspaceEmail(account.email) &&
+    !committeeMode(account) &&
     (account.role === "administrator" || account.allContentAccess === true)
   );
 }
 
-export function permissionsFor(account?: Pick<ApprovedAccount, "permissions" | "grants"> | null): ContentPermissions {
+export function permissionsFor(
+  account?: Pick<
+    ApprovedAccount,
+    | "permissions"
+    | "grants"
+    | "accessModel"
+    | "committeeAccessReviewedAt"
+    | "committeeAccessReviewedBy"
+    | "committeeMemberships"
+    | "email"
+    | "status"
+    | "role"
+  > | null,
+): ContentPermissions {
+  if (committeeMode(account))
+    return Object.fromEntries(
+      permissionAreas.map((area) => [
+        area,
+        {
+          view: accessibleCommittees(account, area).length > 0,
+          edit: accessibleCommittees(account, area, "edit").length > 0,
+          scopes: accessibleCommittees(account, area, "edit"),
+        },
+      ]),
+    ) as ContentPermissions;
   if (account?.permissions != null) return account.permissions;
-  return Object.fromEntries(permissionAreas.map(area => [area, {
-    view: true,
-    edit: (account?.grants ?? []).some(g => g.area === area),
-    scopes: (account?.grants ?? []).filter(g => g.area === area).map(g => g.scope),
-  }]));
+  return Object.fromEntries(
+    permissionAreas.map((area) => [
+      area,
+      {
+        view: true,
+        edit: (account?.grants ?? []).some((g) => g.area === area),
+        scopes: (account?.grants ?? [])
+          .filter((g) => g.area === area)
+          .map((g) => g.scope),
+      },
+    ]),
+  );
 }
-export function mayView(account: ApprovedAccount | null | undefined, area: PermissionArea) {
-  return !!account && account.status === "active" && isWorkspaceEmail(account.email) &&
-    (mayManageSharedContent(account) || permissionsFor(account)[area]?.view === true);
+export function mayView(
+  account: ApprovedAccount | null | undefined,
+  area: PermissionArea,
+) {
+  if (committeeMode(account))
+    return accessibleCommittees(account, area).length > 0;
+  return (
+    !!account &&
+    account.status === "active" &&
+    isWorkspaceEmail(account.email) &&
+    (mayManageSharedContent(account) ||
+      permissionsFor(account)[area]?.view === true)
+  );
 }
-export function mayEditArea(account: ApprovedAccount | null | undefined, area: PermissionArea) {
+export function mayEditArea(
+  account: ApprovedAccount | null | undefined,
+  area: PermissionArea,
+) {
   if (!mayView(account, area)) return false;
   if (mayManageSharedContent(account)) return true;
-  if (area === "media" || area === "organisations") return account?.permissions?.[area]?.edit === true;
-  return ownershipScopes.some(scope => mayManage(account, area, scope));
+  if (committeeMode(account))
+    return accessibleCommittees(account, area, "edit").length > 0;
+  if (area === "media" || area === "organisations")
+    return account?.permissions?.[area]?.edit === true;
+  return ownershipScopes.some((scope) => mayManage(account, area, scope));
 }
 export function validPermissions(value: unknown): boolean {
   if (value == null) return true;
   if (typeof value !== "object" || Array.isArray(value)) return false;
-  return Object.entries(value).every(([area, p]) => permissionAreas.includes(area as PermissionArea) &&
-    p && typeof p === "object" && typeof p.view === "boolean" && typeof p.edit === "boolean" &&
-    (!p.edit || p.view) && Array.isArray(p.scopes) && p.scopes.every((scope: OwnershipScope) => ownershipScopes.includes(scope)) &&
-    (!p.edit || !contentAreas.includes(area as ContentArea) || p.scopes.length > 0));
+  return Object.entries(value).every(
+    ([area, p]) =>
+      permissionAreas.includes(area as PermissionArea) &&
+      p &&
+      typeof p === "object" &&
+      typeof p.view === "boolean" &&
+      typeof p.edit === "boolean" &&
+      (!p.edit || p.view) &&
+      Array.isArray(p.scopes) &&
+      p.scopes.every((scope: OwnershipScope) =>
+        (ownershipScopes as readonly string[]).includes(scope),
+      ) &&
+      (!p.edit ||
+        !contentAreas.includes(area as ContentArea) ||
+        p.scopes.length > 0),
+  );
 }

@@ -1,3 +1,4 @@
+import { WorkspaceOwner as WorkspaceOwner_91720f1576b192d5a710d48a3218ecb3 } from '../../../components/admin/access/WorkspaceOwner'
 import { CMSStatusHeading as CMSStatusHeading_f45eec8b84c53ac532890f2ee67945df } from '../../../components/admin/CMSStatusHeading'
 import { CareerCMSStatusCell as CareerCMSStatusCell_7b142bce0343383e5a0dfdc8f07ad33f } from '../../../components/admin/CMSStatusCell'
 import { CareerEditorHeader as CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
@@ -5,6 +6,8 @@ import { CareerChoiceField as CareerChoiceField_b571a13772d70ef4b785a0c59e796355
 import { CareerDateField as CareerDateField_59404842b3b8e6cda85bec35a9da686f } from '../../../components/admin/CareerDateField'
 import { CareerLifecycleCell as CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34 } from '../../../components/admin/CareerLifecycleCell'
 import { CareerEditorFooter as CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
+import { RecordSharing as RecordSharing_e6ebf7555f2f2b8bdbbec7db566efda5 } from '../../../components/admin/RecordSharing'
+import { CommitteeReview as CommitteeReview_0efdea4e0a9f2e1f01b6a0106fbedd99 } from '../../../components/admin/CommitteeReview'
 import { CareerPublicationStatusCell as CareerPublicationStatusCell_f07b37ac41f692f48fee9d222ed514bf } from '../../../components/admin/CareerStatusCell'
 import { LifecycleEmptyState as LifecycleEmptyState_42d71d9f34a8cf4069fbd1a94b7c2615 } from '../../../components/admin/LifecycleEmptyState'
 import { CareerListTools as CareerListTools_425c2154b5081b2b75b2a41486007d14 } from '../../../components/admin/CareerListTools'
@@ -13,9 +16,14 @@ import { CareerPublishControl as CareerPublishControl_57c74453f1f49818c0cb8c1e92
 import { CareerSaveControl as CareerSaveControl_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
 import { CareerEditorView as CareerEditorView_57c74453f1f49818c0cb8c1e92524236 } from '../../../components/admin/CareerEditor'
 import { CollectionBackLink as CollectionBackLink_b7eb021eac5b101e7ce71970147e89df } from '../../../components/admin/DocumentBackLink'
-import { AccountPhoto as AccountPhoto_19077e57c0b53719868a754215553c8a } from '../../../components/admin/AccountPhoto'
+import { MemberEditorHeader as MemberEditorHeader_4aaf83b443a6078c10c4791d1e45fb7d } from '../../../components/admin/MemberEditor'
+import { CommitteeMemberships as CommitteeMemberships_85361f3159d03a7c3fa4c03923b8455d } from '../../../components/admin/CommitteeMemberships'
 import { CalendarPermissions as CalendarPermissions_0e5e8be3be6243394165b6acda0870b9 } from '../../../components/admin/mediaCalendar/CalendarPermissions'
 import { ContentPermissionsField as ContentPermissionsField_d1257e98ee6e87bc3a795e8f49bc774e } from '../../../components/admin/ContentPermissionsField'
+import { AccountPhoto as AccountPhoto_19077e57c0b53719868a754215553c8a } from '../../../components/admin/AccountPhoto'
+import { MemberAccessSummary as MemberAccessSummary_4aaf83b443a6078c10c4791d1e45fb7d } from '../../../components/admin/MemberEditor'
+import { MemberSaveControl as MemberSaveControl_4aaf83b443a6078c10c4791d1e45fb7d } from '../../../components/admin/MemberEditor'
+import { MemberEditorView as MemberEditorView_4aaf83b443a6078c10c4791d1e45fb7d } from '../../../components/admin/MemberEditor'
 import { CommitteeStatusCell as CommitteeStatusCell_d4990eeb700ec5019d3bae61e18f2a3a } from '../../../components/admin/CommitteeStatusCell'
 import { CommitteeEditorHeader as CommitteeEditorHeader_134396005f96c581663d9f2ff7dee8de } from '../../../components/admin/CommitteeEditor'
 import { EditorSection as EditorSection_671b0a745dc229cca2346e4a81fc980a } from '../../../components/admin/EditorSection'
@@ -55,12 +63,14 @@ import { LoginWelcome as LoginWelcome_a8cc6f5d2dc08727fd6734a3818ec46d } from '.
 import { AdminNavigationEnhancements as AdminNavigationEnhancements_2cf824608624f2d905c46bce1dbb1759 } from '../../../components/admin/AdminNavigationEnhancements'
 import { ImageUploadCompression as ImageUploadCompression_52256fb23a13326be6c2f32a1fd1e14f } from '../../../components/admin/ImageUploadCompression'
 import { S3ClientUploadHandler as S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24 } from '@payloadcms/storage-s3/client'
+import { PeopleAccessPage as PeopleAccessPage_de81eb200318f1a20781fc55bb88bd6c } from '../../../components/admin/access/PeopleAccessPage'
 import { MediaCalendar as MediaCalendar_a19d5cde59da8da8e3c41e65a240e08a } from '../../../components/admin/mediaCalendar/MediaCalendar'
 import { MascaDashboard as MascaDashboard_72c4387a9706020af1c627168ef507af } from '../../../components/admin/MascaDashboard'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
 export const importMap = {
+  "/components/admin/access/WorkspaceOwner#WorkspaceOwner": WorkspaceOwner_91720f1576b192d5a710d48a3218ecb3,
   "/components/admin/CMSStatusHeading#CMSStatusHeading": CMSStatusHeading_f45eec8b84c53ac532890f2ee67945df,
   "/components/admin/CMSStatusCell#CareerCMSStatusCell": CareerCMSStatusCell_7b142bce0343383e5a0dfdc8f07ad33f,
   "/components/admin/CareerEditor#CareerEditorHeader": CareerEditorHeader_57c74453f1f49818c0cb8c1e92524236,
@@ -68,6 +78,8 @@ export const importMap = {
   "/components/admin/CareerDateField#CareerDateField": CareerDateField_59404842b3b8e6cda85bec35a9da686f,
   "/components/admin/CareerLifecycleCell#CareerLifecycleCell": CareerLifecycleCell_c42b19ee44d8e912e596b7755099af34,
   "/components/admin/CareerEditor#CareerEditorFooter": CareerEditorFooter_57c74453f1f49818c0cb8c1e92524236,
+  "/components/admin/RecordSharing#RecordSharing": RecordSharing_e6ebf7555f2f2b8bdbbec7db566efda5,
+  "/components/admin/CommitteeReview#CommitteeReview": CommitteeReview_0efdea4e0a9f2e1f01b6a0106fbedd99,
   "/components/admin/CareerStatusCell#CareerPublicationStatusCell": CareerPublicationStatusCell_f07b37ac41f692f48fee9d222ed514bf,
   "/components/admin/LifecycleEmptyState#LifecycleEmptyState": LifecycleEmptyState_42d71d9f34a8cf4069fbd1a94b7c2615,
   "/components/admin/CareerListTools#CareerListTools": CareerListTools_425c2154b5081b2b75b2a41486007d14,
@@ -76,9 +88,14 @@ export const importMap = {
   "/components/admin/CareerEditor#CareerSaveControl": CareerSaveControl_57c74453f1f49818c0cb8c1e92524236,
   "/components/admin/CareerEditor#CareerEditorView": CareerEditorView_57c74453f1f49818c0cb8c1e92524236,
   "/components/admin/DocumentBackLink#CollectionBackLink": CollectionBackLink_b7eb021eac5b101e7ce71970147e89df,
-  "/components/admin/AccountPhoto#AccountPhoto": AccountPhoto_19077e57c0b53719868a754215553c8a,
+  "/components/admin/MemberEditor#MemberEditorHeader": MemberEditorHeader_4aaf83b443a6078c10c4791d1e45fb7d,
+  "/components/admin/CommitteeMemberships#CommitteeMemberships": CommitteeMemberships_85361f3159d03a7c3fa4c03923b8455d,
   "/components/admin/mediaCalendar/CalendarPermissions#CalendarPermissions": CalendarPermissions_0e5e8be3be6243394165b6acda0870b9,
   "/components/admin/ContentPermissionsField#ContentPermissionsField": ContentPermissionsField_d1257e98ee6e87bc3a795e8f49bc774e,
+  "/components/admin/AccountPhoto#AccountPhoto": AccountPhoto_19077e57c0b53719868a754215553c8a,
+  "/components/admin/MemberEditor#MemberAccessSummary": MemberAccessSummary_4aaf83b443a6078c10c4791d1e45fb7d,
+  "/components/admin/MemberEditor#MemberSaveControl": MemberSaveControl_4aaf83b443a6078c10c4791d1e45fb7d,
+  "/components/admin/MemberEditor#MemberEditorView": MemberEditorView_4aaf83b443a6078c10c4791d1e45fb7d,
   "/components/admin/CommitteeStatusCell#CommitteeStatusCell": CommitteeStatusCell_d4990eeb700ec5019d3bae61e18f2a3a,
   "/components/admin/CommitteeEditor#CommitteeEditorHeader": CommitteeEditorHeader_134396005f96c581663d9f2ff7dee8de,
   "/components/admin/EditorSection#EditorSection": EditorSection_671b0a745dc229cca2346e4a81fc980a,
@@ -118,6 +135,7 @@ export const importMap = {
   "/components/admin/AdminNavigationEnhancements#AdminNavigationEnhancements": AdminNavigationEnhancements_2cf824608624f2d905c46bce1dbb1759,
   "/components/admin/ImageUploadCompression#ImageUploadCompression": ImageUploadCompression_52256fb23a13326be6c2f32a1fd1e14f,
   "@payloadcms/storage-s3/client#S3ClientUploadHandler": S3ClientUploadHandler_f97aa6c64367fa259c5bc0567239ef24,
+  "/components/admin/access/PeopleAccessPage#PeopleAccessPage": PeopleAccessPage_de81eb200318f1a20781fc55bb88bd6c,
   "/components/admin/mediaCalendar/MediaCalendar#MediaCalendar": MediaCalendar_a19d5cde59da8da8e3c41e65a240e08a,
   "/components/admin/MascaDashboard#MascaDashboard": MascaDashboard_72c4387a9706020af1c627168ef507af,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1

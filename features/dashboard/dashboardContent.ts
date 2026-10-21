@@ -3,21 +3,24 @@ import { contentAreas, type ApprovedAccount, type ContentArea, type PermissionAr
 import { careerListFilter } from '../careers/careerLifecycle.ts';
 import { lifecycleIDs } from '../events/eventLifecycle.ts';
 import { areaScopes, collectionLink, orderedAreas, type DashboardContext } from './teamDashboard.ts';
+import {committeeMode} from '../access/committeePolicy.ts';
 
 export type DashboardContentCount = { area: PermissionArea; count?: number; status: 'ready' | 'unavailable'; href: string };
 
 /** Count live base documents, never their unpublished draft versions. */
 export async function loadDashboardContent(req: PayloadRequest, account: ApprovedAccount | undefined, context: DashboardContext): Promise<DashboardContentCount[]> {
   if (!req.user) return [];
-  return Promise.all(orderedAreas(account).filter(area => contentAreas.includes(area as ContentArea)).map(async area => {
+  return Promise.all(orderedAreas(account,context.branch).filter(area => committeeMode(account)||contentAreas.includes(area as ContentArea)).map(async area => {
     const clauses: Where[] = [];
     if (contentAreas.includes(area as ContentArea)) {
       const scopes = areaScopes(account, area as ContentArea, context.branch);
       if (account && scopes.length) clauses.push({ owningScope: { in: scopes } });
       else if (context.branch !== 'all') clauses.push({ owningScope: { equals: context.branch } });
     }
+    if(committeeMode(account) && !contentAreas.includes(area as ContentArea) && context.branch!=='all') clauses.push({owningScope:{equals:context.branch}});
     const drafts = req.payload.collections[area]?.config.versions;
     if (area === 'events' || area === 'careers' || (drafts && drafts.drafts)) clauses.push({ _status: { equals: 'published' } });
+    else if(committeeMode(account)) clauses.push({accessPublished:{equals:true}});
     let where: Where = { and: clauses };
     try {
       if (area === 'events') clauses.push({ id: { not_in: (await lifecycleIDs(req.payload, 'archived', req)).concat(-1) } });

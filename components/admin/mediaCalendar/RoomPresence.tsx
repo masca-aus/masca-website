@@ -6,7 +6,11 @@ import {
 } from "./PresenceStrip";
 import { useEffect, useState } from "react";
 import { api, calendarAPI, RequestError } from "./api";
-export function RoomPresence() {
+export function RoomPresence({
+  owningScope,
+}: {
+  owningScope?: import("@/features/access/committeePolicy").CommitteeScope;
+}) {
   const [people, setPeople] = useState<PresencePerson[]>([]);
   const [connection, setConnection] =
     useState<CollaborationConnection>("connecting");
@@ -19,7 +23,12 @@ export function RoomPresence() {
       try {
         const result = await api<{ participants: PresencePerson[] }>(
           `${calendarAPI}/collaboration`,
-          { clientId, postId: null, cursor: null },
+          {
+            clientId,
+            postId: null,
+            cursor: null,
+            ...(owningScope ? { owningScope } : {}),
+          },
         );
         if (alive) {
           setConnection("live");
@@ -59,6 +68,6 @@ export function RoomPresence() {
         leave: true,
       }).catch(() => {});
     };
-  }, []);
+  }, [owningScope]);
   return <PresenceStrip people={people} connection={connection} />;
 }

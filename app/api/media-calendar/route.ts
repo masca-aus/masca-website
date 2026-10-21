@@ -1,19 +1,22 @@
+import { sameWorkspaceOrigin } from "@/features/access/workspaceOrigin";
+import { withCommitteeMode } from "@/features/access/committeeEnvironment";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { z } from "zod";
-import { mayUseCalendar } from "@/features/mediaCalendar/policy";
+import { mayEnterCalendar } from "@/features/mediaCalendar/policy";
 import type { CalendarUser } from "@/features/mediaCalendar/types";
 import {
   actionSchema,
   CalendarError,
   idSchema,
-  patchSchema,
+  createSchema,
 } from "@/features/mediaCalendar/validation";
 import {
   createPost,
   mutatePost,
   overview,
   detail,
+  sharingTargets,
   saveCategory,
   deleteCategory,
   readNotification,
@@ -36,8 +39,10 @@ export async function calendarActor(request: Request) {
     );
   const payload = await getPayload({ config });
   const { user } = await payload.auth({ headers: request.headers });
-  const actor = user as unknown as CalendarUser | null;
-  if (!actor || !mayUseCalendar(actor, "view"))
+  const actor = user
+    ? withCommitteeMode(user as unknown as CalendarUser)
+    : null;
+  if (!actor || !mayEnterCalendar(actor))
     throw new CalendarError(
       "Sign in with an approved media calendar account.",
       403,
@@ -64,7 +69,7 @@ export function safeError(e: unknown) {
   );
 }
 export function requireOrigin(request: Request) {
-  if (request.headers.get("origin") !== new URL(request.url).origin)
+  if (!sameWorkspaceOrigin(request))
     throw new CalendarError("Open this action inside the CMS.", 403);
 }
 export async function GET(request: Request) {
@@ -72,7 +77,12 @@ export async function GET(request: Request) {
     const user = await calendarActor(request),
       url = new URL(request.url),
       id = url.searchParams.get("id");
-    if (id) return reply(await detail(user, idSchema.parse(id)));
+    if (id)
+      return reply(
+        url.searchParams.get("sharing-targets") === "true"
+          ? { members: await sharingTargets(user, idSchema.parse(id)) }
+          : await detail(user, idSchema.parse(id)),
+      );
     const from = z
         .string()
         .datetime({ offset: true })
@@ -92,7 +102,19 @@ export async function GET(request: Request) {
       .min(0)
       .max(20000)
       .parse(url.searchParams.get("offset") ?? 0);
-    return reply(await overview(user, from, to, offset));
+    return reply(
+      await overview(
+        user,
+        from,
+        to,
+        offset,
+        z
+          .string()
+          .min(1)
+          .max(100)
+          .parse(url.searchParams.get("owningScope") ?? "National"),
+      ),
+    );
   } catch (e) {
     return safeError(e);
   }
@@ -107,13 +129,22 @@ export async function POST(request: Request) {
     const data = JSON.parse(raw);
     if (data.action === "create")
       return reply(
-        { post: await createPost(user, patchSchema.parse(data.patch ?? {})) },
+        {
+          post: await createPost(
+            user,
+            createSchema.parse({
+              ...data.patch,
+              owningScope: data.owningScope,
+            }),
+          ),
+        },
         201,
       );
     if (data.action === "category") {
       const category = z
         .object({
           id: idSchema,
+          owningScope: z.string().min(1).max(100).optional(),
           name: z.string().trim().min(1).max(50),
           color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
           archived: z.boolean(),
